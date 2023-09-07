@@ -87,10 +87,10 @@ Modify your `tsconfig.json` to enable `decorators` usage :
 
 **We recommend adhering** to the **Controller-Service-Repository** design pattern using the following folder structure:
 
-1. `Controller` - Manages the REST interface to the business logic [Service](#service)
+1. [EntityHandler](#entityhandler) - Manages the REST interface to the business logic [Service](#service)
 2. [Service](#service) - Contains business logic implementations
 3. [Repository](#repository) - Will contain manipulation of entities through the utilization of [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql).
-   1. `[Optional enhancement]` To simplify `entity manipulation` using [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql), a `BaseRepository` `npm package` was created for [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) of the most common `database actions` like `.create(...), findAll(), findByPrimaryKey(...), find(...), delete(...), exists() ...`
+   1. `[Optional enhancement]` To simplify `entity manipulation` using [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql), a `BaseRepository` `npm package` was created for [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) of the most common `database actions` like `.create(...), findAll(), find(...), delete(...), exists() ...`
 
 ![Alt text](image.png) <= expanded folders => ![Alt text](image-1.png)
 
@@ -197,9 +197,9 @@ class CustomerRepository {
   ...
 ```
 
-`OPTIONAL Enhancement` extend the [Repository](#repository) with `BaseRepository` accessible at [NPM].
+`OPTIONAL Enhancement` extend the [Repository](#repository) with `BaseRepository` accessible at [NPM]. TODO
 
-This extension contains [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) `out of the box` database actions such as `.create(...), findAll(), findByPrimaryKey(...), find(...), delete(...), exists() ...`
+This extension contains [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) `out of the box` database actions such as `.create(...), findAll(), , find(...), delete(...), exists() ...`
 
 `Example`
 
@@ -947,6 +947,8 @@ this.on('SAVE', 'MyEntity' async (req: Request) => {
 ```
 
 ### Example
+
+TODO
 
 ## Contributing
 
