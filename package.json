@@ -16,14 +16,18 @@
     "SAP CAP CDS-TS Decorators",
     "SAP CAP TypeScript Decorators"
   ],
-  "authors": [
+  "author": {
+    "name": "Daniel Dragolea",
+    "email": "dragolea@yahoo.com"
+  },
+  "maintainers": [
     {
       "name": "Daniel Dragolea",
       "email": "dragolea@yahoo.com"
     },
     {
       "name": "Sebastian Blessing",
-      "email": "dragolea@yahoo.com"
+      "email": "sebastian.blessing@abs-gmbh.de"
     }
   ],
   "license": "MIT",
@@ -33,11 +37,8 @@
   "homepage": "https://github.com/dxfrontier/cds-ts-dispatcher#readme",
   "dependencies": {
     "@sap/cds": "^7.2.0",
-    "@types/express": "^4.17.17",
-    "@types/node": "^20.5.9",
     "inversify": "^6.0.1",
     "reflect-metadata": "^0.1.13",
-    "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }
 }

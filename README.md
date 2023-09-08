@@ -2,8 +2,6 @@
 
 <img src="https://img.shields.io/badge/SAP-0FAAFF?style=for-the-badge&logo=sap&logoColor=white" /> <img src="https://img.shields.io/badge/ts--node-3178C6?style=for-the-badge&logo=ts-node&logoColor=white" /> <img src="https://img.shields.io/badge/Node%20js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" /> <img src="https://img.shields.io/badge/Express%20js-000000?style=for-the-badge&logo=express&logoColor=white" /><img src="https://img.shields.io/badge/json-5E5C5C?style=for-the-badge&logo=json&logoColor=white" /> <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white" /> <img src="https://img.shields.io/badge/Cloud%20Foundry-0C9ED5?style=for-the-badge&logo=Cloud%20Foundry&logoColor=white" /> <img src="https://img.shields.io/badge/kubernetes-326ce5.svg?&style=for-the-badge&logo=kubernetes&logoColor=white" />
 
-<!-- ![](https://img.shields.io/github/stars/pandao/editor.md.svg) ![](https://img.shields.io/github/forks/pandao/editor.md.svg) ![](https://img.shields.io/github/tag/pandao/editor.md.svg) ![](https://img.shields.io/github/release/pandao/editor.md.svg) ![](https://img.shields.io/github/issues/pandao/editor.md.svg) ![](https://img.shields.io/bower/v/editor.md.svg) -->
-
 `SAP CAP` `NodeJS-based project` using TypesScript decorators for rapid development.
 
 The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement `JS` handlers provided by the `SAP CAP framework`.
@@ -63,8 +61,8 @@ The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate
 To get started follow these steps:
 
 ```bash
-npm install reflect-metadata
-npm install [OUR_NPM_PACKAGE]
+npm install reflect-metadata @types/express @types/node
+npm install cds-ts-dispatcher TODO
 ```
 
 Once installed, import `reflect-metadata` in your `server.ts`
