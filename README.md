@@ -120,7 +120,7 @@ The `CDSDispatcher` constructor allows you to create an instance for dispatching
 
 `Parameters`
 
-- `entities (Array)`: An array of **[Entity handler](#entityhandler)(s)** classes (Constructable) that represent the different types of entities in the CDS.
+- `entities (Array)`: An array of **[Entity handler](#entityhandler)(s)** (Constructable) that represent the different types of entities in the CDS.
 
 `Example`
 
@@ -143,7 +143,6 @@ The `@EntityHandler` decorator is utilized at the `class-level` to annotate a cl
 `Parameters`
 
 - `entity (CDSTyperEntity)`: A specialized class generated using the [CDS-Typer](#generate-cds-typed-entities).
-  - `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
@@ -154,6 +153,8 @@ class CustomerHandler {
   constructor() {}
   ...
 ```
+
+`MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 > Note @EntityHandler class should contain only handling of the `REST operations`
 
@@ -177,7 +178,7 @@ class CustomerService {
   ...
 ```
 
-> Note @ServiceLogic class should contain only `business logic`.
+> Note @ServiceLogic class should contain only `customer specific business logic`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -212,6 +213,8 @@ class CustomerRepository extends BaseRepository<MyEntity> {
 }
 ```
 
+`MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
 > Note @Repository class should be exclusively responsible for managing `interactions between the database and service layers`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -220,14 +223,13 @@ class CustomerRepository extends BaseRepository<MyEntity> {
 
 ##### Inject
 
-**@Inject**(`serviceIdentifier: ServiceIdentifierOrFunc<unknown>`) `private / public / protected` `NAME_OF_CLASS` : `TYPE_OF_CLASS`
+**@Inject**(`serviceIdentifier: ServiceIdentifierOrFunc<unknown>`)
 
 The `@Inject` decorator is utilized as a `field-level` decorator and allows you to inject dependencies into your classes or components.
 
 `Parameters`
 
 - `serviceIdentifier(Function or Symbol)`: A function or a symbol representing the service to inject.
-  - `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
@@ -241,6 +243,8 @@ class CustomerHandler {
   constructor() {}
   ...
 ```
+
+`MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -286,9 +290,7 @@ See JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/core-services#srv-befor
 
 **@BeforeCreate**()
 
-It is important to note that decorator `@BeforeCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@BeforeCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -313,9 +315,7 @@ this.before('CREATE', MyEntity, async (req: Request) => {
 
 **@BeforeRead**()
 
-It is important to note that decorator `@BeforeRead()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@BeforeRead()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -340,9 +340,7 @@ this.before('READ', MyEntity, async (req: Request) => {
 
 **@BeforeUpdate**()
 
-It is important to note that decorator `@BeforeUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@BeforeUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -367,9 +365,7 @@ this.before('UPDATE', MyEntity, async (req: Request) => {
 
 **@BeforeDelete**()
 
-It is important to note that decorator `@BeforeDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@BeforeDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -405,9 +401,7 @@ See JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-
 
 **@AfterCreate**()
 
-It is important to note that decorator `@AfterCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@AfterCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -434,9 +428,7 @@ this.after('CREATE', MyEntity, async (req: Request) => {
 
 `Example`
 
-It is important to note that decorator `@AfterRead()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@AfterRead()` will use always point to [EntityHandler](#entityhandler) `argument` `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 ```typescript
 @AfterRead()
@@ -459,9 +451,7 @@ this.after('READ', MyEntity, async (req: Request) => {
 
 **@AfterUpdate**()
 
-It is important to note that decorator `@AfterUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@AfterUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -486,9 +476,7 @@ this.after('UPDATE', MyEntity, async (req: Request) => {
 
 **@AfterDelete**()
 
-It is important to note that decorator `@AfterDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@AfterDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -526,9 +514,7 @@ See JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-reques
 
 **@OnCreate**()
 
-It is important to note that decorator `@OnCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -553,9 +539,7 @@ this.on('CREATE', MyEntity, async (req: Request, next: Function) => {
 
 **@OnRead**()
 
-It is important to note that decorator `@OnRead()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnRead()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -580,9 +564,7 @@ this.on('READ', MyEntity, async (req: Request, next: Function) => {
 
 **@OnUpdate**()
 
-It is important to note that decorator `@OnUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -607,9 +589,7 @@ this.on('UPDATE', MyEntity, async (req: Request, next: Function) => {
 
 **@OnDelete**()
 
-It is important to note that decorator `@OnDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -688,9 +668,7 @@ this.on(AnActionOrFunction, async (req: Request) => {
 
 **@OnBoundAction**(`name` : CDSTyperAction)
 
-It is important to note that decorator `@OnBoundAction()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnBoundAction()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Parameters`
 
@@ -719,9 +697,7 @@ this.on(AnActionMethod, MyEntity, async (req: Request) => {
 
 **@OnBoundFunction**(`name` : CDSTyperAction)
 
-It is important to note that decorator `@OnBoundFunction()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnBoundFunction()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Parameters`
 
@@ -754,9 +730,6 @@ The handlers receive one argument:
 
 - `req` of type `Request`
 
-- `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
 For more info about visit **[CDS-Fiori-draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)**
 
 ###### Draft
@@ -768,6 +741,8 @@ The `@Draft()` decorator is utilized at the `method-level` to annotate a method 
 `Important`
 
 When utilizing the `@Draft()` decorator, the `placement of the @Draft() decorator` within your TypeScript class is very important factor to consider. It determines the scope of the `draft` mode within the methods that precede it.
+
+`MyEntity` & `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example 1`
 
@@ -869,9 +844,7 @@ this.after('READ', MyEntity, async (req: Request) => {
 
 This decorator will be triggered when `a new draft is created`.
 
-It is important to note that decorator `@OnCancelDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity.drafts` which represents a generated `CDS entity`.
-
-- `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnCancelDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -896,9 +869,7 @@ this.on('NEW', MyEntity.drafts, async (req: Request) => {
 
 This decorator will be triggered when `a draft is cancelled`.
 
-It is important to note that decorator `@OnCancelDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity.drafts` which represents a generated `CDS entity`.
-
-- `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnCancelDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -923,9 +894,7 @@ this.on('CANCEL', MyEntity.drafts, async (req: Request) => {
 
 This decorator will be triggered when `a new draft is created from an active instance`
 
-It is important to note that decorator `@OnEditDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnEditDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -950,9 +919,7 @@ this.on('EDIT', MyEntity, async (req: Request) => {
 
 This decorator will be triggered when `the active entity is changed`
 
-It is important to note that decorator `@OnSaveDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
-
-- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnSaveDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -977,9 +944,7 @@ this.on('SAVE', MyEntity, async (req: Request) => {
 
 This decorator will be triggered when `the draft will be triggered`
 
-It is important to note that decorator `@OnBoundActionDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity.drafts` which represents a generated `CDS entity`.
-
-- `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnBoundActionDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -1004,9 +969,7 @@ this.on(AnActionDraftMethod, MyEntity.drafts, async (req: Request, next: Functio
 
 This decorator will be triggered when `the draft will be triggered`
 
-It is important to note that decorator `@OnBoundFunctionDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity.drafts` which represents a generated `CDS entity`.
-
-- `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+It is important to note that decorator `@OnBoundFunctionDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
