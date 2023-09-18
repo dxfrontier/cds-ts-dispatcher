@@ -54,42 +54,42 @@ class CDSDispatcher {
     const entity = this.getActiveEntityOrDraft(handler, entityInstance)
 
     return {
-      getEntity: () => entity,
-      getEvent: () => event,
-      getActionName: () => actionName,
+      entity,
+      event,
+      actionName,
     }
   }
 
   private async registerAfterHandler(handlerAndEntity: [Handler, Constructable]) {
-    const handlerProps = this.getHandlerProps(...handlerAndEntity)
+    const { event, entity } = this.getHandlerProps(...handlerAndEntity)
 
-    this.srv.after(handlerProps.getEvent(), handlerProps.getEntity(), async (data, req) => {
+    this.srv.after(event, entity, async (data, req) => {
       return await this.executeCallback(handlerAndEntity, req, data)
     })
   }
 
   private async registerBeforeHandler(handlerAndEntity: [Handler, Constructable]) {
-    const handlerProps = this.getHandlerProps(...handlerAndEntity)
+    const { event, entity } = this.getHandlerProps(...handlerAndEntity)
 
-    this.srv.before(handlerProps.getEvent(), handlerProps.getEntity(), async (req) => {
+    this.srv.before(event, entity, async (req) => {
       return await this.executeCallback(handlerAndEntity, req)
     })
   }
 
   private async registerOnHandler(handlerAndEntity: [Handler, Constructable]) {
-    const handlerProps = this.getHandlerProps(...handlerAndEntity)
+    const { event, actionName, entity } = this.getHandlerProps(...handlerAndEntity)
 
     // CRUD_EVENTS.[ACTION, FUNC]
-    if (handlerProps.getEvent() === 'ACTION' || handlerProps.getEvent() === 'FUNC') {
-      this.srv.on(handlerProps.getActionName()!, async (req, next) => {
+    if (event === 'ACTION' || event === 'FUNC') {
+      this.srv.on(actionName!, async (req, next) => {
         return await this.executeCallback(handlerAndEntity, req, next)
       })
 
       return
     }
 
-    if (handlerProps.getEvent() === 'BOUND_ACTION') {
-      this.srv.on(handlerProps.getActionName()!, handlerProps.getEntity().name, async (req, next) => {
+    if (event === 'BOUND_ACTION' || event === 'BOUND_FUNC') {
+      this.srv.on(actionName!, entity.name, async (req, next) => {
         return await this.executeCallback(handlerAndEntity, req, next)
       })
 
@@ -97,18 +97,18 @@ class CDSDispatcher {
     }
 
     // CRUD_EVENTS.[CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
-    this.srv.on(handlerProps.getEvent(), handlerProps.getEntity(), async (req, next) => {
+    this.srv.on(event, entity, async (req, next) => {
       return await this.executeCallback(handlerAndEntity, req, next)
     })
   }
 
   //cap.cloud.sap/docs/node.js/fiori#draft-support
   private async registerOnDraftHandler(handlerAndEntity: [Handler, Constructable]) {
-    const handlerProps = this.getHandlerProps(...handlerAndEntity)
+    const { event, entity, actionName } = this.getHandlerProps(...handlerAndEntity)
 
     // CRUD_EVENTS.[BOUND_ACTION, BOUND_FUNC]
-    if (handlerProps.getEvent() === 'BOUND_ACTION') {
-      this.srv.on(handlerProps.getActionName()!, handlerProps.getEntity().name, async (req, next) => {
+    if (event === 'BOUND_ACTION' || event === 'BOUND_FUNC') {
+      this.srv.on(actionName!, entity.name, async (req, next) => {
         return await this.executeCallback(handlerAndEntity, req, next)
       })
 
@@ -116,7 +116,7 @@ class CDSDispatcher {
     }
 
     // CRUD_EVENTS.[NEW, CANCEL]
-    this.srv.on(handlerProps.getEvent(), handlerProps.getEntity(), async (req, next) => {
+    this.srv.on(event, entity, async (req, next) => {
       return await this.executeCallback(handlerAndEntity, req, next)
     })
   }
