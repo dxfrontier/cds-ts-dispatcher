@@ -4,7 +4,7 @@
 
 `SAP CAP` `NodeJS-based project` using TypesScript decorators for rapid development.
 
-The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement `JS` handlers provided by the `SAP CAP framework`.
+The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.
 
 <a name="readme-top"></a>
 
@@ -13,14 +13,17 @@ The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate
 - [CDS-TS Dispatcher](#cds-ts-dispatcher)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
+    - [Install CDS-TS-Dispatcher](#install-cds-ts-dispatcher)
+    - [Generate CDS Typed entities](#generate-cds-typed-entities)
   - [Architecture](#architecture)
   - [Usage](#usage)
     - [CDSDispatcher](#cdsdispatcher)
     - [Decorators](#decorators)
       - [Class](#class)
         - [EntityHandler](#entityhandler)
-        - [Service](#service)
+        - [ServiceLogic](#servicelogic)
         - [Repository](#repository)
+          - [Optional BaseRepository](#optional-baserepository)
       - [Fields](#fields)
         - [Inject](#inject)
         - [Inject SRV](#inject-srv)
@@ -30,13 +33,11 @@ The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate
           - [BeforeRead](#beforeread)
           - [BeforeUpdate](#beforeupdate)
           - [BeforeDelete](#beforedelete)
-          - [BeforeAction](#beforeaction)
         - [After](#after)
           - [AfterCreate](#aftercreate)
           - [AfterRead](#afterread)
           - [AfterUpdate](#afterupdate)
           - [AfterDelete](#afterdelete)
-          - [AfterAction](#afteraction)
         - [On](#on)
           - [OnCreate](#oncreate)
           - [OnRead](#onread)
@@ -44,13 +45,16 @@ The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate
           - [OnDelete](#ondelete)
           - [OnAction](#onaction)
           - [OnFunction](#onfunction)
+          - [OnBoundAction](#onboundaction)
+          - [OnBoundFunction](#onboundfunction)
         - [Fiori draft](#fiori-draft)
           - [Draft](#draft)
-          - [OnActionDraft](#onactiondraft)
           - [OnNewDraft](#onnewdraft)
           - [OnCancelDraft](#oncanceldraft)
           - [OnEditDraft](#oneditdraft)
           - [OnSaveDraft](#onsavedraft)
+          - [OnBoundActionDraft](#onboundactiondraft)
+          - [OnBoundFunctionDraft](#onboundfunctiondraft)
     - [Example](#example)
   - [Contributing](#contributing)
   - [License](#license)
@@ -58,11 +62,11 @@ The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate
 
 ## Installation
 
-To get started follow these steps:
+### Install CDS-TS-Dispatcher
 
 ```bash
-npm install reflect-metadata @types/express @types/node
-npm install cds-ts-dispatcher TODO
+npm install cds-ts-dispatcher
+npm install reflect-metadata
 ```
 
 Once installed, import `reflect-metadata` in your `server.ts`
@@ -74,10 +78,20 @@ import 'reflect-metadata'
 Modify your `tsconfig.json` to enable `decorators` usage :
 
 ```bash
-
-"experimentalDecorators": true,                   /* Enable experimental support for legacy experimental decorators. */
-"emitDecoratorMetadata": true,                    /* Emit design-type metadata for decorated
+"experimentalDecorators": true,
+"emitDecoratorMetadata": true,
 ```
+
+### Generate CDS Typed entities
+
+The following command should be used to generate typed entity classes
+
+```bash
+npx @cap-js/cds-typer ./srv/controller/mainService --outputDirectory ./srv/util/types/entities
+```
+
+- Source folder : `./srv/controller/mainService` - Change to your location folder
+- Target folder :`./srv/util/types/entities` - Change to your location folder
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -85,10 +99,10 @@ Modify your `tsconfig.json` to enable `decorators` usage :
 
 **We recommend adhering** to the **Controller-Service-Repository** design pattern using the following folder structure:
 
-1. [EntityHandler](#entityhandler) - Manages the REST interface to the business logic [Service](#service)
-2. [Service](#service) - Contains business logic implementations
+1. [EntityHandler](#entityhandler) - Manages the REST interface to the business logic [ServiceLogic](#servicelogic)
+2. [ServiceLogic](#servicelogic) - Contains business logic implementations
 3. [Repository](#repository) - Will contain manipulation of entities through the utilization of [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql).
-   1. `[Optional enhancement]` To simplify `entity manipulation` using [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql), a `BaseRepository` `npm package` was created for [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) of the most common `database actions` like `.create(...), findAll(), find(...), delete(...), exists() ...`
+   - `[Optional enhancement]` To simplify `entity manipulation` using [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql), a `BaseRepository` `npm package` was created for [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) of the most common `database actions` like `.create(...), findAll(), find(...), delete(...), exists() ...`
 
 ![Alt text](image.png) <= expanded folders => ![Alt text](image-1.png)
 
@@ -102,7 +116,7 @@ Modify your `tsconfig.json` to enable `decorators` usage :
 
 The `CDSDispatcher` constructor allows you to create an instance for dispatching and managing entities.
 
-`CDSDispatcher` class will initialize all **[Entity handler](#entityhandler)(s)** and all of their `Dependencies` : [Services](#service), [Repositories](#repository).
+`CDSDispatcher` class will initialize all **[Entity handler](#entityhandler)(s)** and all of their `Dependencies` : [Services](#servicelogic), [Repositories](#repository).
 
 `Parameters`
 
@@ -114,12 +128,6 @@ The `CDSDispatcher` constructor allows you to create an instance for dispatching
 module.exports = new CDSDispatcher([CustomerHandler, AddressHandler]).initializeEntityHandlers()
 ```
 
-`CDS`
-
-In your `*.ts` files, you need to point to the entity handlers which manage the `REST` interface
-
-![Alt text](image-2.png)
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Decorators
@@ -128,54 +136,48 @@ In your `*.ts` files, you need to point to the entity handlers which manage the 
 
 ##### EntityHandler
 
-**@EntityHandler**(`entityName`: `string`)
+**@EntityHandler**(`entity`: CDSTyperEntity)
 
-The `@EntityHandler` decorator is utilized at the `class-level` to annotate a class with the specific `entity name` that will be used along the hole class.
+The `@EntityHandler` decorator is utilized at the `class-level` to annotate a class with the specific `entity` that will be used in all handlers.
 
 `Parameters`
 
-- `entityName (string)`: A string representing the `CDS entity name`, ensure it it matches `exact name` as define din the `.cds` file.
+- `entity (CDSTyperEntity)`: A specialized class generated using the [CDS-Typer](#generate-cds-typed-entities).
+  - `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
 ```typescript
-@EntityHandler('MyEntity')
+@EntityHandler(MyEntity)
 class CustomerHandler {
   ...
   constructor() {}
   ...
 ```
 
-`CDS`
-
-```typescript
-service MainService {
-    entity MyEntity as projection on decorators.MyEntity; // MyEntity must match with @EntityHandler('MyEntity')
-```
-
 > Note @EntityHandler class should contain only handling of the `REST operations`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-##### Service
+##### ServiceLogic
 
-**@Service()**
+**@ServiceLogic()**
 
-The `@Service` decorator is utilized at the `class-level` to annotate a `class` as a specialized `Service`.
+The `@ServiceLogic` decorator is utilized at the `class-level` to annotate a `class` as a specialized `ServiceLogic`.
 
-When applying `Service` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`
+When applying `ServiceLogic` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`
 
 `Example`
 
 ```typescript
-@Service()
+@ServiceLogic()
 class CustomerService {
   ...
   constructor() {}
   ...
 ```
 
-> Note @Service class should contain only `business logic`.
+> Note @ServiceLogic class should contain only `business logic`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -195,9 +197,9 @@ class CustomerRepository {
   ...
 ```
 
-`OPTIONAL Enhancement` extend the [Repository](#repository) with `BaseRepository` accessible at [NPM]. TODO
+###### Optional BaseRepository
 
-This extension contains [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) `out of the box` database actions such as `.create(...), findAll(), , find(...), delete(...), exists() ...`
+The goal of SAP CAP **[CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql)** **BaseRepository** is to significantly reduce the boilerplate code required to implement data access layers for persistance entities by providing out of the box actions on the `database` such as `.create(...), findAll(), , find(...), delete(...), exists() ...`
 
 `Example`
 
@@ -205,7 +207,7 @@ This extension contains [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) `out
 @Repository()
 class CustomerRepository extends BaseRepository<MyEntity> {
   constructor() {
-    super('MyEntity')
+    super(MyEntity)
   }
 }
 ```
@@ -225,11 +227,12 @@ The `@Inject` decorator is utilized as a `field-level` decorator and allows you 
 `Parameters`
 
 - `serviceIdentifier(Function or Symbol)`: A function or a symbol representing the service to inject.
+  - `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
 ```typescript
-@EntityHandler('MyEntity')
+@EntityHandler(MyEntity)
 class CustomerHandler {
   ...
   @Inject(CustomerService) private customerService: CustomerService
@@ -245,13 +248,13 @@ class CustomerHandler {
 
 **@Inject**(`ServiceHelper.SRV`) `private srv: CdsService`
 
-This specialized `@Inject` can be used as a `constant` in `@Service, @Repository and @EntityHandler` class, the `private srv` can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
+This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repository and @EntityHandler` class, the `private srv` can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
 
 `Example`
 
 ```typescript
-@EntityHandler('MyEntity')
-// OR @Service()
+@EntityHandler(MyEntity)
+// OR @ServiceLogic()
 // OR @Repository()
 class CustomerHandler { // OR CustomerService, CustomerRepository
   ...
@@ -260,6 +263,8 @@ class CustomerHandler { // OR CustomerService, CustomerRepository
   constructor() {}
   ...
 ```
+
+`MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -281,6 +286,10 @@ See JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/core-services#srv-befor
 
 **@BeforeCreate**()
 
+It is important to note that decorator `@BeforeCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 `Example`
 
 ```typescript
@@ -290,12 +299,10 @@ public async beforeCreateMethod(req: Request) {
 }
 ```
 
-Here, it is important to note that decorator `@BeforeCreate()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('CREATE', 'MyEntity', async (req: Request) => {
+this.before('CREATE', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -304,9 +311,13 @@ this.before('CREATE', 'MyEntity', async (req: Request) => {
 
 ###### BeforeRead
 
-`Example`
-
 **@BeforeRead**()
+
+It is important to note that decorator `@BeforeRead()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Example`
 
 ```typescript
 @BeforeRead()
@@ -315,12 +326,10 @@ public async beforeReadMethod(req: Request) {
 }
 ```
 
-Here, it is important to note that decorator `@BeforeCreate()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('READ', 'MyEntity', async (req: Request) => {
+this.before('READ', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -331,6 +340,10 @@ this.before('READ', 'MyEntity', async (req: Request) => {
 
 **@BeforeUpdate**()
 
+It is important to note that decorator `@BeforeUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 `Example`
 
 ```typescript
@@ -340,12 +353,10 @@ public async beforeUpdateMethod(req: Request) {
 }
 ```
 
-Here, it is important to note that decorator `@BeforeCreate()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('UPDATE', 'MyEntity', async (req: Request) => {
+this.before('UPDATE', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -356,6 +367,10 @@ this.before('UPDATE', 'MyEntity', async (req: Request) => {
 
 **@BeforeDelete**()
 
+It is important to note that decorator `@BeforeDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 `Example`
 
 ```typescript
@@ -365,39 +380,10 @@ public async beforeDeleteMethod(req: Request) {
 }
 ```
 
-Here, it is important to note that decorator `@BeforeDelete()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('DELETE', 'MyEntity', async (req: Request) => {
-  return this.customerService.testExample(req)
-})
-```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-###### BeforeAction
-
-**@BeforeAction**(`name` : `string`)
-
-`Parameters`
-
-- `name (string)` : Representing the `CDS action name` defined in the `CDS file`
-
-`Example`
-
-```typescript
-@BeforeAction('boundActionOrFunction')
-public async beforeActionMethod(req: Request) {
-   return this.customerService.testExample(req)
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.before('boundActionOrFunction', async (req: Request) => {
+this.before('DELETE', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -408,10 +394,8 @@ this.before('boundActionOrFunction', async (req: Request) => {
 
 Use `@AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete(), AfterAction()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.` The handlers receive two arguments:
 
-- `results` of type **`DEFINED USER TYPE`** — the outcomes of the `.on` handler which ran before
+- `results` of type **`MyEntity[]`** — the outcomes of the `.on` handler which ran before
 - `req` of type `Request`
-
-To see how **`DEFINED USER TYPE`** can be created from `.cds` please have a look over [CDS2Types](https://www.npmjs.com/package/cds2types) or for official SAP package, refer to [CDSTyper](https://cap.cloud.sap/docs/tools/cds-typer)
 
 See JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
 
@@ -419,23 +403,25 @@ See JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-
 
 ###### AfterCreate
 
-`Example`
-
 **@AfterCreate**()
+
+It is important to note that decorator `@AfterCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Example`
 
 ```typescript
 @AfterCreate()
-public async afterCreateMethod(req: Request) {
+public async afterCreateMethod(results : MyEntity[], req: Request) {
    return this.customerService.testExample( req)
 }
 ```
 
-Here, it is important to note that decorator `@AfterCreate()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('CREATE', 'MyEntity', async (req: Request) => {
+this.after('CREATE', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -448,6 +434,10 @@ this.after('CREATE', 'MyEntity', async (req: Request) => {
 
 `Example`
 
+It is important to note that decorator `@AfterRead()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 ```typescript
 @AfterRead()
 public async afterReadMethod(req: Request) {
@@ -455,12 +445,10 @@ public async afterReadMethod(req: Request) {
 }
 ```
 
-Here, it is important to note that decorator `@AfterRead()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('READ', 'MyEntity', async (req: Request) => {
+this.after('READ', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -471,6 +459,10 @@ this.after('READ', 'MyEntity', async (req: Request) => {
 
 **@AfterUpdate**()
 
+It is important to note that decorator `@AfterUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 `Example`
 
 ```typescript
@@ -480,12 +472,10 @@ public async afterUpdateMethod(req: Request) {
 }
 ```
 
-Here, it is important to note that decorator `@AfterUpdate()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('UPDATE', 'MyEntity', async (req: Request) => {
+this.after('UPDATE', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -496,6 +486,10 @@ this.after('UPDATE', 'MyEntity', async (req: Request) => {
 
 **@AfterDelete**()
 
+It is important to note that decorator `@AfterDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 `Example`
 
 ```typescript
@@ -505,39 +499,10 @@ public async afterDeleteMethod(req: Request) {
 }
 ```
 
-Here, it is important to note that decorator `@AfterDelete()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('DELETE', 'MyEntity', async (req: Request) => {
-  return this.customerService.testExample(req)
-})
-```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-###### AfterAction
-
-**@AfterAction**(`name` : `string`)
-
-`Parameters`
-
-- `name (string)` : Representing the `CDS action name` defined in the `CDS file`
-
-`Example`
-
-```typescript
-@AfterAction('boundActionOrFunction')
-public async afterActionMethod(req: Request) {
-   return this.customerService.testExample( req)
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.after('boundActionOrFunction', async (req: Request) => {
+this.after('DELETE', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -551,6 +516,7 @@ Use `@OnCreate(), @OnRead(), @OnUpdate(), @OnDelete(), OnAction(), @OnFunction()
 The handlers receive one argument:
 
 - `req` of type `Request`
+- `next` of type `Function`
 
 See JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request) event**
 
@@ -560,21 +526,23 @@ See JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-reques
 
 **@OnCreate**()
 
+It is important to note that decorator `@OnCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 `Example`
 
 ```typescript
 @OnCreate()
-public async onCreateMethod(req: Request) {
+public async onCreateMethod(req: Request, next : Function) {
    return this.customerService.testExample( req)
 }
 ```
 
-Here, it is important to note that decorator `@OnCreate()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('CREATE', 'MyEntity', async (req: Request) => {
+this.on('CREATE', MyEntity, async (req: Request, next: Function) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -585,21 +553,23 @@ this.on('CREATE', 'MyEntity', async (req: Request) => {
 
 **@OnRead**()
 
+It is important to note that decorator `@OnRead()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 `Example`
 
 ```typescript
 @OnRead()
-public async onReadMethod(req: Request) {
+public async onReadMethod(req: Request, next : Function) {
    return this.customerService.testExample(req)
 }
 ```
 
-Here, it is important to note that decorator `@OnRead()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('READ', 'MyEntity', async (req: Request) => {
+this.on('READ', MyEntity, async (req: Request, next: Function) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -610,21 +580,23 @@ this.on('READ', 'MyEntity', async (req: Request) => {
 
 **@OnUpdate**()
 
+It is important to note that decorator `@OnUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 `Example`
 
 ```typescript
 @OnUpdate()
-public async onUpdateMethod(req: Request) {
-   return this.customerService.testExample( req)
+public async onUpdateMethod(req: Request, next : Function) {
+   return this.customerService.testExample(req)
 }
 ```
-
-Here, it is important to note that decorator `@OnUpdate()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('UPDATE', 'MyEntity', async (req: Request) => {
+this.on('UPDATE', MyEntity, async (req: Request, next: Function) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -635,21 +607,23 @@ this.on('UPDATE', 'MyEntity', async (req: Request) => {
 
 **@OnDelete**()
 
+It is important to note that decorator `@OnDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 `Example`
 
 ```typescript
 @OnDelete()
-public async onDeleteMethod(req: Request) {
+public async onDeleteMethod(req: Request, next : Function) {
    return this.customerService.testExample( req)
 }
 ```
 
-Here, it is important to note that decorator `@OnDelete()` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('DELETE', 'MyEntity', async (req: Request) => {
+this.on('DELETE', MyEntity, async (req: Request, next: Function) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -658,17 +632,17 @@ this.on('DELETE', 'MyEntity', async (req: Request) => {
 
 ###### OnAction
 
-**@OnAction**(`name` : `string`)
+**@OnAction**(`name` : CDSTyperAction)
 
 `Parameters`
 
-- `name (string)` : Representing the `CDS action name` defined in the `CDS file`
+- `name (CDSTyperAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
 ```typescript
-@OnAction('boundActionOrFunction')
-public async onActionMethod(req: Request) {
+@OnAction(AnActionOrFunction)
+public async onActionMethod(req: Request, next : Function) {
    return this.customerService.testExample( req)
 }
 ```
@@ -676,7 +650,7 @@ public async onActionMethod(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('boundActionOrFunction', async (req: Request) => {
+this.on(AnActionOrFunction, async (req: Request, next: Function) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -685,25 +659,87 @@ this.on('boundActionOrFunction', async (req: Request) => {
 
 ###### OnFunction
 
-**@OnFunction**(`name` : `string`)
+**@OnFunction**(`name` : CDSTyperAction)
 
 `Parameters`
 
-- `name (string)` : Representing the `CDS action name` defined in the `CDS file`
+- `name (CDSTyperAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
 ```typescript
-@OnFunction('boundActionOrFunction')
-public async onFunctionMethod(req: Request) {
-   return this.customerService.testExample( req)
+@OnFunction(AnActionOrFunction)
+public async onFunctionMethod(req: Request, next : Function) {
+   return this.customerService.testExample(req)
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('boundActionOrFunction', async (req: Request) => {
+this.on(AnActionOrFunction, async (req: Request) => {
+  return this.customerService.testExample(req)
+})
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+###### OnBoundAction
+
+**@OnBoundAction**(`name` : CDSTyperAction)
+
+It is important to note that decorator `@OnBoundAction()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Parameters`
+
+- `name (CDSTyperAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Example`
+
+```typescript
+@OnBoundAction(AnActionMethod)
+public async onActionMethod(req: Request, next : Function) {
+   return this.customerService.testExample(req)
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on(AnActionMethod, MyEntity, async (req: Request) => {
+  return this.customerService.testExample(req)
+})
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+###### OnBoundFunction
+
+**@OnBoundFunction**(`name` : CDSTyperAction)
+
+It is important to note that decorator `@OnBoundFunction()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Parameters`
+
+- `name (CDSTyperAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Example`
+
+```typescript
+@OnBoundFunction(aCdsFunctionMethod)
+public async onFunctionMethod(req: Request, next : Function) {
+   return this.customerService.testExample(req)
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on(aCdsFunctionMethod, MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -712,11 +748,14 @@ this.on('boundActionOrFunction', async (req: Request) => {
 
 ##### Fiori draft
 
-Use `@OnActionDraft(), @OnNewDraft(), @OnCancelDraft(), @OnEditDraft(), OnSaveDraft()` handlers to support for both, `active and draft entities`.
+Use `@OnNewDraft(), @OnCancelDraft(), @OnEditDraft(), OnSaveDraft()` handlers to support for both, `active and draft entities`.
 
 The handlers receive one argument:
 
 - `req` of type `Request`
+
+- `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 For more info about visit **[CDS-Fiori-draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)**
 
@@ -737,7 +776,7 @@ When utilizing the `@Draft()` decorator, the `placement of the @Draft() decorato
 @AfterCreate() // Will be marked as draft
 @AfterRead() // Will be marked as draft
 @Draft() // All methods above '@Draft()' will be have 'draft' scope.
-public async draftMethod(req: Request) {
+public async draftMethod(results : MyEntity[], req: Request) {
    return this.customerService.testExample( req)
 }
 ```
@@ -745,7 +784,7 @@ public async draftMethod(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after(['UPDATE, CREATE, READ'], 'MyEntity.drafts', async (req: Request) => {
+this.after(['UPDATE, CREATE, READ'], MyEntity.drafts, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -769,12 +808,12 @@ public async draftMethodAndNonDraft(req: Request) {
 
 ```typescript
 // FOR DRAFT
-this.after('UPDATE', 'MyEntity.drafts', async (req: Request) => {
+this.after('UPDATE', MyEntity.drafts, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 
 // FOR ACTIVE ENTITIES
-this.after(['CREATE', 'READ'], 'MyEntity', async (req: Request) => {
+this.after(['CREATE', 'READ'], MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -787,12 +826,12 @@ this.after(['CREATE', 'READ'], 'MyEntity', async (req: Request) => {
 @BeforeUpdate()
 @BeforeCreate()
 @AfterRead()
-@Draft() // All above decorators will be marked as draft
+@Draft() // All above decorators will be marked AS DRAFT
 public async draftMethod(req: Request) {
    return this.customerService.testExample( req)
 }
 
-// All decorators will work only on the active entity.
+// All decorators will work only FOR ACTIVE ENTITIES
 @BeforeUpdate()
 @BeforeCreate()
 @AfterRead()
@@ -805,49 +844,21 @@ public async methodWithoutDraft(req: Request) {
 
 ```typescript
 // FOR DRAFT
-this.before(['UPDATE', 'CREATE'], 'MyEntity.drafts', async (req: Request) => {
+this.before(['UPDATE', 'CREATE'], MyEntity.drafts, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 
 // FOR DRAFT
-this.after('READ', 'MyEntity.drafts', async (req: Request) => {
+this.after('READ', MyEntity.drafts, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 
 // FOR ACTIVE ENTITIES
-this.before(['UPDATE', 'CREATE'], 'MyEntity', async (req: Request) => {
+this.before(['UPDATE', 'CREATE'], MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 
-this.after('READ', 'MyEntity', async (req: Request) => {
-  return this.customerService.testExample(req)
-})
-```
-
-###### OnActionDraft
-
-**@OnActionDraft()**(`name` : `string`)
-
-`Parameters`
-
-- `name (string)` : Representing the `CDS action name` defined in the `CDS file`
-
-`Example`
-
-```typescript
-@OnActionDraft('boundActionOrFunction')
-public async onActionDraftMethod(req: Request) {
-   return this.customerService.testExample( req)
-}
-
-```
-
-`@OnActionDraft('boundActionOrFunction')` will use always point to `Handler entity argument` which represents a specific `CDS entity`, and the origin of this can be traced back to the [EntityHandler](#entityhandler) => `@EntityHandler('MyEntity')`
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('boundActionOrFunction', 'MyEntity.drafts' async (req: Request) => {
+this.after('READ', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -857,6 +868,10 @@ this.on('boundActionOrFunction', 'MyEntity.drafts' async (req: Request) => {
 **@OnNewDraft()**
 
 This decorator will be triggered when `a new draft is created`.
+
+It is important to note that decorator `@OnCancelDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity.drafts` which represents a generated `CDS entity`.
+
+- `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
@@ -870,7 +885,7 @@ public async onNewDraft(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('NEW', 'MyEntity.drafts' async (req: Request) => {
+this.on('NEW', MyEntity.drafts, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -880,6 +895,10 @@ this.on('NEW', 'MyEntity.drafts' async (req: Request) => {
 **@OnCancelDraft()**
 
 This decorator will be triggered when `a draft is cancelled`.
+
+It is important to note that decorator `@OnCancelDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity.drafts` which represents a generated `CDS entity`.
+
+- `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
@@ -893,7 +912,7 @@ public async onCancelDraft(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('CANCEL', 'MyEntity.drafts' async (req: Request) => {
+this.on('CANCEL', MyEntity.drafts, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -903,6 +922,10 @@ this.on('CANCEL', 'MyEntity.drafts' async (req: Request) => {
 **@OnEditDraft()**
 
 This decorator will be triggered when `a new draft is created from an active instance`
+
+It is important to note that decorator `@OnEditDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
@@ -916,7 +939,7 @@ public async onEditDraft(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('EDIT', 'MyEntity' async (req: Request) => {
+this.on('EDIT', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -926,6 +949,10 @@ this.on('EDIT', 'MyEntity' async (req: Request) => {
 **@OnSaveDraft()**
 
 This decorator will be triggered when `the active entity is changed`
+
+It is important to note that decorator `@OnSaveDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated `CDS entity`.
+
+- `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
@@ -939,7 +966,61 @@ public async onSaveDraft(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('SAVE', 'MyEntity' async (req: Request) => {
+this.on('SAVE', MyEntity, async (req: Request) => {
+  return this.customerService.testExample(req)
+})
+```
+
+###### OnBoundActionDraft
+
+**@OnBoundActionDraft()**
+
+This decorator will be triggered when `the draft will be triggered`
+
+It is important to note that decorator `@OnBoundActionDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity.drafts` which represents a generated `CDS entity`.
+
+- `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Example`
+
+```typescript
+@OnBoundActionDraft(aBoundDraftAction)
+public async onBoundActionDraft(req: Request) {
+   return this.customerService.testExample( req)
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on(AnActionDraftMethod, MyEntity.drafts, async (req: Request, next: Function) => {
+  return this.customerService.testExample(req)
+})
+```
+
+###### OnBoundFunctionDraft
+
+**@OnBoundFunctionDraft()**
+
+This decorator will be triggered when `the draft will be triggered`
+
+It is important to note that decorator `@OnBoundFunctionDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity.drafts` which represents a generated `CDS entity`.
+
+- `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Example`
+
+```typescript
+@OnBoundFunctionDraft(aBoundDraftFunction)
+public async onBoundActionDraft(req: Request) {
+   return this.customerService.testExample( req)
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on(aFunctionDraftMethod, MyEntity.drafts, async (req: Request, next: Function) => {
   return this.customerService.testExample(req)
 })
 ```
