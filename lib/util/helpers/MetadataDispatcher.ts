@@ -24,7 +24,7 @@ export class MetadataDispatcher {
 
   // PUBLIC STATIC METHODS
 
-  public static getEntityName(entity: Constructable): string {
+  public static getEntity(entity: Constructable) {
     return Reflect.getMetadata(Constants.DECORATOR.ENTITY_HANDLER_NAME, entity.constructor)
   }
 
@@ -38,8 +38,8 @@ export class MetadataDispatcher {
     Reflect.defineMetadata(Constants.DECORATOR.DRAFT_FLAG_KEY, true, this.target, propertyKey)
   }
 
-  public addEntityHandlerMetadata(entityName: string): void {
-    Reflect.defineMetadata(Constants.DECORATOR.ENTITY_HANDLER_NAME, entityName, this.target)
+  public addEntityHandlerMetadata(entity: Constructable): void {
+    Reflect.defineMetadata(Constants.DECORATOR.ENTITY_HANDLER_NAME, entity, this.target)
   }
 
   public addMethodMetadata(props: Handler): void {

@@ -2,27 +2,28 @@ import 'reflect-metadata'
 import Constants from '../util/constants/Constants'
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher'
 import { injectable } from 'inversify'
+import { CDSTyperEntity } from '../util/types/types'
 
 /**
  *
  * This decorator can be applied to handler classes that correspond to specific entities.
  * All 'handlers' in that class will have that corresponding entity as a base for execution of their handlers.
  *
- * @param {string} entityName - The name of the entity, the name should be exactly like the one from the .cds
+ * @param {CDSTyperEntity<T>} entity - The entity to associate with the handler class.
  *
  * @example
  * // Apply the decorator to associate the 'Product' entity with the handler class.
- * @EntityHandler('Customers')
+ * @EntityHandler(Customer)
  * class Customer {
  *     // Handler implementation for the 'Product' entity.
  * }
  */
 
-function EntityHandler(entityName: string) {
+function EntityHandler<T>(entity: CDSTyperEntity<T>) {
   return function (target: any) {
     const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.ENTITY_HANDLER_NAME)
 
-    metadataDispatcher.addEntityHandlerMetadata(entityName)
+    metadataDispatcher.addEntityHandlerMetadata(entity)
 
     injectable()(target)
   }
@@ -60,10 +61,9 @@ function Repository() {
  * export default UserService
  */
 
-function Service() {
+function ServiceLogic() {
   return function (target: any) {
     injectable()(target)
   }
 }
-
-export { EntityHandler, Repository, Service }
+export { EntityHandler, Repository, ServiceLogic }

@@ -1,4 +1,5 @@
-import { Request, Service as CdsService } from '@sap/cds'
+import { Request, Service } from '@sap/cds'
+import { Constructable } from '@sap/cds/apis/internal/inference'
 
 enum ServiceHelper {
   SRV = 'srv',
@@ -14,10 +15,13 @@ enum HandlerType {
   OnDraft,
 }
 
-type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION'
-type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'ACTION' | 'FUNC'
+type CDSTyperAction = (...args: any[]) => any
+type CDSTyperEntity<T> = Constructable<T>
 
-type ServiceCallback = (srv: CdsService) => void
+type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION'
+type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'ACTION' | 'FUNC' | 'BOUND_ACTION' | 'BOUND_FUNC'
+
+type ServiceCallback = (srv: Service) => void
 
 type ReturnRequest = (req: Request) => Promise<any>
 type ReturnResultsAndRequest = (results: any[], req: Request) => Promise<any>
@@ -27,7 +31,7 @@ type Handler = {
   event: CRUD_EVENTS | DRAFT_EVENTS
   handlerType: HandlerType
   callback: any
-  actionName?: string
+  actionName?: CDSTyperAction
   isDraft?: boolean
 }
 
@@ -36,10 +40,14 @@ export {
   HandlerType,
   Handler,
   ServiceCallback,
-  CdsService,
+  //
   ReturnRequest,
   ReturnResultsAndRequest,
   ReturnRequestAndNext,
+  //
+  CDSTyperAction,
+  CDSTyperEntity,
+  //
   CRUD_EVENTS,
   DRAFT_EVENTS,
 }

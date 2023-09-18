@@ -6,21 +6,32 @@ import { Container } from 'inversify'
 import { Handler, HandlerType, ServiceCallback, ServiceHelper } from '../types/types'
 import { MetadataDispatcher } from './MetadataDispatcher'
 
+/**
+ * Manages the registration of event handlers for the entities.
+ */
 class CDSDispatcher {
   private srv: Service
   private container: Container
 
+  /**
+   * Creates an instance of CDSDispatcher.
+   * @param {Constructable[]} entities - An array of entity classes to manage event handlers for.
+   */
   constructor(private entities: Constructable[]) {}
 
-  private storeService(srv: Service) {
-    this.srv = srv
+  private initializeContainer() {
     this.container = new Container({
       skipBaseClassChecks: true,
       autoBindInjectable: true,
     })
   }
 
-  private async executeCallback(handler: Handler, entity: Constructable, req: Request, resultsOrNext?: Function | any[]): Promise<any> {
+  private storeService(srv: Service) {
+    this.srv = srv
+  }
+
+  private async executeCallback(handlerAndEntity: [Handler, Constructable], req: Request, resultsOrNext?: Function | any[]): Promise<any> {
+    const [handler, entity] = handlerAndEntity
     const callback = handler.callback.bind(entity)
     if (Array.isArray(resultsOrNext)) {
       const results = resultsOrNext
@@ -31,10 +42,17 @@ class CDSDispatcher {
     }
   }
 
+  private getActiveEntityOrDraft(handler: Handler, entityInstance: Constructable) {
+    const { isDraft } = handler
+    const entityConstructable = MetadataDispatcher.getEntity(entityInstance)
+    const entity = isDraft ? entityConstructable.drafts : entityConstructable
+    return entity
+  }
+
   private getHandlerProps(handler: Handler, entityInstance: Constructable) {
-    const { event, isDraft, actionName } = handler
-    const entityName = MetadataDispatcher.getEntityName(entityInstance)
-    const entity = isDraft ? `${entityName}.drafts` : entityName
+    const { event, actionName } = handler
+    const entity = this.getActiveEntityOrDraft(handler, entityInstance)
+
     return {
       getEntity: () => entity,
       getEvent: () => event,
@@ -45,50 +63,42 @@ class CDSDispatcher {
   private async registerAfterHandler(handlerAndEntity: [Handler, Constructable]) {
     const handlerProps = this.getHandlerProps(...handlerAndEntity)
 
-    if (handlerProps.getEvent() === 'ACTION') {
-      this.srv.after(handlerProps.getActionName()!, async (results: any[], req: Request) => {
-        return await this.executeCallback(...handlerAndEntity, req, results)
-      })
-
-      return
-    }
-
-    this.srv.after(handlerProps.getEvent(), handlerProps.getEntity(), async (results: any[], req: Request) => {
-      return await this.executeCallback(...handlerAndEntity, req, results)
+    this.srv.after(handlerProps.getEvent(), handlerProps.getEntity(), async (data, req) => {
+      return await this.executeCallback(handlerAndEntity, req, data)
     })
   }
 
   private async registerBeforeHandler(handlerAndEntity: [Handler, Constructable]) {
     const handlerProps = this.getHandlerProps(...handlerAndEntity)
 
-    if (handlerProps.getEvent() === 'ACTION') {
-      this.srv.before(handlerProps.getActionName()!, async (req: Request) => {
-        return await this.executeCallback(...handlerAndEntity, req)
-      })
-
-      return
-    }
-
-    this.srv.before(handlerProps.getEvent(), handlerProps.getEntity(), async (req: Request) => {
-      return await this.executeCallback(...handlerAndEntity, req)
+    this.srv.before(handlerProps.getEvent(), handlerProps.getEntity(), async (req) => {
+      return await this.executeCallback(handlerAndEntity, req)
     })
   }
 
   private async registerOnHandler(handlerAndEntity: [Handler, Constructable]) {
     const handlerProps = this.getHandlerProps(...handlerAndEntity)
 
-    // CRUD_METHOD.[ACTION, FUNC]
+    // CRUD_EVENTS.[ACTION, FUNC]
     if (handlerProps.getEvent() === 'ACTION' || handlerProps.getEvent() === 'FUNC') {
-      this.srv.on(handlerProps.getActionName()!, async (req: Request) => {
-        return await this.executeCallback(...handlerAndEntity, req)
+      this.srv.on(handlerProps.getActionName()!, async (req, next) => {
+        return await this.executeCallback(handlerAndEntity, req, next)
       })
 
       return
     }
 
-    // CRUD_METHOD.[CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
-    this.srv.on(handlerProps.getEvent(), handlerProps.getEntity(), async (req: Request, next: Function) => {
-      return await this.executeCallback(...handlerAndEntity, req, next)
+    if (handlerProps.getEvent() === 'BOUND_ACTION') {
+      this.srv.on(handlerProps.getActionName()!, handlerProps.getEntity().name, async (req, next) => {
+        return await this.executeCallback(handlerAndEntity, req, next)
+      })
+
+      return
+    }
+
+    // CRUD_EVENTS.[CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
+    this.srv.on(handlerProps.getEvent(), handlerProps.getEntity(), async (req, next) => {
+      return await this.executeCallback(handlerAndEntity, req, next)
     })
   }
 
@@ -96,18 +106,18 @@ class CDSDispatcher {
   private async registerOnDraftHandler(handlerAndEntity: [Handler, Constructable]) {
     const handlerProps = this.getHandlerProps(...handlerAndEntity)
 
-    // CRUD_METHOD.[ACTION]
-    if (handlerProps.getEvent() === 'ACTION') {
-      this.srv.on(handlerProps.getActionName()!, handlerProps.getEntity(), async (req: Request) => {
-        return await this.executeCallback(...handlerAndEntity, req)
+    // CRUD_EVENTS.[BOUND_ACTION, BOUND_FUNC]
+    if (handlerProps.getEvent() === 'BOUND_ACTION') {
+      this.srv.on(handlerProps.getActionName()!, handlerProps.getEntity().name, async (req, next) => {
+        return await this.executeCallback(handlerAndEntity, req, next)
       })
 
       return
     }
 
-    // CRUD_METHOD.[NEW, CANCEL]
-    this.srv.on(handlerProps.getEvent(), handlerProps.getEntity(), async (req: Request) => {
-      return await this.executeCallback(...handlerAndEntity, req)
+    // CRUD_EVENTS.[NEW, CANCEL]
+    this.srv.on(handlerProps.getEvent(), handlerProps.getEntity(), async (req, next) => {
+      return await this.executeCallback(handlerAndEntity, req, next)
     })
   }
 
@@ -174,10 +184,10 @@ class CDSDispatcher {
   private buildServiceImplementation(): ServiceCallback {
     return (srv: Service) => {
       this.storeService(srv)
+      this.initializeContainer()
       this.buildEntityHandlers()
     }
   }
-
   // PUBLIC ROUTINES
   public initializeEntityHandlers(): ServiceImpl {
     return cds.service.impl(this.buildServiceImplementation())

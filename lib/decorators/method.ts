@@ -1,5 +1,13 @@
 import 'reflect-metadata'
-import { CRUD_EVENTS, DRAFT_EVENTS, HandlerType, ReturnRequest, ReturnRequestAndNext, ReturnResultsAndRequest } from '../util/types/types'
+import {
+  CDSTyperAction,
+  HandlerType,
+  ReturnRequest,
+  ReturnRequestAndNext,
+  ReturnResultsAndRequest,
+  CRUD_EVENTS,
+  DRAFT_EVENTS,
+} from '../util/types/types'
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher'
 import Constants from '../util/constants/Constants'
 
@@ -27,30 +35,6 @@ function Draft() {
   return function (target: any, propertyKey: string) {
     const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME)
     metadataDispatcher.setMethodAsDraft(propertyKey)
-  }
-}
-
-/**
- * Builds a decorator for handling the .after method.
- *
- * @param {Event} event - The event to handle.
- * @param {HandlerType} handlerType - The type of handler (Before, After, On).
- */
-
-function buildAfterAction(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
-  return function (name: string) {
-    return function (target: any, propertyKey: any, descriptor: TypedPropertyDescriptor<ReturnResultsAndRequest>): void {
-      const isDraft: boolean = Reflect.getMetadata(Constants.DECORATOR.DRAFT_FLAG_KEY, target, propertyKey)
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME)
-
-      metadataDispatcher.addMethodMetadata({
-        event,
-        handlerType,
-        callback: descriptor.value,
-        actionName: name,
-        isDraft: !!isDraft,
-      })
-    }
   }
 }
 
@@ -101,31 +85,6 @@ function buildBefore(event: CRUD_EVENTS, handlerType: HandlerType) {
 }
 
 /**
- * TODO refactor in smaller parts
- * Builds a decorator for handling the .before method.
- *
- * @param {Event} event - The event to handle.
- * @param {HandlerType} handlerType - The type of handler (Before, After, On).
- */
-
-function buildBeforeAction(event: CRUD_EVENTS, handlerType: HandlerType) {
-  return function (name: string) {
-    return function (target: any, propertyKey: any, descriptor: TypedPropertyDescriptor<ReturnRequest>): void {
-      const draftFlag: boolean = Reflect.getMetadata(Constants.DECORATOR.DRAFT_FLAG_KEY, target, propertyKey)
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME)
-
-      metadataDispatcher.addMethodMetadata({
-        event,
-        handlerType,
-        callback: descriptor.value,
-        actionName: name,
-        isDraft: !!draftFlag,
-      })
-    }
-  }
-}
-
-/**
  * Builds a decorator for handling the .on method.
  *
  * @param {Event} event - The custom action event to handle.
@@ -133,8 +92,8 @@ function buildBeforeAction(event: CRUD_EVENTS, handlerType: HandlerType) {
  */
 
 function buildOnDraft(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
-  return function (name: string) {
-    return function (target: any, propertyKey: any, descriptor: TypedPropertyDescriptor<ReturnRequest>): void {
+  return function (name: CDSTyperAction) {
+    return function (target: any, propertyKey: any, descriptor: TypedPropertyDescriptor<ReturnRequestAndNext>): void {
       const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME)
 
       metadataDispatcher.addMethodMetadata({
@@ -156,9 +115,8 @@ function buildOnDraft(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerTyp
  */
 
 function buildOn(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
-  return function (name: string) {
-    return function (target: any, propertyKey: any, descriptor: TypedPropertyDescriptor<ReturnRequest>): void {
-      const draftFlag: boolean = Reflect.getMetadata(Constants.DECORATOR.DRAFT_FLAG_KEY, target, propertyKey)
+  return function (name: CDSTyperAction) {
+    return function (target: any, propertyKey: any, descriptor: TypedPropertyDescriptor<ReturnRequestAndNext>): void {
       const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME)
 
       metadataDispatcher.addMethodMetadata({
@@ -166,7 +124,7 @@ function buildOn(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
         handlerType,
         callback: descriptor.value,
         actionName: name,
-        isDraft: !!draftFlag,
+        isDraft: false,
       })
     }
   }
@@ -263,22 +221,6 @@ const BeforeUpdate = buildBefore('UPDATE', HandlerType.Before)
 const BeforeDelete = buildBefore('DELETE', HandlerType.Before)
 
 /**
- *
- * This decorator can be applied to methods that need to execute custom logic before a custom action is performed.
- * The decorated function is called with the request object before the custom action is executed.
- *
- * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request)
- *
- * @example
- * // Apply the decorator to handle the 'BeforeAction' event.
- * @BeforeAction('nameOfTheAction')
- * function myBeforeActionHandler(req: Request) {
- *     // Custom logic to be executed before the custom action.
- * }
- */
-const BeforeAction = buildBeforeAction('ACTION', HandlerType.Before)
-
-/**
  * ####################################################################################################################
  * End `Before` methods
  * ####################################################################################################################
@@ -348,21 +290,6 @@ const AfterUpdate = buildAfter('UPDATE', HandlerType.After)
  * }
  */
 const AfterDelete = buildAfter('DELETE', HandlerType.After)
-
-/**
- *
- * This decorator can be applied to methods that need to execute custom logic before a custom action is performed.
- *
- * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
- * @returns req : Request - The result of custom logic execution.
- * @example
- * // Apply the decorator to handle the 'BeforeAction' event.
- * @BeforeAction('nameOfTheAction')
- * function myBeforeActionHandler(req: Request) {
- *     // Custom logic to be executed before the custom action.
- * }
- */
-const AfterAction = buildAfterAction('ACTION', HandlerType.After)
 
 /**
  * ####################################################################################################################
@@ -459,6 +386,21 @@ const OnAction = buildOn('ACTION', HandlerType.On)
  *
  * @example
  * // Apply the decorator to handle the 'OnAction' event.
+ * @OnAction('nameOfTheAction')
+ * function myOnActionHandler(req: Request) {
+ *     // Custom logic to be executed on the custom action event.
+ * }
+ */
+const OnBoundAction = buildOn('BOUND_ACTION', HandlerType.On)
+const OnBoundFunction = buildOn('BOUND_FUNC', HandlerType.On)
+/**
+ *
+ * This decorator can be applied to methods that need to execute custom logic when a custom action event is triggered.
+ *
+ * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
+ *
+ * @example
+ * // Apply the decorator to handle the 'OnAction' event.
  * @OnFunction('nameOfTheAction')
  * function myOnActionHandler(req: Request) {
  *     // Custom logic to be executed on the custom action event.
@@ -514,24 +456,6 @@ const OnSaveDraft = buildOn('SAVE', HandlerType.On)
 
 /**
  *
- * This decorator can be applied to a method which will handle an action as a 'draft'
- *
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
- *
- * @example
- * @OnActionDraft('nameOfTheAction')
- * function myOnActionHandler(req: Request) {
- *     // Custom logic to be executed on the custom action event.
- * }
- *
- * Above decorator will be translated to
- *
- * srv.on('nameOfTheAction', 'MyEntity.drafts', (req : Request) => {} )
- */
-const OnActionDraft = buildOnDraft('ACTION', HandlerType.OnDraft)
-
-/**
- *
  * This decorator can be applied to methods when a 'draft' is created
  *
  * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
@@ -566,20 +490,37 @@ const OnNewDraft = buildOnDraft('NEW', HandlerType.OnDraft)
 
 const OnCancelDraft = buildOnDraft('CANCEL', HandlerType.OnDraft)
 
+/**
+ *
+ * This decorator can be applied to methods that will handle when 'draft' is cancelled
+ *
+ * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
+ * @example
+ * @OnCancelDraft
+ * function myBoundActionOrFunction(req : Request, next : Function) {
+ *     // Custom logic to be executed on the custom action event.
+ * }
+ *
+ * Above decorator will be translated to
+ * srv.on('boundActionOrFunction', 'MyEntity.drafts', (req : Request, next : Function) => {})
+ *
+ */
+
+const OnBoundActionDraft = buildOnDraft('BOUND_ACTION', HandlerType.OnDraft)
+const OnBoundFunctionDraft = buildOnDraft('BOUND_FUNC', HandlerType.OnDraft)
+
 export {
   // BEFORE events
   BeforeCreate,
   BeforeRead,
   BeforeUpdate,
   BeforeDelete,
-  BeforeAction,
   //
   // AFTER events
   AfterCreate,
   AfterRead,
   AfterUpdate,
   AfterDelete,
-  AfterAction,
   //
   // ON events
   OnCreate,
@@ -588,12 +529,17 @@ export {
   OnDelete,
   OnAction,
   OnFunction,
-  OnEditDraft,
-  OnSaveDraft,
+  OnBoundAction,
+  OnBoundFunction,
   //
   // DRAFT events
   Draft,
-  OnActionDraft,
   OnNewDraft,
   OnCancelDraft,
+  OnBoundActionDraft,
+  OnBoundFunctionDraft,
+  //
+  // Triggered on active entity E.g. 'MyEntity'
+  OnEditDraft,
+  OnSaveDraft,
 }
