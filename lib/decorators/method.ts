@@ -420,7 +420,7 @@ const OnFunction = buildOn('FUNC', HandlerType.On)
  * }
  *
  * Above decorator will be translated to
- * srv.on('EDIT', 'MyEntity', ...)
+ * srv.on('EDIT', MyEntity, ...)
  *
  */
 const OnEditDraft = buildOn('EDIT', HandlerType.On)
@@ -437,7 +437,7 @@ const OnEditDraft = buildOn('EDIT', HandlerType.On)
  * }
  *
  * Above decorator will be translated to
- * srv.on('SAVE', 'MyEntity', ...)
+ * srv.on('SAVE', MyEntity, ...)
  *
  */
 const OnSaveDraft = buildOn('SAVE', HandlerType.On)
@@ -539,7 +539,7 @@ export {
   OnBoundActionDraft,
   OnBoundFunctionDraft,
   //
-  // Triggered on active entity E.g. 'MyEntity'
+  // Triggered on active entity E.g. MyEntity
   OnEditDraft,
   OnSaveDraft,
 }
