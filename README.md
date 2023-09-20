@@ -53,8 +53,6 @@ The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate
           - [OnCancelDraft](#oncanceldraft)
           - [OnEditDraft](#oneditdraft)
           - [OnSaveDraft](#onsavedraft)
-          - [OnBoundActionDraft](#onboundactiondraft)
-          - [OnBoundFunctionDraft](#onboundfunctiondraft)
     - [Example](#example)
   - [Contributing](#contributing)
   - [License](#license)
@@ -104,7 +102,7 @@ npx @cap-js/cds-typer ./srv/controller/mainService --outputDirectory ./srv/util/
 3. [Repository](#repository) - Will contain manipulation of entities through the utilization of [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql).
    - `[Optional enhancement]` To simplify `entity manipulation` using [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql), a `BaseRepository` `npm package` was created for [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) of the most common `database actions` like `.create(...), findAll(), find(...), delete(...), exists() ...`
 
-![Alt text](image.png) <= expanded folders => ![Alt text](image-1.png)
+![Alt text](<[image.png](https://raw.githubusercontent.com/dxfrontier/markdown-resources/main/cds-ts-dispatcher/image-1.png)>) <= expanded folders => ![Alt text](image-1.png)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -200,7 +198,17 @@ class CustomerRepository {
 
 ###### Optional BaseRepository
 
-The goal of SAP CAP **[CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql)** **BaseRepository** is to significantly reduce the boilerplate code required to implement data access layers for persistance entities by providing out of the box actions on the `database` such as `.create(...), findAll(), , find(...), delete(...), exists() ...`
+The SAP CAP **[CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql)** **BaseRepository** was designed to reduce the boilerplace code required to implement data access layer for persistance entities.
+It simplifies the implementation by offering a set of ready-to-use actions for interacting with the database. These actions include:
+
+- `.create(...)`: Easily create new records in the database.
+- `.findAll()`: Retrieve all records from the database.
+- `.find(...)`: Query the database to find specific data.
+- `.delete(...)`: Effortlessly remove records from the database.
+- `.exists()`: Check the existence of data in the database.
+- ...
+
+To get started with SAP CAP **[CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql)** **BaseRepository**, refer to the official documentation [TODO] TODO . Explore the capabilities it offers and enhance your data access layer with ease.
 
 `Example`
 
@@ -742,6 +750,12 @@ The `@Draft()` decorator is utilized at the `method-level` to annotate a method 
 
 When utilizing the `@Draft()` decorator, the `placement of the @Draft() decorator` within your TypeScript class is very important factor to consider. It determines the scope of the `draft` mode within the methods that precede it.
 
+`@Draft` can be used togheter with the following decorator actions :
+
+- `@BeforeCreate, @BeforeRead, @BeforeUpdate, @BeforeDelete`
+- `@AfterCreate, @AfterRead, @AfterUpdate, @AfterDelete`
+- `@OnBoundAction, @OnBoundFunction`
+
 `MyEntity` & `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example 1`
@@ -750,10 +764,17 @@ When utilizing the `@Draft()` decorator, the `placement of the @Draft() decorato
 @AfterUpdate() // Will be marked as draft
 @AfterCreate() // Will be marked as draft
 @AfterRead() // Will be marked as draft
-@Draft() // All methods above '@Draft()' will be have 'draft' scope.
+@Draft() // All methods above '@Draft()' will be triggered on 'MyEntity.drafts'
 public async draftMethod(results : MyEntity[], req: Request) {
-   return this.customerService.testExample( req)
+   return this.customerService.testExample(req)
 }
+
+@OnBoundAction(anAction)
+@Draft() // Above action will be be triggered on 'MyEntity.drafts'
+public async draftMethodAction(req: Request, next : Function) {
+  // ...
+}
+
 ```
 
 `Equivalent to 'JS'`
@@ -761,6 +782,10 @@ public async draftMethod(results : MyEntity[], req: Request) {
 ```typescript
 this.after(['UPDATE, CREATE, READ'], MyEntity.drafts, async (req: Request) => {
   return this.customerService.testExample(req)
+})
+
+this.on(anAction, MyEntity.drafts, async (req: Request, next: Function) => {
+  // ...
 })
 ```
 
@@ -770,6 +795,7 @@ When using `@Draft()` in-between other `Decorators`. The above decorators of the
 The rest `Decorators` below `@Draft()` will be work on active entities.
 
 ```typescript
+
 @AfterUpdate() // Marked as a draft
 @Draft() // Draft is in-between 'after', this means that only '@AfterUpdate' will me marked as draft
 @AfterCreate() // Will work on active entity
@@ -800,18 +826,16 @@ this.after(['CREATE', 'READ'], MyEntity, async (req: Request) => {
 ```typescript
 @BeforeUpdate()
 @BeforeCreate()
-@AfterRead()
 @Draft() // All above decorators will be marked AS DRAFT
 public async draftMethod(req: Request) {
-   return this.customerService.testExample( req)
+   return this.customerService.testExample(req)
 }
 
 // All decorators will work only FOR ACTIVE ENTITIES
 @BeforeUpdate()
 @BeforeCreate()
-@AfterRead()
 public async methodWithoutDraft(req: Request) {
-   return this.customerService.testExample( req)
+   return this.customerService.testExample(req)
 }
 ```
 
@@ -823,17 +847,8 @@ this.before(['UPDATE', 'CREATE'], MyEntity.drafts, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 
-// FOR DRAFT
-this.after('READ', MyEntity.drafts, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
-
 // FOR ACTIVE ENTITIES
 this.before(['UPDATE', 'CREATE'], MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
-
-this.after('READ', MyEntity, async (req: Request) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -850,15 +865,15 @@ It is important to note that decorator `@OnCancelDraft()` will use always point 
 
 ```typescript
 @OnNewDraft()
-public async onNewDraft(req: Request) {
-   return this.customerService.testExample( req)
+public async onNewDraft(req: Request, next: Function) {
+   return this.customerService.testExample(req)
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('NEW', MyEntity.drafts, async (req: Request) => {
+this.on('NEW', MyEntity.drafts, async (req: Request, next: Function) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -875,15 +890,15 @@ It is important to note that decorator `@OnCancelDraft()` will use always point 
 
 ```typescript
 @OnCancelDraft()
-public async onCancelDraft(req: Request) {
-   return this.customerService.testExample( req)
+public async onCancelDraft(req: Request, next: Function) {
+   return this.customerService.testExample(req)
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('CANCEL', MyEntity.drafts, async (req: Request) => {
+this.on('CANCEL', MyEntity.drafts, async (req: Request, next: Function) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -900,15 +915,15 @@ It is important to note that decorator `@OnEditDraft()` will use always point to
 
 ```typescript
 @OnEditDraft()
-public async onEditDraft(req: Request) {
-   return this.customerService.testExample( req)
+public async onEditDraft(req: Request, next: Function) {
+   return this.customerService.testExample(req)
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('EDIT', MyEntity, async (req: Request) => {
+this.on('EDIT', MyEntity, async (req: Request, next: Function) => {
   return this.customerService.testExample(req)
 })
 ```
@@ -925,72 +940,22 @@ It is important to note that decorator `@OnSaveDraft()` will use always point to
 
 ```typescript
 @OnSaveDraft()
-public async onSaveDraft(req: Request) {
-   return this.customerService.testExample( req)
+public async onSaveDraft(req: Request, next: Function) {
+   return this.customerService.testExample(req)
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('SAVE', MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
-```
-
-###### OnBoundActionDraft
-
-**@OnBoundActionDraft()**
-
-This decorator will be triggered when `the draft will be triggered`
-
-It is important to note that decorator `@OnBoundActionDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
-
-`Example`
-
-```typescript
-@OnBoundActionDraft(aBoundDraftAction)
-public async onBoundActionDraft(req: Request) {
-   return this.customerService.testExample( req)
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on(AnActionDraftMethod, MyEntity.drafts, async (req: Request, next: Function) => {
-  return this.customerService.testExample(req)
-})
-```
-
-###### OnBoundFunctionDraft
-
-**@OnBoundFunctionDraft()**
-
-This decorator will be triggered when `the draft will be triggered`
-
-It is important to note that decorator `@OnBoundFunctionDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
-
-`Example`
-
-```typescript
-@OnBoundFunctionDraft(aBoundDraftFunction)
-public async onBoundActionDraft(req: Request) {
-   return this.customerService.testExample( req)
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on(aFunctionDraftMethod, MyEntity.drafts, async (req: Request, next: Function) => {
+this.on('SAVE', MyEntity, async (req: Request, next: Function) => {
   return this.customerService.testExample(req)
 })
 ```
 
 ### Example
 
-TODO
+A full working example can be found on .... TODO
 
 ## Contributing
 
