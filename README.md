@@ -102,11 +102,9 @@ npx @cap-js/cds-typer ./srv/controller/mainService --outputDirectory ./srv/util/
 3. [Repository](#repository) - Will contain manipulation of entities through the utilization of [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql).
    - `[Optional enhancement]` To simplify `entity manipulation` using [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql), a `BaseRepository` `npm package` was created for [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) of the most common `database actions` like `.create(...), findAll(), find(...), delete(...), exists() ...`
 
-Example of folder structure using Controller-Service-Repository pattern
+`Controller-Service-Repository` suggested folder structure
 
-![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/image.png?raw=true) <= expanded folders => ![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/image-1.png?raw=true)
-
-<!-- ![Alt text](<[image.png](https://raw.githubusercontent.com/dxfrontier/markdown-resources/main/cds-ts-dispatcher/image-1.png)>) <= expanded folders => ![Alt text](image-1.png) -->
+![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/architecture_folder_structure.png?raw=true) <= expanded folders => ![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/architecture_folder_structure_expanded.png?raw=true)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
