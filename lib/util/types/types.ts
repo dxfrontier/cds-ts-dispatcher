@@ -1,5 +1,6 @@
-import { Request, Service } from '@sap/cds'
-import { Constructable } from '@sap/cds/apis/internal/inference'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { type Request, type Service } from '@sap/cds';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
 
 enum ServiceHelper {
   SRV = 'srv',
@@ -15,39 +16,51 @@ enum HandlerType {
   OnDraft,
 }
 
-type CDSTyperAction = (...args: any[]) => any
-type CDSTyperEntity<T> = Constructable<T>
+type CDSTyperAction = (...args: any[]) => any;
+type CDSTyperEntity<T> = Constructable<T>;
 
-type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION'
-type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'ACTION' | 'FUNC' | 'BOUND_ACTION' | 'BOUND_FUNC'
+type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION';
+type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'ACTION' | 'FUNC' | 'BOUND_ACTION' | 'BOUND_FUNC';
 
-type ServiceCallback = (srv: Service) => void
+type ServiceCallback = (srv: Service) => void;
 
-type ReturnRequest = (req: Request) => Promise<any>
-type ReturnResultsAndRequest = (results: any[], req: Request) => Promise<any>
-type ReturnRequestAndNext = (req: Request, next: Function) => Promise<any>
+type ReturnRequest = (req: Request, ...args: any[]) => Promise<any>;
+type ReturnResultsAndRequest = (results: any[], req: Request, ...args: any[]) => Promise<any>;
+type ReturnRequestAndNext = (req: Request, next: Function) => Promise<any>;
+type ReturnSingleInstanceCapable<T, K> = (results: T[], req: K, isSingleInstance: boolean) => Promise<any>;
 
-type Handler = {
-  event: CRUD_EVENTS | DRAFT_EVENTS
-  handlerType: HandlerType
-  callback: any
-  actionName?: CDSTyperAction
-  isDraft?: boolean
+type TypedRequest<T> = Omit<Request, 'data'> & { data: T };
+
+interface HandlerBuilder {
+  buildHandlers: () => void;
+}
+
+interface Handler {
+  event: CRUD_EVENTS | DRAFT_EVENTS;
+  handlerType: HandlerType;
+  callback: ReturnRequest | ReturnRequestAndNext | ReturnResultsAndRequest;
+  actionName?: CDSTyperAction;
+  isDraft?: boolean;
+  isSingleInstance?: boolean;
 }
 
 export {
   ServiceHelper,
   HandlerType,
-  Handler,
-  ServiceCallback,
+  type HandlerBuilder,
+  type Handler,
+  type ServiceCallback,
   //
-  ReturnRequest,
-  ReturnResultsAndRequest,
-  ReturnRequestAndNext,
+  type ReturnRequest,
+  type ReturnResultsAndRequest,
+  type ReturnRequestAndNext,
+  type ReturnSingleInstanceCapable,
   //
-  CDSTyperAction,
-  CDSTyperEntity,
+  type CDSTyperAction,
+  type CDSTyperEntity,
   //
-  CRUD_EVENTS,
-  DRAFT_EVENTS,
-}
+  type TypedRequest,
+  //
+  type CRUD_EVENTS,
+  type DRAFT_EVENTS,
+};

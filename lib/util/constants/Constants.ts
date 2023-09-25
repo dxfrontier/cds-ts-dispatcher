@@ -1,10 +1,11 @@
-class Constants {
-  public static DECORATOR = {
+export const Constants = {
+  DECORATOR: {
     ENTITY_HANDLER_NAME: 'ENTITY_NAME',
     METHOD_ACCUMULATOR_NAME: 'METHOD_ACCUMULATOR',
     INJECTOR_FIELDS_ACCUMULATOR_NAME: 'INJECTOR_ACCUMULATOR',
     DRAFT_FLAG_KEY: 'DRAFT_KEY',
-  }
-}
+    SINGLE_INSTANCE_FLAG_KEY: 'SINGLE_INSTANCE_KEY',
+  },
+};
 
-export default Constants
+export default Constants;
