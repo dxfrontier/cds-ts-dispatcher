@@ -53,6 +53,7 @@ The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate
           - [OnCancelDraft](#oncanceldraft)
           - [OnEditDraft](#oneditdraft)
           - [OnSaveDraft](#onsavedraft)
+        - [SingleInstanceCapable](#singleinstancecapable)
     - [Example](#example)
   - [Contributing](#contributing)
   - [License](#license)
@@ -70,7 +71,7 @@ npm install reflect-metadata
 Once installed, import `reflect-metadata` in your `server.ts`
 
 ```typescript
-import 'reflect-metadata'
+import 'reflect-metadata';
 ```
 
 Modify your `tsconfig.json` to enable `decorators` usage :
@@ -125,7 +126,7 @@ The `CDSDispatcher` constructor allows you to create an instance for dispatching
 `Example`
 
 ```typescript
-module.exports = new CDSDispatcher([CustomerHandler, AddressHandler]).initializeEntityHandlers()
+module.exports = new CDSDispatcher([CustomerHandler, AddressHandler]).initializeEntityHandlers();
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -154,9 +155,7 @@ class CustomerHandler {
   ...
 ```
 
-`MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
-
-> Note @EntityHandler class should contain only handling of the `REST operations`
+> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -177,8 +176,6 @@ class CustomerService {
   constructor() {}
   ...
 ```
-
-> Note @ServiceLogic class should contain only `customer specific business logic`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -218,14 +215,12 @@ To get started with SAP CAP **[CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql
 @Repository()
 class CustomerRepository extends BaseRepository<MyEntity> {
   constructor() {
-    super(MyEntity)
+    super(MyEntity);
   }
 }
 ```
 
-`MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
-
-> Note @Repository class should be exclusively responsible for managing `interactions between the database and service layers`.
+> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -254,7 +249,7 @@ class CustomerHandler {
   ...
 ```
 
-`MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -278,7 +273,7 @@ class CustomerHandler { // OR CustomerService, CustomerRepository
   ...
 ```
 
-`MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -306,7 +301,7 @@ It is important to note that decorator `@BeforeCreate()` will use always point t
 
 ```typescript
 @BeforeCreate()
-public async beforeCreateMethod(req: Request) {
+public async beforeCreateMethod(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample( req)
 }
 ```
@@ -314,9 +309,9 @@ public async beforeCreateMethod(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('CREATE', MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.before('CREATE', MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -331,7 +326,7 @@ It is important to note that decorator `@BeforeRead()` will use always point to 
 
 ```typescript
 @BeforeRead()
-public async beforeReadMethod(req: Request) {
+public async beforeReadMethod(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample( req)
 }
 ```
@@ -339,9 +334,9 @@ public async beforeReadMethod(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('READ', MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.before('READ', MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -356,7 +351,7 @@ It is important to note that decorator `@BeforeUpdate()` will use always point t
 
 ```typescript
 @BeforeUpdate()
-public async beforeUpdateMethod(req: Request) {
+public async beforeUpdateMethod(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample( req)
 }
 ```
@@ -364,9 +359,9 @@ public async beforeUpdateMethod(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('UPDATE', MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.before('UPDATE', MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -381,7 +376,7 @@ It is important to note that decorator `@BeforeDelete()` will use always point t
 
 ```typescript
 @BeforeDelete()
-public async beforeDeleteMethod(req: Request) {
+public async beforeDeleteMethod(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample(req)
 }
 ```
@@ -389,9 +384,9 @@ public async beforeDeleteMethod(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('DELETE', MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.before('DELETE', MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -417,7 +412,7 @@ It is important to note that decorator `@AfterCreate()` will use always point to
 
 ```typescript
 @AfterCreate()
-public async afterCreateMethod(results : MyEntity[], req: Request) {
+public async afterCreateMethod(results : MyEntity[], req: TypedRequest<MyEntity>) {
    return this.customerService.testExample( req)
 }
 ```
@@ -425,9 +420,9 @@ public async afterCreateMethod(results : MyEntity[], req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('CREATE', MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.after('CREATE', MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -442,7 +437,7 @@ It is important to note that decorator `@AfterRead()` will use always point to [
 
 ```typescript
 @AfterRead()
-public async afterReadMethod(req: Request) {
+public async afterReadMethod(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample( req)
 }
 ```
@@ -450,9 +445,9 @@ public async afterReadMethod(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('READ', MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.after('READ', MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -467,7 +462,7 @@ It is important to note that decorator `@AfterUpdate()` will use always point to
 
 ```typescript
 @AfterUpdate()
-public async afterUpdateMethod(req: Request) {
+public async afterUpdateMethod(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample( req)
 }
 ```
@@ -475,9 +470,9 @@ public async afterUpdateMethod(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('UPDATE', MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.after('UPDATE', MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -492,7 +487,7 @@ It is important to note that decorator `@AfterDelete()` will use always point to
 
 ```typescript
 @AfterDelete()
-public async afterDeleteMethod(req: Request) {
+public async afterDeleteMethod(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample( req)
 }
 ```
@@ -500,9 +495,9 @@ public async afterDeleteMethod(req: Request) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('DELETE', MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.after('DELETE', MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -530,7 +525,7 @@ It is important to note that decorator `@OnCreate()` will use always point to [E
 
 ```typescript
 @OnCreate()
-public async onCreateMethod(req: Request, next : Function) {
+public async onCreateMethod(req: TypedRequest<MyEntity>, next : Function) {
    return this.customerService.testExample( req)
 }
 ```
@@ -538,9 +533,9 @@ public async onCreateMethod(req: Request, next : Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('CREATE', MyEntity, async (req: Request, next: Function) => {
-  return this.customerService.testExample(req)
-})
+this.on('CREATE', MyEntity, async (req: TypedRequest<MyEntity>, next: Function) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -555,7 +550,7 @@ It is important to note that decorator `@OnRead()` will use always point to [Ent
 
 ```typescript
 @OnRead()
-public async onReadMethod(req: Request, next : Function) {
+public async onReadMethod(req: TypedRequest<MyEntity>, next : Function) {
    return this.customerService.testExample(req)
 }
 ```
@@ -563,9 +558,9 @@ public async onReadMethod(req: Request, next : Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('READ', MyEntity, async (req: Request, next: Function) => {
-  return this.customerService.testExample(req)
-})
+this.on('READ', MyEntity, async (req: TypedRequest<MyEntity>, next: Function) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -580,7 +575,7 @@ It is important to note that decorator `@OnUpdate()` will use always point to [E
 
 ```typescript
 @OnUpdate()
-public async onUpdateMethod(req: Request, next : Function) {
+public async onUpdateMethod(req: TypedRequest<MyEntity>, next : Function) {
    return this.customerService.testExample(req)
 }
 ```
@@ -588,9 +583,9 @@ public async onUpdateMethod(req: Request, next : Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('UPDATE', MyEntity, async (req: Request, next: Function) => {
-  return this.customerService.testExample(req)
-})
+this.on('UPDATE', MyEntity, async (req: TypedRequest<MyEntity>, next: Function) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -605,7 +600,7 @@ It is important to note that decorator `@OnDelete()` will use always point to [E
 
 ```typescript
 @OnDelete()
-public async onDeleteMethod(req: Request, next : Function) {
+public async onDeleteMethod(req: TypedRequest<MyEntity>, next : Function) {
    return this.customerService.testExample( req)
 }
 ```
@@ -613,9 +608,9 @@ public async onDeleteMethod(req: Request, next : Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('DELETE', MyEntity, async (req: Request, next: Function) => {
-  return this.customerService.testExample(req)
-})
+this.on('DELETE', MyEntity, async (req: TypedRequest<MyEntity>, next: Function) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -632,7 +627,7 @@ this.on('DELETE', MyEntity, async (req: Request, next: Function) => {
 
 ```typescript
 @OnAction(AnActionOrFunction)
-public async onActionMethod(req: Request, next : Function) {
+public async onActionMethod(req: TypedRequest<MyEntity>, next : Function) {
    return this.customerService.testExample( req)
 }
 ```
@@ -640,9 +635,9 @@ public async onActionMethod(req: Request, next : Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on(AnActionOrFunction, async (req: Request, next: Function) => {
-  return this.customerService.testExample(req)
-})
+this.on(AnActionOrFunction, async (req: TypedRequest<MyEntity>, next: Function) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -659,7 +654,7 @@ this.on(AnActionOrFunction, async (req: Request, next: Function) => {
 
 ```typescript
 @OnFunction(AnActionOrFunction)
-public async onFunctionMethod(req: Request, next : Function) {
+public async onFunctionMethod(req: TypedRequest<MyEntity>, next : Function) {
    return this.customerService.testExample(req)
 }
 ```
@@ -667,9 +662,9 @@ public async onFunctionMethod(req: Request, next : Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on(AnActionOrFunction, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.on(AnActionOrFunction, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -688,7 +683,7 @@ It is important to note that decorator `@OnBoundAction()` will use always point 
 
 ```typescript
 @OnBoundAction(AnActionMethod)
-public async onActionMethod(req: Request, next : Function) {
+public async onActionMethod(req: TypedRequest<MyEntity>, next : Function) {
    return this.customerService.testExample(req)
 }
 ```
@@ -696,9 +691,9 @@ public async onActionMethod(req: Request, next : Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on(AnActionMethod, MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.on(AnActionMethod, MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -717,7 +712,7 @@ It is important to note that decorator `@OnBoundFunction()` will use always poin
 
 ```typescript
 @OnBoundFunction(aCdsFunctionMethod)
-public async onFunctionMethod(req: Request, next : Function) {
+public async onFunctionMethod(req: TypedRequest<MyEntity>, next : Function) {
    return this.customerService.testExample(req)
 }
 ```
@@ -725,9 +720,9 @@ public async onFunctionMethod(req: Request, next : Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on(aCdsFunctionMethod, MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.on(aCdsFunctionMethod, MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -752,13 +747,13 @@ The `@Draft()` decorator is utilized at the `method-level` to annotate a method 
 
 When utilizing the `@Draft()` decorator, the `placement of the @Draft() decorator` within your TypeScript class is very important factor to consider. It determines the scope of the `draft` mode within the methods that precede it.
 
-`@Draft` can be used togheter with the following decorator actions :
+`Supported decorators actions`
+
+`@Draft` can be used together with the following decorator actions :
 
 - `@BeforeCreate, @BeforeRead, @BeforeUpdate, @BeforeDelete`
 - `@AfterCreate, @AfterRead, @AfterUpdate, @AfterDelete`
 - `@OnBoundAction, @OnBoundFunction`
-
-`MyEntity` & `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example 1`
 
@@ -767,28 +762,30 @@ When utilizing the `@Draft()` decorator, the `placement of the @Draft() decorato
 @AfterCreate() // Will be marked as draft
 @AfterRead() // Will be marked as draft
 @Draft() // All methods above '@Draft()' will be triggered on 'MyEntity.drafts'
-public async draftMethod(results : MyEntity[], req: Request) {
+public async draftMethod(results : MyEntity[], req: TypedRequest<MyEntity>) {
    return this.customerService.testExample(req)
 }
 
 @OnBoundAction(anAction)
 @Draft() // Above action will be be triggered on 'MyEntity.drafts'
-public async draftMethodAction(req: Request, next : Function) {
+public async draftMethodAction(req: TypedRequest<MyEntity>, next : Function) {
   // ...
 }
 
 ```
 
+> `MyEntity` & `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 `Equivalent to 'JS'`
 
 ```typescript
-this.after(['UPDATE, CREATE, READ'], MyEntity.drafts, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.after(['UPDATE, CREATE, READ'], MyEntity.drafts, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 
-this.on(anAction, MyEntity.drafts, async (req: Request, next: Function) => {
+this.on(anAction, MyEntity.drafts, async (req: TypedRequest<MyEntity>, next: Function) => {
   // ...
-})
+});
 ```
 
 `Example 2`
@@ -802,23 +799,25 @@ The rest `Decorators` below `@Draft()` will be work on active entities.
 @Draft() // Draft is in-between 'after', this means that only '@AfterUpdate' will me marked as draft
 @AfterCreate() // Will work on active entity
 @AfterRead() // Will work on active entity
-public async draftMethodAndNonDraft(req: Request) {
+public async draftMethodAndNonDraft(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample( req)
 }
 ```
+
+> `MyEntity` & `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Equivalent to 'JS'`
 
 ```typescript
 // FOR DRAFT
-this.after('UPDATE', MyEntity.drafts, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.after('UPDATE', MyEntity.drafts, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 
 // FOR ACTIVE ENTITIES
-this.after(['CREATE', 'READ'], MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.after(['CREATE', 'READ'], MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
 
 `Example 3`
@@ -829,31 +828,35 @@ this.after(['CREATE', 'READ'], MyEntity, async (req: Request) => {
 @BeforeUpdate()
 @BeforeCreate()
 @Draft() // All above decorators will be marked AS DRAFT
-public async draftMethod(req: Request) {
+public async draftMethod(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample(req)
 }
 
 // All decorators will work only FOR ACTIVE ENTITIES
 @BeforeUpdate()
 @BeforeCreate()
-public async methodWithoutDraft(req: Request) {
+public async methodWithoutDraft(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample(req)
 }
 ```
+
+> `MyEntity` & `MyEntity.drafts` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Equivalent to 'JS'`
 
 ```typescript
 // FOR DRAFT
-this.before(['UPDATE', 'CREATE'], MyEntity.drafts, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.before(['UPDATE', 'CREATE'], MyEntity.drafts, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 
 // FOR ACTIVE ENTITIES
-this.before(['UPDATE', 'CREATE'], MyEntity, async (req: Request) => {
-  return this.customerService.testExample(req)
-})
+this.before(['UPDATE', 'CREATE'], MyEntity, async (req: TypedRequest<MyEntity>) => {
+  return this.customerService.testExample(req);
+});
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### OnNewDraft
 
@@ -867,7 +870,7 @@ It is important to note that decorator `@OnCancelDraft()` will use always point 
 
 ```typescript
 @OnNewDraft()
-public async onNewDraft(req: Request, next: Function) {
+public async onNewDraft(req: TypedRequest<MyEntity>, next: Function) {
    return this.customerService.testExample(req)
 }
 ```
@@ -875,10 +878,12 @@ public async onNewDraft(req: Request, next: Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('NEW', MyEntity.drafts, async (req: Request, next: Function) => {
-  return this.customerService.testExample(req)
-})
+this.on('NEW', MyEntity.drafts, async (req: TypedRequest<MyEntity>, next: Function) => {
+  return this.customerService.testExample(req);
+});
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### OnCancelDraft
 
@@ -892,7 +897,7 @@ It is important to note that decorator `@OnCancelDraft()` will use always point 
 
 ```typescript
 @OnCancelDraft()
-public async onCancelDraft(req: Request, next: Function) {
+public async onCancelDraft(req: TypedRequest<MyEntity>, next: Function) {
    return this.customerService.testExample(req)
 }
 ```
@@ -900,10 +905,12 @@ public async onCancelDraft(req: Request, next: Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('CANCEL', MyEntity.drafts, async (req: Request, next: Function) => {
-  return this.customerService.testExample(req)
-})
+this.on('CANCEL', MyEntity.drafts, async (req: TypedRequest<MyEntity>, next: Function) => {
+  return this.customerService.testExample(req);
+});
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### OnEditDraft
 
@@ -917,7 +924,7 @@ It is important to note that decorator `@OnEditDraft()` will use always point to
 
 ```typescript
 @OnEditDraft()
-public async onEditDraft(req: Request, next: Function) {
+public async onEditDraft(req: TypedRequest<MyEntity>, next: Function) {
    return this.customerService.testExample(req)
 }
 ```
@@ -925,10 +932,12 @@ public async onEditDraft(req: Request, next: Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('EDIT', MyEntity, async (req: Request, next: Function) => {
-  return this.customerService.testExample(req)
-})
+this.on('EDIT', MyEntity, async (req: TypedRequest<MyEntity>, next: Function) => {
+  return this.customerService.testExample(req);
+});
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### OnSaveDraft
 
@@ -942,7 +951,7 @@ It is important to note that decorator `@OnSaveDraft()` will use always point to
 
 ```typescript
 @OnSaveDraft()
-public async onSaveDraft(req: Request, next: Function) {
+public async onSaveDraft(req: TypedRequest<MyEntity>, next: Function) {
    return this.customerService.testExample(req)
 }
 ```
@@ -950,14 +959,81 @@ public async onSaveDraft(req: Request, next: Function) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('SAVE', MyEntity, async (req: Request, next: Function) => {
-  return this.customerService.testExample(req)
-})
+this.on('SAVE', MyEntity, async (req: TypedRequest<MyEntity>, next: Function) => {
+  return this.customerService.testExample(req);
+});
 ```
 
-### Example
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-A full working example can be found on .... TODO
+##### SingleInstanceCapable
+
+**@SingleInstanceCapable()**
+
+The `@SingleInstanceCapable()` decorator is utilized at the `method-level` to annotate a method that all decorators which are used along with this `@SingleInstanceCapable()` decorator, will handle also single `instance Request`.
+
+`Important`
+
+When utilizing the `@SingleInstanceCapable()` decorator, the `placement of the @SingleInstanceCapable() decorator` within your TypeScript class is very important factor to consider. It defines the scope of the `single instance` mode within the methods that precede it.
+
+When `@SingleInstanceCapable` applied, a 3td parameter will be added to the callback `isSingleInstance: boolean` which can be used to differentiate if it's a single instance request or an entity set.
+
+`Supported decorators actions`
+
+`@SingleInstanceCapable` can be used together with the following decorator actions :
+
+- `@AfterCreate, @AfterRead, @AfterUpdate, @AfterDelete`
+
+`Example 1`
+
+All methods `After. 'Update', 'Create', 'Read'` will be executed on single instance when `isSingleInstance => true` request and entity set when `isSIngleInstance => false`.
+
+- Example single request : http://localhost:4004/odata/v4/main/ `MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
+- Example entity set request : http://localhost:4004/odata/v4/main/ `MyEntity`
+
+```typescript
+@AfterUpdate() //  Will handle single instance and entity set
+@AfterCreate() // Will handle single instance and entity set
+@AfterRead() // Will handle single instance and entity set
+@SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered also when single instance is requested
+public async draftMethod(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
+  if(isSingleInstance) {
+    return this.customerService.handleSingleInstance(req)
+  }
+
+  return this.customerService.handleEntitySet(req)
+}
+```
+
+> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Example 2`
+
+Methods `After. 'Update'` will be executed on single instance request and entity set.
+Methods `After. 'Create', 'Read'` will be executed only on entity set request.
+
+- Example single request : http://localhost:4004/odata/v4/main/ `MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
+- Example entity set request : http://localhost:4004/odata/v4/main/ `MyEntity`
+
+```typescript
+@AfterUpdate() //  Will handle single instance and entity set
+@SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered also when single instance is requested
+@AfterCreate() // Will handle single instance and entity set
+@AfterRead() // Will handle single instance and entity set
+public async draftMethod(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
+  if(isSingleInstance) {
+    return this.customerService.handleSingleInstance(req)
+  }
+
+  return this.customerService.handleEntitySet(req)
+}
+```
+
+> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Example
 
 ## Contributing
 
@@ -977,3 +1053,4 @@ Please make sure to update tests as appropriate.
 - [@ABS GmbH](https://www.abs-gmbh.de/) team
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+```
