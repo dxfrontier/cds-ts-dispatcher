@@ -996,7 +996,7 @@ All methods `After. 'Update', 'Create', 'Read'` will be executed on single insta
 @AfterCreate() // Will handle single instance and entity set
 @AfterRead() // Will handle single instance and entity set
 @SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered also when single instance is requested
-public async draftMethod(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
+public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
   if(isSingleInstance) {
     return this.customerService.handleSingleInstance(req)
   }
@@ -1020,7 +1020,7 @@ Methods `After. 'Create', 'Read'` will be executed only on entity set request.
 @SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered also when single instance is requested
 @AfterCreate() // Will handle single instance and entity set
 @AfterRead() // Will handle single instance and entity set
-public async draftMethod(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
+public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
   if(isSingleInstance) {
     return this.customerService.handleSingleInstance(req)
   }
