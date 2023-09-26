@@ -1013,7 +1013,7 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 
 `Example 2` : Differing behavior for single instance and entity set requests
 
-Methods `After. 'Update'` will be executed on single instance request.
+Methods `After. 'Update'` will be executed on single instance request and entity set
 Methods `After. 'Create', 'Read'` will be executed only on entity set request.
 
 - Example single request : http://localhost:4004/odata/v4/main/ `MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
