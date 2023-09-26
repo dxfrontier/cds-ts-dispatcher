@@ -976,7 +976,7 @@ The `@SingleInstanceCapable()` decorator is utilized at the `method-level` to an
 
 When utilizing the `@SingleInstanceCapable()` decorator, the `placement of the @SingleInstanceCapable() decorator` within your TypeScript class is very important factor to consider. It defines the scope of the `single instance` mode within the methods that precede it.
 
-When `@SingleInstanceCapable` applied, a 3td parameter will be added to the callback `isSingleInstance: boolean` which can be used to differentiate if it's a single instance request or an entity set.
+When `@SingleInstanceCapable` applied, a `3td parameter` will be added to the callback `isSingleInstance: boolean` which can be used to differentiate if it's a single instance request or an entity set.
 
 `Supported decorators actions`
 
@@ -986,7 +986,7 @@ When `@SingleInstanceCapable` applied, a 3td parameter will be added to the call
 
 `Example 1`
 
-All methods `After. 'Update', 'Create', 'Read'` will be executed on single instance when `isSingleInstance => true` request and entity set when `isSIngleInstance => false`.
+All methods `After. 'Update', 'Create', 'Read'` will be executed on single instance when `isSingleInstance => true` request and `isSIngleInstance => false` when entity set is requested.
 
 - Example single request : http://localhost:4004/odata/v4/main/ `MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
 - Example entity set request : http://localhost:4004/odata/v4/main/ `MyEntity`
@@ -995,7 +995,7 @@ All methods `After. 'Update', 'Create', 'Read'` will be executed on single insta
 @AfterUpdate() //  Will handle single instance and entity set
 @AfterCreate() // Will handle single instance and entity set
 @AfterRead() // Will handle single instance and entity set
-@SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered also when single instance is requested
+@SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered when single instance is requested and entity set
 public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
   if(isSingleInstance) {
     return this.customerService.handleSingleInstance(req)
@@ -1017,9 +1017,9 @@ Methods `After. 'Create', 'Read'` will be executed only on entity set request.
 
 ```typescript
 @AfterUpdate() //  Will handle single instance and entity set
-@SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered also when single instance is requested
-@AfterCreate() // Will handle single instance and entity set
-@AfterRead() // Will handle single instance and entity set
+@SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered when single instance is requested and entity set
+@AfterCreate() // Will handle only entity set
+@AfterRead() // Will handle only entity set
 public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
   if(isSingleInstance) {
     return this.customerService.handleSingleInstance(req)
@@ -1053,4 +1053,3 @@ Please make sure to update tests as appropriate.
 - [@ABS GmbH](https://www.abs-gmbh.de/) team
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-```
