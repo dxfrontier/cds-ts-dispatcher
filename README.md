@@ -54,6 +54,8 @@ The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate
           - [OnEditDraft](#oneditdraft)
           - [OnSaveDraft](#onsavedraft)
         - [SingleInstanceCapable](#singleinstancecapable)
+          - [Usage](#usage-1)
+          - [Examples](#examples)
     - [Example](#example)
   - [Contributing](#contributing)
   - [License](#license)
@@ -285,7 +287,7 @@ Use `@BeforeCreate(), @BeforeRead(), @BeforeUpdate(), @BeforeDelete(), BeforeAct
 
 The handlers receive one argument:
 
-- `req` of type `Request`
+- `req` of type `TypedRequest`
 
 See JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) event**
 
@@ -396,7 +398,7 @@ this.before('DELETE', MyEntity, async (req: TypedRequest<MyEntity>) => {
 Use `@AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete(), AfterAction()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.` The handlers receive two arguments:
 
 - `results` of type **`MyEntity[]`** — the outcomes of the `.on` handler which ran before
-- `req` of type `Request`
+- `req` of type `TypedRequest`
 
 See JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
 
@@ -508,7 +510,7 @@ Use `@OnCreate(), @OnRead(), @OnUpdate(), @OnDelete(), OnAction(), @OnFunction()
 
 The handlers receive one argument:
 
-- `req` of type `Request`
+- `req` of type `TypedRequest`
 - `next` of type `Function`
 
 See JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request) event**
@@ -733,7 +735,7 @@ Use `@OnNewDraft(), @OnCancelDraft(), @OnEditDraft(), OnSaveDraft()` handlers to
 
 The handlers receive one argument:
 
-- `req` of type `Request`
+- `req` of type `TypedRequest`
 
 For more info about visit **[CDS-Fiori-draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)**
 
@@ -746,8 +748,6 @@ The `@Draft()` decorator is utilized at the `method-level` to annotate a method 
 `Important`
 
 When utilizing the `@Draft()` decorator, the `placement of the @Draft() decorator` within your TypeScript class is very important factor to consider. It determines the scope of the `draft` mode within the methods that precede it.
-
-`Supported decorators actions`
 
 `@Draft` can be used together with the following decorator actions :
 
@@ -970,23 +970,27 @@ this.on('SAVE', MyEntity, async (req: TypedRequest<MyEntity>, next: Function) =>
 
 **@SingleInstanceCapable()**
 
-The `@SingleInstanceCapable()` decorator is utilized at the `method-level` to annotate a method that all decorators which are used along with this `@SingleInstanceCapable()` decorator, will handle also single `instance Request`.
+The `@SingleInstanceCapable()` decorator is utilized at the `method-level` to annotate a method that all decorators which are used along with this `@SingleInstanceCapable()` decorator, will handle also single `instance TypedRequest`.
 
-`Important`
+###### Usage
+
+When `@SingleInstanceCapable` is applied to a method, a `3td parameter` `isSingleInstance: boolean` will be added to the method's callback.
+This parameter allows you to differentiate between single instance requests and entity set requests and adjust the behavior accordingly.
 
 When utilizing the `@SingleInstanceCapable()` decorator, the `placement of the @SingleInstanceCapable() decorator` within your TypeScript class is very important factor to consider. It defines the scope of the `single instance` mode within the methods that precede it.
 
-When `@SingleInstanceCapable` applied, a `3td parameter` will be added to the callback `isSingleInstance: boolean` which can be used to differentiate if it's a single instance request or an entity set.
-
-`Supported decorators actions`
-
 `@SingleInstanceCapable` can be used together with the following decorator actions :
 
-- `@AfterCreate, @AfterRead, @AfterUpdate, @AfterDelete`
+- `@AfterCreate`
+- `@AfterRead`
+- `@AfterUpdate`
+- `@AfterDelete`
 
-`Example 1`
+###### Examples
 
-All methods `After. 'Update', 'Create', 'Read'` will be executed on single instance when `isSingleInstance => true` request and `isSIngleInstance => false` when entity set is requested.
+`Example 1` : Handling both single instance and entity set requests
+
+All methods `After. 'Update', 'Create', 'Read'` will be executed on single instance when `isSingleInstance => true` request and `isSingleInstance => false` when entity set is requested.
 
 - Example single request : http://localhost:4004/odata/v4/main/ `MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
 - Example entity set request : http://localhost:4004/odata/v4/main/ `MyEntity`
@@ -1007,7 +1011,7 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 
 > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-`Example 2`
+`Example 2` : Differing behavior for single instance and entity set requests
 
 Methods `After. 'Update'` will be executed on single instance request.
 Methods `After. 'Create', 'Read'` will be executed only on entity set request.
