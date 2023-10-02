@@ -88,11 +88,10 @@ Modify your `tsconfig.json` to enable `decorators` usage :
 The following command should be used to generate typed entity classes
 
 ```bash
-npx @cap-js/cds-typer ./srv/controller/mainService --outputDirectory ./srv/util/types/entities
+npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 ```
 
-- Source folder : `./srv/controller/mainService` - Change to your location folder
-- Target folder :`./srv/util/types/entities` - Change to your location folder
+- Target folder :`./srv/util/types/entities` - Change to your location destination folder.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
