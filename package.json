@@ -15,7 +15,6 @@
     "fix": "npm run eslint:fix && npm run prettier:fix",
     "test": "jest",
     "prepare": "husky install",
-    "build:entities": "cds-typer ./test/bookshop/db/schema.cds --outputDirectory ./test/bookshop/srv/util/types/entities",
     "bookshop": "cds watch ./test/bookshop"
   },
   "repository": {
@@ -53,11 +52,10 @@
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
-   "@types/jest": "^29.5.5",
+    "@types/jest": "^29.5.5",
     "@typescript-eslint/eslint-plugin": "^6.7.2",
     "@typescript-eslint/parser": "^6.7.2",
     "@cap-js/sqlite": "^1.2.1",
-    "@cap-js/cds-typer": "^0.10.0",
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-config-standard-with-typescript": "^39.1.0",
