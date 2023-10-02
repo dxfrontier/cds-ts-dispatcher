@@ -1,0 +1,10 @@
+{
+  "name": "@capire/orders",
+  "version": "1.0.0",
+  "dependencies": {
+    "@sap/cds": ">=7.2.1"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "1.2.1"
+  }
+}

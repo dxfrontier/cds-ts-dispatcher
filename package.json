@@ -71,8 +71,7 @@
   "lint-staged": {
     "**/*.{ts, tsx}": [
       "npx eslint . --fix",
-      "npx prettier . --write",
-      "npx jest --findRelatedTests --bail ./test/**"
+      "npx prettier . --write"
     ]
   }
 }
