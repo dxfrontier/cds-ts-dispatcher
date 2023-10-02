@@ -174,7 +174,7 @@ function buildOn(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
   return function <Target extends Object>(name: CDSTyperAction) {
     return function (
       target: Target,
-      propertyKey: string | symbol,
+      _: string | symbol,
       descriptor: TypedPropertyDescriptor<ReturnRequestAndNext>,
     ): void {
       const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
