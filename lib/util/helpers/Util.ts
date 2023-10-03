@@ -23,6 +23,10 @@ export const Util = {
   isRequestSingleInstance<T extends Request>(handler: Handler, request: T): boolean {
     return (request.params.length > 0 && handler?.isSingleInstance) ?? false;
   },
+
+  isEmptyArray<T>(arr: T[]): arr is T[] {
+    return arr.length === 0;
+  },
 };
 
 export default Util;
