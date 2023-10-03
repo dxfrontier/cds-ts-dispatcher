@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "cds-ts watch",
-    "build:entities": "cds-typer '*' --outputDirectory ./srv/util/entities",
-    "clean": "npx rimraf ./srv/util/entities/**/*.js"
+    "build:entities": "cds-typer '*' --outputDirectory ./srv/util/entities && npm run clean",
+    "clean": "npx rimraf ./srv/util/entities/**/*.js && npx rimraf ./srv/util/entities/*.js"
   },
   "dependencies": {
     "@sap/cds": ">=7.2.1"
