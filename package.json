@@ -14,8 +14,7 @@
     "check": "npm run eslint && npm run prettier",
     "fix": "npm run eslint:fix && npm run prettier:fix",
     "test": "jest",
-    "prepare": "husky install",
-    "bookshop": "cds watch ./test/bookshop"
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
