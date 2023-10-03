@@ -115,11 +115,11 @@ function buildBefore(event: CRUD_EVENTS, handlerType: HandlerType) {
  * @param {HandlerType} handlerType - The type of handler (Before, After, On).
  */
 
-function buildOnDraft(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
-  return function <Target extends Object>(name: CDSTyperAction) {
+function buildOnDraftActions(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
+  return function <Target extends Object>() {
     return function (
       target: Target,
-      propertyKey: string | symbol,
+      _: string | symbol,
       descriptor: TypedPropertyDescriptor<ReturnRequestAndNext>,
     ): void {
       const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
@@ -128,7 +128,6 @@ function buildOnDraft(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerTyp
         event,
         handlerType,
         callback: descriptor.value!,
-        actionName: name,
         isDraft: true,
       });
     };
@@ -142,7 +141,7 @@ function buildOnDraft(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerTyp
  * @param {HandlerType} handlerType - The type of handler (Before, After, On).
  */
 
-function buildOnBoundActionDraft(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
+function buildOnDraftBoundAction(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
   return function <Target extends Object>(name: CDSTyperAction) {
     return function (
       target: Target,
@@ -170,7 +169,7 @@ function buildOnBoundActionDraft(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType:
  * @param {HandlerType} handlerType - The type of handler (Before, After, On).
  */
 
-function buildOn(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
+function buildOnAction(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
   return function <Target extends Object>(name: CDSTyperAction) {
     return function (
       target: Target,
@@ -184,6 +183,32 @@ function buildOn(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
         handlerType,
         callback: descriptor.value!,
         actionName: name,
+        isDraft: false,
+      });
+    };
+  };
+}
+
+/**
+ * Builds a decorator for handling the .on method.
+ *
+ * @param {Event} event - The custom action event to handle.
+ * @param {HandlerType} handlerType - The type of handler (Before, After, On).
+ */
+
+function buildOnDraftActiveEntity(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
+  return function <Target extends Object>() {
+    return function (
+      target: Target,
+      _: string | symbol,
+      descriptor: TypedPropertyDescriptor<ReturnRequestAndNext>,
+    ): void {
+      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+
+      metadataDispatcher.addMethodMetadata({
+        event,
+        handlerType,
+        callback: descriptor.value!,
         isDraft: false,
       });
     };
@@ -344,7 +369,7 @@ const OnDelete = buildOnCRUD('DELETE', HandlerType.On);
  * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On action](https://github.com/dxfrontier/cds-ts-dispatcher#onaction)
  */
-const OnAction = buildOn('ACTION', HandlerType.On);
+const OnAction = buildOnAction('ACTION', HandlerType.On);
 
 /**
  *
@@ -352,7 +377,7 @@ const OnAction = buildOn('ACTION', HandlerType.On);
  * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On bound action](https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction)
  */
-const OnBoundAction = buildOnBoundActionDraft('BOUND_ACTION', HandlerType.On);
+const OnBoundAction = buildOnDraftBoundAction('BOUND_ACTION', HandlerType.On);
 
 /**
  *
@@ -360,14 +385,14 @@ const OnBoundAction = buildOnBoundActionDraft('BOUND_ACTION', HandlerType.On);
  * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On bound function](https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction)
  */
-const OnBoundFunction = buildOnBoundActionDraft('BOUND_FUNC', HandlerType.On);
+const OnBoundFunction = buildOnDraftBoundAction('BOUND_FUNC', HandlerType.On);
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a custom action event is triggered.
  * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On function](https://github.com/dxfrontier/cds-ts-dispatcher#onfunction)
  */
-const OnFunction = buildOn('FUNC', HandlerType.On);
+const OnFunction = buildOnAction('FUNC', HandlerType.On);
 
 /**
  *
@@ -375,7 +400,7 @@ const OnFunction = buildOn('FUNC', HandlerType.On);
  * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - On edit draft](https://github.com/dxfrontier/cds-ts-dispatcher#oneditdraft)
  */
-const OnEditDraft = buildOn('EDIT', HandlerType.On);
+const OnEditDraft = buildOnDraftActiveEntity('EDIT', HandlerType.On);
 
 /**
  *
@@ -384,7 +409,7 @@ const OnEditDraft = buildOn('EDIT', HandlerType.On);
  * @see [CDS-TS-Dispatcher - On save draft](https://github.com/dxfrontier/cds-ts-dispatcher#onsavedraft)
  *
  */
-const OnSaveDraft = buildOn('SAVE', HandlerType.On);
+const OnSaveDraft = buildOnDraftActiveEntity('SAVE', HandlerType.On);
 
 /**
  * ####################################################################################################################
@@ -405,7 +430,7 @@ const OnSaveDraft = buildOn('SAVE', HandlerType.On);
  * @see [CDS-TS-Dispatcher - On new Draft](https://github.com/dxfrontier/cds-ts-dispatcher#onnewdraft)
  */
 
-const OnNewDraft = buildOnDraft('NEW', HandlerType.OnDraft);
+const OnNewDraft = buildOnDraftActions('NEW', HandlerType.OnDraft);
 
 /**
  *
@@ -414,21 +439,23 @@ const OnNewDraft = buildOnDraft('NEW', HandlerType.OnDraft);
  * @see [CDS-TS-Dispatcher - On Cancel Draft](https://github.com/dxfrontier/cds-ts-dispatcher#oncanceldraft)
  */
 
-const OnCancelDraft = buildOnDraft('CANCEL', HandlerType.OnDraft);
+const OnCancelDraft = buildOnDraftActions('CANCEL', HandlerType.OnDraft);
 
 export {
+  SingleInstanceCapable,
+  // ========================================================================================================================================================
+  // DRAFT decorator start - Draft decorator can be applied to all below until 'DRAFT decorator end'
+  Draft,
   // BEFORE events
   BeforeCreate,
   BeforeRead,
   BeforeUpdate,
   BeforeDelete,
-  //
   // AFTER events
   AfterCreate,
   AfterRead,
   AfterUpdate,
   AfterDelete,
-  //
   // ON events
   OnCreate,
   OnRead,
@@ -438,17 +465,12 @@ export {
   OnFunction,
   OnBoundAction,
   OnBoundFunction,
-  //
-  // DRAFT events
-  // Triggered on active entity E.g. 'MyEntity.drafts'
-  Draft,
+  // DRAFT decorator end
+  // ========================================================================================================================================================
+  // DRAFT events - Triggered on draft entity 'MyEntity.drafts'
   OnNewDraft,
   OnCancelDraft,
-  //
-  // Triggered on active entity E.g. 'MyEntity'
+  // Triggered on active entity 'MyEntity'
   OnEditDraft,
   OnSaveDraft,
-  //
-  // SingleInstanceHandler,
-  SingleInstanceCapable,
 };
