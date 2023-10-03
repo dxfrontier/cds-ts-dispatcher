@@ -9,9 +9,7 @@ import cds, { type Request, type Service, type ServiceImpl } from '@sap/cds';
 /**
  * Manages the registration of event handlers for the entities.
  */
-/**
- * Manages the registration of event handlers for the entities.
- */
+
 class CDSDispatcher {
   private srv: Service;
   private container: Container;
@@ -20,7 +18,11 @@ class CDSDispatcher {
    * Creates an instance of CDSDispatcher.
    * @param {Constructable[]} entities - An array of entity classes to manage event handlers for.
    */
-  constructor(private readonly entities: Constructable[]) {}
+  constructor(private readonly entities: Constructable[]) {
+    if (Util.isEmptyArray(entities)) {
+      throw new Error('The new CDSDispatcher constructor cannot be empty!');
+    }
+  }
 
   private initializeContainer(): void {
     this.container = new Container({
