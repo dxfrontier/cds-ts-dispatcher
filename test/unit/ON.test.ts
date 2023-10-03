@@ -13,7 +13,7 @@ import {
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { CRUD_EVENTS, HandlerType } from '../../lib/util/types/types';
-import { Book } from '../bookshop/srv/util/types/entities/CatalogService';
+import { Book } from '../bookshop/srv/util/entities/CatalogService';
 
 const testFn = (actionMethod: number) => {};
 
