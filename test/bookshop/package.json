@@ -2,13 +2,15 @@
   "name": "@capire/orders",
   "version": "1.0.0",
   "scripts": {
-    "build:entities": "cds-typer '*' --outputDirectory ./srv/util/types/entities"
+    "start": "cds-ts watch",
+    "build:entities": "cds-typer '*' --outputDirectory ./srv/util/types/entities",
+    "clean": "npx rimraf ./srv/util/types/entities/**/*.js"
   },
   "dependencies": {
     "@sap/cds": ">=7.2.1"
   },
   "devDependencies": {
-    "@cap-js/sqlite": "1.2.1",
-    "@cap-js/cds-typer": "^0.10.0"
+    "@cap-js/cds-typer": "^0.10.0",
+    "@cap-js/sqlite": "1.2.1"
   }
 }
