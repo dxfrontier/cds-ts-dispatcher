@@ -217,4 +217,4 @@ class CDSDispatcher {
   }
 }
 
-export default CDSDispatcher;
+export { CDSDispatcher };
