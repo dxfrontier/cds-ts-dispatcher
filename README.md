@@ -76,11 +76,25 @@ Once installed, import `reflect-metadata` in your `server.ts`
 import 'reflect-metadata';
 ```
 
-Modify your `tsconfig.json` to enable `decorators` usage :
+It is recommended to use the following tsconfig.json properties, modify your `tsconfig.json` as follows :
 
-```bash
-"experimentalDecorators": true,
-"emitDecoratorMetadata": true,
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true
+  }
+}
 ```
 
 ### Generate CDS Typed entities
@@ -127,6 +141,8 @@ The `CDSDispatcher` constructor allows you to create an instance for dispatching
 `Example`
 
 ```typescript
+import { CDSDispatcher } from 'cds-ts-dispatcher';
+
 module.exports = new CDSDispatcher([CustomerHandler, AddressHandler]).initializeEntityHandlers();
 ```
 
@@ -149,6 +165,8 @@ The `@EntityHandler` decorator is utilized at the `class-level` to annotate a cl
 `Example`
 
 ```typescript
+import { EntityHandler } from 'cds-ts-dispatcher';
+
 @EntityHandler(MyEntity)
 class CustomerHandler {
   ...
@@ -171,6 +189,8 @@ When applying `ServiceLogic` decorator, the class becomes eligible to be used wi
 `Example`
 
 ```typescript
+import { ServiceLogic } from 'cds-ts-dispatcher';
+
 @ServiceLogic()
 class CustomerService {
   ...
@@ -189,6 +209,8 @@ The `@Repository` decorator is utilized as a `class-level` annotation that desig
 When applying `Repository` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`
 
 ```typescript
+import { Repository } from 'cds-ts-dispatcher';
+
 @Repository()
 class CustomerRepository {
   ...
@@ -213,6 +235,10 @@ To get started with SAP CAP **[CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql
 `Example`
 
 ```typescript
+import { Repository } from 'cds-ts-dispatcher';
+import { BaseRepository } from 'cds-ts-repository';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
 @Repository()
 class CustomerRepository extends BaseRepository<MyEntity> {
   constructor() {
@@ -240,11 +266,15 @@ The `@Inject` decorator is utilized as a `field-level` decorator and allows you 
 `Example`
 
 ```typescript
+import { Service } from "@sap/cds";
+import { EntityHandler, Inject, ServiceHelper } from "cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
 @EntityHandler(MyEntity)
 class CustomerHandler {
   ...
   @Inject(CustomerService) private customerService: CustomerService
-  @Inject(ServiceHelper.SRV) private srv: CdsService
+  @Inject(ServiceHelper.SRV) private readonly srv: Service
   ...
   constructor() {}
   ...
@@ -263,12 +293,16 @@ This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repos
 `Example`
 
 ```typescript
+import { Service } from "@sap/cds";
+import { EntityHandler, Inject, ServiceHelper } from "cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
 @EntityHandler(MyEntity)
 // OR @ServiceLogic()
 // OR @Repository()
 class CustomerHandler { // OR CustomerService, CustomerRepository
   ...
-  @Inject(ServiceHelper.SRV) private srv: CdsService
+  @Inject(ServiceHelper.SRV) private srv: Service
   ...
   constructor() {}
   ...
@@ -301,9 +335,12 @@ It is important to note that decorator `@BeforeCreate()` will use always point t
 `Example`
 
 ```typescript
+import { BeforeCreate, TypedRequest } from "cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
 @BeforeCreate()
 public async beforeCreateMethod(req: TypedRequest<MyEntity>) {
-   return this.customerService.testExample( req)
+   return this.customerService.testExample(req)
 }
 ```
 
@@ -326,9 +363,12 @@ It is important to note that decorator `@BeforeRead()` will use always point to 
 `Example`
 
 ```typescript
+import { BeforeRead, TypedRequest } from "cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
 @BeforeRead()
 public async beforeReadMethod(req: TypedRequest<MyEntity>) {
-   return this.customerService.testExample( req)
+   return this.customerService.testExample(req)
 }
 ```
 
@@ -351,6 +391,9 @@ It is important to note that decorator `@BeforeUpdate()` will use always point t
 `Example`
 
 ```typescript
+import { BeforeUpdate, TypedRequest } from "cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
 @BeforeUpdate()
 public async beforeUpdateMethod(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample( req)
@@ -376,6 +419,9 @@ It is important to note that decorator `@BeforeDelete()` will use always point t
 `Example`
 
 ```typescript
+import { BeforeDelete, TypedRequest } from "cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
 @BeforeDelete()
 public async beforeDeleteMethod(req: TypedRequest<MyEntity>) {
    return this.customerService.testExample(req)
