@@ -4,13 +4,14 @@
   "scripts": {
     "start": "cds-ts watch",
     "build:entities": "cds-typer '*' --outputDirectory ./srv/util/entities && npm run clean",
-    "clean": "npx rimraf ./srv/util/entities/**/*.js && npx rimraf ./srv/util/entities/*.js"
+    "clean": "npx rimraf ./srv/util/entities/{*.js,**/*.js,**/**/*.js,**/**/**/*.js}"
   },
   "dependencies": {
     "@sap/cds": ">=7.2.1"
   },
   "devDependencies": {
     "@cap-js/cds-typer": "^0.10.0",
-    "@cap-js/sqlite": "1.2.1"
+    "@cap-js/sqlite": "1.2.1",
+    "axios": "^1.5.1"
   }
 }
