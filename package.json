@@ -72,7 +72,7 @@
     "**/*.{ts, tsx}": [
       "npx eslint . --fix",
       "npx prettier . --write",
-      "npx jest --findRelatedTests --bail ./test/**"
+      "npm run test"
     ]
   }
 }

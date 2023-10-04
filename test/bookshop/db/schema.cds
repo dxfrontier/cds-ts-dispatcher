@@ -18,6 +18,7 @@ entity Books : managed {
       image    : LargeBinary            @Core.MediaType: 'image/png';
 }
 
+@odata.draft.enabled: true
 entity Authors : managed {
   key ID           : Integer;
       name         : String(111) @mandatory;

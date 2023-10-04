@@ -1,9 +1,5 @@
-import cds from "@sap/cds";
+import {CDSDispatcher} from '../../../../../lib/index'
+import BookHandler from './handler/BookHandler'
 
-class CatalogService extends cds.ApplicationService {
-  init() {
-    return super.init();
-  }
-}
 
-module.exports = { CatalogService };
+module.exports = new CDSDispatcher([BookHandler]).initializeEntityHandlers();
