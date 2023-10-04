@@ -23,7 +23,6 @@ export class MetadataDispatcher<T extends Object> {
   }
 
   // PUBLIC STATIC METHODS
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static getEntity(entity: Constructable): { drafts: any } {
     return Reflect.getMetadata(Constants.DECORATOR.ENTITY_HANDLER_NAME, entity.constructor);
@@ -34,7 +33,6 @@ export class MetadataDispatcher<T extends Object> {
   }
 
   // PUBLIC METHODS
-
   public setMethodAsDraft(propertyKey: string | symbol): void {
     Reflect.defineMetadata(Constants.DECORATOR.DRAFT_FLAG_KEY, true, this.target, propertyKey);
   }

@@ -1,2 +1,2 @@
-code,symbol,name
-EUR,€,Euro
+code;symbol;name;descr
+EUR,€,Euro,European Euro

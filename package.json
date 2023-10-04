@@ -70,8 +70,8 @@
   },
   "lint-staged": {
     "**/*.{ts, tsx}": [
-      "npx eslint . --fix",
-      "npx prettier . --write",
+      "npm run eslint:fix",
+      "npm run prettier:fix",
       "npm run test --bail --findRelatedTests ./test"
     ]
   }
