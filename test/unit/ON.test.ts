@@ -13,9 +13,7 @@ import {
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { CRUD_EVENTS, HandlerType } from '../../lib/util/types/types';
-import { Book } from '../bookshop/srv/util/entities/CatalogService';
-
-const testFn = (actionMethod: number) => {};
+import { Book, submitOrder } from '../bookshop/srv/util/entities/CatalogService';
 
 @EntityHandler(Book)
 class Customer {
@@ -31,16 +29,16 @@ class Customer {
   @OnDelete()
   public async onDeleteMethod(req: Request, next: Function) {}
 
-  @OnAction(testFn)
+  @OnAction(submitOrder)
   public async onActionMethod(req: Request, next: Function) {}
 
-  @OnFunction(testFn)
+  @OnFunction(submitOrder)
   public async onFunctionMethod(req: Request, next: Function) {}
 
-  @OnBoundAction(testFn)
+  @OnBoundAction(submitOrder)
   public async onBoundActionMethod(req: Request, next: Function) {}
 
-  @OnBoundFunction(testFn)
+  @OnBoundFunction(submitOrder)
   public async onBoundFunctionMethod(req: Request, next: Function) {}
 }
 
@@ -65,7 +63,7 @@ describe('ON', () => {
           foundEvent.event == 'BOUND_FUNC'
         ) {
           if (foundEvent.actionName) {
-            expect(foundEvent.actionName).toBe(testFn);
+            expect(foundEvent.actionName).toBe(submitOrder);
           }
         }
       });
