@@ -1,0 +1,9 @@
+@server = http://localhost:4004
+
+### ------------------------------------------------------------------------
+# Submit Order as authenticated user
+# (send that three times to get out-of-stock message)
+POST {{server}}/odata/v4/catalog/submitOrder
+Content-Type: application/json
+
+{ "book":201, "quantity":5 }

@@ -1,6 +1,6 @@
 ## Installation
 
-Go to the `root` of `(cds-ts-repository)` and run :
+Go to the `root` of `(cds-ts-dispatcher)` and run :
 
 ```bash
 npm install

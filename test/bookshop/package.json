@@ -1,17 +1,18 @@
 {
-  "name": "@capire/orders",
+  "name": "bookshop",
   "version": "1.0.0",
   "scripts": {
-    "start": "cds-ts watch",
-    "build:entities": "cds-typer '*' --outputDirectory ./srv/util/entities && npm run clean",
-    "clean": "npx rimraf ./srv/util/entities/{*.js,**/*.js,**/**/*.js,**/**/**/*.js}"
+    "start": "npm run build:entities && cds-ts watch",
+    "build:entities": "cds-typer '*' --outputDirectory ./srv/util/types/entities",
+    "build:entities:test": "npm run build:entities && npm run clean:js",
+    "clean:js": "npx rimraf ./srv/util/types/entities/{*.js,**/*.js,**/**/*.js,**/**/**/*.js}"
   },
   "dependencies": {
-    "@sap/cds": ">=7.2.1"
+    "@sap/cds": ">=7.3.0"
   },
   "devDependencies": {
     "@cap-js/cds-typer": "^0.10.0",
-    "@cap-js/sqlite": "1.2.1",
+    "@cap-js/sqlite": "1.3.0",
     "axios": "^1.5.1"
   }
 }

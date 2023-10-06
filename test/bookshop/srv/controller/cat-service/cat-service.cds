@@ -9,12 +9,12 @@ type HelloResponse {
   greetingMessage : String;
 }
 
+
 service CatalogService {
 
   /**
    * For displaying lists of Books
    */
-  @readonly
   entity ListOfBooks as projection on Books excluding {
     descr
   };
@@ -22,7 +22,6 @@ service CatalogService {
   /**
    * For display in details pages
    */
-  @readonly
   entity Books       as projection on my.Books {
     *,
     author.name as author
@@ -31,11 +30,7 @@ service CatalogService {
     modifiedBy
   };
 
-  action   submitOrder(book : Books:ID, quantity : Integer)         returns {
-    stock : Integer
-  };
-
-  function submitFunctionOrder(book : Books:ID, quantity : Integer) returns {
+  action submitOrder(book : Books:ID, quantity : Integer) returns {
     stock : Integer
   };
 
@@ -45,5 +40,5 @@ service CatalogService {
     buyer    : String
   };
 
-  action   sendMail(request : HelloRequest)                         returns HelloResponse;
+  action sendMail(request : HelloRequest)                 returns HelloResponse;
 }

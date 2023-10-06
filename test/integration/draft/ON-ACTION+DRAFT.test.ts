@@ -2,14 +2,14 @@ import { Request } from '@sap/cds';
 import { Draft, OnBoundAction, OnBoundFunction } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
-import { submitOrder } from '../../bookshop/srv/util/entities/CatalogService';
+import { sendMail } from '../../bookshop/srv/util/types/entities/CatalogService';
 
 class Customer {
-  @OnBoundAction(submitOrder)
+  @OnBoundAction(sendMail)
   @Draft()
   public async BeforeReadMethod(req: Request, next: Function) {}
 
-  @OnBoundFunction(submitOrder)
+  @OnBoundFunction(sendMail)
   @Draft()
   public async BeforeCreateAndDeleteMethod(req: Request, next: Function) {}
 }

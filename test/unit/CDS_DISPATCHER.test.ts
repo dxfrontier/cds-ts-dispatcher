@@ -1,5 +1,5 @@
 import { CDSDispatcher } from '../../lib/util/helpers/CDSDispatcher';
-import { Book } from '../bookshop/srv/util/entities/CatalogService';
+import { Book } from '../bookshop/srv/util/types/entities/CatalogService';
 
 describe('CDSDispatcher', () => {
   describe('new CDSDispatcher([Book]).initializeEntityHandlers()', () => {

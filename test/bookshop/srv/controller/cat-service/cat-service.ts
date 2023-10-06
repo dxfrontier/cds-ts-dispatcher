@@ -1,5 +1,4 @@
-import {CDSDispatcher} from '../../../../../lib/index'
-import BookHandler from './handler/BookHandler'
+import { CDSDispatcher } from '../../../../../lib/index';
+import ListOfBookHandler from './handler/ListOfBookHandler';
 
-
-module.exports = new CDSDispatcher([BookHandler]).initializeEntityHandlers();
+module.exports = new CDSDispatcher([ListOfBookHandler]).initializeEntityHandlers();
