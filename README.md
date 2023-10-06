@@ -664,11 +664,11 @@ this.on('DELETE', MyEntity, async (req: TypedRequest<MyEntity>, next: Function) 
 
 ###### OnAction
 
-**@OnAction**(`name` : CDSTyperAction)
+**@OnAction**(`name` : CdsTyperFunction)
 
 `Parameters`
 
-- `name (CDSTyperAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `name (CdsTyperFunction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
@@ -691,11 +691,11 @@ this.on(AnActionOrFunction, async (req: TypedRequest<MyEntity>, next: Function) 
 
 ###### OnFunction
 
-**@OnFunction**(`name` : CDSTyperAction)
+**@OnFunction**(`name` : CdsTyperFunction)
 
 `Parameters`
 
-- `name (CDSTyperAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `name (CdsTyperFunction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
@@ -718,13 +718,13 @@ this.on(AnActionOrFunction, async (req: TypedRequest<MyEntity>) => {
 
 ###### OnBoundAction
 
-**@OnBoundAction**(`name` : CDSTyperAction)
+**@OnBoundAction**(`name` : CdsTyperFunction)
 
 It is important to note that decorator `@OnBoundAction()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Parameters`
 
-- `name (CDSTyperAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `name (CdsTyperFunction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
@@ -747,13 +747,13 @@ this.on(AnActionMethod, MyEntity, async (req: TypedRequest<MyEntity>) => {
 
 ###### OnBoundFunction
 
-**@OnBoundFunction**(`name` : CDSTyperAction)
+**@OnBoundFunction**(`name` : CdsTyperFunction)
 
 It is important to note that decorator `@OnBoundFunction()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Parameters`
 
-- `name (CDSTyperAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `name (CdsTyperFunction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
