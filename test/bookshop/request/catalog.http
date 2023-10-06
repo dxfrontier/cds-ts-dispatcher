@@ -3,7 +3,11 @@
 ### ------------------------------------------------------------------------
 # Submit Order 
 # (send that three times to get out-of-stock message)
+# This will test @OnAction() decorator
 POST {{server}}/odata/v4/catalog/submitOrder
 Content-Type: application/json
 
-{ "book":201, "quantity":5 }
+{ 
+    "book":201, 
+    "quantity":5 
+}
