@@ -16,7 +16,12 @@ enum HandlerType {
   OnDraft,
 }
 
-type CDSTyperAction = (...args: any[]) => any;
+interface CdsTyperFunction {
+  (...args: any[]): any;
+  __parameters: object;
+  __returns: unknown;
+}
+
 type CDSTyperEntity<T> = Constructable<T>;
 
 type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION';
@@ -39,7 +44,7 @@ interface Handler {
   event: CRUD_EVENTS | DRAFT_EVENTS;
   handlerType: HandlerType;
   callback: ReturnRequest | ReturnRequestAndNext | ReturnResultsAndRequest;
-  actionName?: CDSTyperAction;
+  actionName?: CdsTyperFunction;
   isDraft?: boolean;
   isSingleInstance?: boolean;
 }
@@ -56,8 +61,8 @@ export {
   type ReturnRequestAndNext,
   type ReturnSingleInstanceCapable,
   //
-  type CDSTyperAction,
   type CDSTyperEntity,
+  type CdsTyperFunction,
   //
   type TypedRequest,
   //
