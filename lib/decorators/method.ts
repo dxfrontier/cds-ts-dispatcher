@@ -8,7 +8,7 @@ import {
   type TypedRequest,
   type CRUD_EVENTS,
   type DRAFT_EVENTS,
-  type CdsTyperFunction,
+  type CdsFunction,
 } from '../util/types/types';
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher';
 import Constants from '../util/constants/Constants';
@@ -142,7 +142,7 @@ function buildOnDraftActions(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: Han
  */
 
 function buildOnDraftBoundAction(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
-  return function <Target extends Object>(name: CdsTyperFunction) {
+  return function <Target extends Object>(name: CdsFunction) {
     return function (
       target: Target,
       propertyKey: string | symbol,
@@ -170,7 +170,7 @@ function buildOnDraftBoundAction(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType:
  */
 
 function buildOnAction(event: CRUD_EVENTS | DRAFT_EVENTS, handlerType: HandlerType) {
-  return function <Target extends Object>(name: CdsTyperFunction) {
+  return function <Target extends Object>(name: CdsFunction) {
     return function (
       target: Target,
       _: string | symbol,
