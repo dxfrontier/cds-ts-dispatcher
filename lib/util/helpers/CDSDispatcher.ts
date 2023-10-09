@@ -66,7 +66,7 @@ class CDSDispatcher {
   private getActiveEntityOrDraft(handler: Handler, entityInstance: Constructable): Constructable {
     const { isDraft } = handler;
     const entityConstructable = MetadataDispatcher.getEntity(entityInstance);
-    const entity = isDraft != null ? entityConstructable.drafts : entityConstructable;
+    const entity = isDraft === true ? entityConstructable.drafts : entityConstructable;
     return entity;
   }
 
@@ -85,8 +85,10 @@ class CDSDispatcher {
   private registerAfterHandler(handlerAndEntity: [Handler, Constructable]): void {
     const { event, entity } = this.getHandlerProps(...handlerAndEntity);
 
+    // private routines for this func
+
     this.srv.after(event, entity, async (data, req) => {
-      return await this.executeCallback(handlerAndEntity, req, data);
+      return await this.executeCallback(handlerAndEntity, req, Util.ensureArray(data));
     });
   }
 

@@ -27,6 +27,13 @@ export const Util = {
   isEmptyArray<T>(arr: T[]): arr is T[] {
     return arr.length === 0;
   },
+
+  /**
+   *  Helper function to ensure data is always an array
+   */
+  ensureArray(data: unknown): unknown[] {
+    return Array.isArray(data) ? data : [data];
+  },
 };
 
 export default Util;
