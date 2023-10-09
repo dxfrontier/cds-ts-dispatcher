@@ -1,0 +1,222 @@
+{
+  "info": {
+    "_postman_id": "53ccef89-ca7a-4efe-8cb9-e7c620ef49a0",
+    "name": "CDS-TS-Dispatcher",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "1369492"
+  },
+  "item": [
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "After",
+          "item": [
+            {
+              "name": "@AfterCreate",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@AfterRead",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["{{catalogService}}", "{{booksEntity}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "@AfterUpdate",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@AfterDelete",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Before",
+          "item": [
+            {
+              "name": "@BeforeCreate",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@BeforeRead",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@BeforeUpdate",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@BeforeDelete",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "On",
+          "item": [
+            {
+              "name": "@OnCreate",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@OnRead",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@OnUpdate",
+              "request": {
+                "method": "PUT",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@OnDelete",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@OnAction",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@OnFunction",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@OnBoundAction",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@OnBoundFunction",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Draft",
+          "item": [
+            {
+              "name": "@OnNewDraft",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@OnCancelDraft",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@OnEditDraft",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@OnSaveDraft",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Others",
+          "item": [
+            {
+              "name": "@SingleInstanceCapable",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "@Draft",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            }
+          ]
+        }
+      ],
+      "description": "CDS-TS-Dispatcher"
+    }
+  ]
+}

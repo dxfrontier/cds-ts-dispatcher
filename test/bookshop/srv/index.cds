@@ -1,1 +1,1 @@
-using from './controller/cat-service/cat-service';
+using from './controller/cat-service/catalog-service';

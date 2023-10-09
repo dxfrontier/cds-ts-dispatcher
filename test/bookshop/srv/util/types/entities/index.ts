@@ -6,51 +6,55 @@ export type Currency = __.Association.to<_sap_common.Currency>;
 export type Country = __.Association.to<_sap_common.Country>;
 export type User = string;
 export type HelloRequest = {
-  greeterName?: string;
-  toName?: string;
+    greeterName?: string;
+    toName?: string;
 };
 export type HelloResponse = {
-  greetingMessage?: string;
+    greetingMessage?: string;
 };
 // the following represents the CDS aspect 'cuid'
 export function _cuidAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class cuid extends Base {
-    ID?: string;
-    static actions: {};
+        ID?: string;
+    static actions: {
+    }
   };
 }
 export class cuid extends _cuidAspect(__.Entity) {}
 // the following represents the CDS aspect 'managed'
 export function _managedAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class managed extends Base {
-    createdAt?: string;
+        createdAt?: string;
     /**
-     * Canonical user ID
-     */
-    createdBy?: User;
-    modifiedAt?: string;
+    * Canonical user ID
+    */
+        createdBy?: User;
+        modifiedAt?: string;
     /**
-     * Canonical user ID
-     */
-    modifiedBy?: User;
-    static actions: {};
+    * Canonical user ID
+    */
+        modifiedBy?: User;
+    static actions: {
+    }
   };
 }
 export class managed extends _managedAspect(__.Entity) {}
 // the following represents the CDS aspect 'temporal'
 export function _temporalAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class temporal extends Base {
-    validFrom?: string;
-    validTo?: string;
-    static actions: {};
+        validFrom?: string;
+        validTo?: string;
+    static actions: {
+    }
   };
 }
 export class temporal extends _temporalAspect(__.Entity) {}
 // the following represents the CDS aspect 'extensible'
 export function _extensibleAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class extensible extends Base {
-    extensions__?: string;
-    static actions: {};
+        extensions__?: string;
+    static actions: {
+    }
   };
 }
 export class extensible extends _extensibleAspect(__.Entity) {}

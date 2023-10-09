@@ -6,19 +6,24 @@ using {
 
 namespace sap.capire.bookshop;
 
+type Roles : String enum {
+  USER;
+  ADMIN;
+}
+
 entity Books : managed {
   key ID       : Integer;
       title    : localized String(111)  @mandatory;
       descr    : localized String(1111);
       author   : Association to Authors @mandatory;
       genre    : Association to Genres;
+      reviews  : Association to many Reviews;
       stock    : Integer;
       price    : Decimal;
       currency : Currency;
       image    : LargeBinary            @Core.MediaType: 'image/png';
 }
 
-@odata.draft.enabled: true
 entity Authors : managed {
   key ID           : Integer;
       name         : String(111) @mandatory;
@@ -38,4 +43,25 @@ entity Genres : sap.common.CodeList {
       parent   : Association to Genres;
       children : Composition of many Genres
                    on children.parent = $self;
+}
+
+entity Reviews : managed {
+  key ID       : Integer;
+      book     : Association to Books;
+      reviewer : Association to Users;
+      rating   : Integer
+      @assert.range: [
+        1,
+        5
+      ];
+      comment  : String;
+}
+
+entity Users : managed {
+  key ID       : Integer;
+      username : String(255) @mandatory;
+      email    : String(255) @mandatory;
+      role     : Roles;
+      reviews  : Association to many Reviews
+                   on reviews.reviewer = $self;
 }
