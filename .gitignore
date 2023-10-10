@@ -1,3 +1,6 @@
+#SAP
+test/bookshop/srv/util/types/entities
+
 # Logs
 logs
 *.log
