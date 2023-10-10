@@ -12,10 +12,10 @@ class Customer {
   public async afterReadMethod(results: any[], req: Request) {}
 
   @AfterUpdate()
-  public async afterUpdateMethod(results: any[], req: Request) {}
+  public async afterUpdateMethod(results: any, req: Request) {}
 
   @AfterDelete()
-  public async afterDeleteMethod(results: any[], req: Request) {}
+  public async afterDeleteMethod(results: boolean, req: Request) {}
 }
 
 const newCustomer = (customer: Constructable) => new customer();

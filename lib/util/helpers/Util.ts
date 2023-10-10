@@ -12,6 +12,10 @@ export const Util = {
     return fn.length === 1;
   },
 
+  isNumber(data: any): boolean {
+    return typeof data === 'number';
+  },
+
   isRequestAndResults(fn: any): fn is ReturnResultsAndRequest {
     return fn.length >= 2;
   },
@@ -26,13 +30,6 @@ export const Util = {
 
   isEmptyArray<T>(arr: T[]): arr is T[] {
     return arr.length === 0;
-  },
-
-  /**
-   *  Helper function to ensure data is always an array
-   */
-  ensureArray(data: unknown): unknown[] {
-    return Array.isArray(data) ? data : [data];
   },
 };
 

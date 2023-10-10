@@ -14,8 +14,6 @@ service CatalogService {
   entity Books   as projection on my.Books;
   entity Authors as projection on my.Authors;
   entity Users   as projection on my.Users;
-
-  @odata.draft.enabled: true
   entity Reviews as projection on my.Reviews;
 
   action submitOrder(book : Books:ID, quantity : Integer) returns {

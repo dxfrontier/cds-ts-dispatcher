@@ -14,40 +14,135 @@
           "item": [
             {
               "name": "@AfterCreate",
-              "request": {
-                "method": "GET",
-                "header": []
-              },
-              "response": []
+              "item": [
+                {
+                  "name": "Currency code should be validated and not empty",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"POST object should be validated and an 400 error should be returned !\", function () {",
+                          "    pm.response.to.have.status(400);",
+                          "});"
+                        ],
+                        "type": "text/javascript"
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"ID\": 542,\n    \"title\": \"Mysterious Journey\",\n    \"descr\": \"A thrilling adventure awaits in the mysterious journey of a lifetime.\",\n    \"author_ID\": 101,\n    \"genre_ID\": 11,\n    \"reviews_ID\": 1,\n    \"stock\": 53,\n    \"price\": 99.11,\n    \"currency_code\": \"\" // no currency then the validation should be triggered and 400 code error should be returned\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "{{booksEntity}}"]
+                    }
+                  },
+                  "response": []
+                }
+              ]
             },
             {
               "name": "@AfterRead",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["{{catalogService}}", "{{booksEntity}}"]
+              "item": [
+                {
+                  "name": "Title should contain 10 % discount",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Item title should contain \\\"10 % discount!\\\"\", function () {",
+                          "    const response = pm.response.json();",
+                          "",
+                          "    response.value.forEach((item) => {",
+                          "        pm.expect(item.title).to.include(\"10 % discount!\")",
+                          "    })",
+                          "});"
+                        ],
+                        "type": "text/javascript"
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "{{booksEntity}}"]
+                    }
+                  },
+                  "response": []
                 }
-              },
-              "response": []
+              ]
             },
             {
               "name": "@AfterUpdate",
-              "request": {
-                "method": "GET",
-                "header": []
-              },
-              "response": []
+              "item": [
+                {
+                  "name": "Add \"No description\" to description field",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"PATCH object 'title' should contain 'Dracula' \", function () {",
+                          "    pm.response.to.have.status(200);",
+                          "",
+                          "    const title = pm.response.json().title;",
+                          "    ",
+                          "    pm.expect(title).to.contain('Dracula')",
+                          "});"
+                        ],
+                        "type": "text/javascript"
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "PATCH",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"descr\": \"No description\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=201)",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "{{booksEntity}}(ID=201)"]
+                    }
+                  },
+                  "response": []
+                }
+              ]
             },
             {
               "name": "@AfterDelete",
-              "request": {
-                "method": "GET",
-                "header": []
-              },
-              "response": []
+              "item": [
+                {
+                  "name": "request",
+                  "request": {
+                    "method": "GET",
+                    "header": []
+                  },
+                  "response": []
+                }
+              ]
             }
           ]
         },
@@ -56,35 +151,69 @@
           "item": [
             {
               "name": "@BeforeCreate",
-              "request": {
-                "method": "GET",
-                "header": []
-              },
-              "response": []
+              "item": [
+                {
+                  "name": "request",
+                  "request": {
+                    "method": "GET",
+                    "header": []
+                  },
+                  "response": []
+                }
+              ]
             },
             {
               "name": "@BeforeRead",
-              "request": {
-                "method": "GET",
-                "header": []
-              },
-              "response": []
+              "item": [
+                {
+                  "name": "Add discount to books",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [""],
+                        "type": "text/javascript"
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "{{booksEntity}}"]
+                    }
+                  },
+                  "response": []
+                }
+              ]
             },
             {
               "name": "@BeforeUpdate",
-              "request": {
-                "method": "GET",
-                "header": []
-              },
-              "response": []
+              "item": [
+                {
+                  "name": "request",
+                  "request": {
+                    "method": "GET",
+                    "header": []
+                  },
+                  "response": []
+                }
+              ]
             },
             {
               "name": "@BeforeDelete",
-              "request": {
-                "method": "GET",
-                "header": []
-              },
-              "response": []
+              "item": [
+                {
+                  "name": "request",
+                  "request": {
+                    "method": "GET",
+                    "header": []
+                  },
+                  "response": []
+                }
+              ]
             }
           ]
         },
@@ -110,7 +239,7 @@
             {
               "name": "@OnUpdate",
               "request": {
-                "method": "PUT",
+                "method": "GET",
                 "header": []
               },
               "response": []

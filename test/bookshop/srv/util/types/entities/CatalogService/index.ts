@@ -75,8 +75,8 @@ export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base
     }
   };
 }
-export class Review extends _._managedAspect(_ReviewAspect(__.Entity)) {static drafts: typeof Review}
-export class Reviews extends Array<Review> {static drafts: typeof Review}
+export class Review extends _._managedAspect(_ReviewAspect(__.Entity)) {}
+export class Reviews extends Array<Review> {}
 
 // function
 export declare const submitOrder: { (book: __.DeepRequired<Book>['ID'], quantity: number): {

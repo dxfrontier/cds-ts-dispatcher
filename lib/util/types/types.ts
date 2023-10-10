@@ -30,7 +30,9 @@ type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'ACTION' | 'FUNC' |
 type ServiceCallback = (srv: Service) => void;
 
 type ReturnRequest = (req: Request, ...args: any[]) => Promise<any>;
-type ReturnResultsAndRequest = (results: any[], req: Request, ...args: any[]) => Promise<any>;
+type ReturnResultsAndRequest = (results: any | any[], req: Request, ...args: any[]) => Promise<any>;
+type ReturnResultAndRequestForUpdate<T> = (result: T, req: Request, ...args: any[]) => Promise<any>;
+type ReturnResultAndRequestForDelete = (result: boolean, req: Request, ...args: any[]) => Promise<any>;
 type ReturnRequestAndNext = (req: Request, next: Function) => Promise<any>;
 type ReturnSingleInstanceCapable<T, K> = (results: T[], req: K, isSingleInstance: boolean) => Promise<any>;
 
@@ -44,7 +46,13 @@ interface HandlerBuilder {
 interface Handler {
   event: CRUD_EVENTS | DRAFT_EVENTS;
   handlerType: HandlerType;
-  callback: ReturnRequest | ReturnRequestAndNext | ReturnResultsAndRequest;
+  // callback:
+  //   | ReturnRequest
+  //   | ReturnRequestAndNext
+  //   | ReturnResultsAndRequest
+  //   | ReturnResultAndRequestForUpdate<any>
+  //   | ReturnResultAndRequestForDelete;
+  callback: any;
   actionName?: CdsFunction;
   isDraft?: boolean;
   isSingleInstance?: boolean;
@@ -59,6 +67,8 @@ export {
   //
   type ReturnRequest,
   type ReturnResultsAndRequest,
+  type ReturnResultAndRequestForUpdate,
+  type ReturnResultAndRequestForDelete,
   type ReturnRequestAndNext,
   type ReturnSingleInstanceCapable,
   //

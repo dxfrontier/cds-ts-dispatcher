@@ -35,31 +35,47 @@ class CDSDispatcher {
     this.srv = srv;
   }
 
-  private async executeCallback(
+  private async executeBeforeCallback(handlerAndEntity: [Handler, Constructable], req: Request): Promise<unknown> {
+    const [handler, entity] = handlerAndEntity;
+    const { callback } = handler;
+
+    if (Util.isRequest(callback)) {
+      return await callback.call(entity, req);
+    }
+  }
+
+  private async executeOnCallback(
     handlerAndEntity: [Handler, Constructable],
     req: Request,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    resultsOrNext?: Function | unknown[],
+    next?: Function,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
     const { callback } = handler;
 
-    if (Util.isRequestAndNext(callback) && typeof resultsOrNext === 'function') {
-      return await callback.call(entity, req, resultsOrNext);
+    if (Util.isRequestAndNext(callback)) {
+      return await callback.call(entity, req, next!);
     }
+  }
 
-    if (Util.isRequestAndResults(callback) && Array.isArray(resultsOrNext)) {
-      const results = resultsOrNext;
+  private async executeAfterCallback(
+    handlerAndEntity: [Handler, Constructable],
+    req: Request,
+    results: unknown[] | unknown | number,
+  ): Promise<unknown> {
+    const [handler, entity] = handlerAndEntity;
+    const { callback } = handler;
+    const isSingleInstance = Util.isRequestSingleInstance(handler, req);
 
-      if (Util.isRequestSingleInstance(handler, req)) {
-        return await callback.call(entity, results, req, true);
+    if (!Array.isArray(results)) {
+      if (Util.isRequestAndResults(callback)) {
+        return await callback.call(entity, results, req, isSingleInstance);
       }
-
-      return await callback.call(entity, results, req, false);
     }
 
-    if (Util.isRequest(callback)) {
-      return await callback.call(entity, req);
+    if (Array.isArray(results)) {
+      if (Util.isRequestAndResults(callback)) {
+        return await callback.call(entity, results, req, isSingleInstance);
+      }
     }
   }
 
@@ -84,11 +100,18 @@ class CDSDispatcher {
 
   private registerAfterHandler(handlerAndEntity: [Handler, Constructable]): void {
     const { event, entity } = this.getHandlerProps(...handlerAndEntity);
+    // private routine for this func
+    const _isDeleted = (data: number): boolean => {
+      return data === 1;
+    };
 
     // private routines for this func
-
     this.srv.after(event, entity, async (data, req) => {
-      return await this.executeCallback(handlerAndEntity, req, Util.ensureArray(data));
+      if (Util.isNumber(data)) {
+        data = _isDeleted(data);
+      }
+
+      return await this.executeAfterCallback(handlerAndEntity, req, data);
     });
   }
 
@@ -96,7 +119,7 @@ class CDSDispatcher {
     const { event, entity } = this.getHandlerProps(...handlerAndEntity);
 
     this.srv.before(event, entity, async (req) => {
-      return await this.executeCallback(handlerAndEntity, req);
+      return await this.executeBeforeCallback(handlerAndEntity, req);
     });
   }
 
@@ -106,7 +129,7 @@ class CDSDispatcher {
     // CRUD_EVENTS.[ACTION, FUNC]
     if (event === 'ACTION' || event === 'FUNC') {
       this.srv.on(actionName!, async (req, next) => {
-        return await this.executeCallback(handlerAndEntity, req, next);
+        return await this.executeOnCallback(handlerAndEntity, req, next);
       });
 
       return;
@@ -115,7 +138,7 @@ class CDSDispatcher {
     // CRUD_EVENTS.[BOUND_ACTION, BOUND_FUNC]
     if (event === 'BOUND_ACTION' || event === 'BOUND_FUNC') {
       this.srv.on(actionName!, entity.toString(), async (req, next) => {
-        return await this.executeCallback(handlerAndEntity, req, next);
+        return await this.executeOnCallback(handlerAndEntity, req, next);
       });
 
       return;
@@ -123,7 +146,7 @@ class CDSDispatcher {
 
     // CRUD_EVENTS.[CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
     this.srv.on(event, entity, async (req, next) => {
-      return await this.executeCallback(handlerAndEntity, req, next);
+      return await this.executeOnCallback(handlerAndEntity, req, next);
     });
   }
 
@@ -133,7 +156,7 @@ class CDSDispatcher {
 
     // CRUD_EVENTS.[NEW, CANCEL]
     this.srv.on(event, entity, async (req, next) => {
-      return await this.executeCallback(handlerAndEntity, req, next);
+      return await this.executeOnCallback(handlerAndEntity, req, next);
     });
   }
 

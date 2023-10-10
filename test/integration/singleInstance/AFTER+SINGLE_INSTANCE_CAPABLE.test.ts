@@ -12,7 +12,7 @@ class Customer {
   @AfterUpdate()
   @AfterDelete()
   @SingleInstanceCapable()
-  public async afterCreateAndDeleteMethod(results: any[], req: Request, isSingleInstance: boolean) {}
+  public async afterCreateAndDeleteMethod(results: any[] | any, req: Request, isSingleInstance: boolean) {}
 }
 
 class CustomerWithDraftInBetween {
@@ -21,7 +21,7 @@ class CustomerWithDraftInBetween {
   @AfterCreate()
   @AfterUpdate()
   @AfterDelete()
-  public async afterReadMethod(results: any[], req: Request, isSingleInstance: boolean) {}
+  public async afterReadMethod(results: any[] | any, req: Request, isSingleInstance: boolean) {}
 }
 
 const newCustomer = (customer: Constructable) => new customer();

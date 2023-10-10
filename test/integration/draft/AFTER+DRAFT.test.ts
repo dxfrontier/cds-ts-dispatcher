@@ -12,7 +12,7 @@ class Customer {
   @AfterUpdate()
   @AfterDelete()
   @Draft()
-  public async afterCreateAndDeleteMethod(results: any[], req: Request) {}
+  public async afterCreateAndDeleteMethod(results: any[] | any, req: Request) {}
 }
 
 class CustomerWithDraftInBetween {
@@ -21,7 +21,7 @@ class CustomerWithDraftInBetween {
   @AfterCreate()
   @AfterUpdate()
   @AfterDelete()
-  public async afterReadMethod(results: any[], req: Request) {}
+  public async afterReadMethod(results: any[] | any, req: Request) {}
 }
 
 const newCustomer = (customer: Constructable) => new customer();

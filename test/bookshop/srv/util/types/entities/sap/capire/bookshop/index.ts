@@ -84,8 +84,8 @@ export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base
     }
   };
 }
-export class Review extends _._managedAspect(_ReviewAspect(__.Entity)) {static drafts: typeof Review}
-export class Reviews extends Array<Review> {static drafts: typeof Review}
+export class Review extends _._managedAspect(_ReviewAspect(__.Entity)) {}
+export class Reviews extends Array<Review> {}
 
 export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class User extends Base {

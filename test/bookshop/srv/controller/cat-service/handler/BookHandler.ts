@@ -1,5 +1,6 @@
 import {
   AfterCreate,
+  AfterDelete,
   AfterRead,
   AfterUpdate,
   EntityHandler,
@@ -10,7 +11,7 @@ import {
 import BookService from '../../../service/BookService';
 import { Request, Service } from '@sap/cds';
 import { Book, submitOrder } from '../../../util/types/entities/CatalogService';
-import { TypedActionRequest } from '../../../../../../lib/util/types/types';
+import { TypedActionRequest, TypedRequest } from '../../../../../../lib/util/types/types';
 
 @EntityHandler(Book)
 class BookHandler {
@@ -18,18 +19,23 @@ class BookHandler {
   @Inject(BookService) private bookService: BookService;
 
   @AfterCreate()
-  private async validateCurrencyCodes(results: Book[], req: Request) {
+  private async validateCurrencyCodes(results: Book, req: Request) {
     this.bookService.validateData(results, req);
-  }
-
-  @AfterUpdate()
-  private async addDefaultDescription(results: Book[], req: Request) {
-    this.bookService.addDefaultDescriptionText(results);
   }
 
   @AfterRead()
   private async addDiscount(results: Book[], req: Request) {
     this.bookService.enrichTitle(results);
+  }
+
+  @AfterUpdate()
+  private async addDefaultDescription(result: Book, req: TypedRequest<Book>) {
+    this.bookService.addDefaultTitleText(result, req);
+  }
+
+  @AfterDelete()
+  private async deleteItem(deleted: boolean, req: Request) {
+    console.log('deleted' + deleted);
   }
 
   @OnAction(submitOrder)

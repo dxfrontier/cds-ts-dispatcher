@@ -14,6 +14,7 @@
     "check": "npm run eslint && npm run prettier",
     "fix": "npm run eslint:fix && npm run prettier:fix",
     "test": "npm run build:entities:test --prefix ./test/bookshop && jest",
+    "test:e2e": "npx newman run ./test/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/e2e/environment.json",
     "prepare": "husky install"
   },
   "repository": {

@@ -11,16 +11,14 @@ class BookService {
     results.map((book) => (book.title += ` -- 10 % discount!`));
   }
 
-  public validateData(results: Book[], req: Request) {
-    results.map((book) => {
-      if (book.currency_code == '') {
-        return req.reject(400, 'Currency code is mandatory!');
-      }
-    });
+  public validateData(result: Book, req: Request) {
+    if (result.currency_code == '') {
+      return req.reject(400, 'Currency code is mandatory!');
+    }
   }
 
-  public addDefaultDescriptionText(results: Book[]) {
-    UPDATE.entity(Book).where({ ID: results[0].ID }).set({ description: results[0].descr });
+  public async addDefaultTitleText(result: Book, req: TypedRequest<Book>) {
+    await UPDATE.entity(Book).where({ ID: req.data.ID }).set({ title: 'Dracula' });
   }
 
   public async verifyStock(req: TypedActionRequest<typeof submitOrder>) {
