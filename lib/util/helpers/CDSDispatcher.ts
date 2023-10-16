@@ -57,7 +57,7 @@ class CDSDispatcher {
     next: Function,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.actionName as ReturnRequestAndNext;
+    const callback = handler.callback as ReturnRequestAndNext;
 
     return await callback.call(entity, req, next);
   }
