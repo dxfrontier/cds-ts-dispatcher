@@ -3,7 +3,16 @@ import { MetadataDispatcher } from './MetadataDispatcher';
 import Util from './Util';
 
 import { type Constructable } from '@sap/cds/apis/internal/inference';
-import { type Handler, HandlerType, type ServiceCallback, ServiceHelper, type HandlerBuilder } from '../types/types';
+import {
+  ServiceHelper,
+  HandlerType,
+  type Handler,
+  type ServiceCallback,
+  type HandlerBuilder,
+  type ReturnRequestAndNext,
+  type ReturnResultsAndRequest,
+  type ReturnRequest,
+} from '../types/types';
 import cds, { type Request, type Service, type ServiceImpl } from '@sap/cds';
 
 /**
@@ -37,45 +46,49 @@ class CDSDispatcher {
 
   private async executeBeforeCallback(handlerAndEntity: [Handler, Constructable], req: Request): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const { callback } = handler;
+    const callback = handler.callback as ReturnRequest;
 
-    if (Util.isRequest(callback)) {
-      return await callback.call(entity, req);
-    }
+    return await callback.call(entity, req);
   }
 
   private async executeOnCallback(
     handlerAndEntity: [Handler, Constructable],
     req: Request,
-    next?: Function,
+    next: Function,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const { callback } = handler;
+    const callback = handler.actionName as ReturnRequestAndNext;
 
-    if (Util.isRequestAndNext(callback)) {
-      return await callback.call(entity, req, next!);
-    }
+    return await callback.call(entity, req, next);
   }
 
   private async executeAfterCallback(
     handlerAndEntity: [Handler, Constructable],
     req: Request,
-    results: unknown[] | unknown | number,
+    results: unknown | unknown[] | number,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const { callback } = handler;
+    const callback = handler.callback as ReturnResultsAndRequest;
     const isSingleInstance = Util.isRequestSingleInstance(handler, req);
 
     if (!Array.isArray(results)) {
-      if (Util.isRequestAndResults(callback)) {
-        return await callback.call(entity, results, req, isSingleInstance);
+      if (Util.isNumber(results)) {
+        // private routine for this func
+        const _isDeleted = (data: unknown): boolean => data === 1;
+        const deleted = _isDeleted(results);
+
+        // DELETE single request
+        return await callback.call(entity, deleted, req, isSingleInstance);
       }
+
+      // READ, UPDATE single request
+      return await callback.call(entity, results, req, isSingleInstance);
+      // }
     }
 
     if (Array.isArray(results)) {
-      if (Util.isRequestAndResults(callback)) {
-        return await callback.call(entity, results, req, isSingleInstance);
-      }
+      // READ entity set
+      return await callback.call(entity, results, req, isSingleInstance);
     }
   }
 
@@ -100,17 +113,8 @@ class CDSDispatcher {
 
   private registerAfterHandler(handlerAndEntity: [Handler, Constructable]): void {
     const { event, entity } = this.getHandlerProps(...handlerAndEntity);
-    // private routine for this func
-    const _isDeleted = (data: number): boolean => {
-      return data === 1;
-    };
 
-    // private routines for this func
     this.srv.after(event, entity, async (data, req) => {
-      if (Util.isNumber(data)) {
-        data = _isDeleted(data);
-      }
-
       return await this.executeAfterCallback(handlerAndEntity, req, data);
     });
   }

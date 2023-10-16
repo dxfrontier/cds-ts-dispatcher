@@ -9,8 +9,6 @@ import {
   type CRUD_EVENTS,
   type DRAFT_EVENTS,
   type CdsFunction,
-  type ReturnResultAndRequestForUpdate,
-  type ReturnResultAndRequestForDelete,
 } from '../util/types/types';
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher';
 import Constants from '../util/constants/Constants';
@@ -47,72 +45,6 @@ function Draft<Target extends Object>() {
   return function (target: Target, propertyKey: string | symbol) {
     const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
     metadataDispatcher.setMethodAsDraft(propertyKey);
-  };
-}
-
-/**
- * Builds a decorator for handling the .after method.
- *
- * @param {Event} event - The event to handle.
- * @param {HandlerType} handlerType - The type of handler (Before, After, On).
- */
-
-function buildAfterUpdate(event: CRUD_EVENTS, handlerType: HandlerType) {
-  return function <Target extends Object, T>() {
-    return function (
-      target: Target,
-      propertyKey: string | symbol,
-      descriptor: TypedPropertyDescriptor<ReturnResultAndRequestForUpdate<T>>,
-    ): void {
-      const isDraft: boolean = Reflect.getMetadata(Constants.DECORATOR.DRAFT_FLAG_KEY, target, propertyKey);
-      const isSingleInstance: boolean = Reflect.getMetadata(
-        Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY,
-        target,
-        propertyKey,
-      );
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
-
-      metadataDispatcher.addMethodMetadata({
-        event,
-        handlerType,
-        callback: descriptor.value!,
-        isDraft: !!isDraft,
-        isSingleInstance,
-      });
-    };
-  };
-}
-
-/**
- * Builds a decorator for handling the .after method.
- *
- * @param {Event} event - The event to handle.
- * @param {HandlerType} handlerType - The type of handler (Before, After, On).
- */
-
-function buildAfterDelete(event: CRUD_EVENTS, handlerType: HandlerType) {
-  return function <Target extends Object>() {
-    return function (
-      target: Target,
-      propertyKey: string | symbol,
-      descriptor: TypedPropertyDescriptor<ReturnResultAndRequestForDelete>,
-    ): void {
-      const isDraft: boolean = Reflect.getMetadata(Constants.DECORATOR.DRAFT_FLAG_KEY, target, propertyKey);
-      const isSingleInstance: boolean = Reflect.getMetadata(
-        Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY,
-        target,
-        propertyKey,
-      );
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
-
-      metadataDispatcher.addMethodMetadata({
-        event,
-        handlerType,
-        callback: descriptor.value!,
-        isDraft: !!isDraft,
-        isSingleInstance,
-      });
-    };
   };
 }
 
@@ -379,14 +311,14 @@ const AfterRead = buildAfter('READ', HandlerType.After);
  * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
  * @see [CDS-TS-Dispatcher - After update](https://github.com/dxfrontier/cds-ts-dispatcher#afterupdate)
  */
-const AfterUpdate = buildAfterUpdate('UPDATE', HandlerType.After);
+const AfterUpdate = buildAfter('UPDATE', HandlerType.After);
 
 /**
  * This decorator can be applied to methods that need to execute custom logic after a delete operation is performed.
  * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
  * @see [CDS-TS-Dispatcher - After delete](https://github.com/dxfrontier/cds-ts-dispatcher#afterdelete)
  */
-const AfterDelete = buildAfterDelete('DELETE', HandlerType.After);
+const AfterDelete = buildAfter('DELETE', HandlerType.After);
 
 /**
  * ####################################################################################################################
