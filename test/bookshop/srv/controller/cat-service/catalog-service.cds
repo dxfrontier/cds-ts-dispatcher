@@ -1,14 +1,5 @@
 using {sap.capire.bookshop as my} from '../../../db/schema';
 
-type HelloRequest {
-  greeterName : String;
-  toName      : String;
-}
-
-type HelloResponse {
-  greetingMessage : String;
-}
-
 service CatalogService {
 
   entity Books   as projection on my.Books;
@@ -20,5 +11,5 @@ service CatalogService {
     stock : Integer
   };
 
-  action sendMail(request : HelloRequest)                 returns HelloResponse;
+
 }

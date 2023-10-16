@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-confusing-void-expression */
 import cds from '@sap/cds';
-import 'reflect-metadata';
 
 const listenMessage = console.log('Server listening...');
 

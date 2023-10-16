@@ -13,7 +13,7 @@ import {
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { CRUD_EVENTS, HandlerType } from '../../lib/util/types/types';
-import { Book, sendMail } from '../bookshop/srv/util/types/entities/CatalogService';
+import { Book, submitOrder } from '../bookshop/srv/util/types/entities/CatalogService';
 
 @EntityHandler(Book)
 class Customer {
@@ -29,16 +29,16 @@ class Customer {
   @OnDelete()
   public async onDeleteMethod(req: Request, next: Function) {}
 
-  @OnAction(sendMail)
+  @OnAction(submitOrder)
   public async onActionMethod(req: Request, next: Function) {}
 
-  @OnFunction(sendMail)
+  @OnFunction(submitOrder)
   public async onFunctionMethod(req: Request, next: Function) {}
 
-  @OnBoundAction(sendMail)
+  @OnBoundAction(submitOrder)
   public async onBoundActionMethod(req: Request, next: Function) {}
 
-  @OnBoundFunction(sendMail)
+  @OnBoundFunction(submitOrder)
   public async onBoundFunctionMethod(req: Request, next: Function) {}
 }
 
@@ -63,7 +63,7 @@ describe('ON', () => {
           foundEvent.event == 'BOUND_FUNC'
         ) {
           expect(foundEvent.actionName).not.toBeUndefined();
-          expect(foundEvent.actionName).toStrictEqual(sendMail);
+          expect(foundEvent.actionName).toStrictEqual(submitOrder);
         }
       });
     });

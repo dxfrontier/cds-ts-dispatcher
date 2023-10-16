@@ -24,6 +24,12 @@ entity Books : managed {
       image    : LargeBinary            @Core.MediaType: 'image/png';
 }
 
+entity BookStatistics : managed {
+  key ID            : Integer;
+      views         : Integer;
+      averageRating : Decimal(3, 2);
+}
+
 entity Authors : managed {
   key ID           : Integer;
       name         : String(111) @mandatory;
@@ -64,4 +70,9 @@ entity Users : managed {
       role     : Roles;
       reviews  : Association to many Reviews
                    on reviews.reviewer = $self;
+}
+
+entity UserActivityLog : managed {
+  key ID         : Integer;
+      actionType : String
 }

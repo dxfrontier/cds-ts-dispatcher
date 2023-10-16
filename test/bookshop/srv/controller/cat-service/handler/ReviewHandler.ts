@@ -34,7 +34,7 @@ class ReviewHandler {
 
   @BeforeDelete()
   private async deleteItem(req: TypedRequest<Review>) {
-    // req.reject(400, 'Before delete executed');
+    req.notify(204, 'Item deleted');
   }
 }
 

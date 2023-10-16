@@ -24,7 +24,7 @@ class BookHandler {
   }
 
   @AfterRead()
-  private async addDiscount(results: Book[], req: Request) {
+  private async addDiscount(results: Book[], _: Request) {
     this.bookService.enrichTitle(results);
   }
 
@@ -35,12 +35,7 @@ class BookHandler {
 
   @AfterDelete()
   private async deleteItem(deleted: boolean, req: Request) {
-    console.log('deleted' + deleted);
-  }
-
-  @OnAction(submitOrder)
-  private async testAction(req: TypedActionRequest<typeof submitOrder>, next: Function) {
-    return this.bookService.verifyStock(req);
+    req.notify(`Item deleted : ${deleted}`);
   }
 }
 
