@@ -6,3 +6,8 @@ type HelloRequest {
 type HelloResponse {
     greetingMessage : String;
 }
+
+type Roles : String enum {
+    USER;
+    ADMIN;
+}

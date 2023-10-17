@@ -4,30 +4,38 @@ using {
   sap
 } from '@sap/cds/common';
 
+using {Roles} from './cds-types/types';
+
 namespace sap.capire.bookshop;
 
-type Roles : String enum {
-  USER;
-  ADMIN;
-}
+// **************************************************************************************************
+// Catalog - Service
+// **************************************************************************************************
 
 entity Books : managed {
   key ID       : Integer;
       title    : localized String(111)  @mandatory;
       descr    : localized String(1111);
-      author   : Association to Authors @mandatory;
-      genre    : Association to Genres;
-      reviews  : Association to many Reviews;
       stock    : Integer;
       price    : Decimal;
       currency : Currency;
       image    : LargeBinary            @Core.MediaType: 'image/png';
+      // Associations
+      author   : Association to Authors @mandatory;
+      genre    : Association to Genres;
+
+      reviews  : Association to many Reviews
+                   on reviews.book = $self;
+
+      stats    : Association to one BookStats
+                   on stats.book = $self;
 }
 
-entity BookStatistics : managed {
+entity BookStats : managed {
   key ID            : Integer;
       views         : Integer;
-      averageRating : Decimal(3, 2);
+      averageRating : Double;
+      book          : Association to one Books;
 }
 
 entity Authors : managed {
@@ -41,9 +49,6 @@ entity Authors : managed {
                        on books.author = $self;
 }
 
-/**
- * Hierarchically organized Code List for Genres
- */
 entity Genres : sap.common.CodeList {
   key ID       : Integer;
       parent   : Association to Genres;
@@ -63,11 +68,17 @@ entity Reviews : managed {
       comment  : String;
 }
 
+// **************************************************************************************************
+
+// **************************************************************************************************
+// Admin - Service
+// **************************************************************************************************
+
 entity Users : managed {
   key ID       : Integer;
       username : String(255) @mandatory;
       email    : String(255) @mandatory;
-      role     : Roles;
+      role     : Roles       @mandatory;
       reviews  : Association to many Reviews
                    on reviews.reviewer = $self;
 }
@@ -76,3 +87,5 @@ entity UserActivityLog : managed {
   key ID         : Integer;
       actionType : String
 }
+
+// **************************************************************************************************

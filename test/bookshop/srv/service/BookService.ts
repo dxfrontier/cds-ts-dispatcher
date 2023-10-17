@@ -2,10 +2,12 @@ import { Request, Service } from '@sap/cds';
 import { Inject, ServiceHelper, ServiceLogic } from '../../../../lib';
 import { Books, Book, submitOrder } from '../util/types/entities/CatalogService';
 import { TypedActionRequest, TypedRequest } from '../../../../lib/util/types/types';
+import BookRepository from '../repository/BookRepository';
 
 @ServiceLogic()
 class BookService {
   @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(BookRepository) private bookRepository: BookRepository;
 
   public enrichTitle(results: Book[]) {
     results.map((book) => (book.title += ` -- 10 % discount!`));
@@ -18,7 +20,7 @@ class BookService {
   }
 
   public async addDefaultTitleText(result: Book, req: TypedRequest<Book>) {
-    await UPDATE.entity(Book).where({ ID: req.data.ID }).set({ title: 'Dracula' });
+    await this.bookRepository.addDefaultTitleText(result, req);
   }
 
   public async verifyStock(req: TypedActionRequest<typeof submitOrder>) {

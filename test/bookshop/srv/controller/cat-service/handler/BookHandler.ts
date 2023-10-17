@@ -5,13 +5,12 @@ import {
   AfterUpdate,
   EntityHandler,
   Inject,
-  OnAction,
   ServiceHelper,
 } from '../../../../../../lib';
 import BookService from '../../../service/BookService';
 import { Request, Service } from '@sap/cds';
-import { Book, submitOrder } from '../../../util/types/entities/CatalogService';
-import { TypedActionRequest, TypedRequest } from '../../../../../../lib/util/types/types';
+import { Book } from '../../../util/types/entities/CatalogService';
+import { TypedRequest } from '../../../../../../lib/util/types/types';
 
 @EntityHandler(Book)
 class BookHandler {
