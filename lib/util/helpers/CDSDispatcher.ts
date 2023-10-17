@@ -141,7 +141,7 @@ class CDSDispatcher {
 
     // CRUD_EVENTS.[BOUND_ACTION, BOUND_FUNC]
     if (event === 'BOUND_ACTION' || event === 'BOUND_FUNC') {
-      this.srv.on(actionName!, entity.toString(), async (req, next) => {
+      this.srv.on(actionName!, entity.name, async (req, next) => {
         return await this.executeOnCallback(handlerAndEntity, req, next);
       });
 
