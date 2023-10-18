@@ -35,8 +35,8 @@ type ReturnRequestAndNext = (req: Request, next: Function) => Promise<any>;
 type ReturnSingleInstanceCapable<T, K> = (results: T[], req: K, isSingleInstance: boolean) => Promise<any>;
 
 type TypedRequest<T> = Omit<Request, 'data'> & { data: T };
-type TypedActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['__parameters'] };
-
+type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['__parameters'] };
+type ActionReturn<T extends CdsFunction> = Promise<T['__returns']>;
 interface HandlerBuilder {
   buildHandlers: () => void;
 }
@@ -45,7 +45,6 @@ interface Handler {
   event: CRUD_EVENTS | DRAFT_EVENTS;
   handlerType: HandlerType;
   callback: ReturnRequest | ReturnRequestAndNext | ReturnResultsAndRequest;
-  // callback: any;
   actionName?: CdsFunction;
   isDraft?: boolean;
   isSingleInstance?: boolean;
@@ -67,7 +66,8 @@ export {
   type CdsFunction,
   //
   type TypedRequest,
-  type TypedActionRequest,
+  type ActionRequest,
+  type ActionReturn,
   //
   type CRUD_EVENTS,
   type DRAFT_EVENTS,
