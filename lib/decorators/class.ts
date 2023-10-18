@@ -41,4 +41,15 @@ function ServiceLogic<Target extends new (...args: never) => unknown>() {
     injectable()(target);
   };
 }
-export { EntityHandler, Repository, ServiceLogic };
+
+/**
+ * This decorator can be applied to classes containing service business logic.
+ */
+
+function UnboundActions<Target extends new (...args: never) => unknown>() {
+  return function (target: Target) {
+    injectable()(target);
+  };
+}
+
+export { EntityHandler, Repository, ServiceLogic, UnboundActions };
