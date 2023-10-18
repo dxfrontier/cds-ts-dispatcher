@@ -16,10 +16,8 @@ import Constants from '../util/constants/Constants';
 /**
  * A decorator function that designates a method as an execution with a single instance constraint.
  * @SingleInstanceHandler decorator should be applied last in the method decorators, as it is the first to evaluate whether the request is for a single request or an entity set.
- *
- * @param {Function} targetMethod - The method to be executed when the request is for a single instance.
- *
- * @returns {MethodDecorator} - A method decorator function that handles single instance execution or an entity set
+ * Note a third parameter must be added when this decorator is applied
+ * isSingleInstance: boolean
  *
  */
 
