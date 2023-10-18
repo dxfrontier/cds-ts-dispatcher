@@ -8,7 +8,6 @@ using {
 
 service AdminService {
   entity UserActivityLog as projection on my.UserActivityLog;
-  // entity BookStats       as projection on my.BookStats;
   entity Users           as projection on my.Users;
   action sendMail(request : HelloRequest) returns HelloResponse;
 }

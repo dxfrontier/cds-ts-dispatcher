@@ -1,7 +1,8 @@
 using {
   Currency,
   managed,
-  sap
+  sap,
+  cuid
 } from '@sap/cds/common';
 
 using {Roles} from './cds-types/types';
@@ -29,6 +30,7 @@ entity Books : managed {
 
       stats    : Association to one BookStats
                    on stats.book = $self;
+
 }
 
 entity BookStats : managed {
@@ -47,6 +49,8 @@ entity Authors : managed {
       placeOfDeath : String;
       books        : Association to many Books
                        on books.author = $self;
+
+
 }
 
 entity Genres : sap.common.CodeList {
@@ -55,6 +59,7 @@ entity Genres : sap.common.CodeList {
       children : Composition of many Genres
                    on children.parent = $self;
 }
+
 
 entity Reviews : managed {
   key ID       : Integer;
@@ -67,6 +72,17 @@ entity Reviews : managed {
       ];
       comment  : String;
 }
+
+entity BookEvents : managed, cuid {
+  name : String;
+  type : String enum {
+    BOOK_SIGNING;
+    AUTHOR_TALK;
+    BOOK_LUNCH
+  };
+
+}
+
 
 // **************************************************************************************************
 

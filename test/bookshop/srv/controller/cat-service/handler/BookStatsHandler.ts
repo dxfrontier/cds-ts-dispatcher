@@ -1,7 +1,8 @@
 import {
   EntityHandler,
   Inject,
-  OnAction,
+  OnBoundAction,
+  OnBoundFunction,
   OnCreate,
   OnDelete,
   OnRead,
@@ -9,14 +10,16 @@ import {
   ServiceHelper,
 } from '../../../../../../lib';
 import { Request, Service } from '@sap/cds';
-import { TypedActionRequest, TypedRequest } from '../../../../../../lib/util/types/types';
+import { type ActionRequest, type ActionReturn, type TypedRequest } from '../../../../../../lib/util/types/types';
 import BookStatsService from '../../../service/BookStatsService';
-import { BookStat, submitOrder } from '../../../util/types/entities/CatalogService';
+import { BookStat } from '../../../util/types/entities/CatalogService';
+import AuthorService from '../../../service/AuthorService';
 
 @EntityHandler(BookStat)
 class BookStatsHandler {
   @Inject(ServiceHelper.SRV) private readonly srv: Service;
   @Inject(BookStatsService) private bookStatsService: BookStatsService;
+  @Inject(AuthorService) private authorService: AuthorService;
 
   @OnCreate()
   public async onCreateMethod(req: TypedRequest<BookStat>, next: Function) {
@@ -41,12 +44,24 @@ class BookStatsHandler {
   }
 
   @OnDelete()
-  public async onDeleteMethod(req: Request, next: Function) {
+  public async onDeleteMethod(req: Request, _: Function) {
     req.notify('Item deleted');
   }
 
-  @OnAction(submitOrder)
-  public async onActionMethod(req: TypedActionRequest<typeof submitOrder>, next: Function) {}
+  // This action will be triggered on the 'BookStat' entity
+  @OnBoundAction(BookStat.actions.GenerateReport)
+  public async onBoundActionMethod(
+    req: ActionRequest<typeof BookStat.actions.GenerateReport>,
+    _: Function,
+  ): ActionReturn<typeof BookStat.actions.GenerateReport> {
+    return this.bookStatsService.handleReport(req);
+  }
+
+  // This function will be triggered on the 'BookStat' entity
+  @OnBoundFunction(BookStat.actions.NotifyAuthor)
+  public async onBoundFunctionMethod(req: ActionRequest<typeof BookStat.actions.NotifyAuthor>, _: Function) {
+    return this.authorService.notifyAuthor(req);
+  }
 }
 
 export default BookStatsHandler;

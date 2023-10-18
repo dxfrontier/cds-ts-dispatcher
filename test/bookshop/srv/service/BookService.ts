@@ -1,7 +1,7 @@
 import { Request, Service } from '@sap/cds';
 import { Inject, ServiceHelper, ServiceLogic } from '../../../../lib';
 import { Books, Book, submitOrder } from '../util/types/entities/CatalogService';
-import { TypedActionRequest, TypedRequest } from '../../../../lib/util/types/types';
+import { ActionRequest, TypedRequest } from '../../../../lib/util/types/types';
 import BookRepository from '../repository/BookRepository';
 
 @ServiceLogic()
@@ -23,7 +23,7 @@ class BookService {
     await this.bookRepository.addDefaultTitleText(result, req);
   }
 
-  public async verifyStock(req: TypedActionRequest<typeof submitOrder>) {
+  public async verifyStock(req: ActionRequest<typeof submitOrder>) {
     const { book, quantity } = req.data;
 
     if (quantity < 1) return req.reject(400, `quantity has to be 1 or more`);

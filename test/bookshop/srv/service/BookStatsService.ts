@@ -1,7 +1,7 @@
 import { Service } from '@sap/cds';
 import { Inject, ServiceHelper, ServiceLogic } from '../../../../lib';
-import { Review } from '../util/types/entities/CatalogService';
-import { TypedRequest } from '../../../../lib/util/types/types';
+import { Book } from '../util/types/entities/CatalogService';
+import { ActionRequest, TypedRequest } from '../../../../lib/util/types/types';
 import { BookStat } from '../util/types/entities/CatalogService';
 import BookStatsRepository from '../repository/BookStatsRepository';
 
@@ -12,6 +12,14 @@ class BookStatsService {
 
   public async updatedViews(req: TypedRequest<BookStat>) {
     return this.bookStatsRepository.updateSingleItemViews(req);
+  }
+
+  public async getUpdatedBook(req: ActionRequest<typeof BookStat.actions.GenerateReport>) {
+    return SELECT.from(Book).where(req.data.ID);
+  }
+
+  public async handleReport(req: ActionRequest<typeof BookStat.actions.GenerateReport>) {
+    return this.bookStatsRepository.generateReport(req);
   }
 }
 
