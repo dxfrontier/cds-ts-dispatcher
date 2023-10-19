@@ -1182,7 +1182,7 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 
 ## Examples
 
-Find here a collection of samples for the [CDS-TS-Dispatcher](https://github.com/dxfrontier/cds-ts-samples)
+Find here a collection of samples for the [CDS-TS-Dispatcher-Samples](https://github.com/dxfrontier/cds-ts-samples)
 
 ## Contributing
 
