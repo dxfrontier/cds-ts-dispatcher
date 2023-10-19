@@ -62,7 +62,6 @@ describe('ON', () => {
           foundEvent.event === 'BOUND_ACTION' ||
           foundEvent.event == 'BOUND_FUNC'
         ) {
-          expect(foundEvent.actionName).not.toBeUndefined();
           expect(foundEvent.actionName).toStrictEqual(submitOrder);
         }
       });
@@ -75,13 +74,11 @@ describe('ON', () => {
   testEvent('UPDATE', 'OnUpdate');
   testEvent('DELETE', 'OnDelete');
 
-  // !!!!
-  // TODO have a look over this.
-  // // ACTION & FUNCTION
-  // testEvent('ACTION', 'OnAction');
-  // testEvent('FUNC', 'OnFunction');
+  // ACTION & FUNCTION
+  testEvent('ACTION', 'OnAction');
+  testEvent('FUNC', 'OnFunction');
 
-  // // BOUND ACTION & FUNCTION
-  // testEvent('BOUND_ACTION', 'OnBoundAction');
-  // testEvent('BOUND_FUNC', 'OnBoundFunction');
+  // BOUND ACTION & FUNCTION
+  testEvent('BOUND_ACTION', 'OnBoundAction');
+  testEvent('BOUND_FUNC', 'OnBoundFunction');
 });
