@@ -322,7 +322,7 @@ class CustomerHandler {
 
 **@Inject**(`ServiceHelper.SRV`) `private srv: CdsService`
 
-This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repository and @EntityHandler` classes, It can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
+This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repository, @EntityHandler and @UnboundActions` classes, It can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
 
 `Example`
 
