@@ -241,7 +241,7 @@ class CDSDispatcher {
   }
 
   // PUBLIC ROUTINES
-  public initializeEntityHandlers(): ServiceImpl {
+  public initialize(): ServiceImpl {
     return cds.service.impl(this.buildServiceImplementation());
   }
 }

@@ -19,8 +19,8 @@ class BookHandler {
   @Inject(BookService) private bookService: BookService;
 
   @AfterCreate()
-  private async validateCurrencyCodes(results: Book, req: Request) {
-    this.bookService.validateData(results, req);
+  private async validateCurrencyCodes(result: Book, req: Request) {
+    this.bookService.validateData(result, req);
   }
 
   @AfterRead()

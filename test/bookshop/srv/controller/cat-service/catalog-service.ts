@@ -14,4 +14,4 @@ module.exports = new CDSDispatcher([
   BookEventsHandler,
   // Unbound actions
   UnboundActionsHandler,
-]).initializeEntityHandlers();
+]).initialize();
