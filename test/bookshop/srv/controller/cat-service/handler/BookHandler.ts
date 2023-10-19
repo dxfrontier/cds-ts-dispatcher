@@ -6,6 +6,7 @@ import {
   EntityHandler,
   Inject,
   ServiceHelper,
+  SingleInstanceCapable,
 } from '../../../../../../lib';
 import BookService from '../../../service/BookService';
 import { Request, Service } from '@sap/cds';
@@ -23,7 +24,14 @@ class BookHandler {
   }
 
   @AfterRead()
-  private async addDiscount(results: Book[], _: Request) {
+  @SingleInstanceCapable()
+  private async addDiscount(results: Book[], req: Request, isSingleInstance: boolean) {
+    if (isSingleInstance) {
+      req.notify('Single instance');
+    } else {
+      req.notify('Entity set');
+    }
+
     this.bookService.enrichTitle(results);
   }
 

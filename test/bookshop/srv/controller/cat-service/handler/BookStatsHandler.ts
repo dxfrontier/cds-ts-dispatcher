@@ -30,7 +30,7 @@ class BookStatsHandler {
   @OnRead()
   public async onReadMethod(req: TypedRequest<BookStat>, next: Function) {
     if (req.params.length === 0) {
-      // check if it's single instance or not // but you can use also the @SingleInstanceCapable() decorator
+      // check if it's single instance or not, but you can use also the @SingleInstanceCapable() decorator
       return this.bookStatsService.updatedViews(req);
     }
 

@@ -9,8 +9,32 @@
 			"enabled": true
 		},
 		{
+			"key": "-------------Services -----------",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
 			"key": "catalogService",
 			"value": "catalog",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "adminService",
+			"value": "admin",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "---------------------------------",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "------------- Entities ------------",
+			"value": "",
 			"type": "default",
 			"enabled": true
 		},
@@ -25,9 +49,33 @@
 			"value": "Reviews",
 			"type": "default",
 			"enabled": true
+		},
+		{
+			"key": "bookStatsEntity",
+			"value": "BookStats",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "bookEvents",
+			"value": "BookEvents",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "--------------------------------",
+			"value": null,
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "draftUUIDInstance",
+			"value": "",
+			"type": "default",
+			"enabled": true
 		}
 	],
 	"_postman_variable_scope": "environment",
-	"_postman_exported_at": "2023-10-11T07:39:35.946Z",
+	"_postman_exported_at": "2023-10-18T15:20:26.621Z",
 	"_postman_exported_using": "Postman/10.18.11"
 }

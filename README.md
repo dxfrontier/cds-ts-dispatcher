@@ -67,16 +67,9 @@ The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate
 
 ```bash
 npm install cds-ts-dispatcher
-npm install reflect-metadata
 ```
 
-Once installed, import `reflect-metadata` in your `server.ts`
-
-```typescript
-import 'reflect-metadata';
-```
-
-It is recommended to use the following tsconfig.json properties, modify your `tsconfig.json` as follows :
+It is recommended to use the following **tsconfig.json** properties:
 
 ```json
 {
@@ -99,7 +92,7 @@ It is recommended to use the following tsconfig.json properties, modify your `ts
 
 ### Generate CDS Typed entities
 
-The following command should be used to generate typed entity classes
+The following command should be used to generate the typed entities.
 
 ```bash
 npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
@@ -113,10 +106,10 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 
 **We recommend adhering** to the **Controller-Service-Repository** design pattern using the following folder structure:
 
-1. [EntityHandler](#entityhandler) - Manages the REST interface to the business logic [ServiceLogic](#servicelogic)
-2. [ServiceLogic](#servicelogic) - Contains business logic implementations
-3. [Repository](#repository) - Will contain manipulation of entities through the utilization of [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql).
-   - `[Optional enhancement]` To simplify `entity manipulation` using [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql), a `BaseRepository` `npm package` was created for [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) of the most common `database actions` like `.create(...), findAll(), find(...), delete(...), exists() ...`
+1. [EntityHandler](#entityhandler) `(Controller)` - Responsible for managing the REST interface to the core business logic implemented in `ServiceLogic`.[ServiceLogic](#servicelogic)
+2. [ServiceLogic](#servicelogic) `(Service)` - Contains business logic implementations
+3. [Repository](#repository) `(Repository)` - This component is dedicated to handling entity manipulation operations by leveraging the power of [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql).
+   - `[Optional]` - To simplify `entity manipulation` using `CDS-QL`, an `npm package` named `BaseRepository` was created. It offers a simplified interface for common database actions such as `.create(...), findAll(), find(...), delete(...), and exists()` and many others.
 
 `Controller-Service-Repository` suggested folder structure
 
@@ -909,7 +902,7 @@ this.before(['UPDATE', 'CREATE'], MyEntity, async (req: TypedRequest<MyEntity>) 
 
 This decorator will be triggered when `a new draft is created`.
 
-It is important to note that decorator `@OnCancelDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+It is important to note that decorator `@OnNewDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity` which represents a generated class using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 `Example`
 
@@ -1026,10 +1019,9 @@ When utilizing the `@SingleInstanceCapable()` decorator, the `placement of the @
 
 `@SingleInstanceCapable` can be used together with the following decorator actions :
 
-- `@AfterCreate`
 - `@AfterRead`
-- `@AfterUpdate`
-- `@AfterDelete`
+- `@BeforeRead`
+- `@OnRead`
 
 ###### Examples
 
@@ -1041,8 +1033,6 @@ All methods `After. 'Update', 'Create', 'Read'` will be executed on single insta
 - Example entity set request : http://localhost:4004/odata/v4/main/ `MyEntity`
 
 ```typescript
-@AfterUpdate() //  Will handle single instance and entity set
-@AfterCreate() // Will handle single instance and entity set
 @AfterRead() // Will handle single instance and entity set
 @SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered when single instance is requested and entity set
 public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
@@ -1067,7 +1057,6 @@ Methods `After. 'Create', 'Read'` will be executed only on entity set request.
 ```typescript
 @AfterUpdate() //  Will handle single instance and entity set
 @SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered when single instance is requested and entity set
-@AfterCreate() // Will handle only entity set
 @AfterRead() // Will handle only entity set
 public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
   if(isSingleInstance) {

@@ -1,4 +1,6 @@
 import {
+  AfterRead,
+  Draft,
   EntityHandler,
   Inject,
   OnCancelDraft,
@@ -6,9 +8,11 @@ import {
   OnNewDraft,
   OnSaveDraft,
   ServiceHelper,
+  SingleInstanceCapable,
 } from '../../../../../../lib';
 import { Request, Service } from '@sap/cds';
 import { BookEvent } from '../../../util/types/entities/CatalogService';
+import { TypedRequest } from '../../../../../../lib/util/types/types';
 
 @EntityHandler(BookEvent)
 class BookEventsHandler {
@@ -36,6 +40,23 @@ class BookEventsHandler {
   public async onSaveDraftMethod(req: Request, next: Function) {
     req.notify('On save draft');
     return next();
+  }
+
+  @AfterRead()
+  @Draft()
+  @SingleInstanceCapable()
+  public async afterReadDraftMethod(results: BookEvent[], req: Request, isSingleInstance: boolean) {
+    // handle single instance
+    if (results.length === 0) {
+      return;
+    }
+
+    if (isSingleInstance) {
+      req.notify('Single instance');
+      return;
+    }
+
+    // handle entity set
   }
 }
 
