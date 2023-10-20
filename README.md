@@ -282,7 +282,7 @@ class UnboundActionsHandler {
   ...
 ```
 
-`Import it in the CDSDispatcher`
+`Imported it in the CDSDispatcher`
 
 ```typescript
 import { CDSDispatcher } from 'cds-ts-dispatcher';
@@ -325,7 +325,8 @@ class CustomerHandler {
   ...
 ```
 
-> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -804,7 +805,8 @@ this.on(AnAction, async (req, next) => {
 });
 ```
 
-> [!NOTE] > `AnAction` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> [!NOTE]
+> AnAction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -836,7 +838,8 @@ this.on(AFunction, async (req) => {
 });
 ```
 
-> [!NOTE] > `AFunction` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> [!NOTE]
+> AFunction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
