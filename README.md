@@ -288,8 +288,7 @@ import { CDSDispatcher } from 'cds-ts-dispatcher';
 module.exports = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
 ```
 
-[!NOTE]
-
+> [!NOTE]
 > The reason behind introducing a distinct decorator for `Unbound actions` stems from the fact that these actions are not associated with any specific `Entity` but instead these actions belongs to the Service itself.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
