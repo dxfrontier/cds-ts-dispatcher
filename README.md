@@ -140,7 +140,7 @@ The `CDSDispatcher` constructor allows you to create an instance for dispatching
 ```typescript
 import { CDSDispatcher } from 'cds-ts-dispatcher';
 
-module.exports = new CDSDispatcher([BookHandler, ReviewHandler, UnboundActionsHandler, ...]).initalize();
+module.exports = new CDSDispatcher([BookHandler, ReviewHandler, UnboundActionsHandler, ...]).initialize();
 ```
 
 `Visual image`
@@ -279,6 +279,16 @@ class UnboundActionsHandler {
   // all unbound actions
   ...
 ```
+
+`Import it in the CDSDispatcher`
+
+```typescript
+import { CDSDispatcher } from 'cds-ts-dispatcher';
+
+module.exports = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
+```
+
+[!NOTE]
 
 > The reason behind introducing a distinct decorator for `Unbound actions` stems from the fact that these actions are not associated with any specific `Entity` but instead these actions belongs to the Service itself.
 
