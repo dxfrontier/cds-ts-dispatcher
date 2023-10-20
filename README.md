@@ -258,7 +258,8 @@ class CustomerRepository extends BaseRepository<MyEntity> {
 }
 ```
 
-> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
