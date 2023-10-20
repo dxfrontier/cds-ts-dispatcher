@@ -778,11 +778,11 @@ this.on('DELETE', MyEntity, async (req, next) => {
 
 ###### OnAction
 
-**@OnAction**(`name` : CdsFunction)
+**@OnAction**(`name` : CdsAction)
 
 `Parameters`
 
-- `name (CdsFunction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 
@@ -845,13 +845,13 @@ this.on(AFunction, async (req) => {
 
 ###### OnBoundAction
 
-**@OnBoundAction**(`name` : CdsFunction)
+**@OnBoundAction**(`name` : CdsAction)
 
 It is important to note that decorator `@OnBoundAction()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Parameters`
 
-- `name (CdsFunction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example`
 

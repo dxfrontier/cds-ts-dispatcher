@@ -2,6 +2,9 @@
 import { type Request, type Service } from '@sap/cds';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 
+/**
+ * Use this helper to inject the SRV constant
+ */
 enum ServiceHelper {
   SRV = 'srv',
 }
@@ -34,8 +37,19 @@ type ReturnResultsAndRequest = (results: any | any[] | boolean, req: Request, ..
 type ReturnRequestAndNext = (req: Request, next: Function) => Promise<any>;
 type ReturnSingleInstanceCapable<T, K> = (results: T[], req: K, isSingleInstance: boolean) => Promise<any>;
 
+/**
+ * Use this type to have the '@sap/cds - Request' typed.
+ */
 type TypedRequest<T> = Omit<Request, 'data'> & { data: T };
+
+/**
+ * Use this type to have ActionRequest typed.
+ */
 type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['__parameters'] };
+
+/**
+ * Use this type to have the return of the action typed.
+ */
 type ActionReturn<T extends CdsFunction> = Promise<T['__returns']>;
 interface HandlerBuilder {
   buildHandlers: () => void;

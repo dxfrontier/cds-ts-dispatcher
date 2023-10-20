@@ -16,7 +16,7 @@ import Constants from '../util/constants/Constants';
 /**
  * A decorator function that designates a method as an execution with a single instance constraint.
  * @SingleInstanceHandler decorator should be applied last in the method decorators, as it is the first to evaluate whether the request is for a single request or an entity set.
- * Note a third parameter must be added when this decorator is applied
+ * Note a third parameter must be added when this decorator is applied :
  * isSingleInstance: boolean
  *
  */
@@ -249,7 +249,7 @@ function buildOnCRUD<Target extends Object>(event: CRUD_EVENTS | DRAFT_EVENTS, h
 /**
  * This decorator can be applied to methods that need to execute custom logic before a new resource is created.
  * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request)
- * @see [CDS-TS-Dispatcher - Before read](https://github.com/dxfrontier/cds-ts-dispatcher#beforecreate)
+ * @see [CDS-TS-Dispatcher - Before create](https://github.com/dxfrontier/cds-ts-dispatcher#beforecreate)
  */
 const BeforeCreate = buildBefore('CREATE', HandlerType.Before);
 
@@ -264,7 +264,7 @@ const BeforeRead = buildBefore('READ', HandlerType.Before);
 
  * This decorator can be applied to methods that need to execute custom logic before an update operation is performed.
  * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) 
- * @see [CDS-TS-Dispatcher - Before delete](https://github.com/dxfrontier/cds-ts-dispatcher#beforeupdate)
+ * @see [CDS-TS-Dispatcher - Before update](https://github.com/dxfrontier/cds-ts-dispatcher#beforeupdate)
  */
 const BeforeUpdate = buildBefore('UPDATE', HandlerType.Before);
 
@@ -289,23 +289,21 @@ const BeforeDelete = buildBefore('DELETE', HandlerType.Before);
  */
 
 /**
- * This decorator can be applied to methods that need to execute custom logic after a create operation is performed on the service.
+ * This decorator can be applied to methods that need to execute custom logic after a create operation is performed.
  * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
- * @see [CDS-TS-Dispatcher - After read](https://github.com/dxfrontier/cds-ts-dispatcher#aftercreate)
+ * @see [CDS-TS-Dispatcher - After create](https://github.com/dxfrontier/cds-ts-dispatcher#aftercreate)
  */
 const AfterCreate = buildAfter('CREATE', HandlerType.After);
 
 /**
- * Handles the 'AfterRead' event by attaching custom behavior to SAP CAP's `srv.after` method for read requests.
- * The `srv.after` callback response will contain the 'request' object and the 'results'
- *
+ * This decorator can be applied to methods that need to execute custom logic after a read operation is performed.
  * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
  * @see [CDS-TS-Dispatcher - After read](https://github.com/dxfrontier/cds-ts-dispatcher#afterread)
  */
 const AfterRead = buildAfter('READ', HandlerType.After);
 
 /**
- * This decorator can be applied to methods that need to execute custom logic after an update operation is performed on the service.
+ * This decorator can be applied to methods that need to execute custom logic after an update operation is performed.
  * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
  * @see [CDS-TS-Dispatcher - After update](https://github.com/dxfrontier/cds-ts-dispatcher#afterupdate)
  */
@@ -379,14 +377,14 @@ const OnBoundAction = buildOnDraftBoundAction('BOUND_ACTION', HandlerType.On);
 
 /**
  *
- * This decorator can be applied to methods that need to execute custom logic when a custom bound action event is triggered
+ * This decorator can be applied to methods that need to execute custom logic when a custom bound function event is triggered
  * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On bound function](https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction)
  */
 const OnBoundFunction = buildOnDraftBoundAction('BOUND_FUNC', HandlerType.On);
 /**
  *
- * This decorator can be applied to methods that need to execute custom logic when a custom action event is triggered.
+ * This decorator can be applied to methods that need to execute custom logic when a custom function event is triggered.
  * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On function](https://github.com/dxfrontier/cds-ts-dispatcher#onfunction)
  */
@@ -394,7 +392,7 @@ const OnFunction = buildOnAction('FUNC', HandlerType.On);
 
 /**
  *
- * This decorator can be applied to methods that will handle when a new draft is created from an active instance
+ * This decorator can be applied to methods when a new draft is created from an active instance.
  * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - On edit draft](https://github.com/dxfrontier/cds-ts-dispatcher#oneditdraft)
  */
@@ -402,7 +400,7 @@ const OnEditDraft = buildOnDraftActiveEntity('EDIT', HandlerType.On);
 
 /**
  *
- * This decorator can be applied to methods that will handle when the 'active entity' is changed
+ * This decorator can be applied to methods when the 'active entity' is changed.
  * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - On save draft](https://github.com/dxfrontier/cds-ts-dispatcher#onsavedraft)
  *
@@ -423,7 +421,7 @@ const OnSaveDraft = buildOnDraftActiveEntity('SAVE', HandlerType.On);
 
 /**
  *
- * This decorator can be applied to methods when a 'draft' is created
+ * This decorator can be applied to methods when a 'draft' is created.
  * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - On new Draft](https://github.com/dxfrontier/cds-ts-dispatcher#onnewdraft)
  */
@@ -432,7 +430,7 @@ const OnNewDraft = buildOnDraftActions('NEW', HandlerType.OnDraft);
 
 /**
  *
- * This decorator can be applied to methods that will handle when 'draft' is cancelled
+ * This decorator can be applied to methods when a 'draft' is cancelled.
  * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - On Cancel Draft](https://github.com/dxfrontier/cds-ts-dispatcher#oncanceldraft)
  */

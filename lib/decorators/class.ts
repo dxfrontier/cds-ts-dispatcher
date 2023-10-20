@@ -33,7 +33,7 @@ function Repository<Target extends new (...args: never) => unknown>() {
 }
 
 /**
- * This decorator can be applied to classes containing service business logic.
+ * This decorator can be applied to classes containing business logic.
  */
 
 function ServiceLogic<Target extends new (...args: never) => unknown>() {
@@ -43,7 +43,7 @@ function ServiceLogic<Target extends new (...args: never) => unknown>() {
 }
 
 /**
- * This decorator can be applied to classes containing service business logic.
+ * This decorator can be applied to classes containing Unbound actions.
  */
 
 function UnboundActions<Target extends new (...args: never) => unknown>() {

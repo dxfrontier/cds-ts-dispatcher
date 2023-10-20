@@ -16,7 +16,7 @@ import {
 import cds, { type Request, type Service, type ServiceImpl } from '@sap/cds';
 
 /**
- * Manages the registration of event handlers for the entities.
+ * Use this class to manage the registration of the event handlers for the entities.
  */
 
 class CDSDispatcher {
@@ -241,6 +241,9 @@ class CDSDispatcher {
   }
 
   // PUBLIC ROUTINES
+  /**
+   * Initialize the entities into the CDSDispatcher to register the handlers.
+   */
   public initialize(): ServiceImpl {
     return cds.service.impl(this.buildServiceImplementation());
   }
