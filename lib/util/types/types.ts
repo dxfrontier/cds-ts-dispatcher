@@ -43,12 +43,12 @@ type ReturnSingleInstanceCapable<T, K> = (results: T[], req: K, isSingleInstance
 type TypedRequest<T> = Omit<Request, 'data'> & { data: T };
 
 /**
- * Use this type to have ActionRequest typed.
+ * Use this type to have the '@sap/cds - Request' typed.
  */
 type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['__parameters'] };
 
 /**
- * Use this type to have the return of the action typed.
+ * Use this type to have the 'return' of the action typed.
  */
 type ActionReturn<T extends CdsFunction> = Promise<T['__returns']>;
 interface HandlerBuilder {
