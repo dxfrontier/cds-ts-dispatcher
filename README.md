@@ -176,7 +176,7 @@ class CustomerHandler {
   ...
 ```
 
-> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -257,7 +257,7 @@ class CustomerRepository extends BaseRepository<MyEntity> {
 }
 ```
 
-> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -323,7 +323,7 @@ class CustomerHandler {
   ...
 ```
 
-> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -351,7 +351,7 @@ class CustomerHandler { // OR CustomerService, CustomerRepository
   ...
 ```
 
-> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -395,6 +395,8 @@ this.before('CREATE', MyEntity, async (req) => {
 });
 ```
 
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### BeforeRead
@@ -422,6 +424,8 @@ this.before('READ', MyEntity, async (req) => {
   // ...
 });
 ```
+
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -451,6 +455,8 @@ this.before('UPDATE', MyEntity, async (req) => {
 });
 ```
 
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### BeforeDelete
@@ -478,6 +484,8 @@ this.before('DELETE', MyEntity, async (req) => {
   // ...
 });
 ```
+
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -523,6 +531,8 @@ this.after('CREATE', MyEntity, async (req) => {
 });
 ```
 
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### AfterRead
@@ -550,6 +560,8 @@ this.after('READ', MyEntity, async (req) => {
   // ...
 });
 ```
+
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -579,6 +591,8 @@ this.after('UPDATE', MyEntity, async (result, req) => {
 });
 ```
 
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### AfterDelete
@@ -607,6 +621,8 @@ this.after('DELETE', MyEntity, async (deleted, req) => {
   // ...
 });
 ```
+
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -649,6 +665,8 @@ this.on('CREATE', MyEntity, async (req, next) => {
 });
 ```
 
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### OnRead
@@ -676,6 +694,8 @@ this.on('READ', MyEntity, async (req, next) => {
   // ...
 });
 ```
+
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -706,6 +726,8 @@ this.on('UPDATE', MyEntity, async (req, next) => {
 });
 ```
 
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### OnDelete
@@ -733,6 +755,8 @@ this.on('DELETE', MyEntity, async (req, next) => {
   // ...
 });
 ```
+
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -765,6 +789,8 @@ this.on(AnAction, async (req, next) => {
 });
 ```
 
+> [!NOTE] > `AnAction` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### OnFunction
@@ -794,6 +820,8 @@ this.on(AFunction, async (req) => {
   // ...
 });
 ```
+
+> [!NOTE] > `AFunction` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -827,6 +855,8 @@ this.on(MyEntity.actions.AnAction, MyEntity, async (req) => {
 });
 ```
 
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### OnBoundFunction
@@ -858,6 +888,8 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
   // ...
 });
 ```
+
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -909,8 +941,6 @@ public async onActionMethod(req: ActionRequest<typeof MyEntity.actions.AnAction>
 
 ```
 
-> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
 `Equivalent to 'JS'`
 
 ```typescript
@@ -940,8 +970,6 @@ public async draftMethodAndNonDraft(results: MyEntity[], req: TypedRequest<MyEnt
   // ...
 }
 ```
-
-> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Equivalent to 'JS'`
 
@@ -980,8 +1008,6 @@ public async methodWithoutDraft(req: TypedRequest<MyEntity>) {
 }
 ```
 
-> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
 `Equivalent to 'JS'`
 
 ```typescript
@@ -995,6 +1021,8 @@ this.before(['UPDATE', 'CREATE'], MyEntity, async (req) => {
   // ...
 });
 ```
+
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -1026,6 +1054,8 @@ this.on('NEW', MyEntity.drafts, async (req, next) => {
 });
 ```
 
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### OnCancelDraft
@@ -1055,6 +1085,8 @@ this.on('CANCEL', MyEntity.drafts, async (req, next) => {
   // ...
 });
 ```
+
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -1086,6 +1118,8 @@ this.on('EDIT', MyEntity, async (req, next) => {
 });
 ```
 
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ###### OnSaveDraft
@@ -1116,6 +1150,8 @@ this.on('SAVE', MyEntity, async (req, next) => {
   // ...
 });
 ```
+
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -1162,8 +1198,6 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 }
 ```
 
-> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
 `Example 2` : Differing behavior for single instance and entity set requests
 
 Method `AfterRead()` will be executed on single instance request and entity set
@@ -1185,7 +1219,7 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 }
 ```
 
-> `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> [!NOTE] > `MyEntity` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
