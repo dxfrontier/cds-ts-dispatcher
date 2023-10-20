@@ -222,7 +222,7 @@ class CustomerRepository {
 
 ###### Optional BaseRepository
 
-The SAP CAP **[CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql)** **[BaseRepository](https://github.com/dxfrontier/cds-ts-repository)** was designed to reduce the boilerplate code required to implement data access layer for persistance entities.
+The **[CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql)** **[BaseRepository](https://github.com/dxfrontier/cds-ts-repository)** was designed to reduce the boilerplate code required to implement data access layer for persistance entities.
 
 It simplifies the implementation by offering a set of ready-to-use actions for interacting with the database. These actions include:
 
