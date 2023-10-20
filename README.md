@@ -377,7 +377,7 @@ See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/c
 
 **@BeforeCreate**()
 
-It is important to note that decorator `@BeforeCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@BeforeCreate()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -408,7 +408,7 @@ this.before('CREATE', MyEntity, async (req) => {
 
 **@BeforeRead**()
 
-It is important to note that decorator `@BeforeRead()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@BeforeRead()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -439,7 +439,7 @@ this.before('READ', MyEntity, async (req) => {
 
 **@BeforeUpdate**()
 
-It is important to note that decorator `@BeforeUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@BeforeUpdate()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -470,7 +470,7 @@ this.before('UPDATE', MyEntity, async (req) => {
 
 **@BeforeDelete**()
 
-It is important to note that decorator `@BeforeDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@BeforeDelete()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -517,7 +517,7 @@ See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/co
 
 **@AfterCreate**()
 
-It is important to note that decorator `@AfterCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@AfterCreate()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -550,7 +550,7 @@ this.after('CREATE', MyEntity, async (req) => {
 
 `Example`
 
-It is important to note that decorator `@AfterRead()` will use always point to [EntityHandler](#entityhandler) `argument` `MyEntity`
+It is important to note that decorator `@AfterRead()` will be triggered base on the [EntityHandler](#entityhandler) `argument` `MyEntity`
 
 ```typescript
 import { AfterRead, TypedRequest } from "cds-ts-dispatcher";
@@ -579,7 +579,7 @@ this.after('READ', MyEntity, async (req) => {
 
 **@AfterUpdate**()
 
-It is important to note that decorator `@AfterUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@AfterUpdate()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -610,7 +610,7 @@ this.after('UPDATE', MyEntity, async (result, req) => {
 
 **@AfterDelete**()
 
-It is important to note that decorator `@AfterDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@AfterDelete()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -655,7 +655,7 @@ See also the official SAP JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-
 
 **@OnCreate**()
 
-It is important to note that decorator `@OnCreate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@OnCreate()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -686,7 +686,7 @@ this.on('CREATE', MyEntity, async (req, next) => {
 
 **@OnRead**()
 
-It is important to note that decorator `@OnRead()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@OnRead()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -717,7 +717,7 @@ this.on('READ', MyEntity, async (req, next) => {
 
 **@OnUpdate**()
 
-It is important to note that decorator `@OnUpdate()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@OnUpdate()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -749,7 +749,7 @@ this.on('UPDATE', MyEntity, async (req, next) => {
 
 **@OnDelete**()
 
-It is important to note that decorator `@OnDelete()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@OnDelete()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -847,7 +847,7 @@ this.on(AFunction, async (req) => {
 
 **@OnBoundAction**(`name` : CdsFunction)
 
-It is important to note that decorator `@OnBoundAction()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@OnBoundAction()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Parameters`
 
@@ -882,7 +882,7 @@ this.on(MyEntity.actions.AnAction, MyEntity, async (req) => {
 
 **@OnBoundFunction**(`name` : CdsFunction)
 
-It is important to note that decorator `@OnBoundFunction()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@OnBoundFunction()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Parameters`
 
@@ -1053,7 +1053,7 @@ this.before(['UPDATE', 'CREATE'], MyEntity, async (req) => {
 
 This decorator will be triggered when `a new draft is created`.
 
-It is important to note that decorator `@OnNewDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@OnNewDraft()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1086,7 +1086,7 @@ this.on('NEW', MyEntity.drafts, async (req, next) => {
 
 This decorator will be triggered when `a draft is cancelled`.
 
-It is important to note that decorator `@OnCancelDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@OnCancelDraft()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1119,7 +1119,7 @@ this.on('CANCEL', MyEntity.drafts, async (req, next) => {
 
 This decorator will be triggered when `a new draft is created from an active instance`
 
-It is important to note that decorator `@OnEditDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@OnEditDraft()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1152,7 +1152,7 @@ this.on('EDIT', MyEntity, async (req, next) => {
 
 This decorator will be triggered when `the active entity is changed`
 
-It is important to note that decorator `@OnSaveDraft()` will use always point to [EntityHandler](#entityhandler) `argument` => `MyEntity`
+It is important to note that decorator `@OnSaveDraft()` will be triggered base on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
