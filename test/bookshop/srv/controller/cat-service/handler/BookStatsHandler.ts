@@ -59,7 +59,10 @@ class BookStatsHandler {
 
   // This function will be triggered on the 'BookStat' entity
   @OnBoundFunction(BookStat.actions.NotifyAuthor)
-  public async onBoundFunctionMethod(req: ActionRequest<typeof BookStat.actions.NotifyAuthor>, _: Function) {
+  public async onBoundFunctionMethod(
+    req: ActionRequest<typeof BookStat.actions.NotifyAuthor>,
+    _: Function,
+  ): ActionReturn<typeof BookStat.actions.NotifyAuthor> {
     return this.authorService.notifyAuthor(req);
   }
 }
