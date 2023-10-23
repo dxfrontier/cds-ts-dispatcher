@@ -10,8 +10,10 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 
 - [CDS-TS Dispatcher](#cds-ts-dispatcher)
   - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-    - [Install CDS-TS-Dispatcher](#install-cds-ts-dispatcher)
+    - [Install CDS-TS-Dispatcher - New project](#install-cds-ts-dispatcher---new-project)
+    - [Install CDS-TS-Dispatcher - Existing project](#install-cds-ts-dispatcher---existing-project)
     - [Generate CDS Typed entities](#generate-cds-typed-entities)
   - [Architecture](#architecture)
   - [`[Optional]` - BaseRepository](#optional---baserepository)
@@ -60,12 +62,76 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
   - [License](#license)
   - [Authors](#authors)
 
-## Installation
+## Prerequisites
 
-### Install CDS-TS-Dispatcher
+Install [**@sap/cds-dk**](https://cap.cloud.sap/docs/get-started/) globally:
 
 ```bash
-npm install cds-ts-dispatcher
+npm i -g @sap/cds-dk
+```
+
+## Installation
+
+### Install CDS-TS-Dispatcher - New project
+
+Use the following steps if you want to create a new **SAP CAP project.**
+
+1. Create new folder :
+
+```bash
+mkdir new-sap-cap-project
+cd new-sap-cap-project
+```
+
+2. Initialize the CDS folder structure :
+
+```bash
+cds init
+```
+
+3. Add the most up-to-date packages :
+
+```bash
+npm install @sap/cds@latest express@latest @cap-js/sqlite@latest typescript
+npm install --save-dev @dxfrontier/cds-ts-dispatcher @types/node
+```
+
+4. Add a **tsconfig.json** :
+
+```bash
+tsc --init
+```
+
+5. It is recommended to use the following **tsconfig.json** properties:
+
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "target": "ES2020",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+6. Run the `CDS-TS` server
+
+```bash
+cds-ts watch
+```
+
+### Install CDS-TS-Dispatcher - Existing project
+
+Use the following steps if you want to add only the **@dxfrontier/cds-ts-dispatcher to an existing project :**
+
+```bash
+npm install @dxfrontier/cds-ts-dispatcher
 ```
 
 It is recommended to use the following **tsconfig.json** properties:
@@ -73,17 +139,14 @@ It is recommended to use the following **tsconfig.json** properties:
 ```json
 {
   "compilerOptions": {
-    "target": "ES2020",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "target": "ES2020",
     "module": "commonjs",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": false,
     "skipLibCheck": true
   }
 }

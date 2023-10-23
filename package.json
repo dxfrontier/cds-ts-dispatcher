@@ -1,12 +1,12 @@
 {
   "name": "@dxfrontier/cds-ts-dispatcher",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "SAP CAP NodeJS-based project using TypesScript decorators for rapid development. The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.",
-  "main": "/dist/index.js",
-  "module": "/dist/index.mjs",
-  "types": "/dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
-    "/dist"
+    "./dist"
   ],
   "workspaces": [
     "./test/bookshop"
@@ -22,7 +22,8 @@
     "test:newman": "newman run ./test/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/e2e/environment.json --bail",
     "start:bookshop": "npm run start --prefix ./test/bookshop",
     "prepare": "husky install",
-    "build": "tsup"
+    "build": "echo 'build cds-ts-dispatcher' && tsup",
+    "clean:build": "echo 'Clean dist folder' && npx rimraf ./dist/{*.js,*.map,*.ts,*.mts,*.mjs}"
   },
   "repository": {
     "type": "git",
@@ -60,6 +61,7 @@
   },
   "devDependencies": {
     "@cap-js/sqlite": "^1.3.1",
+    "@cap-js/cds-typer": "^0.10.0",
     "@types/jest": "^29.5.6",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
@@ -77,12 +79,14 @@
     "ts-jest": "^29.1.1",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2"
+
   },
   "lint-staged": {
     "**/*.{ts, tsx}": [
       "npm run eslint:fix",
       "npm run prettier:fix",
-      "npm run test --bail --findRelatedTests ./test"
+      "npm run test --bail --findRelatedTests ./test",
+      "npm run build"
     ]
   }
 }
