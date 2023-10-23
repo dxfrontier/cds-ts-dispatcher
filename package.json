@@ -1,5 +1,5 @@
 {
-  "name": "cds-ts-dispatcher",
+  "name": "@dxfrontier/cds-ts-dispatcher",
   "version": "0.1.0",
   "description": "SAP CAP NodeJS-based project using TypesScript decorators for rapid development. The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.",
   "main": "lib/index.ts",
