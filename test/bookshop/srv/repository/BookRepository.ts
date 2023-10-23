@@ -1,5 +1,5 @@
-import { Repository } from '../../../../lib';
-import { TypedRequest } from '../../../../lib/util/types/types';
+import { Repository } from '../../../../dist';
+import { TypedRequest } from '../../../../dist';
 import { Book } from '../util/types/entities/CatalogService';
 
 @Repository()

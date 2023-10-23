@@ -6,10 +6,10 @@ import {
   EntityHandler,
   Inject,
   ServiceHelper,
-} from '../../../../../../lib';
+} from '../../../../../../dist';
 import { Request, Service } from '@sap/cds';
 import { Review } from '../../../util/types/entities/CatalogService';
-import { TypedRequest } from '../../../../../../lib/util/types/types';
+import { TypedRequest } from '../../../../../../dist';
 import ReviewService from '../../../service/ReviewService';
 
 @EntityHandler(Review)

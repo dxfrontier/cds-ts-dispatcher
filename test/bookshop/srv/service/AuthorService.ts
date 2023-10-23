@@ -1,7 +1,7 @@
 import { Service } from '@sap/cds';
-import { Inject, ServiceHelper, ServiceLogic } from '../../../../lib';
+import { Inject, ServiceHelper, ServiceLogic } from '../../../../dist';
 import { Book } from '../util/types/entities/CatalogService';
-import { ActionRequest, TypedRequest } from '../../../../lib/util/types/types';
+import { ActionRequest, TypedRequest } from '../../../../dist';
 import { BookStat } from '../util/types/entities/CatalogService';
 import BookStatsRepository from '../repository/BookStatsRepository';
 

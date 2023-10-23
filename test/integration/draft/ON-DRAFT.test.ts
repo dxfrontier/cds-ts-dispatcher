@@ -1,5 +1,5 @@
 import { Request } from '@sap/cds';
-import { OnCancelDraft, OnEditDraft, OnNewDraft, OnSaveDraft } from '../../../lib';
+import { OnCancelDraft, OnEditDraft, OnNewDraft, OnSaveDraft } from '../../../dist';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 

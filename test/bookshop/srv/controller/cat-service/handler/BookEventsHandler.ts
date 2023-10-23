@@ -9,10 +9,10 @@ import {
   OnSaveDraft,
   ServiceHelper,
   SingleInstanceCapable,
-} from '../../../../../../lib';
+} from '../../../../../../dist';
 import { Request, Service } from '@sap/cds';
 import { BookEvent } from '../../../util/types/entities/CatalogService';
-import { TypedRequest } from '../../../../../../lib/util/types/types';
+import { TypedRequest } from '../../../../../../dist';
 
 @EntityHandler(BookEvent)
 class BookEventsHandler {

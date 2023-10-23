@@ -1,5 +1,5 @@
 import { Request } from '@sap/cds';
-import { Draft, OnCancelDraft, OnEditDraft, OnNewDraft, OnSaveDraft } from '../../lib';
+import { Draft, OnCancelDraft, OnEditDraft, OnNewDraft, OnSaveDraft } from '../../dist';
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { CRUD_EVENTS, DRAFT_EVENTS, HandlerType } from '../../lib/util/types/types';
@@ -29,7 +29,7 @@ describe('DRAFT', () => {
   function testEvent(event: CRUD_EVENTS | DRAFT_EVENTS, eventName: string) {
     describe(`@${eventName}`, () => {
       test(`It should RETURN : all defined properties for this @${eventName} decorator`, () => {
-        const foundEvent = decoratorProps.filter((item) => item.event === event)[0];
+        const foundEvent = decoratorProps.filter((item: any) => item.event === event)[0];
 
         expect(foundEvent.callback).toBeDefined();
         expect(foundEvent.event).toBe(event);

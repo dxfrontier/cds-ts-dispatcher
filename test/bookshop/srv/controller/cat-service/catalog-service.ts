@@ -1,4 +1,4 @@
-import { CDSDispatcher } from '../../../../../lib/index';
+import { CDSDispatcher } from '../../../../../dist';
 import BookEventsHandler from './handler/BookEventsHandler';
 import BookHandler from './handler/BookHandler';
 import BookStatsHandler from './handler/BookStatsHandler';

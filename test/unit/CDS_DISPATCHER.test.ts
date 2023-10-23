@@ -1,4 +1,4 @@
-import { CDSDispatcher } from '../../lib/util/helpers/CDSDispatcher';
+import { CDSDispatcher } from '../../dist';
 import { Book } from '../bookshop/srv/util/types/entities/CatalogService';
 
 describe('CDSDispatcher', () => {

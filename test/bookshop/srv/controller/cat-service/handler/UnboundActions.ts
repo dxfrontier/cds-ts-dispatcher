@@ -1,6 +1,6 @@
-import { Inject, OnAction, OnFunction, ServiceHelper, UnboundActions } from '../../../../../../lib';
+import { Inject, OnAction, OnFunction, ServiceHelper, UnboundActions } from '../../../../../../dist';
 import { Service } from '@sap/cds';
-import { ActionRequest, ActionReturn } from '../../../../../../lib/util/types/types';
+import { ActionRequest, ActionReturn } from '../../../../../../dist';
 import { submitOrder, submitOrderFunction } from '../../../util/types/entities/CatalogService';
 
 @UnboundActions()

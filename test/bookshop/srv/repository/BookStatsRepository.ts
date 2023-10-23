@@ -1,5 +1,5 @@
-import { Repository } from '../../../../lib';
-import { ActionRequest, TypedRequest } from '../../../../lib/util/types/types';
+import { Repository } from '../../../../dist';
+import { ActionRequest, TypedRequest } from '../../../../dist';
 import { Author, Book, BookStat } from '../util/types/entities/CatalogService';
 
 @Repository()

@@ -1,5 +1,5 @@
 import { Request } from '@sap/cds';
-import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate } from '../../lib';
+import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate } from '../../dist';
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { CRUD_EVENTS, HandlerType } from '../../lib/util/types/types';

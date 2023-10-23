@@ -1,5 +1,5 @@
 import { Constructable } from '@sap/cds/apis/internal/inference';
-import { EntityHandler } from '../../lib';
+import { EntityHandler } from '../../dist';
 import { Book } from '../bookshop/srv/util/types/entities/sap/capire/bookshop';
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 

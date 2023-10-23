@@ -1,7 +1,7 @@
 import { Service } from '@sap/cds';
-import { Inject, ServiceHelper, ServiceLogic } from '../../../../lib';
+import { Inject, ServiceHelper, ServiceLogic } from '../../../../dist';
 import { Review } from '../util/types/entities/CatalogService';
-import { TypedRequest } from '../../../../lib/util/types/types';
+import { TypedRequest } from '../../../../dist';
 
 @ServiceLogic()
 class ReviewService {
