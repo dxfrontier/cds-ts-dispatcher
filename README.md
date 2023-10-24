@@ -89,11 +89,11 @@ cd new-sap-cap-project
 cds init
 ```
 
-3. Add the most up-to-date packages :
+1. Add the the following NPM packages :
 
 ```bash
-npm install @sap/cds@latest express@latest @cap-js/sqlite@latest typescript
-npm install --save-dev @dxfrontier/cds-ts-dispatcher @types/node
+npm install @sap/cds express
+npm install --save-dev @dxfrontier/cds-ts-dispatcher @types/node @cap-js/sqlite typescript
 ```
 
 4. Add a **tsconfig.json** :
@@ -375,7 +375,7 @@ The `@Inject` decorator is utilized as a `field-level` decorator and allows you 
 ```typescript
 import { Service } from "@sap/cds";
 
-import { EntityHandler, Inject, ServiceHelper } from "cds-ts-dispatcher";
+import { EntityHandler, Inject, ServiceHelper } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
@@ -403,7 +403,7 @@ This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repos
 
 ```typescript
 import { Service } from "@sap/cds";
-import { EntityHandler, Inject, ServiceHelper } from "cds-ts-dispatcher";
+import { EntityHandler, Inject, ServiceHelper } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
@@ -445,7 +445,7 @@ It is important to note that decorator `@BeforeCreate()` will be triggered based
 `Example`
 
 ```typescript
-import { BeforeCreate, TypedRequest } from "cds-ts-dispatcher";
+import { BeforeCreate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeCreate()
@@ -476,7 +476,7 @@ It is important to note that decorator `@BeforeRead()` will be triggered based o
 `Example`
 
 ```typescript
-import { BeforeRead, TypedRequest } from "cds-ts-dispatcher";
+import { BeforeRead, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeRead()
@@ -507,7 +507,7 @@ It is important to note that decorator `@BeforeUpdate()` will be triggered based
 `Example`
 
 ```typescript
-import { BeforeUpdate, TypedRequest } from "cds-ts-dispatcher";
+import { BeforeUpdate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeUpdate()
@@ -538,7 +538,7 @@ It is important to note that decorator `@BeforeDelete()` will be triggered based
 `Example`
 
 ```typescript
-import { BeforeDelete, TypedRequest } from "cds-ts-dispatcher";
+import { BeforeDelete, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeDelete()
@@ -585,7 +585,7 @@ It is important to note that decorator `@AfterCreate()` will be triggered based 
 `Example`
 
 ```typescript
-import { AfterCreate, TypedRequest } from "cds-ts-dispatcher";
+import { AfterCreate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterCreate()
@@ -616,7 +616,7 @@ this.after('CREATE', MyEntity, async (req) => {
 It is important to note that decorator `@AfterRead()` will be triggered based on the [EntityHandler](#entityhandler) `argument` `MyEntity`
 
 ```typescript
-import { AfterRead, TypedRequest } from "cds-ts-dispatcher";
+import { AfterRead, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterRead()
@@ -647,7 +647,7 @@ It is important to note that decorator `@AfterUpdate()` will be triggered based 
 `Example`
 
 ```typescript
-import { AfterUpdate, TypedRequest } from "cds-ts-dispatcher";
+import { AfterUpdate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterUpdate()
@@ -679,7 +679,7 @@ It is important to note that decorator `@AfterDelete()` will be triggered based 
 
 ```typescript
 import { Request } from "@sap/cds";
-import { AfterDelete } from "cds-ts-dispatcher";
+import { AfterDelete } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterDelete()
@@ -723,7 +723,7 @@ It is important to note that decorator `@OnCreate()` will be triggered based on 
 `Example`
 
 ```typescript
-import { OnCreate, TypedRequest } from "cds-ts-dispatcher";
+import { OnCreate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnCreate()
@@ -754,7 +754,7 @@ It is important to note that decorator `@OnRead()` will be triggered based on th
 `Example`
 
 ```typescript
-import { OnRead, TypedRequest } from "cds-ts-dispatcher";
+import { OnRead, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnRead()
@@ -786,7 +786,7 @@ It is important to note that decorator `@OnUpdate()` will be triggered based on 
 
 ```typescript
 
-import { OnUpdate, TypedRequest } from "cds-ts-dispatcher";
+import { OnUpdate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnUpdate()
@@ -817,7 +817,7 @@ It is important to note that decorator `@OnDelete()` will be triggered based on 
 `Example`
 
 ```typescript
-import { OnDelete, TypedRequest } from "cds-ts-dispatcher";
+import { OnDelete, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnDelete()
@@ -851,7 +851,7 @@ this.on('DELETE', MyEntity, async (req, next) => {
 
 ```typescript
 
-import { OnAction, ActionRequest, ActionReturn } from "cds-ts-dispatcher";
+import { OnAction, ActionRequest, ActionReturn } from "@dxfrontier/cds-ts-dispatcher";
 import { AnAction } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnAction(AnAction)
@@ -884,7 +884,7 @@ this.on(AnAction, async (req, next) => {
 `Example`
 
 ```typescript
-import { OnFunction, ActionRequest, ActionReturn } from "cds-ts-dispatcher";
+import { OnFunction, ActionRequest, ActionReturn } from "@dxfrontier/cds-ts-dispatcher";
 import { AFunction } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnFunction(AFunction)
@@ -919,7 +919,7 @@ It is important to note that decorator `@OnBoundAction()` will be triggered base
 `Example`
 
 ```typescript
-import { OnBoundAction, ActionRequest, ActionReturn } from "cds-ts-dispatcher";
+import { OnBoundAction, ActionRequest, ActionReturn } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnBoundAction(MyEntity.actions.AnAction)
@@ -954,7 +954,7 @@ It is important to note that decorator `@OnBoundFunction()` will be triggered ba
 `Example`
 
 ```typescript
-import { OnBoundFunction, ActionRequest, ActionReturn } from "cds-ts-dispatcher";
+import { OnBoundFunction, ActionRequest, ActionReturn } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnBoundFunction(MyEntity.actions.AFunction)
@@ -1005,7 +1005,7 @@ When utilizing the `@Draft()` decorator, the `placement of the @Draft() decorato
 `Example 1`
 
 ```typescript
-import { AfterRead, AfterUpdate, AfterDelete, OnBoundAction, Draft, TypedRequest} from "cds-ts-dispatcher";
+import { AfterRead, AfterUpdate, AfterDelete, OnBoundAction, Draft, TypedRequest} from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterUpdate() // Will be marked as draft
@@ -1042,7 +1042,7 @@ When using `@Draft()` in-between other `Decorators`. The above decorators of the
 The rest `Decorators` below `@Draft()` will be work on active entities.
 
 ```typescript
-import { AfterCreate, AfterUpdate, AfterRead, OnBoundAction, Draft, TypedRequest } from "cds-ts-dispatcher";
+import { AfterCreate, AfterUpdate, AfterRead, OnBoundAction, Draft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterUpdate() // Marked as a draft
@@ -1073,7 +1073,7 @@ this.after(['CREATE', 'READ'], MyEntity, async (results, req) => {
 `Alternative to all above is to split between` `@Draft` and `Active entities`.
 
 ```typescript
-import { BeforeUpdate, BeforeCreate, Draft, TypedRequest } from "cds-ts-dispatcher";
+import { BeforeUpdate, BeforeCreate, Draft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeUpdate()
@@ -1121,7 +1121,7 @@ It is important to note that decorator `@OnNewDraft()` will be triggered based o
 `Example`
 
 ```typescript
-import { OnNewDraft, TypedRequest } from "cds-ts-dispatcher";
+import { OnNewDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnNewDraft()
@@ -1154,7 +1154,7 @@ It is important to note that decorator `@OnCancelDraft()` will be triggered base
 `Example`
 
 ```typescript
-import { OnCancelDraft, TypedRequest } from "cds-ts-dispatcher";
+import { OnCancelDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnCancelDraft()
@@ -1187,7 +1187,7 @@ It is important to note that decorator `@OnEditDraft()` will be triggered based 
 `Example`
 
 ```typescript
-import { OnEditDraft, TypedRequest } from "cds-ts-dispatcher";
+import { OnEditDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnEditDraft()
@@ -1221,7 +1221,7 @@ It is important to note that decorator `@OnSaveDraft()` will be triggered based 
 
 ```typescript
 
-import { OnSaveDraft, TypedRequest } from "cds-ts-dispatcher";
+import { OnSaveDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnSaveDraft()
@@ -1272,7 +1272,7 @@ All methods `AfterRead() 'BeforeRead()', 'OnRead()'` will be executed on single 
 
 ```typescript
 
-import { AfterRead, SingleInstanceCapable, TypedRequest } from "cds-ts-dispatcher";
+import { AfterRead, SingleInstanceCapable, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterRead() // Will handle single instance and entity set
