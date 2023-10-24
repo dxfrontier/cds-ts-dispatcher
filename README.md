@@ -201,7 +201,7 @@ The `CDSDispatcher` constructor allows you to create an instance for dispatching
 `Example`
 
 ```typescript
-import { CDSDispatcher } from 'cds-ts-dispatcher';
+import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
 
 module.exports = new CDSDispatcher([BookHandler, ReviewHandler, UnboundActionsHandler, ...]).initialize();
 ```
@@ -229,7 +229,7 @@ The `@EntityHandler` decorator is utilized at the `class-level` to annotate a cl
 `Example`
 
 ```typescript
-import { EntityHandler } from 'cds-ts-dispatcher';
+import { EntityHandler } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
@@ -255,7 +255,7 @@ When applying `ServiceLogic` decorator, the class becomes eligible to be used wi
 `Example`
 
 ```typescript
-import { ServiceLogic } from 'cds-ts-dispatcher';
+import { ServiceLogic } from '@dxfrontier/cds-ts-dispatcher';
 
 @ServiceLogic()
 class CustomerService {
@@ -275,7 +275,7 @@ The `@Repository` decorator is utilized as a `class-level` annotation that desig
 When applying `Repository` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`
 
 ```typescript
-import { Repository } from 'cds-ts-dispatcher';
+import { Repository } from '@dxfrontier/cds-ts-dispatcher';
 
 @Repository()
 class CustomerRepository {
@@ -302,8 +302,8 @@ To get started, refer to the official documentation **[BaseRepository](https://g
 `Example`
 
 ```typescript
-import { Repository } from 'cds-ts-dispatcher';
-import { BaseRepository } from 'cds-ts-repository';
+import { Repository } from '@dxfrontier/cds-ts-dispatcher';
+import { BaseRepository } from '@dxfrontier/cds-ts-repository';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @Repository()
@@ -335,7 +335,7 @@ The `@UnboundActions` decorator is utilized at the `class-level` to annotate a `
 `Example`
 
 ```typescript
-import { UnboundActions } from 'cds-ts-dispatcher';
+import { UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
 
 @UnboundActions()
 class UnboundActionsHandler {
@@ -348,7 +348,7 @@ class UnboundActionsHandler {
 `Imported it in the CDSDispatcher`
 
 ```typescript
-import { CDSDispatcher } from 'cds-ts-dispatcher';
+import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
 
 module.exports = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
 ```
