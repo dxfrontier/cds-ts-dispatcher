@@ -29,7 +29,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
       - [Fields](#fields)
         - [Inject](#inject)
         - [Inject SRV](#inject-srv)
-      - [Methods](#methods)
+      - [Methods - `active entity`](#methods---active-entity)
         - [Before](#before)
           - [BeforeCreate](#beforecreate)
           - [BeforeRead](#beforeread)
@@ -49,14 +49,24 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
           - [OnFunction](#onfunction)
           - [OnBoundAction](#onboundaction)
           - [OnBoundFunction](#onboundfunction)
-        - [Fiori draft](#fiori-draft)
-          - [Draft](#draft)
+      - [Methods : `draft entity`](#methods--draft-entity)
+        - [Before](#before-1)
+          - [BeforeNewDraft](#beforenewdraft)
+          - [BeforeCancelDraft](#beforecanceldraft)
+          - [BeforeEditDraft](#beforeeditdraft)
+          - [BeforeSaveDraft](#beforesavedraft)
+        - [After](#after-1)
+          - [AfterNewDraft](#afternewdraft)
+          - [AfterCancelDraft](#aftercanceldraft)
+          - [AfterEditDraft](#aftereditdraft)
+          - [AfterSaveDraft](#aftersavedraft)
+        - [On](#on-1)
           - [OnNewDraft](#onnewdraft)
           - [OnCancelDraft](#oncanceldraft)
           - [OnEditDraft](#oneditdraft)
           - [OnSaveDraft](#onsavedraft)
-        - [SingleInstanceCapable](#singleinstancecapable)
-          - [Usage](#usage-1)
+      - [Method : `SingleInstanceCapable`](#method--singleinstancecapable)
+        - [Usage](#usage-1)
   - [Examples](#examples)
   - [Contributing](#contributing)
   - [License](#license)
@@ -422,7 +432,7 @@ class CustomerHandler { // OR CustomerService, CustomerRepository
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-#### Methods
+#### Methods - `active entity`
 
 ##### Before
 
@@ -431,6 +441,9 @@ Use `@BeforeCreate(), @BeforeRead(), @BeforeUpdate(), @BeforeDelete()` to regist
 The handlers receive one argument:
 
 - `req` of type `TypedRequest`
+
+> [!NOTE]
+> If `@odata.draft.enabled: true` use **@BeforeCreateDraft(), BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()**
 
 See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) event**
 
@@ -572,6 +585,9 @@ The results from the preceding `.on` handler, with the following types:
 
 - `req` of type `TypedRequest`
 
+> [!NOTE]
+> If `@odata.draft.enabled: true` use **@AfterCreateDraft(), AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()**
+
 See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -710,7 +726,10 @@ The handlers receive one argument:
 - `req` of type `TypedRequest`
 - `next` of type `Function`
 
-See also the official SAP JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request) event**
+> [!NOTE]
+> If `@odata.draft.enabled: true` use **@OnCreateDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft()**
+
+> See also the official SAP JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request) event**
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -976,80 +995,33 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-##### Fiori draft
+#### Methods : `draft entity`
 
-Use `@OnNewDraft(), @OnCancelDraft(), @OnEditDraft(), OnSaveDraft()` handlers to support for both, `active and draft entities`.
+All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
 
-The handlers receive one argument:
+> [!NOTE]
+> Except the @OnAction(), @OnFunction() as this are bound directly to the service and not to an entity.
 
-- `req` of type `TypedRequest`
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-See also the official SAP JS **[CDS-Fiori-draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)**
+##### Before
 
-###### Draft
+###### BeforeNewDraft
 
-**@Draft()**
+**@BeforeNewDraft**()
 
-The `@Draft()` decorator is utilized at the `method-level` to annotate a method that this method and all decorators which are used along with this `Draft()` decorator, will be marked as a `Draft`.
+Use this decorator when you want to validate inputs before a new draft is created.
 
-`Important`
+It is important to note that decorator `@BeforeNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
-When utilizing the `@Draft()` decorator, the `placement of the @Draft() decorator` within your TypeScript class is very important factor to consider. It determines the scope of the `draft` mode within the methods that precede it.
-
-`@Draft` can be used together with the following decorator actions :
-
-- `@BeforeCreate, @BeforeRead, @BeforeUpdate, @BeforeDelete`
-- `@AfterCreate, @AfterRead, @AfterUpdate, @AfterDelete`
-- `@OnBoundAction, @OnBoundFunction`
-
-`Example 1`
+`Example`
 
 ```typescript
-import { AfterRead, AfterUpdate, AfterDelete, OnBoundAction, Draft, TypedRequest} from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeNewDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-@AfterUpdate() // Will be marked as draft
-@AfterDelete() // Will be marked as draft
-@AfterRead() // Will be marked as draft
-@Draft() // All methods above '@Draft()' will be triggered on 'MyEntity.drafts'
-public async draftMethod(results: MyEntity[], req: TypedRequest<MyEntity>) {
-  // ...
-}
-
-@OnBoundAction(MyEntity.actions.AnAction)
-@Draft()
-public async onActionMethod(req: ActionRequest<typeof MyEntity.actions.AnAction>, next: Function): ActionReturn<typeof MyEntity.actions.AnAction>
-  // ...
-}
-
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.after(['UPDATE, CREATE, READ'], MyEntity.drafts, async (req) => {
-  // ...
-});
-
-this.on(MyEntity.actions.AnAction, MyEntity.drafts, async (req, next) => {
-  // ...
-});
-```
-
-`Example 2`
-
-When using `@Draft()` in-between other `Decorators`. The above decorators of the `@Draft()` will be placed `only as Draft`.
-The rest `Decorators` below `@Draft()` will be work on active entities.
-
-```typescript
-import { AfterCreate, AfterUpdate, AfterRead, OnBoundAction, Draft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterUpdate() // Marked as a draft
-@Draft() // Draft is in-between 'after', this means that only '@AfterUpdate' will me marked as draft
-@AfterCreate() // Will work on active entity
-@AfterRead() // Will work on active entity
-public async draftMethodAndNonDraft(results: MyEntity[], req: TypedRequest<MyEntity>) {
+@BeforeNewDraft()
+public async beforeCreateDraftMethod(req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1057,50 +1029,7 @@ public async draftMethodAndNonDraft(results: MyEntity[], req: TypedRequest<MyEnt
 `Equivalent to 'JS'`
 
 ```typescript
-// FOR DRAFT
-this.after('UPDATE', MyEntity.drafts, async (results, req) => {
-  // ...
-});
-
-// FOR ACTIVE ENTITIES
-this.after(['CREATE', 'READ'], MyEntity, async (results, req) => {
-  // ...
-});
-```
-
-`Example 3`
-
-`Alternative to all above is to split between` `@Draft` and `Active entities`.
-
-```typescript
-import { BeforeUpdate, BeforeCreate, Draft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@BeforeUpdate()
-@BeforeCreate()
-@Draft() // All above decorators will be marked AS DRAFT
-public async draftMethod(req: TypedRequest<MyEntity>) {
-  // ...
-}
-
-// All decorators will work only FOR ACTIVE ENTITIES
-@BeforeUpdate()
-@BeforeCreate()
-public async methodWithoutDraft(req: TypedRequest<MyEntity>) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-// FOR DRAFT
-this.before(['UPDATE', 'CREATE'], MyEntity.drafts, async (req) => {
-  // ...
-});
-
-// FOR ACTIVE ENTITIES
-this.before(['UPDATE', 'CREATE'], MyEntity, async (req) => {
+this.before('NEW', MyEntity.drafts, async (req) => {
   // ...
 });
 ```
@@ -1109,6 +1038,226 @@ this.before(['UPDATE', 'CREATE'], MyEntity, async (req) => {
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+###### BeforeCancelDraft
+
+**@BeforeCancelDraft**()
+
+Use this decorator when you want to validate inputs before a draft is discarded.
+
+It is important to note that decorator `@BeforeCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
+
+`Example`
+
+```typescript
+import { BeforeCancelDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeCancelDraft()
+public async beforeCancelDraftMethod(req: TypedRequest<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('CANCEL', MyEntity.drafts, async (req) => {
+  // ...
+});
+```
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+###### BeforeEditDraft
+
+**@BeforeEditDraft**()
+
+Use this decorator when you want to validate inputs when a new draft is created from an active instance.
+
+It is important to note that decorator `@BeforeEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
+
+`Example`
+
+```typescript
+import { BeforeEditDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeEditDraft()
+public async beforeEditDraftMethod(req: TypedRequest<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('EDIT', MyEntity, async (req) => {
+  // ...
+});
+```
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+###### BeforeSaveDraft
+
+**@BeforeSaveDraft**()
+
+Use this decorator when you want to validate inputs when active entity is changed.
+
+It is important to note that decorator `@BeforeSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
+
+`Example`
+
+```typescript
+import { BeforeSaveDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeSaveDraft()
+public async beforeSaveDraftMethod(req: TypedRequest<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('SAVE', MyEntity, async (req) => {
+  // ...
+});
+```
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+##### After
+
+###### AfterNewDraft
+
+**@AfterNewDraft**()
+
+Use this decorator when you want to enhance outbound data when a new draft is created.
+
+It is important to note that decorator `@AfterNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
+
+`Example`
+
+```typescript
+import { AfterNewDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterNewDraft()
+public async afterNewDraftMethod(req: TypedRequest<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('NEW', MyEntity.drafts, async (req) => {
+  // ...
+});
+```
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+###### AfterCancelDraft
+
+**@AfterCancelDraft**()
+
+Use this decorator when you want to enhance outbound data when a draft is discarded.
+
+It is important to note that decorator `@AfterCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
+
+`Example`
+
+```typescript
+import { AfterCancelDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterCancelDraft()
+public async afterCancelDraftMethod(req: TypedRequest<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('CANCEL', MyEntity.drafts, async (req) => {
+  // ...
+});
+```
+
+###### AfterEditDraft
+
+**@AfterEditDraft**()
+
+Use this decorator when you want to enhance outbound data when a new draft is created from an active instance.
+
+It is important to note that decorator `@AfterEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
+
+`Example`
+
+```typescript
+import { AfterEditDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterEditDraft()
+public async afterEditDraftMethod(req: TypedRequest<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('EDIT', MyEntity, async (req) => {
+  // ...
+});
+```
+
+###### AfterSaveDraft
+
+**@AfterSaveDraft**()
+
+Use this decorator when you want to enhance outbound data when the active entity is changed.
+
+It is important to note that decorator `@AfterSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
+
+`Example`
+
+```typescript
+import { AfterSaveDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterSaveDraft()
+public async afterSaveDraftMethod(req: TypedRequest<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('SAVE', MyEntity, async (req) => {
+  // ...
+});
+```
+
+##### On
+
+Use [@OnNewDraft()](#onnewdraft), [@OnCancelDraft()](#oncanceldraft), [@OnCancelDraft()](#oncanceldraft), [@OnSaveDraft()](#onsavedraft) `handlers to support for both`, active and draft entities.
+
+The handlers receive one argument:
+
+- `req` of type `TypedRequest`
+
+See Official SAP **[Fiori-draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)**
 
 ###### OnNewDraft
 
@@ -1243,7 +1392,7 @@ this.on('SAVE', MyEntity, async (req, next) => {
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-##### SingleInstanceCapable
+#### Method : `SingleInstanceCapable`
 
 **@SingleInstanceCapable()**
 
@@ -1259,16 +1408,16 @@ When utilizing the `@SingleInstanceCapable()` decorator, the `placement of the @
 
 `@SingleInstanceCapable` can be used together with the following decorator actions :
 
-- `@AfterRead`
-- `@BeforeRead`
-- `@OnRead`
+- [@AfterRead()](#afterread)
+- [@BeforeRead()](#beforeread)
+- [@OnRead()](#onread)
 
 `Example 1` : Handling both single instance and entity set requests
 
-All methods `AfterRead() 'BeforeRead()', 'OnRead()'` will be executed on single instance when `isSingleInstance => true` request and `isSingleInstance => false` when entity set is requested.
+All methods `@AfterRead(), @BeforeRead(), @OnRead()` will be executed on single instance when `isSingleInstance => true` request and `isSingleInstance => false` when entity set is requested.
 
-- Example single request : http://localhost:4004/odata/v4/main/ `MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
-- Example entity set request : http://localhost:4004/odata/v4/main/ `MyEntity`
+- Example single request : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
+- Example entity set request : http://localhost:4004/odata/v4/main/MyEntity
 
 ```typescript
 
