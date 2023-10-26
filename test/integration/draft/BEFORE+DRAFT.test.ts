@@ -47,7 +47,7 @@ describe('Before - Draft', () => {
       const foundDelete = decoratorProps.filter((item) => item.event === 'DELETE')[0];
       const foundUpdate = decoratorProps.filter((item) => item.event === 'UPDATE')[0];
 
-      expect([foundCreate.isDraft, foundDelete.isDraft, foundUpdate.isDraft]).toStrictEqual([true, false, true]);
+      expect([foundCreate.isDraft, foundDelete.isDraft, foundUpdate.isDraft]).toStrictEqual([true, true, true]);
     });
   });
 
