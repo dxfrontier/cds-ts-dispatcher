@@ -1,16 +1,15 @@
 import { Request } from '@sap/cds';
-import { Draft, OnBoundAction, OnBoundFunction } from '../../../dist';
+import { OnBoundAction, OnBoundFunction } from '../../../dist';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { submitOrder } from '../../bookshop/srv/util/types/entities/CatalogService';
+import { OnBoundActionDraft, OnBoundFunctionDraft } from '../../../lib';
 
 class Customer {
-  @OnBoundAction(submitOrder)
-  @Draft()
+  @OnBoundActionDraft(submitOrder)
   public async BeforeReadMethod(req: Request, next: Function) {}
 
-  @OnBoundFunction(submitOrder)
-  @Draft()
+  @OnBoundFunctionDraft(submitOrder)
   public async BeforeCreateAndDeleteMethod(req: Request, next: Function) {}
 }
 
@@ -20,7 +19,7 @@ const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Custom
 describe('ON - Draft', () => {
   describe(`
   @OnBoundAction(testFn)
-  @Draft()`, () => {
+  `, () => {
     it('It should : mark @OnBoundAction(testFn) decorator as "draft"', () => {
       const found = decoratorProps.filter((item) => item.event === 'BOUND_ACTION')[0];
 
@@ -30,7 +29,7 @@ describe('ON - Draft', () => {
 
   describe(`
   @OnBoundFunction(testFn)
-  @Draft()`, () => {
+  `, () => {
     it('It should : mark @OnBoundFunction(testFn) decorator as "draft"', () => {
       const found = decoratorProps.filter((item) => item.event === 'BOUND_FUNC')[0];
 

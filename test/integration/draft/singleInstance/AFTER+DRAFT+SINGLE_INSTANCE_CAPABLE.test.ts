@@ -1,28 +1,26 @@
 import { Request } from '@sap/cds';
-import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, Draft, SingleInstanceCapable } from '../../../../dist';
+import { AfterCreate, AfterDelete, AfterRead, SingleInstanceCapable } from '../../../../dist';
 import { MetadataDispatcher } from '../../../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
+import { AfterCreateDraft, AfterDeleteDraft, AfterReadDraft, AfterUpdateDraft } from '../../../../lib';
 
 class Customer {
-  @AfterRead()
+  @AfterReadDraft()
   @SingleInstanceCapable()
-  @Draft()
   public async afterReadMethod(results: any[], req: Request, isSingleInstance: boolean) {}
 
-  @AfterCreate()
-  @AfterUpdate()
-  @AfterDelete()
+  @AfterCreateDraft()
+  @AfterUpdateDraft()
+  @AfterDeleteDraft()
   @SingleInstanceCapable()
-  @Draft()
   public async afterCreateAndDeleteMethod(results: any[] | boolean, req: Request, isSingleInstance: boolean) {}
 }
 
 class CustomerWithDraftInBetween {
   @AfterRead()
   @SingleInstanceCapable()
-  @AfterCreate()
-  @AfterUpdate()
-  @Draft()
+  @AfterCreateDraft()
+  @AfterUpdateDraft()
   @AfterDelete()
   public async afterReadMethod(results: any[] | boolean, req: Request, isSingleInstance: boolean) {}
 }
@@ -33,9 +31,9 @@ const decoratorPropsInBetweenDraft = MetadataDispatcher.getMetadataHandlers(newC
 
 describe('AFTER - Single instance capable', () => {
   describe(`
-  @AfterRead()
+  @AfterReadDraft()
   @SingleInstanceCapable()
-  @Draft()`, () => {
+  `, () => {
     it('It should : mark @AfterRead() decorator as "single instance" and as a "draft"', () => {
       const foundEvent = decoratorProps.filter((item) => item.event === 'READ')[0];
 
@@ -45,11 +43,11 @@ describe('AFTER - Single instance capable', () => {
   });
 
   describe(`
-  @AfterCreate() 
-  @AfterUpdate()
-  @AfterDelete()
+  @AfterCreateDraft()
+  @AfterUpdateDraft()
+  @AfterDeleteDraft()
   @SingleInstanceCapable()
-  @Draft()`, () => {
+  `, () => {
     it('It should : mark @AfterCreate(), @AfterUpdate(), @AfterDelete() decorators as "single instance" and as a "draft"', () => {
       const foundCreate = decoratorProps.filter((item) => item.event === 'CREATE')[0];
       const foundDelete = decoratorProps.filter((item) => item.event === 'DELETE')[0];
@@ -68,9 +66,8 @@ describe('AFTER - Single instance capable', () => {
   describe(`
   @AfterRead()
   @SingleInstanceCapable()
-  @AfterCreate()
-  @AfterUpdate()
-  @Draft()
+  @AfterCreateDraft()
+  @AfterUpdateDraft()
   @AfterDelete()
   `, () => {
     it(`
@@ -90,7 +87,7 @@ describe('AFTER - Single instance capable', () => {
       ]).toStrictEqual([true, undefined, undefined, undefined]);
 
       expect([foundRead.isDraft, foundCreate.isDraft, foundUpdate.isDraft, foundDelete.isDraft]).toStrictEqual([
-        true,
+        false,
         true,
         true,
         false,

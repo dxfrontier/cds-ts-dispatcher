@@ -7,11 +7,11 @@ import {
   Inject,
   ServiceHelper,
   SingleInstanceCapable,
+  type TypedRequest,
 } from '../../../../../../dist';
 import BookService from '../../../service/BookService';
 import { Request, Service } from '@sap/cds';
 import { Book } from '../../../util/types/entities/CatalogService';
-import { TypedRequest } from '../../../../../../dist';
 
 @EntityHandler(Book)
 class BookHandler {

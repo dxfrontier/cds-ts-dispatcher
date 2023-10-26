@@ -21,7 +21,7 @@ class Customer {
 const newCustomer = (customer: Constructable) => new customer();
 const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
 
-describe('BEFORE', () => {
+describe('BEFORE - Active entity', () => {
   function testEvent(event: CRUD_EVENTS, eventName: string) {
     describe(`@${eventName}`, () => {
       test(`It should RETURN : all defined properties for this @${eventName} decorator`, () => {

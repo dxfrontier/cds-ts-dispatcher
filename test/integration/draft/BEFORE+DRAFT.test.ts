@@ -1,23 +1,21 @@
 import { Request } from '@sap/cds';
-import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate, Draft } from '../../../dist';
+import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate } from '../../../dist';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
+import { BeforeCreateDraft, BeforeDeleteDraft, BeforeReadDraft, BeforeUpdateDraft } from '../../../lib';
 
 class Customer {
-  @BeforeRead()
-  @Draft()
+  @BeforeReadDraft()
   public async BeforeReadMethod(req: Request) {}
 
-  @BeforeCreate()
-  @BeforeUpdate()
-  @BeforeDelete()
-  @Draft()
+  @BeforeCreateDraft()
+  @BeforeUpdateDraft()
+  @BeforeDeleteDraft()
   public async BeforeCreateAndDeleteMethod(req: Request) {}
 }
 
 class CustomerWithDraftInBetween {
-  @BeforeRead()
-  @Draft()
+  @BeforeReadDraft()
   @BeforeCreate()
   @BeforeUpdate()
   @BeforeDelete()
@@ -30,8 +28,8 @@ const decoratorPropsInBetweenDraft = MetadataDispatcher.getMetadataHandlers(newC
 
 describe('Before - Draft', () => {
   describe(`
-  @BeforeRead()
-  @Draft()`, () => {
+  @BeforeReadDraft()
+  `, () => {
     it('It should : mark @BeforeRead() decorator as "draft"', () => {
       const foundEvent = decoratorProps.filter((item) => item.event === 'READ')[0];
 
@@ -40,22 +38,21 @@ describe('Before - Draft', () => {
   });
 
   describe(`
-  @BeforeCreate() 
-  @BeforeUpdate()
-  @BeforeDelete()
-  @Draft()`, () => {
+  @BeforeCreateDraft()
+  @BeforeUpdateDraft()
+  @BeforeDeleteDraft()
+  `, () => {
     it('It should : mark @BeforeCreate(), @BeforeUpdate, @BeforeDelete() decorators as "draft"', () => {
       const foundCreate = decoratorProps.filter((item) => item.event === 'CREATE')[0];
       const foundDelete = decoratorProps.filter((item) => item.event === 'DELETE')[0];
       const foundUpdate = decoratorProps.filter((item) => item.event === 'UPDATE')[0];
 
-      expect([foundCreate.isDraft, foundDelete.isDraft, foundUpdate.isDraft]).toStrictEqual([true, true, true]);
+      expect([foundCreate.isDraft, foundDelete.isDraft, foundUpdate.isDraft]).toStrictEqual([true, false, true]);
     });
   });
 
   describe(`
-  @BeforeRead()
-  @Draft()
+  @BeforeReadDraft()
   @BeforeCreate()
   @BeforeUpdate()
   @BeforeDelete()

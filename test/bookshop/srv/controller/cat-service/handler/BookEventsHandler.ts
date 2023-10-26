@@ -1,6 +1,6 @@
 import {
   AfterRead,
-  Draft,
+  AfterReadDraft,
   EntityHandler,
   Inject,
   OnCancelDraft,
@@ -12,11 +12,30 @@ import {
 } from '../../../../../../dist';
 import { Request, Service } from '@sap/cds';
 import { BookEvent } from '../../../util/types/entities/CatalogService';
-import { TypedRequest } from '../../../../../../dist';
 
 @EntityHandler(BookEvent)
 class BookEventsHandler {
   @Inject(ServiceHelper.SRV) private readonly srv: Service;
+
+  // @BeforeNewDraft()
+  // public async beforeNewDraftCreated(req: TypedRequest<BookEvent>) {
+  //   debugger;
+  // }
+
+  // @BeforeSaveDraft()
+  // public async beforeSaveDraft(req: TypedRequest<BookEvent>) {
+  //   debugger;
+  // }
+
+  // @BeforeEditDraft()
+  // public async beforeEditDraft(req: TypedRequest<BookEvent>) {
+  //   debugger;
+  // }
+
+  // @BeforeDeleteDraft()
+  // public async beforeDeleteDraft(req: TypedRequest<BookEvent>) {
+  //   debugger;
+  // }
 
   @OnNewDraft()
   public async onNewDraftMethod(req: Request, next: Function) {
@@ -43,7 +62,7 @@ class BookEventsHandler {
   }
 
   @AfterRead()
-  @Draft()
+  @AfterReadDraft()
   @SingleInstanceCapable()
   public async afterReadDraftMethod(results: BookEvent[], req: Request, isSingleInstance: boolean) {
     // handle single instance

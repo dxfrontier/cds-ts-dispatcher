@@ -7,7 +7,9 @@ using {
 
 
 service AdminService {
+  @odata.draft.enabled: true
   entity UserActivityLog as projection on my.UserActivityLog;
+
   entity Users           as projection on my.Users;
   action sendMail(request : HelloRequest) returns HelloResponse;
 }

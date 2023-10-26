@@ -1,4 +1,4 @@
 import { CDSDispatcher } from '../../../../../dist/index';
-import BookStatsHandler from '../cat-service/handler/BookStatsHandler';
+import UserActivityLogHandler from './handler/UserActivityLogHandler';
 
-module.exports = new CDSDispatcher([BookStatsHandler]).initialize();
+module.exports = new CDSDispatcher([UserActivityLogHandler]).initialize();

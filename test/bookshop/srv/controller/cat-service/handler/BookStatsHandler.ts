@@ -1,4 +1,5 @@
 import {
+  BeforeNewDraft,
   EntityHandler,
   Inject,
   OnBoundAction,
