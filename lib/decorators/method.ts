@@ -252,7 +252,7 @@ const BeforeDelete = buildBefore({ event: 'DELETE', handlerType: HandlerType.Bef
  * @see [CDS-TS-Dispatcher - Before delete](https://github.com/dxfrontier/cds-ts-dispatcher#beforedelete)
  * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  */
-const BeforeDeleteDraft = buildBefore({ event: 'DELETE', handlerType: HandlerType.Before, isDraft: false });
+const BeforeDeleteDraft = buildBefore({ event: 'DELETE', handlerType: HandlerType.Before, isDraft: true });
 
 /**
  * ####################################################################################################################
