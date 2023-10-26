@@ -1000,7 +1000,7 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
 
 > [!NOTE]
-> Except the @OnAction(), @OnFunction() as this are bound directly to the service and not to an entity.
+> Except the `@OnAction(), @OnFunction()` as this are bound to the service and not to an entity.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -1253,9 +1253,10 @@ this.after('SAVE', MyEntity, async (results, req) => {
 
 Use [@OnNewDraft()](#onnewdraft), [@OnCancelDraft()](#oncanceldraft), [@OnCancelDraft()](#oncanceldraft), [@OnSaveDraft()](#onsavedraft) `handlers to support for both`, active and draft entities.
 
-The handlers receive one argument:
+The handlers receive two arguments:
 
 - `req` of type `TypedRequest`
+- `next` of type `Function`
 
 See Official SAP **[Fiori-draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)**
 
@@ -1402,9 +1403,9 @@ The `@SingleInstanceCapable()` decorator is utilized at the `method-level` to an
 
 When `@SingleInstanceCapable` is applied to a method, a `3td parameter` should be added for example : `isSingleInstance: boolean`.
 
-- This parameter allows you to differentiate between `single instance requests` and `entity set requests` and adjust the behavior accordingly.
+- `isSingleInstance: boolean` parameter will allow to differentiate between `single instance requests` and `entity set requests` and adjust the behavior accordingly.
 
-When utilizing the `@SingleInstanceCapable()` decorator, the `placement of the @SingleInstanceCapable() decorator` within your TypeScript class is very important factor to consider. It defines the scope of the `single instance` mode within the methods that precede it.
+When utilizing the `@SingleInstanceCapable()` decorator, the `position` of the `@SingleInstanceCapable() decorator` within your TypeScript class is very important factor to consider. It defines the scope of the `single instance` mode within the methods that precede it.
 
 `@SingleInstanceCapable` can be used together with the following decorator actions :
 
@@ -1414,7 +1415,7 @@ When utilizing the `@SingleInstanceCapable()` decorator, the `placement of the @
 
 `Example 1` : Handling both single instance and entity set requests
 
-All methods `@AfterRead(), @BeforeRead(), @OnRead()` will be executed on single instance when `isSingleInstance => true` request and `isSingleInstance => false` when entity set is requested.
+All methods `@AfterRead(), @BeforeRead(), @OnRead()` will be executed on single instance when `isSingleInstance` => **true** request and `isSingleInstance` => **false** when entity set is requested.
 
 - Example single request : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
 - Example entity set request : http://localhost:4004/odata/v4/main/MyEntity
@@ -1437,8 +1438,8 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 
 `Example 2` : Differing behavior for single instance and entity set requests
 
-Method `AfterRead()` will be executed on single instance request and entity set
-Method `BeforeRead()` will be executed only on entity set request.
+`AfterRead()` decorator will be executed on single instance request and entity set
+`BeforeRead()` decorator will be executed only on entity set request.
 
 - Example single request : http://localhost:4004/odata/v4/main/ `MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
 - Example entity set request : http://localhost:4004/odata/v4/main/ `MyEntity`
