@@ -33,9 +33,6 @@ export class MetadataDispatcher<T extends Object> {
   }
 
   // PUBLIC METHODS
-  public setMethodAsDraft(propertyKey: string | symbol): void {
-    Reflect.defineMetadata(Constants.DECORATOR.DRAFT_FLAG_KEY, true, this.target, propertyKey);
-  }
 
   public setMethodAsSingleInstanceCapable(propertyKey: string | symbol): void {
     Reflect.defineMetadata(Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY, true, this.target, propertyKey);
