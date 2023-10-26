@@ -442,10 +442,10 @@ The handlers receive one argument:
 
 - `req` of type `TypedRequest`
 
-> [!NOTE]
-> If `@odata.draft.enabled: true` use **@BeforeCreateDraft(), BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()**
-
 See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) event**
+
+> [!NOTE]
+> If `@odata.draft.enabled: true` use `@BeforeCreateDraft(), BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -585,10 +585,10 @@ The results from the preceding `.on` handler, with the following types:
 
 - `req` of type `TypedRequest`
 
-> [!NOTE]
-> If `@odata.draft.enabled: true` use **@AfterCreateDraft(), AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()**
-
 See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
+
+> [!NOTE]
+> If `@odata.draft.enabled: true` use `@AfterCreateDraft(), AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -726,10 +726,10 @@ The handlers receive one argument:
 - `req` of type `TypedRequest`
 - `next` of type `Function`
 
-> [!NOTE]
-> If `@odata.draft.enabled: true` use **@OnCreateDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft()**
+See also the official SAP JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request) event**
 
-> See also the official SAP JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request) event**
+> [!NOTE]
+> If `@odata.draft.enabled: true` use `@OnCreateDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft()`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
