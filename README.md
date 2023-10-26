@@ -1149,7 +1149,7 @@ import { AfterNewDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterNewDraft()
-public async afterNewDraftMethod(req: TypedRequest<MyEntity>) {
+public async afterNewDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1157,7 +1157,7 @@ public async afterNewDraftMethod(req: TypedRequest<MyEntity>) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('NEW', MyEntity.drafts, async (req) => {
+this.after('NEW', MyEntity.drafts, async (results, req) => {
   // ...
 });
 ```
@@ -1180,7 +1180,7 @@ import { AfterCancelDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterCancelDraft()
-public async afterCancelDraftMethod(req: TypedRequest<MyEntity>) {
+public async afterCancelDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1188,7 +1188,7 @@ public async afterCancelDraftMethod(req: TypedRequest<MyEntity>) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('CANCEL', MyEntity.drafts, async (req) => {
+this.after('CANCEL', MyEntity.drafts, async (results, req) => {
   // ...
 });
 ```
@@ -1208,7 +1208,7 @@ import { AfterEditDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterEditDraft()
-public async afterEditDraftMethod(req: TypedRequest<MyEntity>) {
+public async afterEditDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1216,7 +1216,7 @@ public async afterEditDraftMethod(req: TypedRequest<MyEntity>) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('EDIT', MyEntity, async (req) => {
+this.after('EDIT', MyEntity, async (results, req) => {
   // ...
 });
 ```
@@ -1236,7 +1236,7 @@ import { AfterSaveDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterSaveDraft()
-public async afterSaveDraftMethod(req: TypedRequest<MyEntity>) {
+public async afterSaveDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1244,7 +1244,7 @@ public async afterSaveDraftMethod(req: TypedRequest<MyEntity>) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('SAVE', MyEntity, async (req) => {
+this.after('SAVE', MyEntity, async (results, req) => {
   // ...
 });
 ```
