@@ -148,17 +148,7 @@ class CDSDispatcher {
       return;
     }
 
-    // CRUD_EVENTS.[CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
-    this.srv.on(event, entity, async (req, next) => {
-      return await this.executeOnCallback(handlerAndEntity, req, next);
-    });
-  }
-
-  // cap.cloud.sap/docs/node.js/fiori#draft-support
-  private registerOnDraftHandler(handlerAndEntity: [Handler, Constructable]): void {
-    const { event, entity } = this.getHandlerProps(...handlerAndEntity);
-
-    // CRUD_EVENTS.[NEW, CANCEL]
+    // CRUD_EVENTS.[NEW, CANCEL, CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
     this.srv.on(event, entity, async (req, next) => {
       return await this.executeOnCallback(handlerAndEntity, req, next);
     });
@@ -168,20 +158,16 @@ class CDSDispatcher {
     const [handler] = handlerAndEntity;
 
     switch (handler.handlerType) {
-      case HandlerType.After:
-        this.registerAfterHandler(handlerAndEntity);
-        break;
-
       case HandlerType.Before:
         this.registerBeforeHandler(handlerAndEntity);
         break;
 
-      case HandlerType.On:
-        this.registerOnHandler(handlerAndEntity);
+      case HandlerType.After:
+        this.registerAfterHandler(handlerAndEntity);
         break;
 
-      case HandlerType.OnDraft:
-        this.registerOnDraftHandler(handlerAndEntity);
+      case HandlerType.On:
+        this.registerOnHandler(handlerAndEntity);
         break;
 
       default:
