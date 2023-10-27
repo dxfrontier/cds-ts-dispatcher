@@ -104,4 +104,18 @@ entity UserActivityLog : managed {
       actionType : String
 }
 
+entity Promotions {
+  key ID          : Integer;
+      name        : String(255) @mandatory;
+      description : String(1000);
+      startDate   : Date        @mandatory;
+      endDate     : Date        @mandatory;
+      discount    : Decimal     @mandatory;
+      // Add more fields as needed
+
+      // Associations
+      books       : Association to many Books;
+// Add more associations as needed
+}
+
 // **************************************************************************************************
