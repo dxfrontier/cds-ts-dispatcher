@@ -32,6 +32,13 @@ export class MetadataDispatcher<T extends Object> {
     return Reflect.getMetadata(Constants.DECORATOR.METHOD_ACCUMULATOR_NAME, entity);
   }
 
+  public static getSingleInstanceCapableFlag<Target extends Object>(
+    target: Target,
+    propertyKey: string | symbol,
+  ): boolean {
+    return Reflect.getMetadata(Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY, target, propertyKey);
+  }
+
   // PUBLIC METHODS
 
   public setMethodAsSingleInstanceCapable(propertyKey: string | symbol): void {

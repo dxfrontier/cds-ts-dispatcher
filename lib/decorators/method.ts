@@ -4,8 +4,6 @@ import {
   type ReturnRequest,
   type ReturnRequestAndNext,
   type ReturnResultsAndRequest,
-  type ReturnSingleInstanceCapable,
-  type TypedRequest,
   type CRUD_EVENTS,
   type DRAFT_EVENTS,
   type CdsFunction,
@@ -21,12 +19,9 @@ import Constants from '../util/constants/Constants';
  *
  */
 
-function SingleInstanceCapable<T, K extends TypedRequest<T>, Target extends Object>() {
-  return function (
-    target: Target,
-    propertyKey: string | symbol,
-    _: TypedPropertyDescriptor<ReturnSingleInstanceCapable<T, K>>,
-  ) {
+function SingleInstanceCapable<Target extends Object>() {
+  // TODO find a way to add TypedPropertyDescriptor
+  return function (target: Target, propertyKey: string | symbol, _: PropertyDescriptor) {
     const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY);
     metadataDispatcher.setMethodAsSingleInstanceCapable(propertyKey);
   };
@@ -47,12 +42,8 @@ function buildAfter(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: H
       descriptor: TypedPropertyDescriptor<ReturnResultsAndRequest>,
     ): void {
       const { event, handlerType, isDraft } = options;
+      const isSingleInstance = MetadataDispatcher.getSingleInstanceCapableFlag(target, propertyKey);
 
-      const isSingleInstance: boolean = Reflect.getMetadata(
-        Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY,
-        target,
-        propertyKey,
-      );
       const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
@@ -75,8 +66,14 @@ function buildAfter(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: H
 
 function buildBefore(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: HandlerType; isDraft: boolean }) {
   return function <Target extends Object>() {
-    return function (target: Target, _: string | symbol, descriptor: TypedPropertyDescriptor<ReturnRequest>): void {
+    return function (
+      target: Target,
+      propertyKey: string | symbol,
+      descriptor: TypedPropertyDescriptor<ReturnRequest>,
+    ): void {
       const { event, handlerType, isDraft } = options;
+      const isSingleInstance = MetadataDispatcher.getSingleInstanceCapableFlag(target, propertyKey);
+
       const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
@@ -84,6 +81,7 @@ function buildBefore(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: 
         handlerType,
         callback: descriptor.value!,
         isDraft,
+        isSingleInstance,
       });
     };
   };
@@ -132,10 +130,12 @@ function buildOnCRUD<Target extends Object>(options: {
   return function () {
     return function (
       target: Target,
-      _: string | symbol,
+      propertyKey: string | symbol,
       descriptor: TypedPropertyDescriptor<ReturnRequestAndNext>,
     ): void {
       const { event, handlerType, isDraft } = options;
+      const isSingleInstance = MetadataDispatcher.getSingleInstanceCapableFlag(target, propertyKey);
+
       const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
@@ -143,6 +143,7 @@ function buildOnCRUD<Target extends Object>(options: {
         handlerType,
         callback: descriptor.value!,
         isDraft,
+        isSingleInstance,
       });
     };
   };

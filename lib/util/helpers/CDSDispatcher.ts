@@ -47,8 +47,9 @@ class CDSDispatcher {
   private async executeBeforeCallback(handlerAndEntity: [Handler, Constructable], req: Request): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
     const callback = handler.callback as ReturnRequest;
+    const isSingleInstance = Util.isRequestSingleInstance(handler, req);
 
-    return await callback.call(entity, req);
+    return await callback.call(entity, req, isSingleInstance);
   }
 
   private async executeOnCallback(
@@ -58,8 +59,9 @@ class CDSDispatcher {
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
     const callback = handler.callback as ReturnRequestAndNext;
+    const isSingleInstance = Util.isRequestSingleInstance(handler, req);
 
-    return await callback.call(entity, req, next);
+    return await callback.call(entity, req, next, isSingleInstance);
   }
 
   private async executeAfterCallback(
@@ -83,7 +85,6 @@ class CDSDispatcher {
 
       // READ, UPDATE single request
       return await callback.call(entity, results, req, isSingleInstance);
-      // }
     }
 
     if (Array.isArray(results)) {
