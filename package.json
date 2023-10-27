@@ -1,6 +1,6 @@
 {
   "name": "@dxfrontier/cds-ts-dispatcher",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "SAP CAP NodeJS-based project using TypesScript decorators for rapid development. The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -30,7 +30,7 @@
     "start:bookshop": "npm run start --prefix ./test/bookshop",
     
     "prepare": "husky install",
-
+    
     "build:clean": "echo 'Clean dist folder' && npx rimraf ./dist/{*.js,*.map,*.ts,*.mts,*.mjs}",
     "build:message": "echo 'Build started...'",
     "build:ts": "tsup",
