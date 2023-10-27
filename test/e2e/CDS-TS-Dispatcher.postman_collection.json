@@ -472,341 +472,381 @@
 					"item": [
 						{
 							"name": "@OnCreate",
-							"event": [
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Contains text 'On Create executed'\", function () {",
-											"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"    pm.expect(response[0].message).to.contains('On Create executed')",
-											"});",
-											"",
-											"pm.test(\"Successful POST request\", function () {",
-											"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"ID\": 3,\n    \"views\": 234,\n    \"averageRating\": 222.33,\n    \"book_ID\": 203\n}",
-									"options": {
-										"raw": {
-											"language": "json"
+									"name": "On create a new Book statistics",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Contains text 'On Create executed'\", function () {",
+													"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"    pm.expect(response[0].message).to.contains('On Create executed')",
+													"});",
+													"",
+													"pm.test(\"Successful POST request\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
 										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
-									"host": [
-										"{{baseUrl}}"
 									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookStatsEntity}}"
-									]
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"ID\": 3,\n    \"views\": 234,\n    \"averageRating\": 222.33,\n    \"book_ID\": 203\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookStatsEntity}}"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
 							"name": "@OnRead",
-							"event": [
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"1 item should have 'views : 444233'\", function () {",
-											"    const response = pm.response.json();",
-											"",
-											"    response.value.forEach((item) => {",
-											"        if(item.views === 444233) {",
-											"            pm.expect(item.views.toString()).to.contains(\"444233\");",
-											"        }",
-											"    })",
-											"});",
-											"",
-											"pm.test(\"Successful POST request\", function () {",
-											"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
-									"host": [
-										"{{baseUrl}}"
+									"name": "On read book statistics entity",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"1 item should have 'views : 444233'\", function () {",
+													"    const response = pm.response.json();",
+													"",
+													"    response.value.forEach((item) => {",
+													"        if(item.views === 444233) {",
+													"            pm.expect(item.views.toString()).to.contains(\"444233\");",
+													"        }",
+													"    })",
+													"});",
+													"",
+													"pm.test(\"Successful POST request\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
 									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookStatsEntity}}"
-									]
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookStatsEntity}}"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
 							"name": "@OnUpdate",
-							"event": [
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Text message should contain 'On update executed'\", function () {",
-											"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"",
-											"    pm.expect(response[0].message).to.contains('On update executed')",
-											"",
-											"});",
-											"",
-											"pm.test(\"Successful POST request\", function () {",
-											"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "PATCH",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"views\": 1000,\n    \"averageRating\": 53.333,\n    \"book_ID\": 203\n}",
-									"options": {
-										"raw": {
-											"language": "json"
+									"name": "On update single entity",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Text message should contain 'On update executed'\", function () {",
+													"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"",
+													"    pm.expect(response[0].message).to.contains('On update executed')",
+													"",
+													"});",
+													"",
+													"pm.test(\"Successful POST request\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
 										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=1)",
-									"host": [
-										"{{baseUrl}}"
 									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookStatsEntity}}(ID=1)"
-									]
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"views\": 1000,\n    \"averageRating\": 53.333,\n    \"book_ID\": 203\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=1)",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookStatsEntity}}(ID=1)"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
 							"name": "@OnDelete",
-							"event": [
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Delete an item should return text 'item deleted'\", function () {",
-											"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"    pm.expect(response[0].message).to.contains('Item deleted')",
-											"",
-											"});",
-											"",
-											"pm.test(\"Successful POST request\", function () {",
-											"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "DELETE",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=2)",
-									"host": [
-										"{{baseUrl}}"
+									"name": "On delete a single entity",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Delete an item should return text 'item deleted'\", function () {",
+													"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"    pm.expect(response[0].message).to.contains('Item deleted')",
+													"",
+													"});",
+													"",
+													"pm.test(\"Successful POST request\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
 									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookStatsEntity}}(ID=2)"
-									]
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=2)",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookStatsEntity}}(ID=2)"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
 							"name": "@OnAction",
-							"event": [
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"submitOrder contains a stock = 6\", function () {",
-											"    const {stock} = pm.response.json();",
-											"    pm.expect(stock).to.eql(6);",
-											"});",
-											"",
-											"pm.test(\"Successful POST request\", function () {",
-											"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"book\" : 271,\n    \"quantity\": 5\n}",
-									"options": {
-										"raw": {
-											"language": "json"
+									"name": "On execute an action",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"submitOrder contains a stock = 6\", function () {",
+													"    const {stock} = pm.response.json();",
+													"    pm.expect(stock).to.eql(6);",
+													"});",
+													"",
+													"pm.test(\"Successful POST request\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
 										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
-									"host": [
-										"{{baseUrl}}"
 									],
-									"path": [
-										"{{catalogService}}",
-										"submitOrder"
-									]
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"book\" : 271,\n    \"quantity\": 5\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"submitOrder"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
 							"name": "@OnFunction",
-							"event": [
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"submitOrder contains a stock = 7\", function () {",
-											"    const {stock} = pm.response.json();",
-											"    pm.expect(stock).to.eql(7);",
-											"});",
-											"",
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/submitOrderFunction(book=271,quantity=6)",
-									"host": [
-										"{{baseUrl}}"
+									"name": "On execute a function",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"submitOrder contains a stock = 7\", function () {",
+													"    const {stock} = pm.response.json();",
+													"    pm.expect(stock).to.eql(7);",
+													"});",
+													"",
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
 									],
-									"path": [
-										"{{catalogService}}",
-										"submitOrderFunction(book=271,quantity=6)"
-									]
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/submitOrderFunction(book=271,quantity=6)",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"submitOrderFunction(book=271,quantity=6)"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
 							"name": "@OnBoundAction",
-							"event": [
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Returned object should contain 'Jane Eyre', rating : 11 and stats : 4344\", function () {",
-											"    const response = pm.response.json();",
-											"",
-											"    pm.expect(response.book).to.equals(\"Jane Eyre\");",
-											"    pm.expect(response.rating).to.equals(11);",
-											"    pm.expect(response.stats).to.equals(444233);",
-											"});",
-											"",
-											"pm.test(\"Successful POST request\", function () {",
-											"    pm.expect(pm.response.code).to.be.oneOf([201, 202, 200]);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"ID\" : 271\n}",
-									"options": {
-										"raw": {
-											"language": "json"
+									"name": "On execute a bound action to an entity",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Returned object should contain 'Jane Eyre', rating : 11 and stats : 4344\", function () {",
+													"    const response = pm.response.json();",
+													"",
+													"    pm.expect(response.book).to.equals(\"Jane Eyre\");",
+													"    pm.expect(response.rating).to.equals(11);",
+													"    pm.expect(response.stats).to.equals(444233);",
+													"});",
+													"",
+													"pm.test(\"Successful POST request\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([201, 202, 200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
 										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=2)/CatalogService.GenerateReport",
-									"host": [
-										"{{baseUrl}}"
 									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookStatsEntity}}(ID=2)",
-										"CatalogService.GenerateReport"
-									]
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"ID\" : 271\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=2)/CatalogService.GenerateReport",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookStatsEntity}}(ID=2)",
+												"CatalogService.GenerateReport"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "@OnBoundFunction",
-							"event": [
+							"name": "OnBoundFunction",
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Returned object should contain value : true\", function () {",
-											"    const response = pm.response.json();",
-											"",
-											"    pm.expect(response.value).to.equals(true);",
-											"});",
-											"",
-											"pm.test(\"Status code is 204\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=1)/CatalogService.NotifyAuthor(ID=107)",
-									"host": [
-										"{{baseUrl}}"
+									"name": "On execute a bound function on an entity",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Returned object should contain value : true\", function () {",
+													"    const response = pm.response.json();",
+													"",
+													"    pm.expect(response.value).to.equals(true);",
+													"});",
+													"",
+													"pm.test(\"Status code is 204\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
 									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookStatsEntity}}(ID=1)",
-										"CatalogService.NotifyAuthor(ID=107)"
-									]
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=1)/CatalogService.NotifyAuthor(ID=107)",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookStatsEntity}}(ID=1)",
+												"CatalogService.NotifyAuthor(ID=107)"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						}
 					],
 					"description": "The `On` phase is started after the `Before` phase, as long as no return value is yet provided and no exception occurred. It's meant to implement the core processing of the event. There can be an arbitrary number of `On` handlers per event, although as soon as the first `On` handler successfully completes the event processing, all remaining `On` handlers are skipped.\n\nThe `On` phase is completed when one of the following conditions applies:\n\n- A handler [completes the event processing](https://cap.cloud.sap/docs/java/provisioning-api#eventcompletion) by setting a result value or setting the state of an event to completed. In this case, any remaining registered `On` handlers are skipped and execution continues with the `After` phase.\n    \n- A handler throws an exception. In this case, event processing is terminated immediately.\n    \n\nIn case of synchronous events, if after the `On` phase, no handler completed the event processing, it's considered an error and the event processing is aborted with an exception. However when registering an `On` handler for an asynchronous event it is not recommended to complete the event processing, as other handlers might not get notified of the event anymore. In that case CAP ensures to auto-complete the event, once all `On` handlers have been executed."
@@ -815,197 +855,638 @@
 					"name": "Draft",
 					"item": [
 						{
-							"name": "@OnNewDraft",
-							"event": [
+							"name": "Before",
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Returned object is created & headers contains text 'On new draft'\", function () {",
-											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"    pm.expect(headers[0].message).to.contains('On new draft')",
-											"",
-											"    const response = pm.response.json();",
-											"    const UUIDValue = response.ID",
-											"    ",
-											"    pm.environment.set(\"draftUUIDInstance\", UUIDValue);",
-											"});",
-											"",
-											"pm.test(\"Response contains IsActiveEntity: false\", function () {",
-											"    const jsonData = pm.response.json();",
-											"    pm.expect(jsonData.IsActiveEntity).to.eql(false);",
-											"});",
-											"",
-											"pm.test(\"Status code is 201\", function () {",
-											"    pm.response.to.have.status(201);",
-											"});",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\" : \"Empire strikes again, volume III\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
+									"name": "@BeforeNewDraft",
+									"item": [
+										{
+											"name": "Before new draft should contain, header message 'Before new draft executed'",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Returned object is created & headers contains text 'Before new draft executed'\", function () {",
+															"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    pm.expect(headers[0].message).to.contains('Before new draft executed')",
+															"    ",
+															"    const response = pm.response.json();",
+															"    const UUIDValue = response.ID",
+															"    ",
+															"    pm.environment.set(\"draftUUIDInstance\", UUIDValue);",
+															"});",
+															"",
+															"pm.test(\"Response contains IsActiveEntity: false\", function () {",
+															"    const jsonData = pm.response.json();",
+															"    pm.expect(jsonData.IsActiveEntity).to.eql(false);",
+															"});",
+															"",
+															"pm.test(\"Status code is 201\", function () {",
+															"    pm.response.to.have.status(201);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"actionType\": \"Merge\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{adminService}}/{{userActivityLogEntity}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{adminService}}",
+														"{{userActivityLogEntity}}"
+													]
+												}
+											},
+											"response": []
 										}
-									}
+									]
 								},
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEvents}}",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookEvents}}"
+								{
+									"name": "@BeforeSaveDraft",
+									"item": [
+										{
+											"name": "Before save draft should contain, header message 'Before save draft executed'",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Headers contains text 'Before save draft executed'\", function () {",
+															"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    headers.forEach((item) => {",
+															"        if(item.message === 'Before save draft executed') {",
+															"            pm.expect(item.message).to.contains('Before save draft executed')",
+															"        }",
+															"    })",
+															"});",
+															"",
+															"pm.test(\"Response contains IsActiveEntity: true, which means the draft was activated\", function () {",
+															"    const jsonData = pm.response.json();",
+															"    pm.expect(jsonData.IsActiveEntity).to.eql(true);",
+															"});",
+															"",
+															"pm.test(\"Status code is 201\", function () {",
+															"    pm.response.to.have.status(201);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{adminService}}/{{userActivityLogEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)/AdminService.draftActivate",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{adminService}}",
+														"{{userActivityLogEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+														"AdminService.draftActivate"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@BeforeEditDraft",
+									"item": [
+										{
+											"name": "Before edit a draft should contain, header with 'Before edit draft executed'",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Headers contains text 'Before edit draft executed\", function () {",
+															"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    pm.expect(headers[0].message).to.contains('Before edit draft executed')",
+															"});",
+															"",
+															"pm.test(\"Response contains HasActiveEntity: true, meaning that active entity is again a draft\", function () {",
+															"    const jsonData = pm.response.json();",
+															"    pm.expect(jsonData.HasActiveEntity).to.eql(true);",
+															"});",
+															"",
+															"pm.test(\"Status code is 201\", function () {",
+															"    pm.response.to.have.status(201);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{adminService}}/{{userActivityLogEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=true)/AdminService.draftEdit",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{adminService}}",
+														"{{userActivityLogEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=true)",
+														"AdminService.draftEdit"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@BeforeDeleteDraft",
+									"item": [
+										{
+											"name": "Before delete a draft should return 204 status",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 204\", function () {",
+															"    pm.response.to.have.status(204);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{adminService}}/{{userActivityLogEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{adminService}}",
+														"{{userActivityLogEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)"
+													]
+												}
+											},
+											"response": []
+										}
 									]
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "@OnSaveDraft",
-							"event": [
+							"name": "After",
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Headers contains text 'On save draft'\", function () {",
-											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"    headers.forEach((item) => {",
-											"        if(item.message === 'On save draft') {",
-											"            pm.expect(item.message).to.contains('On save draft')",
-											"        }",
-											"    })",
-											"});",
-											"",
-											"pm.test(\"Response contains IsActiveEntity: true, which means the draft was activated\", function () {",
-											"    const jsonData = pm.response.json();",
-											"    pm.expect(jsonData.IsActiveEntity).to.eql(true);",
-											"});",
-											"",
-											"pm.test(\"Status code is 201\", function () {",
-											"    pm.response.to.have.status(201);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{}",
-									"options": {
-										"raw": {
-											"language": "json"
+									"name": "@AfterNewDraft",
+									"item": [
+										{
+											"name": "After a new draft is created header should contain 'After new draft executed'",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Returned object is created & headers contains text 'After new draft executed'\", function () {",
+															"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    pm.expect(headers[0].message).to.contains('After new draft executed')",
+															"",
+															"    const response = pm.response.json();",
+															"    const UUIDValue = response.ID",
+															"    ",
+															"    pm.environment.set(\"draftUUIDInstance\", UUIDValue);",
+															"});",
+															"",
+															"pm.test(\"Response contains IsActiveEntity: false\", function () {",
+															"    const jsonData = pm.response.json();",
+															"    pm.expect(jsonData.IsActiveEntity).to.eql(false);",
+															"});",
+															"",
+															"pm.test(\"Status code is 201\", function () {",
+															"    pm.response.to.have.status(201);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"name\": \"Summer Sale\",\n    \"description\": \"Get amazing discounts on selected books during the summer season.\",\n    \"startDate\": \"2023-06-01\",\n    \"endDate\": \"2023-08-31\",\n    \"discount\": 0.25 // 25% discount\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{adminService}}/{{promotionsEntity}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{adminService}}",
+														"{{promotionsEntity}}"
+													]
+												}
+											},
+											"response": []
 										}
-									}
+									]
 								},
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=false)/CatalogService.draftActivate",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
-										"CatalogService.draftActivate"
+								{
+									"name": "@AfterSaveDraft",
+									"item": [
+										{
+											"name": "After a new draft is created, header should contain 'After save draft executed'",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Headers contains text 'After save draft executed'\", function () {",
+															"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    headers.forEach((item) => {",
+															"        if(item.message === 'After save draft executed') {",
+															"            pm.expect(item.message).to.contains('After save draft executed')",
+															"        }",
+															"    })",
+															"});",
+															"",
+															"pm.test(\"Response contains IsActiveEntity: true, which means the draft was activated\", function () {",
+															"    const jsonData = pm.response.json();",
+															"    pm.expect(jsonData.IsActiveEntity).to.eql(true);",
+															"});",
+															"",
+															"pm.test(\"Status code is 201\", function () {",
+															"    pm.response.to.have.status(201);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{adminService}}/{{promotionsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)/AdminService.draftActivate",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{adminService}}",
+														"{{promotionsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+														"AdminService.draftActivate"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@AfterEditDraft",
+									"item": [
+										{
+											"name": "After a draft is edited, header should contain 'After edit draft executed'",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Headers contains text 'After edit draft executed'\", function () {",
+															"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    pm.expect(headers[0].message).to.contains('After edit draft executed')",
+															"});",
+															"",
+															"pm.test(\"Response contains HasActiveEntity: true, meaning that active entity is again a draft\", function () {",
+															"    const jsonData = pm.response.json();",
+															"    pm.expect(jsonData.HasActiveEntity).to.eql(true);",
+															"});",
+															"",
+															"pm.test(\"Status code is 201\", function () {",
+															"    pm.response.to.have.status(201);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{adminService}}/{{promotionsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=true)/AdminService.draftEdit",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{adminService}}",
+														"{{promotionsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=true)",
+														"AdminService.draftEdit"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@AfterDeleteDraft",
+									"item": [
+										{
+											"name": "After delete a draft, should return 204 status",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 204\", function () {",
+															"    pm.response.to.have.status(204);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{adminService}}/{{promotionsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{adminService}}",
+														"{{promotionsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)"
+													]
+												}
+											},
+											"response": []
+										}
 									]
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "@OnEditDraft",
-							"event": [
+							"name": "On",
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Headers contains text 'On edit draft'\", function () {",
-											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"    pm.expect(headers[0].message).to.contains('On edit draft')",
-											"});",
-											"",
-											"pm.test(\"Response contains HasActiveEntity: true, meaning that active entity is again a draft\", function () {",
-											"    const jsonData = pm.response.json();",
-											"    pm.expect(jsonData.HasActiveEntity).to.eql(true);",
-											"});",
-											"",
-											"pm.test(\"Status code is 201\", function () {",
-											"    pm.response.to.have.status(201);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{}",
-									"options": {
-										"raw": {
-											"language": "json"
+									"name": "@OnNewDraft",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Returned object is created & headers contains text 'On new draft'\", function () {",
+													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"    pm.expect(headers[0].message).to.contains('On new draft')",
+													"",
+													"    const response = pm.response.json();",
+													"    const UUIDValue = response.ID",
+													"    ",
+													"    pm.environment.set(\"draftUUIDInstance\", UUIDValue);",
+													"});",
+													"",
+													"pm.test(\"Response contains IsActiveEntity: false\", function () {",
+													"    const jsonData = pm.response.json();",
+													"    pm.expect(jsonData.IsActiveEntity).to.eql(false);",
+													"});",
+													"",
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
 										}
-									}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"name\" : \"Empire strikes again, volume III\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookEvents}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookEvents}}"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=true)/CatalogService.draftEdit",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=true)",
-										"CatalogService.draftEdit"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "@OnCancelDraft",
-							"event": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 204\", function () {",
-											"    pm.response.to.have.status(204);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "DELETE",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=true)",
-									"host": [
-										"{{baseUrl}}"
+									"name": "@OnSaveDraft",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Headers contains text 'On save draft'\", function () {",
+													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"    headers.forEach((item) => {",
+													"        if(item.message === 'On save draft') {",
+													"            pm.expect(item.message).to.contains('On save draft')",
+													"        }",
+													"    })",
+													"});",
+													"",
+													"pm.test(\"Response contains IsActiveEntity: true, which means the draft was activated\", function () {",
+													"    const jsonData = pm.response.json();",
+													"    pm.expect(jsonData.IsActiveEntity).to.eql(true);",
+													"});",
+													"",
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
 									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=true)"
-									]
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=false)/CatalogService.draftActivate",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+												"CatalogService.draftActivate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "@OnEditDraft",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Headers contains text 'On edit draft'\", function () {",
+													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"    pm.expect(headers[0].message).to.contains('On edit draft')",
+													"});",
+													"",
+													"pm.test(\"Response contains HasActiveEntity: true, meaning that active entity is again a draft\", function () {",
+													"    const jsonData = pm.response.json();",
+													"    pm.expect(jsonData.HasActiveEntity).to.eql(true);",
+													"});",
+													"",
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=true)/CatalogService.draftEdit",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=true)",
+												"CatalogService.draftEdit"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "@OnCancelDraft",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 204\", function () {",
+													"    pm.response.to.have.status(204);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=true)",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=true)"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						}
 					],
 					"description": "Lean draft is a new approach which makes it easier to differentiate between drafts and active instances in your code. This new architecture drastically reduces the complexity and enables more features like storing active instances in remote systems while keeping the corresponding drafts in the local persistence."
@@ -1088,13 +1569,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEvents}}",
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"{{catalogService}}",
-										"{{bookEvents}}"
+										"{{bookEventsEntity}}"
 									]
 								}
 							},
@@ -1125,13 +1606,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"{{catalogService}}",
-										"{{bookEvents}}(ID={{draftUUIDInstance}},IsActiveEntity=false)"
+										"{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)"
 									]
 								}
 							},
