@@ -17,26 +17,6 @@ import { BookEvent } from '../../../util/types/entities/CatalogService';
 class BookEventsHandler {
   @Inject(ServiceHelper.SRV) private readonly srv: Service;
 
-  // @BeforeNewDraft()
-  // public async beforeNewDraftCreated(req: TypedRequest<BookEvent>) {
-  //   debugger;
-  // }
-
-  // @BeforeSaveDraft()
-  // public async beforeSaveDraft(req: TypedRequest<BookEvent>) {
-  //   debugger;
-  // }
-
-  // @BeforeEditDraft()
-  // public async beforeEditDraft(req: TypedRequest<BookEvent>) {
-  //   debugger;
-  // }
-
-  // @BeforeDeleteDraft()
-  // public async beforeDeleteDraft(req: TypedRequest<BookEvent>) {
-  //   debugger;
-  // }
-
   @OnNewDraft()
   public async onNewDraftMethod(req: Request, next: Function) {
     req.notify('On new draft');
@@ -72,7 +52,6 @@ class BookEventsHandler {
 
     if (isSingleInstance) {
       req.notify('Single instance');
-      return;
     }
 
     // handle entity set

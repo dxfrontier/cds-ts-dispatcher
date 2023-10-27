@@ -6,6 +6,7 @@ import {
   EntityHandler,
   Inject,
   ServiceHelper,
+  SingleInstanceCapable,
 } from '../../../../../../dist';
 import { Request, Service } from '@sap/cds';
 import { Review } from '../../../util/types/entities/CatalogService';
@@ -23,7 +24,8 @@ class ReviewHandler {
   }
 
   @BeforeRead()
-  private async addDiscount(req: TypedRequest<Review>) {
+  @SingleInstanceCapable()
+  private async addDiscount(req: TypedRequest<Review>, isSingleInstance: boolean) {
     req.notify(400, 'Before read executed');
   }
 

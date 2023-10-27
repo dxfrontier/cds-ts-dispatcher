@@ -1,5 +1,4 @@
 import {
-  BeforeNewDraft,
   EntityHandler,
   Inject,
   OnBoundAction,
@@ -9,6 +8,7 @@ import {
   OnRead,
   OnUpdate,
   ServiceHelper,
+  SingleInstanceCapable,
 } from '../../../../../../dist';
 import { Request, Service } from '@sap/cds';
 import { type ActionRequest, type ActionReturn, type TypedRequest } from '../../../../../../dist';
@@ -29,10 +29,10 @@ class BookStatsHandler {
   }
 
   @OnRead()
-  public async onReadMethod(req: TypedRequest<BookStat>, next: Function) {
-    if (req.params.length === 0) {
-      // check if it's single instance or not, but you can use also the @SingleInstanceCapable() decorator
-      return this.bookStatsService.updatedViews(req);
+  @SingleInstanceCapable()
+  public async onReadMethod(req: TypedRequest<BookStat>, next: Function, isSingleInstance: boolean) {
+    if (isSingleInstance) {
+      return await this.bookStatsService.updatedViews(req);
     }
 
     return next();

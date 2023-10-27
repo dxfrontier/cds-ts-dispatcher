@@ -37,7 +37,7 @@ class BookHandler {
 
   @AfterUpdate()
   private async addDefaultDescription(result: Book, req: TypedRequest<Book>) {
-    this.bookService.addDefaultTitleText(result, req);
+    await this.bookService.addDefaultTitleText(result, req);
   }
 
   @AfterDelete()

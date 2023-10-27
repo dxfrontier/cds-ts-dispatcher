@@ -20,25 +20,33 @@ class BookService {
   }
 
   public async addDefaultTitleText(result: Book, req: TypedRequest<Book>) {
-    await this.bookRepository.addDefaultTitleText(result, req);
+    await this.bookRepository.update({ ID: req.data.ID }, { title: 'Dracula' });
   }
 
   public async verifyStock(req: ActionRequest<typeof submitOrder>) {
     const { book, quantity } = req.data;
+    const bookFound = await this.bookRepository.findOne({ ID: book });
 
-    if (quantity < 1) return req.reject(400, `quantity has to be 1 or more`);
+    if (quantity < 1) {
+      return req.reject(400, `quantity has to be 1 or more`);
+    }
 
-    let b = await SELECT`stock`.from(Book, book);
-    if (!b) return req.error(404, `Book #${book} doesn't exist`);
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    if (!bookFound) {
+      return req.error(404, `Book #${book} doesn't exist`);
+    }
 
-    let { stock } = b;
+    if (bookFound.stock !== null && quantity > bookFound.stock!) {
+      return req.reject(409, `${quantity} exceeds stock for book #${book}`);
+    }
 
-    if (quantity > stock) return req.reject(409, `${quantity} exceeds stock for book #${book}`);
+    await this.bookRepository.update(bookFound, {
+      stock: (bookFound.stock! -= quantity),
+    });
 
-    await UPDATE(Book, book).with({ stock: (stock -= quantity) });
     await this.srv.emit('OrderedBook', { book, quantity, buyer: req.user.id });
 
-    return { stock };
+    return { stock: bookFound.stock };
   }
 }
 
