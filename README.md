@@ -66,8 +66,10 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
           - [OnEditDraft](#oneditdraft)
           - [OnSaveDraft](#onsavedraft)
       - [Method : `SingleInstanceCapable`](#method--singleinstancecapable)
-        - [Usage](#usage-1)
-  - [Examples](#examples)
+        - [Complementary Decorator Actions](#complementary-decorator-actions)
+        - [Execution behavior](#execution-behavior)
+        - [Examples](#examples)
+  - [Examples](#examples-1)
   - [Contributing](#contributing)
   - [License](#license)
   - [Authors](#authors)
@@ -1399,13 +1401,11 @@ this.on('SAVE', MyEntity, async (req, next) => {
 
 The `@SingleInstanceCapable()` decorator is utilized at the `method-level` to annotate a method that all decorators which are used along with this `@SingleInstanceCapable()` decorator, will handle also single `instance Request`.
 
-###### Usage
+When working with `@SingleInstanceCapable` decorator, a `3td parameter`, `isSingleInstance: boolean`.
 
-When `@SingleInstanceCapable` is applied to a method, a `3td parameter` should be added for example : `isSingleInstance: boolean`.
+- This parameter serves to differentiate between two types of requests: `single instance requests` and `entity set requests`. You can adjust the behavior of your methods based on the value of isSingleInstance.
 
-- `isSingleInstance: boolean` parameter will allow to differentiate between `single instance requests` and `entity set requests` and adjust the behavior accordingly.
-
-When utilizing the `@SingleInstanceCapable()` decorator, the `position` of the `@SingleInstanceCapable() decorator` within your TypeScript class is very important factor to consider. It defines the scope of the `single instance` mode within the methods that precede it.
+##### Complementary Decorator Actions
 
 `@SingleInstanceCapable` can be used together with the following decorator actions :
 
@@ -1413,9 +1413,16 @@ When utilizing the `@SingleInstanceCapable()` decorator, the `position` of the `
 - [@BeforeRead()](#beforeread)
 - [@OnRead()](#onread)
 
-`Example 1` : Handling both single instance and entity set requests
+##### Execution behavior
 
-All methods `@AfterRead(), @BeforeRead(), @OnRead()` will be executed on single instance when `isSingleInstance` => **true** request and `isSingleInstance` => **false** when entity set is requested.
+All methods decorated with `@SingleInstanceCapable` and [@AfterRead()](#afterread), [@BeforeRead()](#beforeread), [@OnRead](#onread) will be executed in two distinct ways :
+
+1. `Single instance mode` - When the `isSingleInstance` parameter is set to **true**, these methods will be executed for single instance requests.
+2. `Entity set mode`: When the `isSingleInstance` parameter is set to **false**, these methods will be executed for entity set requests.
+
+##### Examples
+
+`Example 1` : Handling both single instance and entity set requests
 
 - Example single request : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
 - Example entity set request : http://localhost:4004/odata/v4/main/MyEntity
