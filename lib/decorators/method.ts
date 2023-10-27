@@ -75,11 +75,7 @@ function buildAfter(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: H
 
 function buildBefore(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: HandlerType; isDraft: boolean }) {
   return function <Target extends Object>() {
-    return function (
-      target: Target,
-      propertyKey: string | symbol,
-      descriptor: TypedPropertyDescriptor<ReturnRequest>,
-    ): void {
+    return function (target: Target, _: string | symbol, descriptor: TypedPropertyDescriptor<ReturnRequest>): void {
       const { event, handlerType, isDraft } = options;
       const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
@@ -115,38 +111,6 @@ function buildOnAction(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType
         handlerType,
         callback: descriptor.value!,
         actionName: name,
-        isDraft,
-      });
-    };
-  };
-}
-
-/**
- * Builds a decorator for handling the .on method.
- *
- * @param {Event} event - The custom action event to handle.
- * @param {HandlerType} handlerType - The type of handler (Before, After, On).
- */
-
-function buildOnDraftActiveEntity(options: {
-  event: CRUD_EVENTS | DRAFT_EVENTS;
-  handlerType: HandlerType;
-  isDraft: boolean;
-}) {
-  return function <Target extends Object>() {
-    return function (
-      target: Target,
-      _: string | symbol,
-      descriptor: TypedPropertyDescriptor<ReturnRequestAndNext>,
-    ): void {
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
-
-      const { event, handlerType, isDraft } = options;
-
-      metadataDispatcher.addMethodMetadata({
-        event,
-        handlerType,
-        callback: descriptor.value!,
         isDraft,
       });
     };
@@ -460,7 +424,7 @@ const OnFunction = buildOnAction({ event: 'FUNC', handlerType: HandlerType.On, i
  * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - On edit draft](https://github.com/dxfrontier/cds-ts-dispatcher#oneditdraft)
  */
-const OnEditDraft = buildOnDraftActiveEntity({ event: 'EDIT', handlerType: HandlerType.On, isDraft: false });
+const OnEditDraft = buildOnCRUD({ event: 'EDIT', handlerType: HandlerType.On, isDraft: false });
 
 /**
  *
@@ -469,7 +433,7 @@ const OnEditDraft = buildOnDraftActiveEntity({ event: 'EDIT', handlerType: Handl
  * @see [CDS-TS-Dispatcher - On save draft](https://github.com/dxfrontier/cds-ts-dispatcher#onsavedraft)
  *
  */
-const OnSaveDraft = buildOnDraftActiveEntity({ event: 'SAVE', handlerType: HandlerType.On, isDraft: false });
+const OnSaveDraft = buildOnCRUD({ event: 'SAVE', handlerType: HandlerType.On, isDraft: false });
 
 /**
  * ####################################################################################################################
