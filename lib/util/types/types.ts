@@ -2,13 +2,6 @@
 import { type Request, type Service } from '@sap/cds';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 
-/**
- * Use this helper to inject the SRV constant
- */
-// enum SRV {
-//   SRV = 'srv',
-// }
-
 enum HandlerType {
   Before,
   On,
