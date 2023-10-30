@@ -5,7 +5,7 @@ import {
   AfterSaveDraft,
   EntityHandler,
   Inject,
-  ServiceHelper,
+  SRV,
 } from '../../../../../../dist';
 import { Service } from '@sap/cds';
 import { TypedRequest } from '../../../../../../dist';
@@ -13,7 +13,7 @@ import { Promotion } from '../../../util/types/entities/AdminService';
 
 @EntityHandler(Promotion)
 class PromotionHandler {
-  @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(SRV) private readonly srv: Service;
 
   @AfterNewDraft()
   public async afterNewDraftCreated(results: Promotion, req: TypedRequest<Promotion>) {

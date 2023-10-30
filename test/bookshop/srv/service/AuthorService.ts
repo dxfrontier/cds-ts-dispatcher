@@ -1,5 +1,5 @@
 import { Service } from '@sap/cds';
-import { Inject, ServiceHelper, ServiceLogic } from '../../../../dist';
+import { Inject, SRV, ServiceLogic } from '../../../../dist';
 import { Book } from '../util/types/entities/CatalogService';
 import { ActionRequest, TypedRequest } from '../../../../dist';
 import { BookStat } from '../util/types/entities/CatalogService';
@@ -7,7 +7,7 @@ import BookStatsRepository from '../repository/BookStatsRepository';
 
 @ServiceLogic()
 class AuthorService {
-  @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(SRV) private readonly srv: Service;
 
   public async notifyAuthor(req: ActionRequest<typeof BookStat.actions.NotifyAuthor>) {
     const authorID = req.data.ID;

@@ -5,9 +5,9 @@ import { type Constructable } from '@sap/cds/apis/internal/inference';
 /**
  * Use this helper to inject the SRV constant
  */
-enum ServiceHelper {
-  SRV = 'srv',
-}
+// enum SRV {
+//   SRV = 'srv',
+// }
 
 enum HandlerType {
   Before,
@@ -65,7 +65,6 @@ interface Handler {
 }
 
 export {
-  ServiceHelper,
   HandlerType,
   type HandlerBuilder,
   type Handler,

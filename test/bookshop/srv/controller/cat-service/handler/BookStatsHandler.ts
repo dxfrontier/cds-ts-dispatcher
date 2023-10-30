@@ -7,7 +7,7 @@ import {
   OnDelete,
   OnRead,
   OnUpdate,
-  ServiceHelper,
+  SRV,
   SingleInstanceCapable,
 } from '../../../../../../dist';
 import { Request, Service } from '@sap/cds';
@@ -18,7 +18,7 @@ import AuthorService from '../../../service/AuthorService';
 
 @EntityHandler(BookStat)
 class BookStatsHandler {
-  @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(SRV) private readonly srv: Service;
   @Inject(BookStatsService) private bookStatsService: BookStatsService;
   @Inject(AuthorService) private authorService: AuthorService;
 

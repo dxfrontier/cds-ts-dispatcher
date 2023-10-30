@@ -7,7 +7,7 @@ import {
   OnEditDraft,
   OnNewDraft,
   OnSaveDraft,
-  ServiceHelper,
+  SRV,
   SingleInstanceCapable,
 } from '../../../../../../dist';
 import { Request, Service } from '@sap/cds';
@@ -15,7 +15,7 @@ import { BookEvent } from '../../../util/types/entities/CatalogService';
 
 @EntityHandler(BookEvent)
 class BookEventsHandler {
-  @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(SRV) private readonly srv: Service;
 
   @OnNewDraft()
   public async onNewDraftMethod(req: Request, next: Function) {

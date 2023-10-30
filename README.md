@@ -387,14 +387,14 @@ The `@Inject` decorator is utilized as a `field-level` decorator and allows you 
 ```typescript
 import { Service } from "@sap/cds";
 
-import { EntityHandler, Inject, ServiceHelper } from "@dxfrontier/cds-ts-dispatcher";
+import { EntityHandler, Inject, SRV } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
 class CustomerHandler {
   ...
   @Inject(CustomerService) private customerService: CustomerService
-  @Inject(ServiceHelper.SRV) private srv: Service
+  @Inject(SRV) private srv: Service
   ...
   constructor() {}
   ...
@@ -407,7 +407,7 @@ class CustomerHandler {
 
 ##### Inject SRV
 
-**@Inject**(`ServiceHelper.SRV`) `private srv: CdsService`
+**@Inject**(SRV) `private srv: CdsService`
 
 This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repository, @EntityHandler and @UnboundActions` classes, It can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
 
@@ -415,7 +415,7 @@ This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repos
 
 ```typescript
 import { Service } from "@sap/cds";
-import { EntityHandler, Inject, ServiceHelper } from "@dxfrontier/cds-ts-dispatcher";
+import { EntityHandler, Inject, SRV } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
@@ -423,7 +423,7 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 // OR @Repository()
 class CustomerHandler { // OR CustomerService, CustomerRepository
   ...
-  @Inject(ServiceHelper.SRV) private srv: Service
+  @Inject(SRV) private srv: Service
   ...
   constructor() {}
   ...

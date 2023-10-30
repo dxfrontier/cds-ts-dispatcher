@@ -1,12 +1,12 @@
 import { Request, Service } from '@sap/cds';
-import { Inject, ServiceHelper, ServiceLogic } from '../../../../dist';
+import { Inject, SRV, ServiceLogic } from '../../../../dist';
 import { Book, submitOrder } from '../util/types/entities/CatalogService';
 import { ActionRequest, TypedRequest } from '../../../../dist';
 import BookRepository from '../repository/BookRepository';
 
 @ServiceLogic()
 class BookService {
-  @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(SRV) private readonly srv: Service;
   @Inject(BookRepository) private bookRepository: BookRepository;
 
   public enrichTitle(results: Book[]) {

@@ -7,4 +7,6 @@ export const Constants = {
   },
 };
 
+export const SRV = 'srv';
+
 export default Constants;

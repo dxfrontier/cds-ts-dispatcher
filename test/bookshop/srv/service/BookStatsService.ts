@@ -1,5 +1,5 @@
 import { Service } from '@sap/cds';
-import { Inject, ServiceHelper, ServiceLogic } from '../../../../dist';
+import { Inject, SRV, ServiceLogic } from '../../../../dist';
 import { ActionRequest, TypedRequest } from '../../../../dist';
 import { BookStat } from '../util/types/entities/CatalogService';
 import BookStatsRepository from '../repository/BookStatsRepository';
@@ -7,7 +7,7 @@ import BookRepository from '../repository/BookRepository';
 
 @ServiceLogic()
 class BookStatsService {
-  @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(SRV) private readonly srv: Service;
   @Inject(BookStatsRepository) private readonly bookStatsRepository: BookStatsRepository;
   @Inject(BookRepository) private readonly bookRepository: BookRepository;
 

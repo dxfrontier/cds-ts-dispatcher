@@ -5,7 +5,7 @@ import {
   AfterUpdate,
   EntityHandler,
   Inject,
-  ServiceHelper,
+  SRV,
   SingleInstanceCapable,
   type TypedRequest,
 } from '../../../../../../dist';
@@ -15,7 +15,7 @@ import { Book } from '../../../util/types/entities/CatalogService';
 
 @EntityHandler(Book)
 class BookHandler {
-  @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(SRV) private readonly srv: Service;
   @Inject(BookService) private bookService: BookService;
 
   @AfterCreate()

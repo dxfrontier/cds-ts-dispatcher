@@ -6,7 +6,7 @@ import {
   BeforeSaveDraft,
   EntityHandler,
   Inject,
-  ServiceHelper,
+  SRV,
 } from '../../../../../../dist';
 import { Service } from '@sap/cds';
 import { TypedRequest } from '../../../../../../dist';
@@ -14,7 +14,7 @@ import { UserActivityLog } from '../../../util/types/entities/AdminService';
 
 @EntityHandler(UserActivityLog)
 class UserActivityLogHandler {
-  @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(SRV) private readonly srv: Service;
 
   @BeforeNewDraft()
   public async beforeNewDraftCreated(req: TypedRequest<UserActivityLog>) {

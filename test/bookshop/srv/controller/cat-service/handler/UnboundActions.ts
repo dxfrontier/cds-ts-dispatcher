@@ -1,11 +1,11 @@
-import { Inject, OnAction, OnFunction, ServiceHelper, UnboundActions } from '../../../../../../dist';
+import { Inject, OnAction, OnFunction, SRV, UnboundActions } from '../../../../../../dist';
 import { Service } from '@sap/cds';
 import { ActionRequest, ActionReturn } from '../../../../../../dist';
 import { submitOrder, submitOrderFunction } from '../../../util/types/entities/CatalogService';
 
 @UnboundActions()
 class UnboundActionsHandler {
-  @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(SRV) private readonly srv: Service;
 
   @OnAction(submitOrder)
   public async onActionMethod(

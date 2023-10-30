@@ -5,7 +5,7 @@ import {
   BeforeUpdate,
   EntityHandler,
   Inject,
-  ServiceHelper,
+  SRV,
   SingleInstanceCapable,
 } from '../../../../../../dist';
 import { Request, Service } from '@sap/cds';
@@ -15,7 +15,7 @@ import ReviewService from '../../../service/ReviewService';
 
 @EntityHandler(Review)
 class ReviewHandler {
-  @Inject(ServiceHelper.SRV) private readonly srv: Service;
+  @Inject(SRV) private readonly srv: Service;
   @Inject(ReviewService) private reviewService: ReviewService;
 
   @BeforeCreate()

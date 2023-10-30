@@ -4,7 +4,6 @@ import Util from './Util';
 
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import {
-  ServiceHelper,
   HandlerType,
   type Handler,
   type ServiceCallback,
@@ -13,6 +12,8 @@ import {
   type ReturnResultsAndRequest,
   type ReturnRequest,
 } from '../types/types';
+import { SRV } from '../constants/Constants';
+
 import cds, { type Request, type Service, type ServiceImpl } from '@sap/cds';
 
 /**
@@ -193,8 +194,8 @@ class CDSDispatcher {
   }
 
   private readonly registerSrvConstant = (): void => {
-    if (!this.container.isBound(ServiceHelper.SRV)) {
-      this.container.bind<Service>(ServiceHelper.SRV).toConstantValue(this.srv);
+    if (!this.container.isBound(SRV)) {
+      this.container.bind<Service>(SRV).toConstantValue(this.srv);
     }
   };
 
