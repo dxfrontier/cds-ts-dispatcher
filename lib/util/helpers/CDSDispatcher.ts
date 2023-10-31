@@ -32,6 +32,8 @@ class CDSDispatcher {
     if (Util.isEmptyArray(entities)) {
       throw new Error('The new CDSDispatcher constructor cannot be empty!');
     }
+
+    this.initializeContainer();
   }
 
   private initializeContainer(): void {
@@ -223,7 +225,6 @@ class CDSDispatcher {
   private buildServiceImplementation(): ServiceCallback {
     return (srv: Service) => {
       this.storeService(srv);
-      this.initializeContainer();
       this.buildEntityHandlers();
     };
   }
