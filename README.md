@@ -65,6 +65,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
           - [OnCancelDraft](#oncanceldraft)
           - [OnEditDraft](#oneditdraft)
           - [OnSaveDraft](#onsavedraft)
+        - [Other draft handlers](#other-draft-handlers)
       - [Method : `SingleInstanceCapable`](#method--singleinstancecapable)
         - [Complementary Decorator Actions](#complementary-decorator-actions)
         - [Execution behavior](#execution-behavior)
@@ -582,7 +583,7 @@ Use `@AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete()` register hand
 The results from the preceding `.on` handler, with the following types:
 
 - `results` (of type `MyEntity[]`) for `@AfterRead`
-- `results` (of type `MyEntity`) for `@AfterUpdate` and `@AfterCreate`
+- `result` (of type `MyEntity`) for `@AfterUpdate` and `@AfterCreate`
 - `deleted` (of type `boolean`) for `@AfterDelete`
 
 - `req` of type `TypedRequest`
@@ -999,14 +1000,15 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 #### Methods : `draft entity`
 
-All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
-
-> [!NOTE]
-> Except the `@OnAction(), @OnFunction()` as this are bound to the service and not to an entity.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ##### Before
+
+Use `@BeforeCreateDraft(), @BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()` to register handlers to run before `.on` handlers, frequently used for `validating user input.`
+
+The handlers receive one argument:
+
+- `req` of type `TypedRequest`
+
+See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) event**
 
 ###### BeforeNewDraft
 
@@ -1136,6 +1138,18 @@ this.before('SAVE', MyEntity, async (req) => {
 
 ##### After
 
+Use `@AfterCreateDraft(), @AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.` The handlers receive two arguments:
+
+The results from the preceding `.on` handler, with the following types:
+
+- `results` (of type `MyEntity[]`) for `@AfterRead`
+- `result` (of type `MyEntity`) for `@AfterUpdate` and `@AfterCreate`
+- `deleted` (of type `boolean`) for `@AfterDelete`
+
+- `req` of type `TypedRequest`
+
+See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
+
 ###### AfterNewDraft
 
 **@AfterNewDraft**()
@@ -1253,7 +1267,7 @@ this.after('SAVE', MyEntity, async (results, req) => {
 
 ##### On
 
-Use [@OnNewDraft()](#onnewdraft), [@OnCancelDraft()](#oncanceldraft), [@OnCancelDraft()](#oncanceldraft), [@OnSaveDraft()](#onsavedraft) `handlers to support for both`, active and draft entities.
+Use `@OnNewDraft(), @OnCancelDraft(), @OnCancelDraft(), @OnSaveDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnCreateDraft(), @OnDeleteDraft()` handlers to support for both, active and draft entities.
 
 The handlers receive two arguments:
 
@@ -1392,6 +1406,15 @@ this.on('SAVE', MyEntity, async (req, next) => {
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+##### Other draft handlers
+
+All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
+
+> [!NOTE]
+> Except the `@OnAction(), @OnFunction()` as this are bound to the service and not to an entity.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
