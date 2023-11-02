@@ -1,5 +1,5 @@
+import { Service } from '@sap/cds';
 import {
-  AfterNewDraft,
   BeforeDeleteDraft,
   BeforeEditDraft,
   BeforeNewDraft,
@@ -7,9 +7,8 @@ import {
   EntityHandler,
   Inject,
   SRV,
-} from '../../../../../../dist';
-import { Service } from '@sap/cds';
-import { TypedRequest } from '../../../../../../dist';
+  TypedRequest,
+} from '../../../../../../lib';
 import { UserActivityLog } from '../../../util/types/entities/AdminService';
 
 @EntityHandler(UserActivityLog)

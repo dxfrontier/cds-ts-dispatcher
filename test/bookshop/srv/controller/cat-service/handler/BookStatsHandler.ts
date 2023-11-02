@@ -9,9 +9,11 @@ import {
   OnUpdate,
   SRV,
   SingleInstanceCapable,
-} from '../../../../../../dist';
+  type ActionRequest,
+  type ActionReturn,
+  type TypedRequest,
+} from '../../../../../../lib';
 import { Request, Service } from '@sap/cds';
-import { type ActionRequest, type ActionReturn, type TypedRequest } from '../../../../../../dist';
 import BookStatsService from '../../../service/BookStatsService';
 import { BookStat } from '../../../util/types/entities/CatalogService';
 import AuthorService from '../../../service/AuthorService';

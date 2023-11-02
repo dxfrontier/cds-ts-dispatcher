@@ -8,7 +8,7 @@ import {
   SRV,
   SingleInstanceCapable,
   type TypedRequest,
-} from '../../../../../../dist';
+} from '../../../../../../lib';
 import BookService from '../../../service/BookService';
 import { Request, Service } from '@sap/cds';
 import { Book } from '../../../util/types/entities/CatalogService';

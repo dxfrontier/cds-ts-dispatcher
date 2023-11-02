@@ -1,4 +1,4 @@
-import { Repository } from '../../../../dist';
+import { Repository } from '../../../../lib';
 import { BookStat } from '../util/types/entities/CatalogService';
 import { BaseRepository } from '@dxfrontier/cds-ts-repository';
 

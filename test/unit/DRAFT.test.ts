@@ -12,7 +12,7 @@ import {
   AfterSaveDraft,
   AfterEditDraft,
   AfterCancelDraft,
-} from '../../dist';
+} from '../../lib';
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { CRUD_EVENTS, DRAFT_EVENTS, Handler, HandlerType } from '../../lib/util/types/types';

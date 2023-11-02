@@ -1,5 +1,5 @@
 import { Request } from '@sap/cds';
-import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate } from '../../../dist';
+import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { BeforeCreateDraft, BeforeDeleteDraft, BeforeReadDraft, BeforeUpdateDraft } from '../../../lib';

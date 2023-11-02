@@ -9,7 +9,7 @@ import {
   OnSaveDraft,
   SRV,
   SingleInstanceCapable,
-} from '../../../../../../dist';
+} from '../../../../../../lib';
 import { Request, Service } from '@sap/cds';
 import { BookEvent } from '../../../util/types/entities/CatalogService';
 

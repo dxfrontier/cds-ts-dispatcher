@@ -1,7 +1,7 @@
 import { Request, Service } from '@sap/cds';
-import { Inject, SRV, ServiceLogic } from '../../../../dist';
+import { Inject, SRV, ServiceLogic } from '../../../../lib';
 import { Book, submitOrder } from '../util/types/entities/CatalogService';
-import { ActionRequest, TypedRequest } from '../../../../dist';
+import { ActionRequest, TypedRequest } from '../../../../lib';
 import BookRepository from '../repository/BookRepository';
 
 @ServiceLogic()

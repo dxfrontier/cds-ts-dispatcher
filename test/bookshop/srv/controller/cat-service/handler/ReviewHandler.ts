@@ -7,10 +7,10 @@ import {
   Inject,
   SRV,
   SingleInstanceCapable,
-} from '../../../../../../dist';
+  type TypedRequest,
+} from '../../../../../../lib';
 import { Request, Service } from '@sap/cds';
 import { Review } from '../../../util/types/entities/CatalogService';
-import { TypedRequest } from '../../../../../../dist';
 import ReviewService from '../../../service/ReviewService';
 
 @EntityHandler(Review)

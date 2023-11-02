@@ -1,5 +1,5 @@
 import { Constructable } from '@sap/cds/apis/internal/inference';
-import { SingleInstanceCapable } from '../../dist';
+import { SingleInstanceCapable } from '../../lib';
 import { Request } from '@sap/cds';
 import Constants from '../../lib/util/constants/Constants';
 

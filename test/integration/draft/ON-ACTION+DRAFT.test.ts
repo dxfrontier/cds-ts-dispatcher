@@ -1,5 +1,5 @@
 import { Request } from '@sap/cds';
-import { OnBoundAction, OnBoundFunction } from '../../../dist';
+import { OnBoundAction, OnBoundFunction } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { submitOrder } from '../../bookshop/srv/util/types/entities/CatalogService';

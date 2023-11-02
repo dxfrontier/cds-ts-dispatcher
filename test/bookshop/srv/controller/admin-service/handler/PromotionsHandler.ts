@@ -6,9 +6,9 @@ import {
   EntityHandler,
   Inject,
   SRV,
-} from '../../../../../../dist';
+  type TypedRequest,
+} from '../../../../../../lib';
 import { Service } from '@sap/cds';
-import { TypedRequest } from '../../../../../../dist';
 import { Promotion } from '../../../util/types/entities/AdminService';
 
 @EntityHandler(Promotion)

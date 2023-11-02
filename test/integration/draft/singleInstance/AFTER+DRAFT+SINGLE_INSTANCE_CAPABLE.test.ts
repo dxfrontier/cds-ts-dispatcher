@@ -1,5 +1,5 @@
 import { Request } from '@sap/cds';
-import { AfterCreate, AfterDelete, AfterRead, SingleInstanceCapable } from '../../../../dist';
+import { AfterCreate, AfterDelete, AfterRead, SingleInstanceCapable } from '../../../../lib';
 import { MetadataDispatcher } from '../../../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { AfterCreateDraft, AfterDeleteDraft, AfterReadDraft, AfterUpdateDraft } from '../../../../lib';
