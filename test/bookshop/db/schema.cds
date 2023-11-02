@@ -74,8 +74,8 @@ entity Reviews : managed {
 }
 
 entity BookEvents : managed, cuid {
-  name : String;
-  type : String enum {
+  name  : String;
+  types : String enum {
     BOOK_SIGNING;
     AUTHOR_TALK;
     BOOK_LUNCH
