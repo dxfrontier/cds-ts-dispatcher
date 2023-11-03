@@ -175,7 +175,7 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 
 - Target folder :`./srv/util/types/entities` - Change to your location destination folder.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ## Architecture
 
@@ -195,7 +195,7 @@ Simplify Entity Manipulation with CDS-QL: [BaseRepository](https://github.com/dx
 
 It offers a simplified interface for common database actions such as `create(), createMany(), getAll(), find(), update(), updateLocaleTexts(), getLocaleTexts(), count(), exists(), delete(), deleteMany() ... ` and many other actions.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ## Usage
 
@@ -223,7 +223,7 @@ module.exports = new CDSDispatcher([BookHandler, ReviewHandler, UnboundActionsHa
 
 <img src="https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/usage_cdsDispatcher.png?raw=true">
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ### Decorators
 
@@ -255,7 +255,7 @@ class CustomerHandler {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### ServiceLogic
 
@@ -277,7 +277,7 @@ class CustomerService {
   ...
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### Repository
 
@@ -337,7 +337,7 @@ class CustomerRepository extends BaseRepository<MyEntity> {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### UnboundActions
 
@@ -369,7 +369,7 @@ module.exports = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
 > [!NOTE]
 > The reason behind introducing a distinct decorator for `Unbound actions` stems from the fact that these actions are not associated with any specific `Entity` but instead these actions belongs to the Service itself.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 #### Fields
 
@@ -404,7 +404,7 @@ class CustomerHandler {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### Inject SRV
 
@@ -433,7 +433,7 @@ class CustomerHandler { // OR CustomerService, CustomerRepository
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 #### Methods - `active entity`
 
@@ -450,7 +450,7 @@ See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/c
 > [!NOTE]
 > If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@BeforeCreateDraft(), BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()`
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### BeforeCreate
 
@@ -481,7 +481,7 @@ this.before('CREATE', MyEntity, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### BeforeRead
 
@@ -512,7 +512,7 @@ this.before('READ', MyEntity, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### BeforeUpdate
 
@@ -543,7 +543,7 @@ this.before('UPDATE', MyEntity, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### BeforeDelete
 
@@ -574,7 +574,7 @@ this.before('DELETE', MyEntity, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### After
 
@@ -593,7 +593,7 @@ See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/co
 > [!NOTE]
 > If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@AfterCreateDraft(), AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()`
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### AfterCreate
 
@@ -624,7 +624,7 @@ this.after('CREATE', MyEntity, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### AfterRead
 
@@ -655,7 +655,7 @@ this.after('READ', MyEntity, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### AfterUpdate
 
@@ -686,7 +686,7 @@ this.after('UPDATE', MyEntity, async (result, req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### AfterDelete
 
@@ -718,7 +718,7 @@ this.after('DELETE', MyEntity, async (deleted, req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### On
 
@@ -734,7 +734,7 @@ See also the official SAP JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-
 > [!NOTE]
 > If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@OnCreateDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft()`
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnCreate
 
@@ -765,7 +765,7 @@ this.on('CREATE', MyEntity, async (req, next) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnRead
 
@@ -796,7 +796,7 @@ this.on('READ', MyEntity, async (req, next) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnUpdate
 
@@ -828,7 +828,7 @@ this.on('UPDATE', MyEntity, async (req, next) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnDelete
 
@@ -859,7 +859,7 @@ this.on('DELETE', MyEntity, async (req, next) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnAction
 
@@ -893,7 +893,7 @@ this.on(AnAction, async (req, next) => {
 > [!NOTE]
 > AnAction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnFunction
 
@@ -926,7 +926,7 @@ this.on(AFunction, async (req) => {
 > [!NOTE]
 > AFunction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnBoundAction
 
@@ -961,7 +961,7 @@ this.on(MyEntity.actions.AnAction, MyEntity, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnBoundFunction
 
@@ -996,7 +996,7 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 #### Methods : `draft entity`
 
@@ -1041,7 +1041,7 @@ this.before('NEW', MyEntity.drafts, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### BeforeCancelDraft
 
@@ -1307,7 +1307,7 @@ this.on('NEW', MyEntity.drafts, async (req, next) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnCancelDraft
 
@@ -1340,7 +1340,7 @@ this.on('CANCEL', MyEntity.drafts, async (req, next) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnEditDraft
 
@@ -1373,7 +1373,7 @@ this.on('EDIT', MyEntity, async (req, next) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnSaveDraft
 
@@ -1407,7 +1407,7 @@ this.on('SAVE', MyEntity, async (req, next) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### Other draft handlers
 
@@ -1416,7 +1416,7 @@ All active entity [On](#on), [Before](#before), [After](#after) events have also
 > [!NOTE]
 > Except the `@OnAction(), @OnFunction()` as this are bound to the service and not to an entity.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 #### Method : `SingleInstanceCapable`
 
@@ -1490,7 +1490,7 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ## Examples
 
@@ -1533,4 +1533,4 @@ SOFTWARE.
 - [@sblessing](https://github.com/sblessing)
 - [@ABS GmbH](https://www.abs-gmbh.de/) team
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
