@@ -1,0 +1,59 @@
+name: 🐞 Bug
+description: File a bug/issue
+title: '[BUG] <title>'
+labels: ['type: bug']
+body:
+  - type: textarea
+    attributes:
+      label: Current behavior
+      description: A description of what you're experiencing.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: A description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Example steps to reproduce the behavior :
+
+        1. In this environment...
+        2. With this config...
+        3. With this sample model...
+        4. Run '...'/ Do...
+        5. See error...
+
+        <pre>
+        ```ts
+        public async myMethod(results: MyEntity) {
+         // ...
+        }
+        ```
+        </pre>
+
+        Tip: You can add TypeScript code in ```ts fences:
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Environment
+      description: |
+        You can acquire the versions for :
+          - @dxfrontier packages => `npm list | grep "@dxfrontier"`
+          - cds-typer package => `npx cds-typer --version`
+          - node => `node -v`
+          - npm => `npm --version`
+      value: |
+        - **@dxfrontier packages**:
+        - **node**
+        - **npm**
+
+    validations:
+      required: false

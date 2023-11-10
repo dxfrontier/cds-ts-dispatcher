@@ -1,0 +1,22 @@
+name: 💡 Feature Request
+description: Request a missing feature
+title: '[FEATURE] <title>'
+labels: ['type: feature request']
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: |
+        A description of the feature you're interested in. 
+        If possible include use cases, links to CAPire, and how it would benefit this tool and its users.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Suggested solution
+      description: |
+        Describe your proposed solution. 
+        A description of what your feature request is all about.
+    validations:
+      required: true
