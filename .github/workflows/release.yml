@@ -39,6 +39,7 @@ jobs:
           IS_PATCH_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'patch') }}
           IS_MINOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}
           IS_MAJOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'major') }}
+          IS_NO_RELEASE_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'norelease') }}
         run: |
           if [ "${IS_MINOR_FOUND}" == "true" ]; then
             echo "version=minor" >> $GITHUB_ENV
@@ -46,9 +47,12 @@ jobs:
           elif [ "${IS_PATCH_FOUND}" == "true" ]; then
             echo "version=patch" >> $GITHUB_ENV
             echo "Version: patch"
-          else
+          elif [ "${IS_MAJOR_FOUND}" == "true" ]; then
             echo "version=major" >> $GITHUB_ENV
             echo "Version: major"
+          else
+            echo "version=norelease" >> $GITHUB_ENV
+            echo "Version: norelease"
           fi
 
       - uses: rymndhng/release-on-push-action@master
