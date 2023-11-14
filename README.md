@@ -4,8 +4,6 @@
 
 The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement TS handlers provided by the SAP CAP framework.
 
-<a name="readme-top"></a>
-
 ## Table of Contents
 
 - [CDS-TS Dispatcher](#cds-ts-dispatcher)
@@ -68,7 +66,6 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
         - [Other draft handlers](#other-draft-handlers)
       - [Method : `SingleInstanceCapable`](#method--singleinstancecapable)
         - [Complementary Decorator Actions](#complementary-decorator-actions)
-        - [Execution behavior](#execution-behavior)
         - [Examples](#examples)
   - [Examples](#examples-1)
   - [Contributing](#contributing)
@@ -205,7 +202,7 @@ It offers a simplified interface for common database actions such as `create(), 
 
 The `CDSDispatcher` constructor allows you to create an instance for dispatching and managing entities.
 
-`CDSDispatcher` class will initialize all **[Entity handler](#entityhandler)(s)** and all of their `Dependencies` : [Services](#servicelogic), [Repositories](#repository).
+`CDSDispatcher` class will initialize all **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository).
 
 `Parameters`
 
@@ -317,6 +314,7 @@ To get started, refer to the official documentation **[BaseRepository](https://g
 ```typescript
 import { Repository } from '@dxfrontier/cds-ts-dispatcher';
 import { BaseRepository } from '@dxfrontier/cds-ts-repository';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @Repository()
@@ -578,9 +576,9 @@ this.before('DELETE', MyEntity, async (req) => {
 
 ##### After
 
-Use `@AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.` The handlers receive two arguments:
+Use `@AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.`
 
-The results from the preceding `.on` handler, with the following types:
+The handlers receive two arguments:
 
 - `results` (of type `MyEntity[]`) for `@AfterRead`
 - `result` (of type `MyEntity`) for `@AfterUpdate` and `@AfterCreate`
@@ -724,7 +722,7 @@ this.after('DELETE', MyEntity, async (deleted, req) => {
 
 Use `@OnCreate(), @OnRead(), @OnUpdate(), @OnDelete(), OnAction(), @OnFunction(), @OnBoundAction(), @OnBoundFunction()` handlers to fulfill requests, e.g. by reading/writing data from/to databases handlers.
 
-The handlers receive one argument:
+The handlers receive two arguments:
 
 - `req` of type `TypedRequest`
 - `next` of type `Function`
@@ -867,7 +865,7 @@ this.on('DELETE', MyEntity, async (req, next) => {
 
 `Parameters`
 
-- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`
 
 `Example`
 
@@ -901,7 +899,7 @@ this.on(AnAction, async (req, next) => {
 
 `Parameters`
 
-- `name (CdsFunction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `name (CdsFunction)` : Representing the `CDS action` defined in the `CDS file`.
 
 `Example`
 
@@ -936,7 +934,7 @@ It is important to note that decorator `@OnBoundAction()` will be triggered base
 
 `Parameters`
 
-- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`.
 
 `Example`
 
@@ -945,7 +943,7 @@ import { OnBoundAction, ActionRequest, ActionReturn } from "@dxfrontier/cds-ts-d
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnBoundAction(MyEntity.actions.AnAction)
-public async onActionMethod(req: ActionRequest<typeof MyEntity.actions.AnAction>, next: Function): ActionReturn<typeof MyEntity.actions.AnAction>
+public async onActionMethod(req: ActionRequest<typeof MyEntity.actions.AnAction>, next: Function): ActionReturn<typeof MyEntity.actions.AnAction> {
   // ...
 }
 ```
@@ -971,7 +969,7 @@ It is important to note that decorator `@OnBoundFunction()` will be triggered ba
 
 `Parameters`
 
-- `name (CdsFunction)` : Representing the `CDS action` defined in the `CDS file`, generated using the [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+- `name (CdsFunction)` : Representing the `CDS action` defined in the `CDS file`.
 
 `Example`
 
@@ -1074,6 +1072,8 @@ this.before('CANCEL', MyEntity.drafts, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ###### BeforeEditDraft
 
 **@BeforeEditDraft**()
@@ -1105,6 +1105,8 @@ this.before('EDIT', MyEntity, async (req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ###### BeforeSaveDraft
 
 **@BeforeSaveDraft**()
@@ -1135,6 +1137,8 @@ this.before('SAVE', MyEntity, async (req) => {
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### After
 
@@ -1181,6 +1185,8 @@ this.after('NEW', MyEntity.drafts, async (results, req) => {
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ###### AfterCancelDraft
 
 **@AfterCancelDraft**()
@@ -1208,6 +1214,11 @@ this.after('CANCEL', MyEntity.drafts, async (results, req) => {
   // ...
 });
 ```
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### AfterEditDraft
 
@@ -1237,6 +1248,11 @@ this.after('EDIT', MyEntity, async (results, req) => {
 });
 ```
 
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ###### AfterSaveDraft
 
 **@AfterSaveDraft**()
@@ -1264,6 +1280,11 @@ this.after('SAVE', MyEntity, async (results, req) => {
   // ...
 });
 ```
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### On
 
@@ -1422,11 +1443,7 @@ All active entity [On](#on), [Before](#before), [After](#after) events have also
 
 **@SingleInstanceCapable()**
 
-The `@SingleInstanceCapable()` decorator is utilized at the `method-level` to annotate a method that all decorators which are used along with this `@SingleInstanceCapable()` decorator, will handle also single `instance Request`.
-
-When working with `@SingleInstanceCapable` decorator, a `3td parameter`, `isSingleInstance: boolean`.
-
-- This parameter serves to differentiate between two types of requests: `single instance requests` and `entity set requests`. You can adjust the behavior of your methods based on the value of isSingleInstance.
+The `@SingleInstanceCapable()` decorator is applied at the method level to indicate that all decorators used in conjunction with this decorator will handle both single instance and entity set requests, this behaves like a **switch** when the REQUEST is entity set and single instance, so you can manage different behavior.
 
 ##### Complementary Decorator Actions
 
@@ -1436,53 +1453,44 @@ When working with `@SingleInstanceCapable` decorator, a `3td parameter`, `isSing
 - [@BeforeRead()](#beforeread)
 - [@OnRead()](#onread)
 
-##### Execution behavior
-
-All methods decorated with `@SingleInstanceCapable` and [@AfterRead()](#afterread), [@BeforeRead()](#beforeread), [@OnRead](#onread) will be executed in two distinct ways :
-
-1. `Single instance mode` - When the `isSingleInstance` parameter is set to **true**, these methods will be executed for single instance requests.
-2. `Entity set mode`: When the `isSingleInstance` parameter is set to **false**, these methods will be executed for entity set requests.
-
 ##### Examples
 
-`Example 1` : Handling both single instance and entity set requests
+`Example 1` : Handling single instance request
 
 - Example single request : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
-- Example entity set request : http://localhost:4004/odata/v4/main/MyEntity
 
 ```typescript
 
 import { AfterRead, SingleInstanceCapable, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-@AfterRead() // Will handle single instance and entity set
-@SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered when single instance is requested and entity set
+@AfterRead()
+@SingleInstanceCapable()
 public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
   if(isSingleInstance) {
+    // This will be executed only when single instance read is performed
+    // isSingleInstance flag will be `true`
     return this.customerService.handleSingleInstance(req)
   }
-
-  return this.customerService.handleEntitySet(req)
 }
 ```
 
 `Example 2` : Differing behavior for single instance and entity set requests
 
-`AfterRead()` decorator will be executed on single instance request and entity set
-`BeforeRead()` decorator will be executed only on entity set request.
-
 - Example single request : http://localhost:4004/odata/v4/main/ `MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
 - Example entity set request : http://localhost:4004/odata/v4/main/ `MyEntity`
 
 ```typescript
-@AfterRead() //  Will handle single instance and entity set
-@SingleInstanceCapable() // All methods above '@SingleInstanceCapable()' will be triggered when single instance is requested and entity set
-@BeforeRead() // Will handle only entity set
+@AfterRead()
+@SingleInstanceCapable()
+@BeforeRead()
 public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
   if(isSingleInstance) {
+    // This method will be executed for 'AfterRead` single instance
     return this.customerService.handleSingleInstance(req)
   }
 
+  // This method will be executed for `BeforeRead` both cases : single instance & entity set
   return this.customerService.handleEntitySet(req)
 }
 ```

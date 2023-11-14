@@ -1,7 +1,7 @@
 {
   "name": "@dxfrontier/cds-ts-dispatcher",
   "version": "0.1.12",
-  "description": "SAP CAP NodeJS-based project using TypesScript decorators for rapid development. The goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.",
+  "description": "The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement TS handlers provided by the SAP CAP framework.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -43,10 +43,11 @@
     "url": "git+https://github.com/dxfrontier/cds-ts-dispatcher.git"
   },
   "keywords": [
+    "CDS-TS-Dispatcher",
     "CDS-TS-Repository",
-    "Controller-Service-Repository",
-    "SAP CAP CDS-TS Decorators",
-    "SAP CAP TypeScript Decorators"
+    "SAP CAP Decorators",
+    "SAP CAP TypeScript",
+    "Controller-Service-Repository"
   ],
   "author": {
     "name": "Daniel Dragolea",
