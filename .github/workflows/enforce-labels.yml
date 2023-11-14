@@ -1,0 +1,64 @@
+name: Version bump
+
+on:
+  pull_request:
+    types: [opened, labeled]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  # This will enforce pull request to have a label 'patch', 'minor', 'major'
+  enforce-label-version-release:
+    name: 'Enforce Labels: patch, minor, major'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Enforce version release labels
+        uses: yogevbd/enforce-label-action@2.1.0
+        with:
+          REQUIRED_LABELS_ANY: 'patch,minor,major'
+          REQUIRED_LABELS_ANY_DESCRIPTION: "Select at least one label ['patch', 'minor', 'major']"
+
+  # This will use the enforced label from the previous step to increase the package.json version
+  bump-version:
+    needs: enforce-label-version-release
+    name: 'Bump: version increase'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: 'Save version to .env'
+        env:
+          IS_PATCH_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'patch') }}
+          IS_MINOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}
+          IS_MAJOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'major') }}
+        run: |
+          if [ "${IS_MINOR_FOUND}" == "true" ]; then
+            echo "version=minor" >> $GITHUB_ENV
+            echo "Version: minor"
+          elif [ "${IS_PATCH_FOUND}" == "true" ]; then
+            echo "version=patch" >> $GITHUB_ENV
+            echo "Version: patch"
+          else
+            echo "version=major" >> $GITHUB_ENV
+            echo "Version: major"
+          fi
+
+      - name: 'Automated: version bump (package.json)'
+        id: version-bump
+        uses: phips28/gh-action-bump-version@v10.1.1
+        with:
+          version-type: ${{ env.version }}
+          minor-wording: minor
+          major-wording: major
+          patch-wording: patch
+          skip-tag: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

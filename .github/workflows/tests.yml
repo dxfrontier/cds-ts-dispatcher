@@ -1,0 +1,61 @@
+# This will run unit / integration and e2e tests
+
+name: Test
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+    paths-ignore:
+      - '../../README.md'
+      - '../ISSUE_TEMPLATE'
+      - '../workflows'
+
+  workflow_dispatch:
+
+jobs:
+  # This will start unit/integration testing
+  test-unit:
+    name: Unit
+    strategy:
+      matrix:
+        version: [20, 18]
+        platform: [macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Instal SAP CDS-DK
+        run: npm i -g @sap/cds-dk ts-node
+
+      - name: Start unit / integration tests
+        run: npm test
+
+  # This will start the e2e tests with a live server
+  test-e2e:
+    name: End-to-end (e2e)
+    needs: test-unit
+    strategy:
+      matrix:
+        version: [20, 18]
+        platform: [macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Instal SAP CDS-DK
+        run: npm i -g @sap/cds-dk ts-node
+
+      - name: Start server and start e2e tests
+        run: npm run start:server-and-test

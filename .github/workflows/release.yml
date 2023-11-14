@@ -1,0 +1,88 @@
+# This will increase package.json version, create tags and release
+
+name: Release
+
+on:
+  pull_request:
+    types:
+      - closed
+    paths-ignore:
+      - '../../test'
+      - '../ISSUE_TEMPLATE'
+      - '../workflows'
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo The PR was merged
+
+    # This will create automatic tags based on the last 50 comits and it will create latest release
+  release:
+    name: 'Create: tags and release'
+    runs-on: ubuntu-latest
+    needs: if_merged
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: 'Save version to .env'
+        env:
+          IS_PATCH_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'patch') }}
+          IS_MINOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}
+          IS_MAJOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'major') }}
+        run: |
+          if [ "${IS_MINOR_FOUND}" == "true" ]; then
+            echo "version=minor" >> $GITHUB_ENV
+            echo "Version: minor"
+          elif [ "${IS_PATCH_FOUND}" == "true" ]; then
+            echo "version=patch" >> $GITHUB_ENV
+            echo "Version: patch"
+          else
+            echo "version=major" >> $GITHUB_ENV
+            echo "Version: major"
+          fi
+
+      - uses: rymndhng/release-on-push-action@master
+        with:
+          bump_version_scheme: ${{ env.version }}
+          release_name: 'Release <RELEASE_VERSION>'
+          tag_prefix: 'v'
+
+  # This will start build of the project
+  build:
+    name: 'Start: build'
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install
+      - run: npm run build
+
+  # This will push the latest build of the project to npm
+  publish-npm:
+    name: 'Publish: npm public'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
