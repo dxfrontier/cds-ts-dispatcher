@@ -11,10 +11,13 @@ import {
   type ReturnRequestAndNext,
   type ReturnResultsAndRequest,
   type ReturnRequest,
+  type Service,
+  type ServiceImpl,
+  type Request,
 } from '../types/types';
 import { SRV } from '../constants/Constants';
 
-import cds, { type Request, type Service, type ServiceImpl } from '@sap/cds';
+import cds from '@sap/cds';
 
 /**
  * Use this class to manage the registration of the event handlers for the entities.

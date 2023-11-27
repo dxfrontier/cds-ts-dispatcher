@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type Request } from '@sap/cds';
-import { type Handler } from '../types/types';
+import { type Handler, type Request } from '../types/types';
 
 export const Util = {
   isNumber(data: any): boolean {
