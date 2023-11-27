@@ -1,4 +1,4 @@
-import { Request } from '@sap/cds';
+import { Request } from '../../../lib/index';
 import { OnBoundAction, OnBoundFunction } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
 import { Constructable } from '@sap/cds/apis/internal/inference';

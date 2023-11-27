@@ -7,10 +7,11 @@ import {
   OnEditDraft,
   OnNewDraft,
   OnSaveDraft,
+  Request,
   SRV,
+  Service,
   SingleInstanceCapable,
 } from '../../../../../../lib';
-import { Request, Service } from '@sap/cds';
 import { BookEvent } from '../../../util/types/entities/CatalogService';
 
 @EntityHandler(BookEvent)

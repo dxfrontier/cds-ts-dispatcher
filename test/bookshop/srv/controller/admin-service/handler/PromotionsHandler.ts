@@ -7,8 +7,8 @@ import {
   Inject,
   SRV,
   type TypedRequest,
+  type Service,
 } from '../../../../../../lib';
-import { Service } from '@sap/cds';
 import { Promotion } from '../../../util/types/entities/AdminService';
 
 @EntityHandler(Promotion)

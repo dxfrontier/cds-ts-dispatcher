@@ -1,6 +1,6 @@
 import { Constructable } from '@sap/cds/apis/internal/inference';
 import { SingleInstanceCapable } from '../../lib';
-import { Request } from '@sap/cds';
+import { Request } from '../../lib/index';
 import Constants from '../../lib/util/constants/Constants';
 
 function createCustomerInstance(): Constructable {
