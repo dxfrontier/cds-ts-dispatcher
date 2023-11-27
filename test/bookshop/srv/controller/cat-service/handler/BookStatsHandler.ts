@@ -12,8 +12,9 @@ import {
   type ActionRequest,
   type ActionReturn,
   type TypedRequest,
+  type Service,
+  type Request,
 } from '../../../../../../lib';
-import { Request, Service } from '@sap/cds';
 import BookStatsService from '../../../service/BookStatsService';
 import { BookStat } from '../../../util/types/entities/CatalogService';
 import AuthorService from '../../../service/AuthorService';
@@ -21,8 +22,8 @@ import AuthorService from '../../../service/AuthorService';
 @EntityHandler(BookStat)
 class BookStatsHandler {
   @Inject(SRV) private readonly srv: Service;
-  @Inject(BookStatsService) private bookStatsService: BookStatsService;
-  @Inject(AuthorService) private authorService: AuthorService;
+  @Inject(BookStatsService) private readonly bookStatsService: BookStatsService;
+  @Inject(AuthorService) private readonly authorService: AuthorService;
 
   @OnCreate()
   public async onCreateMethod(req: TypedRequest<BookStat>, next: Function) {

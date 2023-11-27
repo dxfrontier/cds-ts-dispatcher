@@ -1,4 +1,4 @@
-import { Request } from '@sap/cds';
+import { Request } from '../../lib/index';
 import {
   EntityHandler,
   OnAction,

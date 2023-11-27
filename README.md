@@ -102,8 +102,8 @@ cds init
 1. Add the the following NPM packages :
 
 ```bash
-npm install @sap/cds express
-npm install --save-dev @dxfrontier/cds-ts-dispatcher @types/node @cap-js/sqlite typescript
+npm install @dxfrontier/cds-ts-dispatcher @sap/cds express
+npm install --save-dev @types/node @cap-js/sqlite typescript
 ```
 
 4. Add a **tsconfig.json** :
@@ -384,9 +384,7 @@ The `@Inject` decorator is utilized as a `field-level` decorator and allows you 
 `Example`
 
 ```typescript
-import { Service } from "@sap/cds";
-
-import { EntityHandler, Inject, SRV } from "@dxfrontier/cds-ts-dispatcher";
+import { EntityHandler, Inject, SRV, Service } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
@@ -413,8 +411,7 @@ This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repos
 `Example`
 
 ```typescript
-import { Service } from "@sap/cds";
-import { EntityHandler, Inject, SRV } from "@dxfrontier/cds-ts-dispatcher";
+import { EntityHandler, Inject, SRV, Service } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
@@ -695,8 +692,7 @@ It is important to note that decorator `@AfterDelete()` will be triggered based 
 `Example`
 
 ```typescript
-import { Request } from "@sap/cds";
-import { AfterDelete } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterDelete, Request} from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterDelete()

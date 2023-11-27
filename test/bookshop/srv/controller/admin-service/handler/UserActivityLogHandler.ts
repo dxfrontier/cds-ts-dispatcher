@@ -1,4 +1,3 @@
-import { Service } from '@sap/cds';
 import {
   BeforeDeleteDraft,
   BeforeEditDraft,
@@ -8,6 +7,7 @@ import {
   Inject,
   SRV,
   TypedRequest,
+  type Service,
 } from '../../../../../../lib';
 import { UserActivityLog } from '../../../util/types/entities/AdminService';
 

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type Request, type Service } from '@sap/cds';
+import { type Request } from '@sap/cds/apis/events';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
-
+import { type Service, type ServiceImpl } from '@sap/cds/apis/services';
 enum HandlerType {
   Before,
   On,
@@ -44,6 +44,7 @@ type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['_
  * Use this type to have the 'return' of the action typed.
  */
 type ActionReturn<T extends CdsFunction> = Promise<T['__returns']>;
+
 interface HandlerBuilder {
   buildHandlers: () => void;
 }
@@ -77,4 +78,9 @@ export {
   //
   type CRUD_EVENTS,
   type DRAFT_EVENTS,
+
+  // Standard exports
+  type Request,
+  type Service,
+  type ServiceImpl,
 };

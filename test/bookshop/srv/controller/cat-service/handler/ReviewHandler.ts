@@ -5,18 +5,19 @@ import {
   BeforeUpdate,
   EntityHandler,
   Inject,
+  Request,
   SRV,
+  Service,
   SingleInstanceCapable,
   type TypedRequest,
 } from '../../../../../../lib';
-import { Request, Service } from '@sap/cds';
 import { Review } from '../../../util/types/entities/CatalogService';
 import ReviewService from '../../../service/ReviewService';
 
 @EntityHandler(Review)
 class ReviewHandler {
   @Inject(SRV) private readonly srv: Service;
-  @Inject(ReviewService) private reviewService: ReviewService;
+  @Inject(ReviewService) private readonly reviewService: ReviewService;
 
   @BeforeCreate()
   private async validateCurrencyCodes(req: TypedRequest<Review>) {

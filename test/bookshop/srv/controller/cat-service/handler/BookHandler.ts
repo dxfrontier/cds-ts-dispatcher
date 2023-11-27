@@ -5,18 +5,19 @@ import {
   AfterUpdate,
   EntityHandler,
   Inject,
+  Request,
   SRV,
+  Service,
   SingleInstanceCapable,
   type TypedRequest,
 } from '../../../../../../lib';
 import BookService from '../../../service/BookService';
-import { Request, Service } from '@sap/cds';
 import { Book } from '../../../util/types/entities/CatalogService';
 
 @EntityHandler(Book)
 class BookHandler {
   @Inject(SRV) private readonly srv: Service;
-  @Inject(BookService) private bookService: BookService;
+  @Inject(BookService) private readonly bookService: BookService;
 
   @AfterCreate()
   private async validateCurrencyCodes(result: Book, req: Request) {

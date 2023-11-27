@@ -6,8 +6,8 @@ import {
   UnboundActions,
   type ActionRequest,
   type ActionReturn,
+  type Service,
 } from '../../../../../../lib';
-import { Service } from '@sap/cds';
 import { submitOrder, submitOrderFunction } from '../../../util/types/entities/CatalogService';
 
 @UnboundActions()
@@ -20,7 +20,7 @@ class UnboundActionsHandler {
     next: Function,
   ): ActionReturn<typeof submitOrder> {
     return {
-      stock: req.data.quantity + 1,
+      stock: req.data.quantity! + 1,
     };
   }
 
@@ -30,7 +30,7 @@ class UnboundActionsHandler {
     next: Function,
   ): ActionReturn<typeof submitOrderFunction> {
     return {
-      stock: req.data.quantity + 1,
+      stock: req.data.quantity! + 1,
     };
   }
 }
