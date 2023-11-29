@@ -9,9 +9,9 @@ permissions:
   pull-requests: read
 
 jobs:
-  # This will enforce pull request to have a label 'patch', 'minor', 'major'
+  # This will enforce pull request to have a label 'patch', 'minor', 'major', 'norelease'
   enforce-label-version-release:
-    name: 'Enforce Labels: patch, minor, major'
+    name: 'Enforce Labels: patch, minor, major, norelease'
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -20,16 +20,26 @@ jobs:
       - name: Enforce version release labels
         uses: yogevbd/enforce-label-action@2.1.0
         with:
-          REQUIRED_LABELS_ANY: 'patch,minor,major'
-          REQUIRED_LABELS_ANY_DESCRIPTION: "Select at least one label ['patch', 'minor', 'major']"
+          REQUIRED_LABELS_ANY: 'patch,minor,major,norelease'
+          REQUIRED_LABELS_ANY_DESCRIPTION: "Select at least one label ['patch', 'minor', 'major', 'norelease']"
+  
+  if-label-norelease-stop:
+    name: No bump version if label 'norelease'
+    needs: enforce-label-version-release 
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'norelease') }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo The PR has can be have bump increase
 
   # This will use the enforced label from the previous step to increase the package.json version
   bump-version:
-    needs: enforce-label-version-release
+    needs: [if-label-norelease-stop, enforce-label-version-release]
     name: 'Bump: version increase'
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
@@ -39,7 +49,6 @@ jobs:
           IS_PATCH_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'patch') }}
           IS_MINOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}
           IS_MAJOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'major') }}
-          IS_NO_RELEASE_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'norelease') }}
         run: |
           if [ "${IS_MINOR_FOUND}" == "true" ]; then
             echo "version=minor" >> $GITHUB_ENV
