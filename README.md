@@ -14,15 +14,16 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
     - [Install CDS-TS-Dispatcher - Existing project](#install-cds-ts-dispatcher---existing-project)
     - [Generate CDS Typed entities](#generate-cds-typed-entities)
   - [Architecture](#architecture)
-  - [`[Optional]` - BaseRepository](#optional---baserepository)
   - [Usage](#usage)
     - [CDSDispatcher](#cdsdispatcher)
+      - [Parameters](#parameters)
+      - [Method](#method)
     - [Decorators](#decorators)
       - [Class](#class)
         - [EntityHandler](#entityhandler)
         - [ServiceLogic](#servicelogic)
         - [Repository](#repository)
-          - [Optional BaseRepository](#optional-baserepository)
+          - [`[Optional]` - BaseRepository](#optional---baserepository)
         - [UnboundActions](#unboundactions)
       - [Fields](#fields)
         - [Inject](#inject)
@@ -63,7 +64,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
           - [OnCancelDraft](#oncanceldraft)
           - [OnEditDraft](#oneditdraft)
           - [OnSaveDraft](#onsavedraft)
-        - [Other draft handlers](#other-draft-handlers)
+        - [`Other` draft handlers](#other-draft-handlers)
       - [Method : `SingleInstanceCapable`](#method--singleinstancecapable)
         - [Complementary Decorator Actions](#complementary-decorator-actions)
         - [Examples](#examples)
@@ -162,6 +163,8 @@ It is recommended to use the following **tsconfig.json** properties:
 }
 ```
 
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ### Generate CDS Typed entities
 
 The following command should be used to generate the typed entities.
@@ -171,6 +174,8 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 ```
 
 - Target folder :`./srv/util/types/entities` - Change to your location destination folder.
+
+For more info see official **[SAP CDS-Typer](https://cap.cloud.sap/docs/tools/cds-typer)** page.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -186,14 +191,6 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 
 ![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/architecture_folder_structure.png?raw=true) <= expanded folders => ![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/architecture_folder_structure_expanded.png?raw=true)
 
-## `[Optional]` - BaseRepository
-
-Simplify Entity Manipulation with CDS-QL: [BaseRepository](https://github.com/dxfrontier/cds-ts-repository)
-
-It offers a simplified interface for common database actions such as `create(), createMany(), getAll(), find(), update(), updateLocaleTexts(), getLocaleTexts(), count(), exists(), delete(), deleteMany() ... ` and many other actions.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
 ## Usage
 
 ### CDSDispatcher
@@ -202,18 +199,29 @@ It offers a simplified interface for common database actions such as `create(), 
 
 The `CDSDispatcher` constructor allows you to create an instance for dispatching and managing entities.
 
-`CDSDispatcher` class will initialize all **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository).
+<!-- `CDSDispatcher` class will initialize all **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository). -->
 
-`Parameters`
+#### Parameters
 
-- `entities (Array)`: An array of **[Entity handler](#entityhandler)(s)** (Constructable) that represent the different types of entities in the CDS.
+- `entities (Array)`: An array of **[Entity handler](#entityhandler)(s)** (Constructable) that represent the entities in the CDS.
+
+#### Method
+
+- `initialize`: The `initialize` method of the `CDSDispatcher` class is used to initialize **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository).
+
+<!-- `CDSDispatcher` class will initialize all **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository). -->
 
 `Example`
 
 ```typescript
 import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
 
-module.exports = new CDSDispatcher([BookHandler, ReviewHandler, UnboundActionsHandler, ...]).initialize();
+module.exports = new CDSDispatcher([
+  BookHandler,
+  ReviewHandler,
+  UnboundActionsHandler,
+  // ...
+]).initialize();
 ```
 
 `Visual image`
@@ -294,9 +302,9 @@ class CustomerRepository {
   ...
 ```
 
-###### Optional BaseRepository
+###### `[Optional]` - BaseRepository
 
-The **[CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql)** **[BaseRepository](https://github.com/dxfrontier/cds-ts-repository)** was designed to reduce the boilerplate code required to implement data access layer for persistance entities.
+The **[BaseRepository](https://github.com/dxfrontier/cds-ts-repository)** was designed to reduce the boilerplate code required to implement data access layer for persistance entities.
 
 It simplifies the implementation by offering a set of ready-to-use actions for interacting with the database. These actions include:
 
@@ -996,7 +1004,7 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 ##### Before
 
-Use `@BeforeCreateDraft(), @BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()` to register handlers to run before `.on` handlers, frequently used for `validating user input.`
+Use `@BeforeNewDraft(), @BeforeCancelDraft(), @BeforeEditDraft(), @BeforeSaveDraft(), @BeforeCreateDraft(), @BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()` to register handlers to run before `.on` handlers, frequently used for `validating user input.`
 
 The handlers receive one argument:
 
@@ -1138,7 +1146,7 @@ this.before('SAVE', MyEntity, async (req) => {
 
 ##### After
 
-Use `@AfterCreateDraft(), @AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.` The handlers receive two arguments:
+Use `@AfterNewDraft(), @AfterCancelDraft(), @AfterEditDraft(), @AfterSaveDraft(), @AfterCreateDraft(), @AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.` The handlers receive two arguments:
 
 The results from the preceding `.on` handler, with the following types:
 
@@ -1284,7 +1292,7 @@ this.after('SAVE', MyEntity, async (results, req) => {
 
 ##### On
 
-Use `@OnNewDraft(), @OnCancelDraft(), @OnCancelDraft(), @OnSaveDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnCreateDraft(), @OnDeleteDraft()` handlers to support for both, active and draft entities.
+Use `@OnNewDraft(), @OnCancelDraft(), @OnCancelDraft(), @OnSaveDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnCreateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft()` handlers to support for both, active and draft entities.
 
 The handlers receive two arguments:
 
@@ -1426,7 +1434,7 @@ this.on('SAVE', MyEntity, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### Other draft handlers
+##### `Other` draft handlers
 
 All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
 
