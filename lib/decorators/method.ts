@@ -157,55 +157,46 @@ function buildOnCRUD<Target extends Object>(options: {
 
 /**
  * This decorator can be applied to methods that need to execute custom logic before a new resource is created.
- * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request)
- * @see [CDS-TS-Dispatcher - Before create](https://github.com/dxfrontier/cds-ts-dispatcher#beforecreate)
+ * @see [CDS-TS-Dispatcher - BeforeCreate](https://github.com/dxfrontier/cds-ts-dispatcher#beforecreate)
  */
 const BeforeCreate = buildBefore({ event: 'CREATE', handlerType: HandlerType.Before, isDraft: false });
 
 /**
- * This decorator can be applied to methods that need to execute custom logic before a new resource is created as a draft
- * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request)
- * @see [CDS-TS-Dispatcher - Before create](https://github.com/dxfrontier/cds-ts-dispatcher#beforecreate)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
+ * This decorator can be applied to methods that need to execute custom logic before a new DRAFT resource is created.
+ * @see [CDS-TS-Dispatcher - BeforeCreate](https://github.com/dxfrontier/cds-ts-dispatcher#beforecreate)
  */
 const BeforeCreateDraft = buildBefore({ event: 'CREATE', handlerType: HandlerType.Before, isDraft: true });
 
 /**
  * This decorator can be applied to methods that need to execute custom logic before a read operation is performed.
- * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request)
- * @see [CDS-TS-Dispatcher - Before read](https://github.com/dxfrontier/cds-ts-dispatcher#beforeread)
+ * @see [CDS-TS-Dispatcher - BeforeRead](https://github.com/dxfrontier/cds-ts-dispatcher#beforeread)
  */
 const BeforeRead = buildBefore({ event: 'READ', handlerType: HandlerType.Before, isDraft: false });
 
 /**
- * This decorator can be applied to methods that need to execute custom logic before a read operation is performed as a draft.
+ * This decorator can be applied to methods that need to execute custom logic before a DRAFT read operation is performed.
  * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request)
- * @see [CDS-TS-Dispatcher - Before read](https://github.com/dxfrontier/cds-ts-dispatcher#beforeread)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
+ * @see [CDS-TS-Dispatcher - BeforeReadDraft](https://github.com/dxfrontier/cds-ts-dispatcher#methods--draft-entity)
  */
 const BeforeReadDraft = buildBefore({ event: 'READ', handlerType: HandlerType.Before, isDraft: true });
 
 /**
 
  * This decorator can be applied to methods that need to execute custom logic before an update operation is performed.
- * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) 
- * @see [CDS-TS-Dispatcher - Before update](https://github.com/dxfrontier/cds-ts-dispatcher#beforeupdate)
+ * @see [CDS-TS-Dispatcher - BeforeUpdate](https://github.com/dxfrontier/cds-ts-dispatcher#beforeupdate)
  */
 const BeforeUpdate = buildBefore({ event: 'UPDATE', handlerType: HandlerType.Before, isDraft: false });
 
 /**
 
- * This decorator can be applied to methods that need to execute custom logic before an update operation is performed as a draft.
- * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) 
- * @see [CDS-TS-Dispatcher - Before update](https://github.com/dxfrontier/cds-ts-dispatcher#beforeupdate)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
+ * This decorator can be applied to methods that need to execute custom logic before a DRAFT update operation is performed.
+ * @see [CDS-TS-Dispatcher - BeforeUpdateDraft](https://github.com/dxfrontier/cds-ts-dispatcher#methods---active-entity)
  */
 const BeforeUpdateDraft = buildBefore({ event: 'UPDATE', handlerType: HandlerType.Before, isDraft: true });
 
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic before a delete operation is performed.
- * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request)
  * @see [CDS-TS-Dispatcher - Before delete](https://github.com/dxfrontier/cds-ts-dispatcher#beforedelete)
  */
 const BeforeDelete = buildBefore({ event: 'DELETE', handlerType: HandlerType.Before, isDraft: false });
@@ -213,9 +204,7 @@ const BeforeDelete = buildBefore({ event: 'DELETE', handlerType: HandlerType.Bef
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic before a delete operation is performed on a draft
- * @see [CAP srv.before(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request)
- * @see [CDS-TS-Dispatcher - Before delete](https://github.com/dxfrontier/cds-ts-dispatcher#beforedelete)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
+ * @see [CDS-TS-Dispatcher - Before delete](https://github.com/dxfrontier/cds-ts-dispatcher#methods--draft-entity)
  */
 const BeforeDeleteDraft = buildBefore({ event: 'DELETE', handlerType: HandlerType.Before, isDraft: true });
 
@@ -233,61 +222,49 @@ const BeforeDeleteDraft = buildBefore({ event: 'DELETE', handlerType: HandlerTyp
 
 /**
  * This decorator can be applied to methods that need to execute custom logic after a create operation is performed.
- * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
  * @see [CDS-TS-Dispatcher - After create](https://github.com/dxfrontier/cds-ts-dispatcher#aftercreate)
  */
 const AfterCreate = buildAfter({ event: 'CREATE', handlerType: HandlerType.After, isDraft: false });
 
 /**
  * This decorator can be applied to methods that need to execute custom logic after a create operation is performed.
- * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
- * @see [CDS-TS-Dispatcher - After create](https://github.com/dxfrontier/cds-ts-dispatcher#aftercreate)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
+ * @see [CDS-TS-Dispatcher - After create](https://github.com/dxfrontier/cds-ts-dispatcher#after)
  */
 const AfterCreateDraft = buildAfter({ event: 'CREATE', handlerType: HandlerType.After, isDraft: true });
 
 /**
  * This decorator can be applied to methods that need to execute custom logic after a read operation is performed.
- * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
  * @see [CDS-TS-Dispatcher - After read](https://github.com/dxfrontier/cds-ts-dispatcher#afterread)
  */
 const AfterRead = buildAfter({ event: 'READ', handlerType: HandlerType.After, isDraft: false });
 
 /**
  * This decorator can be applied to methods that need to execute custom logic after a read operation is performed as a draft.
- * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
- * @see [CDS-TS-Dispatcher - After read](https://github.com/dxfrontier/cds-ts-dispatcher#afterread)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
+ * @see [CDS-TS-Dispatcher - After read](https://github.com/dxfrontier/cds-ts-dispatcher#after)
  */
 const AfterReadDraft = buildAfter({ event: 'READ', handlerType: HandlerType.After, isDraft: true });
 
 /**
  * This decorator can be applied to methods that need to execute custom logic after an update operation is performed.
- * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
  * @see [CDS-TS-Dispatcher - After update](https://github.com/dxfrontier/cds-ts-dispatcher#afterupdate)
  */
 const AfterUpdate = buildAfter({ event: 'UPDATE', handlerType: HandlerType.After, isDraft: false });
 
 /**
  * This decorator can be applied to methods that need to execute custom logic after an update operation is performed as a draft.
- * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
  * @see [CDS-TS-Dispatcher - After update](https://github.com/dxfrontier/cds-ts-dispatcher#afterupdate)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  */
 const AfterUpdateDraft = buildAfter({ event: 'UPDATE', handlerType: HandlerType.After, isDraft: true });
 
 /**
  * This decorator can be applied to methods that need to execute custom logic after a delete operation is performed.
- * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
  * @see [CDS-TS-Dispatcher - After delete](https://github.com/dxfrontier/cds-ts-dispatcher#afterdelete)
  */
 const AfterDelete = buildAfter({ event: 'DELETE', handlerType: HandlerType.After, isDraft: false });
 
 /**
  * This decorator can be applied to methods that need to execute custom logic after a delete operation is performed as a draft.
- * @see [CAP srv.after(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request)
  * @see [CDS-TS-Dispatcher - After delete](https://github.com/dxfrontier/cds-ts-dispatcher#afterdelete)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  */
 const AfterDeleteDraft = buildAfter({ event: 'DELETE', handlerType: HandlerType.After, isDraft: true });
 
@@ -305,23 +282,19 @@ const AfterDeleteDraft = buildAfter({ event: 'DELETE', handlerType: HandlerType.
 
 /**
  * This decorator can be applied to methods that need to execute custom logic when a create event is triggered.
- * @see [CAP srv.on(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request)
  * @see [CDS-TS-Dispatcher - On create](https://github.com/dxfrontier/cds-ts-dispatcher#oncreate)
  */
 const OnCreate = buildOnCRUD({ event: 'CREATE', handlerType: HandlerType.On, isDraft: false });
 
 /**
  * This decorator can be applied to methods that need to execute custom logic when a create event is triggered on draft.
- * @see [CAP srv.on(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request)
  * @see [CDS-TS-Dispatcher - On create](https://github.com/dxfrontier/cds-ts-dispatcher#oncreate)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  */
 const OnCreateDraft = buildOnCRUD({ event: 'CREATE', handlerType: HandlerType.On, isDraft: true });
 
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a read event is triggered.
- * @see [CAP srv.on(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request)
  * @see [CDS-TS-Dispatcher - On read](https://github.com/dxfrontier/cds-ts-dispatcher#onread)
  */
 const OnRead = buildOnCRUD({ event: 'READ', handlerType: HandlerType.On, isDraft: false });
@@ -329,16 +302,13 @@ const OnRead = buildOnCRUD({ event: 'READ', handlerType: HandlerType.On, isDraft
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a read event is triggered on draft
- * @see [CAP srv.on(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request)
  * @see [CDS-TS-Dispatcher - On read](https://github.com/dxfrontier/cds-ts-dispatcher#onread)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  */
 const OnReadDraft = buildOnCRUD({ event: 'READ', handlerType: HandlerType.On, isDraft: true });
 
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when an update event is triggered.
- * @see [CAP srv.on(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request)
  * @see [CDS-TS-Dispatcher - On update](https://github.com/dxfrontier/cds-ts-dispatcher#onupdate)
  */
 const OnUpdate = buildOnCRUD({ event: 'UPDATE', handlerType: HandlerType.On, isDraft: false });
@@ -355,7 +325,6 @@ const OnUpdateDraft = buildOnCRUD({ event: 'UPDATE', handlerType: HandlerType.On
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a delete event is triggered.
- * @see [CAP srv.on(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request)
  * @see [CDS-TS-Dispatcher - On delete](https://github.com/dxfrontier/cds-ts-dispatcher#ondelete)
  */
 const OnDelete = buildOnCRUD({ event: 'DELETE', handlerType: HandlerType.On, isDraft: false });
@@ -363,16 +332,13 @@ const OnDelete = buildOnCRUD({ event: 'DELETE', handlerType: HandlerType.On, isD
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a delete event is triggered on draft
- * @see [CAP srv.on(request) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request)
  * @see [CDS-TS-Dispatcher - On delete](https://github.com/dxfrontier/cds-ts-dispatcher#ondelete)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  */
 const OnDeleteDraft = buildOnCRUD({ event: 'DELETE', handlerType: HandlerType.On, isDraft: true });
 
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a custom action event is triggered.
- * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On action](https://github.com/dxfrontier/cds-ts-dispatcher#onaction)
  */
 const OnAction = buildOnAction({ event: 'ACTION', handlerType: HandlerType.On, isDraft: false });
@@ -380,7 +346,6 @@ const OnAction = buildOnAction({ event: 'ACTION', handlerType: HandlerType.On, i
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a custom bound action event is triggered
- * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On bound action](https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction)
  */
 const OnBoundAction = buildOnAction({ event: 'BOUND_ACTION', handlerType: HandlerType.On, isDraft: false });
@@ -388,16 +353,13 @@ const OnBoundAction = buildOnAction({ event: 'BOUND_ACTION', handlerType: Handle
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a custom bound action event is triggered as a draft.
- * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On bound action](https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  */
 const OnBoundActionDraft = buildOnAction({ event: 'BOUND_ACTION', handlerType: HandlerType.On, isDraft: true });
 
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a custom bound function event is triggered
- * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On bound function](https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction)
  */
 const OnBoundFunction = buildOnAction({ event: 'BOUND_FUNC', handlerType: HandlerType.On, isDraft: false });
@@ -405,16 +367,13 @@ const OnBoundFunction = buildOnAction({ event: 'BOUND_FUNC', handlerType: Handle
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a custom bound function event is triggered as a draft.
- * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On bound function](https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction)
- * @see [Draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  */
 const OnBoundFunctionDraft = buildOnAction({ event: 'BOUND_FUNC', handlerType: HandlerType.On, isDraft: true });
 
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a custom function event is triggered.
- * @see [CAP srv.on(event) Method](https://cap.cloud.sap/docs/node.js/core-services#srv-on-event)
  * @see [CDS-TS-Dispatcher - On function](https://github.com/dxfrontier/cds-ts-dispatcher#onfunction)
  */
 const OnFunction = buildOnAction({ event: 'FUNC', handlerType: HandlerType.On, isDraft: false });
@@ -422,7 +381,6 @@ const OnFunction = buildOnAction({ event: 'FUNC', handlerType: HandlerType.On, i
 /**
  *
  * This decorator can be applied to methods when a new draft is created from an active instance.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - On edit draft](https://github.com/dxfrontier/cds-ts-dispatcher#oneditdraft)
  */
 const OnEditDraft = buildOnCRUD({ event: 'EDIT', handlerType: HandlerType.On, isDraft: false });
@@ -430,7 +388,6 @@ const OnEditDraft = buildOnCRUD({ event: 'EDIT', handlerType: HandlerType.On, is
 /**
  *
  * This decorator can be applied to methods when the 'active entity' is changed.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - On save draft](https://github.com/dxfrontier/cds-ts-dispatcher#onsavedraft)
  *
  */
@@ -451,7 +408,6 @@ const OnSaveDraft = buildOnCRUD({ event: 'SAVE', handlerType: HandlerType.On, is
 /**
  *
  * This decorator can be applied to methods when a 'draft' is created.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - On new draft](https://github.com/dxfrontier/cds-ts-dispatcher#onnewdraft)
  */
 
@@ -460,7 +416,6 @@ const OnNewDraft = buildOnCRUD({ event: 'NEW', handlerType: HandlerType.On, isDr
 /**
  *
  * This decorator can be applied to methods when a 'draft' is cancelled.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - On cancel draft](https://github.com/dxfrontier/cds-ts-dispatcher#oncanceldraft)
  */
 
@@ -469,7 +424,6 @@ const OnCancelDraft = buildOnCRUD({ event: 'CANCEL', handlerType: HandlerType.On
 /**
  *
  * This decorator can be applied to methods when before a 'draft' is created.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - Before new draft](https://github.com/dxfrontier/cds-ts-dispatcher#beforenewdraft)
  */
 
@@ -478,7 +432,6 @@ const BeforeNewDraft = buildBefore({ event: 'NEW', handlerType: HandlerType.Befo
 /**
  *
  * This decorator can be applied to methods when before a 'draft' is canceled.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - Before cancel draft](https://github.com/dxfrontier/cds-ts-dispatcher#beforecanceldraft)
  */
 
@@ -487,7 +440,6 @@ const BeforeCancelDraft = buildBefore({ event: 'CANCEL', handlerType: HandlerTyp
 /**
  *
  * This decorator can be applied to methods when before a 'draft' is edited.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - Before edit draft](https://github.com/dxfrontier/cds-ts-dispatcher#beforeeditdraft)
  */
 
@@ -496,7 +448,6 @@ const BeforeEditDraft = buildBefore({ event: 'EDIT', handlerType: HandlerType.Be
 /**
  *
  * This decorator can be applied to methods when before a 'draft' is saved.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - Before save draft](https://github.com/dxfrontier/cds-ts-dispatcher#beforesavedraft)
  */
 
@@ -505,8 +456,7 @@ const BeforeSaveDraft = buildBefore({ event: 'SAVE', handlerType: HandlerType.Be
 /**
  *
  * This decorator can be applied to methods when after a new 'draft' is created.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
- * @see [CDS-TS-Dispatcher - After save draft](https://github.com/dxfrontier/cds-ts-dispatcher#aftersavedraft)
+ * @see [CDS-TS-Dispatcher - After new draft](https://github.com/dxfrontier/cds-ts-dispatcher#afternewdraft)
  */
 
 const AfterNewDraft = buildAfter({ event: 'NEW', handlerType: HandlerType.After, isDraft: true });
@@ -514,8 +464,7 @@ const AfterNewDraft = buildAfter({ event: 'NEW', handlerType: HandlerType.After,
 /**
  *
  * This decorator can be applied to methods when after a 'draft' is saved.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
- * @see [CDS-TS-Dispatcher - After save draft](https://github.com/dxfrontier/cds-ts-dispatcher#aftersavedraft)
+ * @see [CDS-TS-Dispatcher - After cancel draft](https://github.com/dxfrontier/cds-ts-dispatcher#aftercanceldraft)
  */
 
 const AfterCancelDraft = buildAfter({ event: 'CANCEL', handlerType: HandlerType.After, isDraft: true });
@@ -523,7 +472,6 @@ const AfterCancelDraft = buildAfter({ event: 'CANCEL', handlerType: HandlerType.
 /**
  *
  * This decorator can be applied to methods when after a 'draft' is edited.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - After edit draft](https://github.com/dxfrontier/cds-ts-dispatcher#aftereditdraft)
  */
 
@@ -532,7 +480,6 @@ const AfterEditDraft = buildAfter({ event: 'EDIT', handlerType: HandlerType.Afte
 /**
  *
  * This decorator can be applied to methods when after a 'draft' is saved.
- * @see [CAP Draft Method](https://cap.cloud.sap/docs/node.js/fiori#draft-support)
  * @see [CDS-TS-Dispatcher - After save draft](https://github.com/dxfrontier/cds-ts-dispatcher#aftersavedraft)
  */
 
