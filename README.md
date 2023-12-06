@@ -414,7 +414,7 @@ class CustomerHandler {
 
 **@Inject**(SRV) `private srv: Service`
 
-This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repository, @EntityHandler and @UnboundActions` classes, It can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
+This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repository, @EntityHandler and @UnboundActions` classes, it can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
 
 `Example`
 
@@ -425,6 +425,7 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 @EntityHandler(MyEntity)
 // OR @ServiceLogic()
 // OR @Repository()
+// OR @UnboundActions
 class CustomerHandler { // OR CustomerService, CustomerRepository
   ...
   @Inject(SRV) private srv: Service
@@ -585,11 +586,10 @@ Use `@AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete()` register hand
 
 The handlers receive two arguments:
 
-- `results` (of type `MyEntity[]`) for `@AfterRead`
-- `result` (of type `MyEntity`) for `@AfterUpdate` and `@AfterCreate`
-- `deleted` (of type `boolean`) for `@AfterDelete`
-
-- `req` of type `TypedRequest`
+- `results` (for `@AfterRead`): An array of type `MyEntity[]`.
+- `result` (for `@AfterUpdate` and `@AfterCreate`): An object of type `MyEntity`.
+- `deleted` (for `@AfterDelete`): A `boolean` indicating whether the entity was deleted.
+- `req`: An object of type `TypedRequest`.
 
 See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
 
@@ -619,7 +619,7 @@ public async afterCreateMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('CREATE', MyEntity, async (req) => {
+this.after('CREATE', MyEntity, async (result, req) => {
   // ...
 });
 ```
@@ -650,7 +650,7 @@ public async afterReadMethod(results: MyEntity[], req: TypedRequest<MyEntity>) {
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('READ', MyEntity, async (req) => {
+this.after('READ', MyEntity, async (results, req) => {
   // ...
 });
 ```
