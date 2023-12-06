@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Request } from '../../../lib/util/types/types';
-import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, SingleInstanceCapable } from '../../../lib';
+import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, EntityHandler, SingleInstanceCapable } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
-import { EntityHandler } from '../../../dist';
 import { Book } from '../../bookshop/srv/util/types/entities/CatalogService';
 
 @EntityHandler(Book)
