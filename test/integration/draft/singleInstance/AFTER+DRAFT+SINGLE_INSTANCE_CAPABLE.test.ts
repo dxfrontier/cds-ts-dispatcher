@@ -7,11 +7,11 @@ import {
   AfterDeleteDraft,
   AfterReadDraft,
   AfterUpdateDraft,
+  EntityHandler,
 } from '../../../../lib';
 import { MetadataDispatcher } from '../../../../lib/util/helpers/MetadataDispatcher';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { Request } from '../../../../lib/util/types/types';
-import { EntityHandler } from '../../../../dist';
 import { Book } from '../../../bookshop/srv/util/types/entities/CatalogService';
 
 @EntityHandler(Book)
