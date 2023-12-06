@@ -1,25 +1,29 @@
-import { Request } from '../../lib/index';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { EntityHandler } from '../../lib/index';
 import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate } from '../../lib';
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
-import { Constructable } from '@sap/cds/apis/internal/inference';
-import { CRUD_EVENTS, HandlerType } from '../../lib/util/types/types';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
+import { type CRUD_EVENTS, HandlerType, TypedRequest } from '../../lib/util/types/types';
+import { BookEvent, type BookEvents } from '../bookshop/srv/util/types/entities/CatalogService';
 
-class Customer {
+@EntityHandler(BookEvent)
+class BookEventHandler {
   @BeforeCreate()
-  public async beforeCreateMethod(req: Request) {}
+  public async beforeCreateMethod(req: TypedRequest<BookEvents>) {}
 
   @BeforeRead()
-  public async beforeReadMethod(req: Request) {}
+  public async beforeReadMethod(req: TypedRequest<BookEvents>) {}
 
   @BeforeUpdate()
-  public async beforeUpdateMethod(req: Request) {}
+  public async beforeUpdateMethod(req: TypedRequest<BookEvents>) {}
 
   @BeforeDelete()
-  public async beforeDeleteMethod(req: Request) {}
+  public async beforeDeleteMethod(req: TypedRequest<BookEvents>) {}
 }
 
-const newCustomer = (customer: Constructable) => new customer();
-const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const newBookEvent = (BookEvent: Constructable) => new BookEvent();
+const decoratorProps = MetadataDispatcher.getMetadataHandlers(newBookEvent(BookEventHandler));
 
 describe('BEFORE', () => {
   function testEvent(event: CRUD_EVENTS, eventName: string) {

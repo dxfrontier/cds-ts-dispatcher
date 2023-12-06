@@ -1,6 +1,14 @@
-import { Inject, type Request, SRV, Service, ServiceLogic } from '../../../../lib';
-import { Book, submitOrder } from '../util/types/entities/CatalogService';
-import { ActionRequest, TypedRequest } from '../../../../lib';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import {
+  Inject,
+  type Request,
+  SRV,
+  Service,
+  ServiceLogic,
+  type ActionRequest,
+  type TypedRequest,
+} from '../../../../lib';
+import { type Book, type submitOrder } from '../util/types/entities/CatalogService';
 import BookRepository from '../repository/BookRepository';
 
 @ServiceLogic()
@@ -13,7 +21,7 @@ class BookService {
   }
 
   public validateData(result: Book, req: Request) {
-    if (result.currency_code == '') {
+    if (result.currency_code === '') {
       return req.reject(400, 'Currency code is mandatory!');
     }
   }

@@ -1,24 +1,28 @@
-import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, type Request } from '../../lib';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { AfterCreate, AfterDelete, AfterRead, AfterUpdate } from '../../lib';
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
-import { Constructable } from '@sap/cds/apis/internal/inference';
-import { CRUD_EVENTS, HandlerType } from '../../lib/util/types/types';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
+import { type CRUD_EVENTS, HandlerType, TypedRequest } from '../../lib/util/types/types';
+import { Book } from '../bookshop/srv/util/types/entities/sap/capire/bookshop';
+import { EntityHandler } from '../../dist';
 
-class Customer {
+@EntityHandler(Book)
+class BookHandler {
   @AfterCreate()
-  public async afterCreateMethod(results: any[], req: Request) {}
+  public async afterCreateMethod(result: Book, req: TypedRequest<Book>) {}
 
   @AfterRead()
-  public async afterReadMethod(results: any[], req: Request) {}
+  public async afterReadMethod(results: Book[], req: TypedRequest<Book>) {}
 
   @AfterUpdate()
-  public async afterUpdateMethod(results: any, req: Request) {}
+  public async afterUpdateMethod(result: Book, req: TypedRequest<Book>) {}
 
   @AfterDelete()
-  public async afterDeleteMethod(results: boolean, req: Request) {}
+  public async afterDeleteMethod(deleted: boolean, req: TypedRequest<Book>) {}
 }
 
-const newCustomer = (customer: Constructable) => new customer();
-const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
+const newBook = (Book: Constructable) => new Book();
+const decoratorProps = MetadataDispatcher.getMetadataHandlers(newBook(BookHandler));
 
 describe('BEFORE - Active entity', () => {
   function testEvent(event: CRUD_EVENTS, eventName: string) {

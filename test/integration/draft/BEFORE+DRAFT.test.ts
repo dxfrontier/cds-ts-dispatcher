@@ -1,8 +1,16 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Request } from '../../../lib/util/types/types';
-import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate } from '../../../lib';
+import {
+  BeforeCreate,
+  BeforeDelete,
+  BeforeUpdate,
+  BeforeCreateDraft,
+  BeforeDeleteDraft,
+  BeforeReadDraft,
+  BeforeUpdateDraft,
+} from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
-import { Constructable } from '@sap/cds/apis/internal/inference';
-import { BeforeCreateDraft, BeforeDeleteDraft, BeforeReadDraft, BeforeUpdateDraft } from '../../../lib';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
 
 class Customer {
   @BeforeReadDraft()
@@ -22,9 +30,9 @@ class CustomerWithDraftInBetween {
   public async BeforeReadMethod(req: Request) {}
 }
 
-const newCustomer = (customer: Constructable) => new customer();
-const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
-const decoratorPropsInBetweenDraft = MetadataDispatcher.getMetadataHandlers(newCustomer(CustomerWithDraftInBetween));
+const newBook = (Book: Constructable) => new Book();
+const decoratorProps = MetadataDispatcher.getMetadataHandlers(newBook(Customer));
+const decoratorPropsInBetweenDraft = MetadataDispatcher.getMetadataHandlers(newBook(CustomerWithDraftInBetween));
 
 describe('Before - Draft', () => {
   describe(`

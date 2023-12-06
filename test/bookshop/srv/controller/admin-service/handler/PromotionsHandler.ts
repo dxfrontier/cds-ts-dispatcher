@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
   AfterDeleteDraft,
   AfterEditDraft,
@@ -32,7 +33,7 @@ class PromotionHandler {
 
   @AfterDeleteDraft()
   public async afterDeleteDraft(deleted: boolean, req: TypedRequest<Promotion>) {
-    debugger;
+    // debugger;
   }
 }
 

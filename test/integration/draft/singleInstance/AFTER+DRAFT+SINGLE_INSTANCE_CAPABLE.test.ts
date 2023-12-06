@@ -1,19 +1,30 @@
-import { AfterCreate, AfterDelete, AfterRead, SingleInstanceCapable } from '../../../../lib';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import {
+  AfterDelete,
+  AfterRead,
+  SingleInstanceCapable,
+  AfterCreateDraft,
+  AfterDeleteDraft,
+  AfterReadDraft,
+  AfterUpdateDraft,
+} from '../../../../lib';
 import { MetadataDispatcher } from '../../../../lib/util/helpers/MetadataDispatcher';
-import { Constructable } from '@sap/cds/apis/internal/inference';
-import { AfterCreateDraft, AfterDeleteDraft, AfterReadDraft, AfterUpdateDraft } from '../../../../lib';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { Request } from '../../../../lib/util/types/types';
+import { EntityHandler } from '../../../../dist';
+import { Book } from '../../../bookshop/srv/util/types/entities/CatalogService';
 
-class Customer {
+@EntityHandler(Book)
+class BookHandler {
   @AfterReadDraft()
   @SingleInstanceCapable()
-  public async afterReadMethod(results: any[], req: Request, isSingleInstance: boolean) {}
+  public async afterReadMethod(results: Book, req: Request, isSingleInstance: boolean) {}
 
   @AfterCreateDraft()
   @AfterUpdateDraft()
   @AfterDeleteDraft()
   @SingleInstanceCapable()
-  public async afterCreateAndDeleteMethod(results: any[] | boolean, req: Request, isSingleInstance: boolean) {}
+  public async afterCreateAndDeleteMethod(results: Book[] | boolean, req: Request, isSingleInstance: boolean) {}
 }
 
 class CustomerWithDraftInBetween {
@@ -22,12 +33,12 @@ class CustomerWithDraftInBetween {
   @AfterCreateDraft()
   @AfterUpdateDraft()
   @AfterDelete()
-  public async afterReadMethod(results: any[] | boolean, req: Request, isSingleInstance: boolean) {}
+  public async afterReadMethod(results: Book[] | boolean, req: Request, isSingleInstance: boolean) {}
 }
 
-const newCustomer = (customer: Constructable) => new customer();
-const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
-const decoratorPropsInBetweenDraft = MetadataDispatcher.getMetadataHandlers(newCustomer(CustomerWithDraftInBetween));
+const newBookEvent = (Customer: Constructable) => new Customer();
+const decoratorProps = MetadataDispatcher.getMetadataHandlers(newBookEvent(BookHandler));
+const decoratorPropsInBetweenDraft = MetadataDispatcher.getMetadataHandlers(newBookEvent(CustomerWithDraftInBetween));
 
 describe('AFTER - Single instance capable', () => {
   describe(`

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
   BeforeDeleteDraft,
   BeforeEditDraft,
@@ -32,7 +33,7 @@ class UserActivityLogHandler {
 
   @BeforeDeleteDraft()
   public async beforeDeleteDraft(req: TypedRequest<UserActivityLog>) {
-    debugger;
+    // debugger;
   }
 }
 

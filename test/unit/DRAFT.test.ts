@@ -1,4 +1,5 @@
-import { Request } from '../../lib/index';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { EntityHandler, Request } from '../../lib/index';
 import {
   OnCancelDraft,
   OnEditDraft,
@@ -14,49 +15,57 @@ import {
   AfterCancelDraft,
 } from '../../lib';
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
-import { Constructable } from '@sap/cds/apis/internal/inference';
-import { CRUD_EVENTS, DRAFT_EVENTS, Handler, HandlerType } from '../../lib/util/types/types';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
+import {
+  type CRUD_EVENTS,
+  type DRAFT_EVENTS,
+  type Handler,
+  HandlerType,
+  TypedRequest,
+} from '../../lib/util/types/types';
+import { BookEvent } from '../bookshop/srv/util/types/entities/CatalogService';
 
-class Customer {
+@EntityHandler(BookEvent)
+class BookEventsHandler {
   @OnNewDraft()
   public async onNewDraftMethod(req: Request, next: Function) {}
 
   @OnCancelDraft()
-  public async onCancelDraft(req: Request, next: Function) {}
+  public async onCancelDraft(req: TypedRequest<Request>, next: Function) {}
 
   @OnEditDraft()
   public async onEditDraft(req: Request, next: Function) {}
 
   @OnSaveDraft()
-  public async onSaveDraft(req: Request, next: Function) {}
+  public async onSaveDraft(req: TypedRequest<Request>, next: Function) {}
 
   @BeforeNewDraft()
   public async beforeNewDraftMethod(req: Request) {}
 
   @BeforeCancelDraft()
-  public async beforeCancelDraft(req: Request) {}
+  public async beforeCancelDraft(req: TypedRequest<Request>) {}
 
   @BeforeEditDraft()
   public async beforeEditDraft(req: Request) {}
 
   @BeforeSaveDraft()
-  public async beforeSaveDraft(req: Request) {}
+  public async beforeSaveDraft(req: TypedRequest<Request>) {}
 
   @AfterNewDraft()
-  public async afterNewDraftMethod(results: any, req: Request) {}
+  public async afterNewDraftMethod(results: BookEvent, req: Request) {}
 
   @AfterCancelDraft()
-  public async afterCancelDraft(results: any, req: Request) {}
+  public async afterCancelDraft(results: BookEvent, req: TypedRequest<Request>) {}
 
   @AfterEditDraft()
-  public async afterEditDraft(results: any, req: Request) {}
+  public async afterEditDraft(results: BookEvent, req: Request) {}
 
   @AfterSaveDraft()
-  public async afterSaveDraft(results: any, req: Request) {}
+  public async afterSaveDraft(results: BookEvent, req: TypedRequest<Request>) {}
 }
 
-const newCustomer = (customer: Constructable) => new customer();
-const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
+const newBookEvents = (BookEvents: Constructable) => new BookEvents();
+const decoratorProps = MetadataDispatcher.getMetadataHandlers(newBookEvents(BookEventsHandler));
 
 describe('DRAFT', () => {
   function testEvent(event: CRUD_EVENTS | DRAFT_EVENTS, eventName: string, handlerType: HandlerType, isDraft: boolean) {

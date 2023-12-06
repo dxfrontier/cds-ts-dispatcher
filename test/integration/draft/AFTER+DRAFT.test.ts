@@ -1,17 +1,26 @@
-import { Request } from '../../../lib/index';
-import { AfterCreate, AfterDelete, AfterRead, AfterUpdate } from '../../../lib';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { EntityHandler, Request } from '../../../lib/index';
+import {
+  AfterCreate,
+  AfterDelete,
+  AfterUpdate,
+  AfterCreateDraft,
+  AfterDeleteDraft,
+  AfterReadDraft,
+} from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
-import { Constructable } from '@sap/cds/apis/internal/inference';
-import { AfterCreateDraft, AfterDeleteDraft, AfterReadDraft, AfterUpdateDraft } from '../../../lib';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
+import { Book } from '../../bookshop/srv/util/types/entities/CatalogService';
 
-class Customer {
+@EntityHandler(Book)
+class BookHandler {
   @AfterReadDraft()
-  public async afterReadMethod(results: any[], req: Request) {}
+  public async afterReadMethod(results: Book[], req: Request) {}
 
   @AfterUpdate()
   @AfterCreateDraft()
   @AfterDeleteDraft()
-  public async afterCreateAndDeleteMethod(results: any[] | any, req: Request) {}
+  public async afterCreateAndDeleteMethod(results: Book[] | Book, req: Request) {}
 }
 
 class CustomerWithDraftInBetween {
@@ -19,12 +28,12 @@ class CustomerWithDraftInBetween {
   @AfterCreate()
   @AfterUpdate()
   @AfterDelete()
-  public async afterReadMethod(results: any[] | any, req: Request) {}
+  public async afterReadMethod(results: Book[] | Book, req: Request) {}
 }
 
-const newCustomer = (customer: Constructable) => new customer();
-const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
-const decoratorPropsInBetweenDraft = MetadataDispatcher.getMetadataHandlers(newCustomer(CustomerWithDraftInBetween));
+const newBook = (Book: Constructable) => new Book();
+const decoratorProps = MetadataDispatcher.getMetadataHandlers(newBook(BookHandler));
+const decoratorPropsInBetweenDraft = MetadataDispatcher.getMetadataHandlers(newBook(CustomerWithDraftInBetween));
 
 describe('AFTER - Draft', () => {
   describe(`

@@ -1,11 +1,12 @@
-import { Request } from '../../../lib/index';
-import { OnBoundAction, OnBoundFunction } from '../../../lib';
-import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
-import { Constructable } from '@sap/cds/apis/internal/inference';
-import { submitOrder } from '../../bookshop/srv/util/types/entities/CatalogService';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { EntityHandler, Request } from '../../../lib/index';
 import { OnBoundActionDraft, OnBoundFunctionDraft } from '../../../lib';
+import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
+import { Book, submitOrder } from '../../bookshop/srv/util/types/entities/CatalogService';
 
-class Customer {
+@EntityHandler(Book)
+class BookHandler {
   @OnBoundActionDraft(submitOrder)
   public async BeforeReadMethod(req: Request, next: Function) {}
 
@@ -13,8 +14,8 @@ class Customer {
   public async BeforeCreateAndDeleteMethod(req: Request, next: Function) {}
 }
 
-const newCustomer = (customer: Constructable) => new customer();
-const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
+const newBook = (Book: Constructable) => new Book();
+const decoratorProps = MetadataDispatcher.getMetadataHandlers(newBook(BookHandler));
 
 describe('ON - Draft', () => {
   describe(`

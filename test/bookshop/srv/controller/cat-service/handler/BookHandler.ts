@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
   AfterCreate,
   AfterDelete,
@@ -38,7 +39,7 @@ class BookHandler {
 
   @AfterUpdate()
   private async addDefaultDescription(result: Book, req: TypedRequest<Book>) {
-    this.bookService.addDefaultTitleText(result, req);
+    void this.bookService.addDefaultTitleText(result, req);
   }
 
   @AfterDelete()
