@@ -5,7 +5,11 @@ using {
   cuid
 } from '@sap/cds/common';
 
-using {Roles} from './cds-types/types';
+using {
+  Roles,
+  BookTypes
+} from './cds-types/types';
+
 
 namespace sap.capire.bookshop;
 
@@ -75,11 +79,7 @@ entity Reviews : managed {
 
 entity BookEvents : managed, cuid {
   name  : String;
-  types : String enum {
-    BOOK_SIGNING;
-    AUTHOR_TALK;
-    BOOK_LUNCH
-  };
+  types : BookTypes
 
 }
 

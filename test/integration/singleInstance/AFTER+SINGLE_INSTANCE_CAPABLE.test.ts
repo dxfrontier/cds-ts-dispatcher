@@ -1,18 +1,21 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Request } from '../../../lib/util/types/types';
-import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, SingleInstanceCapable } from '../../../lib';
+import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, EntityHandler, SingleInstanceCapable } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
-import { Constructable } from '@sap/cds/apis/internal/inference';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
+import { Book } from '../../bookshop/srv/util/types/entities/CatalogService';
 
+@EntityHandler(Book)
 class Customer {
   @AfterRead()
   @SingleInstanceCapable()
-  public async afterReadMethod(results: any[], req: Request, isSingleInstance: boolean) {}
+  public async afterReadMethod(results: Book[], req: Request, isSingleInstance: boolean) {}
 
   @AfterCreate()
   @AfterUpdate()
   @AfterDelete()
   @SingleInstanceCapable()
-  public async afterCreateAndDeleteMethod(results: any[] | any, req: Request, isSingleInstance: boolean) {}
+  public async afterCreateAndDeleteMethod(results: Book[] | Book, req: Request, isSingleInstance: boolean) {}
 }
 
 class CustomerWithDraftInBetween {
@@ -21,10 +24,10 @@ class CustomerWithDraftInBetween {
   @AfterCreate()
   @AfterUpdate()
   @AfterDelete()
-  public async afterReadMethod(results: any[] | any, req: Request, isSingleInstance: boolean) {}
+  public async afterReadMethod(results: Book[] | Book, req: Request, isSingleInstance: boolean) {}
 }
 
-const newCustomer = (customer: Constructable) => new customer();
+const newCustomer = (Customer: Constructable) => new Customer();
 const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
 const decoratorPropsInBetweenDraft = MetadataDispatcher.getMetadataHandlers(newCustomer(CustomerWithDraftInBetween));
 

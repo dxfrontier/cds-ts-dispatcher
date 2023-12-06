@@ -15,20 +15,29 @@
     "eslint": "npx eslint .",
     "eslint:fix": "npx eslint . --fix",
     "eslint:message": "echo 'Eslint started...'",
+
     "prettier": "npx prettier . --check",
     "prettier:fix": "npx prettier . --write",
     "prettier:message": "echo 'Prettier started ...'",
+    
     "check": "run-s eslint:message eslint prettier:message prettier",
+    
     "fix": "run-s eslint:message eslint:fix prettier:message prettier:fix",
-    "test": "npm run build:entities:test --prefix ./test/bookshop && jest",
-    "test:newman": "newman run ./test/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/e2e/environment.json --bail",
-    "test:all": "run-s test start:server-and-test",
+    
+    "test:e2e": "newman run ./test/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/e2e/environment.json --bail",
+        
     "start:bookshop": "npm run start --prefix ./test/bookshop",
-    "start:server-and-test": "start-server-and-test start:bookshop http://localhost:4004 test:newman",
+
+    "test:unit": "npm run build:entities:test --prefix ./test/bookshop && jest",
+    "test:live-server:e2e-tests": "start-server-and-test start:bookshop http://localhost:4004 test:e2e",
+    "test:all": "run-s test:unit test:live-server:e2e-tests",
+    
     "prepare": "husky install",
+    
     "build:clean": "echo 'Clean dist folder' && npx rimraf ./dist/{*.js,*.map,*.ts,*.mts,*.mjs}",
     "build:message": "echo 'Build started...'",
     "build:ts": "tsup",
+    
     "build": "run-s build:clean build:message build:ts"
   },
   "repository": {
@@ -95,7 +104,7 @@
     "**/*.{ts, tsx}": [
       "npm run eslint:fix",
       "npm run prettier:fix",
-      "npm run test --bail --findRelatedTests ./test"
+      "npm run test:unit --bail --findRelatedTests ./test"
     ]
   }
 }

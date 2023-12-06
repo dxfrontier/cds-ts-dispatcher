@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Request } from '../../lib/index';
 import {
   EntityHandler,
@@ -11,42 +12,42 @@ import {
   OnUpdate,
 } from '../../lib';
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
-import { Constructable } from '@sap/cds/apis/internal/inference';
-import { CRUD_EVENTS, HandlerType } from '../../lib/util/types/types';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
+import { type CRUD_EVENTS, HandlerType, TypedRequest } from '../../lib/util/types/types';
 import { Book, submitOrder } from '../bookshop/srv/util/types/entities/CatalogService';
 
 @EntityHandler(Book)
-class Customer {
+class BookHandler {
   @OnCreate()
-  public async onCreateMethod(req: Request, next: Function) {}
+  public async onCreateMethod(req: TypedRequest<Request>, next: Function) {}
 
   @OnRead()
   public async onReadMethod(req: Request, next: Function) {}
 
   @OnUpdate()
-  public async onUpdateMethod(req: Request, next: Function) {}
+  public async onUpdateMethod(req: TypedRequest<Request>, next: Function) {}
 
   @OnDelete()
   public async onDeleteMethod(req: Request, next: Function) {}
 
   @OnAction(submitOrder)
-  public async onActionMethod(req: Request, next: Function) {}
+  public async onActionMethod(req: TypedRequest<Request>, next: Function) {}
 
   @OnFunction(submitOrder)
   public async onFunctionMethod(req: Request, next: Function) {}
 
   @OnBoundAction(submitOrder)
-  public async onBoundActionMethod(req: Request, next: Function) {}
+  public async onBoundActionMethod(req: TypedRequest<Request>, next: Function) {}
 
   @OnBoundFunction(submitOrder)
-  public async onBoundFunctionMethod(req: Request, next: Function) {}
+  public async onBoundFunctionMethod(req: TypedRequest<Request>, next: Function) {}
 }
 
-const newCustomer = (customer: Constructable) => new customer();
-const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
+const newBook = (Book: Constructable) => new Book();
+const decoratorProps = MetadataDispatcher.getMetadataHandlers(newBook(BookHandler));
 
 describe('ON', () => {
-  function testEvent(event: CRUD_EVENTS, eventName: string) {
+  function testEvent(event: CRUD_EVENTS, eventName: string): void {
     describe(`@${eventName}`, () => {
       test(`It should RETURN : all defined properties for this @${eventName} decorator`, () => {
         const foundEvent = decoratorProps.filter((item) => item.event === event)[0];
@@ -60,7 +61,7 @@ describe('ON', () => {
           foundEvent.event === 'ACTION' ||
           foundEvent.event === 'FUNC' ||
           foundEvent.event === 'BOUND_ACTION' ||
-          foundEvent.event == 'BOUND_FUNC'
+          foundEvent.event === 'BOUND_FUNC'
         ) {
           expect(foundEvent.actionName).toStrictEqual(submitOrder);
         }

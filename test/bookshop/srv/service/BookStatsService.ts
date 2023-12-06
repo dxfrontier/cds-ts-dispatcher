@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Inject, SRV, Service, ServiceLogic } from '../../../../lib';
 import { type ActionRequest, type TypedRequest } from '../../../../lib';
 import { type BookStat } from '../util/types/entities/CatalogService';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
   EntityHandler,
   Inject,
@@ -58,7 +59,7 @@ class BookStatsHandler {
     req: ActionRequest<typeof BookStat.actions.GenerateReport>,
     _: Function,
   ): ActionReturn<typeof BookStat.actions.GenerateReport> {
-    return this.bookStatsService.handleReport(req);
+    return await this.bookStatsService.handleReport(req);
   }
 
   // This function will be triggered on the 'BookStat' entity
@@ -67,7 +68,7 @@ class BookStatsHandler {
     req: ActionRequest<typeof BookStat.actions.NotifyAuthor>,
     _: Function,
   ): ActionReturn<typeof BookStat.actions.NotifyAuthor> {
-    return this.authorService.notifyAuthor(req);
+    return await this.authorService.notifyAuthor(req);
   }
 }
 

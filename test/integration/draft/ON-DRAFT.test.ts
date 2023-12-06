@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Request } from '../../../lib/util/types/types';
-import { OnCancelDraft, OnEditDraft, OnNewDraft, OnSaveDraft } from '../../../lib';
+import { EntityHandler, OnCancelDraft, OnEditDraft, OnNewDraft, OnSaveDraft } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
-import { Constructable } from '@sap/cds/apis/internal/inference';
+import { type Constructable } from '@sap/cds/apis/internal/inference';
+import { Book } from '../../bookshop/srv/util/types/entities/CatalogService';
 
-class Customer {
+@EntityHandler(Book)
+class BookHandler {
   @OnNewDraft()
   public async method1(req: Request, next: Function) {}
 
@@ -17,8 +20,8 @@ class Customer {
   public async method4(req: Request, next: Function) {}
 }
 
-const newCustomer = (customer: Constructable) => new customer();
-const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(Customer));
+const newCustomer = (Book: Constructable) => new Book();
+const decoratorProps = MetadataDispatcher.getMetadataHandlers(newCustomer(BookHandler));
 
 describe('ON - Draft', () => {
   describe('@OnNewDraft()', () => {
