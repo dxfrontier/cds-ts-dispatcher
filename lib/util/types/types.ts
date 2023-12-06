@@ -43,7 +43,7 @@ type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['_
 /**
  * Use this type to have the 'return' of the action typed.
  */
-type ActionReturn<T extends CdsFunction> = Promise<T['__returns']>;
+type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void | Error>;
 
 interface HandlerBuilder {
   buildHandlers: () => void;
