@@ -12,13 +12,16 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
   - [Installation](#installation)
     - [Install CDS-TS-Dispatcher - New project](#install-cds-ts-dispatcher---new-project)
     - [Install CDS-TS-Dispatcher - Existing project](#install-cds-ts-dispatcher---existing-project)
-    - [Generate CDS Typed entities](#generate-cds-typed-entities)
+    - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
+      - [Option 1 - `Recommended`](#option-1---recommended)
+      - [Option 2](#option-2)
+      - [`Important`](#important)
   - [Architecture](#architecture)
   - [Usage](#usage)
-    - [CDSDispatcher](#cdsdispatcher)
+    - [`CDSDispatcher`](#cdsdispatcher)
       - [Parameters](#parameters)
       - [Method](#method)
-    - [Decorators](#decorators)
+    - [`Decorators`](#decorators)
       - [Class](#class)
         - [EntityHandler](#entityhandler)
         - [ServiceLogic](#servicelogic)
@@ -165,15 +168,38 @@ It is recommended to use the following **tsconfig.json** properties:
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-### Generate CDS Typed entities
+### `Generate CDS Typed entities`
 
-The following command should be used to generate the typed entities.
+#### Option 1 - `Recommended`
+
+Execute the command :
+
+```bash
+cds add typer
+```
+
+> [!TIP]
+> If above option is being used, this means whenever we change a `.CDS` file the changes will be reflected in the generated `@cds-models` folder.
+
+#### Option 2
+
+Execute the command :
 
 ```bash
 npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 ```
 
-- Target folder :`./srv/util/types/entities` - Change to your location destination folder.
+- Target folder :`./srv/util/types/entities` - Change to your desired destination folder.
+
+> [!TIP]
+> If above option is being used, you have to run every time the command when you do a change in a `.CDS file`
+
+#### `Important`
+
+> [!CAUTION]
+> Import always the `generated entities from the service folders and not from the index.ts`
+
+![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/common/cds_typer_entities_@cds-models.png?raw=true)
 
 For more info see official **[SAP CDS-Typer](https://cap.cloud.sap/docs/tools/cds-typer)** page.
 
@@ -193,7 +219,7 @@ For more info see official **[SAP CDS-Typer](https://cap.cloud.sap/docs/tools/cd
 
 ## Usage
 
-### CDSDispatcher
+### `CDSDispatcher`
 
 **CDSDispatcher**(`entities` : `Constructable[]`)
 
@@ -230,7 +256,7 @@ module.exports = new CDSDispatcher([
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-### Decorators
+### `Decorators`
 
 #### Class
 
@@ -1504,7 +1530,7 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-## Examples
+## `Examples`
 
 Find here a collection of samples for the [CDS-TS-Dispatcher-Samples](https://github.com/dxfrontier/cds-ts-samples)
 
