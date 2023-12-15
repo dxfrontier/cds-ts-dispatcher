@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type Request } from '@sap/cds/apis/events';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
-import { type Service, type ServiceImpl } from '@sap/cds/apis/services';
+import { type Service, type ServiceImpl, type TypedRequest } from '@sap/cds/apis/services';
+
 enum HandlerType {
   Before,
   On,
@@ -29,11 +30,6 @@ type ReturnRequest = (req: Request, ...args: any[]) => Promise<any>;
 type ReturnResultsAndRequest = (results: any | any[] | boolean, req: Request, ...args: any[]) => Promise<any>;
 type ReturnRequestAndNext = (req: Request, next: Function, ...args: any[]) => Promise<any>;
 type ReturnSingleInstanceCapable = (isSingleInstance: boolean) => Promise<any>;
-
-/**
- * Use this type to have the '@sap/cds - Request' typed.
- */
-type TypedRequest<T> = Omit<Request, 'data'> & { data: T };
 
 /**
  * Use this type to have the '@sap/cds - Request' typed.
