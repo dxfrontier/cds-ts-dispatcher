@@ -1,5 +1,3 @@
 # Ignore artifacts
-
 dist
-test/bookshop/srv/util/types/entities
-test/bookshop/@cds-models
+test

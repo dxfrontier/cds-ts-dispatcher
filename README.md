@@ -71,7 +71,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
       - [Method : `SingleInstanceCapable`](#method--singleinstancecapable)
         - [Complementary Decorator Actions](#complementary-decorator-actions)
         - [Examples](#examples)
-  - [Examples](#examples-1)
+  - [`Examples`](#examples-1)
   - [Contributing](#contributing)
   - [License](#license)
   - [Authors](#authors)
@@ -121,14 +121,18 @@ tsc --init
 ```json
 {
   "compilerOptions": {
+    "target": "ES2020",
+    "outDir": "./gen/srv/srv",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false,
-    "target": "ES2020",
     "module": "commonjs",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
     "skipLibCheck": true
   }
 }
@@ -153,18 +157,40 @@ It is recommended to use the following **tsconfig.json** properties:
 ```json
 {
   "compilerOptions": {
+    "target": "ES2020",
+    "outDir": "./gen/srv/srv",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false,
-    "target": "ES2020",
     "module": "commonjs",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
     "skipLibCheck": true
   }
 }
 ```
+
+> [!WARNING]
+> If below message appears
+>
+> ```bash
+> -----------------------------------------------------------------------
+> WARNING: Package '@sap/cds' was loaded from different installations: [
+>  '***/node_modules/@sap/cds/lib/index.js',
+>  '***/node_modules/@dxfrontier/cds-ts-dispatcher/node_modules/@sap/cds/lib/index.js'
+> ] Rather ensure a single install only to avoid hard-to-resolve errors.
+> -----------------------------------------------------------------------
+> ```
+>
+> Run the following command :
+>
+> ```bash
+> npm install @sap/cds@latest
+> ```
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -172,10 +198,14 @@ It is recommended to use the following **tsconfig.json** properties:
 
 #### Option 1 - `Recommended`
 
-Execute the command :
+Execute the following commands :
 
 ```bash
 cds add typer
+```
+
+```bash
+npm install
 ```
 
 > [!TIP]
