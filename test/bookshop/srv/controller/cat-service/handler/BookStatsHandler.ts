@@ -17,8 +17,8 @@ import {
   type Request,
 } from '../../../../../../lib';
 import BookStatsService from '../../../service/BookStatsService';
-import { BookStat } from '../../../util/types/entities/CatalogService';
 import AuthorService from '../../../service/AuthorService';
+import { BookStat } from '../../../../@cds-models/CatalogService';
 
 @EntityHandler(BookStat)
 class BookStatsHandler {

@@ -12,7 +12,7 @@ import {
   SingleInstanceCapable,
   type TypedRequest,
 } from '../../../../../../lib';
-import { Review } from '../../../util/types/entities/CatalogService';
+import { Review } from '../../../../@cds-models/CatalogService';
 import ReviewService from '../../../service/ReviewService';
 
 @EntityHandler(Review)

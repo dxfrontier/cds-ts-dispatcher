@@ -10,7 +10,7 @@ import {
   type TypedRequest,
   type Service,
 } from '../../../../../../lib';
-import { Promotion } from '../../../util/types/entities/AdminService';
+import { Promotion } from '../../../../@cds-models/AdminService';
 
 @EntityHandler(Promotion)
 class PromotionHandler {

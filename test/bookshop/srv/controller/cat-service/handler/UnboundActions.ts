@@ -8,7 +8,7 @@ import {
   type ActionReturn,
   type Service,
 } from '../../../../../../lib';
-import { submitOrder, submitOrderFunction } from '../../../util/types/entities/CatalogService';
+import { submitOrder, submitOrderFunction } from '../../../../@cds-models/CatalogService';
 
 @UnboundActions()
 class UnboundActionsHandler {

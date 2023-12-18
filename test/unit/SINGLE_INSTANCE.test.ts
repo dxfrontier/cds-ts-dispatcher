@@ -2,7 +2,7 @@ import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { EntityHandler, SingleInstanceCapable } from '../../lib';
 import { Request } from '../../lib/index';
 import Constants from '../../lib/util/constants/Constants';
-import { Book } from '../bookshop/srv/util/types/entities/CatalogService';
+import { Book } from '../bookshop/@cds-models/CatalogService';
 
 function createCustomerInstance(): Constructable {
   @EntityHandler(Book)

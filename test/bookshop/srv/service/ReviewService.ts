@@ -1,5 +1,5 @@
 import { type TypedRequest, Inject, SRV, ServiceLogic, Service } from '../../../../lib';
-import { type Review } from '../util/types/entities/CatalogService';
+import type { Review } from '../../@cds-models/CatalogService';
 
 @ServiceLogic()
 class ReviewService {

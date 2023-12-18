@@ -3,7 +3,7 @@ import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, EntityHandler } from 
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { type CRUD_EVENTS, HandlerType, TypedRequest } from '../../lib/util/types/types';
-import { Book } from '../bookshop/srv/util/types/entities/sap/capire/bookshop';
+import { Book } from '../bookshop/@cds-models/CatalogService';
 
 @EntityHandler(Book)
 class BookHandler {

@@ -1,5 +1,5 @@
 import { CDSDispatcher } from '../../lib';
-import { Book } from '../bookshop/srv/util/types/entities/CatalogService';
+import { Book } from '../bookshop/@cds-models/CatalogService';
 
 describe('CDSDispatcher', () => {
   describe('new CDSDispatcher([Book]).initialize()', () => {
