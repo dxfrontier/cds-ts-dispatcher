@@ -12,8 +12,8 @@ import {
   SingleInstanceCapable,
   type TypedRequest,
 } from '../../../../../../lib';
+import { Book } from '../../../../@cds-models/CatalogService';
 import BookService from '../../../service/BookService';
-import { Book } from '../../../util/types/entities/CatalogService';
 
 @EntityHandler(Book)
 class BookHandler {

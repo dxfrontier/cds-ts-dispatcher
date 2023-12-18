@@ -1,5 +1,5 @@
 import { Inject, SRV, Service, ServiceLogic, type ActionRequest } from '../../../../lib';
-import { type BookStat } from '../util/types/entities/CatalogService';
+import type { BookStat } from '../../@cds-models/CatalogService';
 
 @ServiceLogic()
 class AuthorService {

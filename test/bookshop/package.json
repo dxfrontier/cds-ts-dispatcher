@@ -3,8 +3,14 @@
   "version": "1.0.0",
   "scripts": {
     "start": "npm run build:entities && cds-ts watch",
-    "build:entities": "cds-typer '*' --outputDirectory ./srv/util/types/entities",
+    "build:entities": "cds-typer '*' --outputDirectory ./@cds-models",
     "build:entities:test": "npm run build:entities && npm run clean:js",
-    "clean:js": "npx rimraf ./srv/util/types/entities/{*.js,**/*.js,**/**/*.js,**/**/**/*.js}"
+    "clean:js": "npx rimraf ./@cds-models/{*.js,**/*.js,**/**/*.js,**/**/**/*.js}"
+  },
+  "devDependencies": {
+    "@cap-js/cds-typer": ">=0.1"
+  },
+  "imports": {
+    "#cds-models/*": "./@cds-models/*/index.js"
   }
 }

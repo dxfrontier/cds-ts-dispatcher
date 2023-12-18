@@ -11,6 +11,9 @@
     "strict": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "#cds-models/*": ["./@cds-models/*/index.ts"]
+    }
   }
 }

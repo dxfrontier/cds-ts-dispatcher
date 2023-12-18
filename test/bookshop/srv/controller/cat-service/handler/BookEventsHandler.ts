@@ -13,7 +13,7 @@ import {
   Service,
   SingleInstanceCapable,
 } from '../../../../../../lib';
-import { BookEvent } from '../../../util/types/entities/CatalogService';
+import { BookEvent } from '../../../../@cds-models/CatalogService';
 
 @EntityHandler(BookEvent)
 class BookEventsHandler {

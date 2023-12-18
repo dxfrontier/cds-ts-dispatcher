@@ -14,7 +14,7 @@ import {
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { type CRUD_EVENTS, HandlerType, TypedRequest } from '../../lib/util/types/types';
-import { Book, submitOrder } from '../bookshop/srv/util/types/entities/CatalogService';
+import { Book, submitOrder } from '../bookshop/@cds-models/CatalogService';
 
 @EntityHandler(Book)
 class BookHandler {

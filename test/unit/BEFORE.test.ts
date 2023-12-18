@@ -4,21 +4,21 @@ import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate } from '../../lib'
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { type CRUD_EVENTS, HandlerType, TypedRequest } from '../../lib/util/types/types';
-import { BookEvent, type BookEvents } from '../bookshop/srv/util/types/entities/CatalogService';
+import { BookEvent } from '../bookshop/@cds-models/CatalogService';
 
 @EntityHandler(BookEvent)
 class BookEventHandler {
   @BeforeCreate()
-  public async beforeCreateMethod(req: TypedRequest<BookEvents>) {}
+  public async beforeCreateMethod(req: TypedRequest<BookEvent>) {}
 
   @BeforeRead()
-  public async beforeReadMethod(req: TypedRequest<BookEvents>) {}
+  public async beforeReadMethod(req: TypedRequest<BookEvent>) {}
 
   @BeforeUpdate()
-  public async beforeUpdateMethod(req: TypedRequest<BookEvents>) {}
+  public async beforeUpdateMethod(req: TypedRequest<BookEvent>) {}
 
   @BeforeDelete()
-  public async beforeDeleteMethod(req: TypedRequest<BookEvents>) {}
+  public async beforeDeleteMethod(req: TypedRequest<BookEvent>) {}
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

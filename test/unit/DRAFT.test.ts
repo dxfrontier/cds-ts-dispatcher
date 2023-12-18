@@ -23,7 +23,7 @@ import {
   HandlerType,
   TypedRequest,
 } from '../../lib/util/types/types';
-import { BookEvent } from '../bookshop/srv/util/types/entities/CatalogService';
+import { BookEvent } from '../bookshop/@cds-models/CatalogService';
 
 @EntityHandler(BookEvent)
 class BookEventsHandler {

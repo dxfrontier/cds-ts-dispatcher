@@ -8,7 +8,7 @@ import {
   type ActionRequest,
   type TypedRequest,
 } from '../../../../lib';
-import { type Book, type submitOrder } from '../util/types/entities/CatalogService';
+import type { Book, submitOrder } from '../../@cds-models/CatalogService';
 import BookRepository from '../repository/BookRepository';
 
 @ServiceLogic()
@@ -54,7 +54,7 @@ class BookService {
     }
     await this.srv.emit('OrderedBook', { book, quantity, buyer: req.user.id });
 
-    return { stock: bookFound.stock };
+    return { stock: bookFound!.stock };
   }
 }
 

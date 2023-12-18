@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Inject, SRV, Service, ServiceLogic } from '../../../../lib';
 import { type ActionRequest, type TypedRequest } from '../../../../lib';
-import { type BookStat } from '../util/types/entities/CatalogService';
 import BookStatsRepository from '../repository/BookStatsRepository';
 import BookRepository from '../repository/BookRepository';
+import type { BookStat } from '../../@cds-models/CatalogService';
 
 @ServiceLogic()
 class BookStatsService {
@@ -24,12 +24,12 @@ class BookStatsService {
     const statsID = req.params[0] as string;
 
     const bookStats = await this.bookStatsRepository.findOne({ ID: parseInt(statsID) });
-    const book = await this.bookRepository.findOne({ ID: bookStats.book_ID });
+    const book = await this.bookRepository.findOne({ ID: bookStats!.book_ID });
 
     return {
-      book: book.title,
-      rating: bookStats.averageRating,
-      stats: bookStats.views,
+      book: book!.title,
+      rating: bookStats!.averageRating,
+      stats: bookStats!.views,
     };
   }
 }

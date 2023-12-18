@@ -1,7 +1,7 @@
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { EntityHandler } from '../../lib';
-import { Book } from '../bookshop/srv/util/types/entities/sap/capire/bookshop';
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
+import { Book } from '../bookshop/@cds-models/CatalogService';
 
 function customerBeforeCreateInstance(): Constructable {
   @EntityHandler(Book)

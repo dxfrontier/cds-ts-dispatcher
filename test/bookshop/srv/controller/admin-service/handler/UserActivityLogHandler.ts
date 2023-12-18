@@ -10,7 +10,7 @@ import {
   TypedRequest,
   type Service,
 } from '../../../../../../lib';
-import { UserActivityLog } from '../../../util/types/entities/AdminService';
+import { UserActivityLog } from '../../../../@cds-models/AdminService';
 
 @EntityHandler(UserActivityLog)
 class UserActivityLogHandler {

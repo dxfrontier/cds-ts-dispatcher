@@ -1,7 +1,7 @@
 import { Repository } from '../../../../lib';
 
 import { BaseRepository } from '@dxfrontier/cds-ts-repository';
-import { Book } from '../util/types/entities/CatalogService';
+import { Book } from '../../@cds-models/CatalogService';
 
 @Repository()
 class BookRepository extends BaseRepository<Book> {
