@@ -71,6 +71,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
       - [Method : `SingleInstanceCapable`](#method--singleinstancecapable)
         - [Complementary Decorator Actions](#complementary-decorator-actions)
         - [Examples](#examples)
+  - [`Deployment to BTP` using `MTA`](#deployment-to-btp-using-mta)
   - [`Examples`](#examples-1)
   - [Contributing](#contributing)
   - [License](#license)
@@ -121,20 +122,30 @@ tsc --init
 ```json
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "outDir": "./gen/srv/srv",
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "strictPropertyInitialization": false,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    /* Allow decorators */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+
+    /* Strictness */
     "strict": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": false,
-    "skipLibCheck": true
-  }
+
+    "lib": ["es2022"],
+
+    "outDir": "./gen/srv"
+  },
+  "include": ["./srv"]
 }
 ```
 
@@ -157,20 +168,30 @@ It is recommended to use the following **tsconfig.json** properties:
 ```json
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "outDir": "./gen/srv/srv",
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "strictPropertyInitialization": false,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    /* Allow decorators */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+
+    /* Strictness */
     "strict": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": false,
-    "skipLibCheck": true
-  }
+
+    "lib": ["es2022"],
+
+    "outDir": "./gen/srv"
+  },
+  "include": ["./srv"]
 }
 ```
 
@@ -1559,6 +1580,52 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+## `Deployment to BTP` using `MTA`
+
+1. Add `mta.yaml` to your project using the following command :
+
+```bash
+cds add mta
+```
+
+2. Install `npm-run-all package`:
+
+```bash
+npm install --save-dev npm-run-all
+```
+
+3. Modify your `package.json` by adding the following `scripts`:
+
+```json
+"build:cds": "echo 'STEP 1 : Build CDS' && cds build --production",
+"build:ts": "echo 'STEP 2 : Transpile TS => JS' && tsc",
+"build:srv:clean:ts": "echo 'Step 3: Clean TS files from srv folder' && find gen/srv/srv -type f -name '*.ts' -delete",
+
+"build:production": "run-s build:cds build:ts build:srv:clean:ts"
+```
+
+4. Modify `mta.yaml` as follows :
+
+```yml
+- builder: custom
+  commands:
+    - npm ci
+    - npm run build:production
+    - npx @cap-js/cds-typer "*" --outputDirectory gen/srv/@cds-models
+```
+
+- `npm ci` - Will do a clean install
+- `npm run build:production` - will run the package.json script command for CDS build and transpilation of TS to JS
+- `npx @cap-js/cds-typer "*" --outputDirectory gen/srv/@cds-models` - will make sure the @cds-models are generated.
+
+5. Run to produce the `.mtar file`
+
+```bash
+mbt build
+```
+
+6. Deploy your `mtar` to BTP
 
 ## `Examples`
 
