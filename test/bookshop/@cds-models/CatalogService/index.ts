@@ -144,6 +144,12 @@ export class Genres extends Array<Genre> {}
 Object.defineProperty(Genre, 'name', { value: 'sap.capire.bookshop.Genres' })
 Object.defineProperty(Genres, 'name', { value: 'sap.capire.bookshop.Genres' })
 
+// event
+export class OrderedBook {
+    book: __.DeepRequired<Book>['ID'] | null;
+    quantity: number | null;
+    buyer: string | null;
+}
 // function
 export declare const submitOrder: { (book: __.DeepRequired<Book>['ID'] | null, quantity: number | null): {
     stock?: number | null;

@@ -7,8 +7,10 @@ import {
   type ActionRequest,
   type ActionReturn,
   type Service,
+  type TypedRequest,
+  OnEvent,
 } from '../../../../../../lib';
-import { submitOrder, submitOrderFunction } from '../../../../@cds-models/CatalogService';
+import { OrderedBook, submitOrder, submitOrderFunction } from '../../../../@cds-models/CatalogService';
 
 @UnboundActions()
 class UnboundActionsHandler {
@@ -32,6 +34,11 @@ class UnboundActionsHandler {
     return {
       stock: req.data.quantity! + 1,
     };
+  }
+
+  @OnEvent(OrderedBook)
+  public async onEvent(req: TypedRequest<OrderedBook>) {
+    //
   }
 }
 

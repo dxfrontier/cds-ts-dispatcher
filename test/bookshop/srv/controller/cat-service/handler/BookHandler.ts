@@ -28,6 +28,8 @@ class BookHandler {
   @AfterRead()
   @SingleInstanceCapable()
   private async addDiscount(results: Book[], req: Request, isSingleInstance: boolean) {
+    await this.srv.emit('OrderedBook', { book: 'dada', quantity: 3, buyer: req.user.id });
+
     if (isSingleInstance) {
       req.notify('Single instance');
     } else {

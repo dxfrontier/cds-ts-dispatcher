@@ -10,13 +10,13 @@ service CatalogService {
   entity BookEvents as projection on my.BookEvents;
 
   entity BookStats  as projection on my.BookStats actions { // Bound action / function
-    action   GenerateReport(ID : Books:ID) returns {
-      book : Books:title;
-      stats : BookStats:views;
-      rating : BookStats:averageRating
-    };
-    function NotifyAuthor(ID : Authors:ID) returns Boolean;
-  };
+                         action   GenerateReport(ID : Books:ID) returns {
+                           book : Books:title;
+                           stats : BookStats:views;
+                           rating : BookStats:averageRating
+                         };
+                         function NotifyAuthor(ID : Authors:ID) returns Boolean;
+                       };
 
   // Unbound action
   action   submitOrder(book : Books:ID, quantity : Integer)         returns {
@@ -28,4 +28,9 @@ service CatalogService {
     stock : Integer
   };
 
+  event OrderedBook : {
+    book     : Books:ID;
+    quantity : Integer;
+    buyer    : String
+  };
 }
