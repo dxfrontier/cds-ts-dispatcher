@@ -7,6 +7,7 @@ import {
   type CRUD_EVENTS,
   type DRAFT_EVENTS,
   type CdsFunction,
+  type CdsEvent,
 } from '../util/types/types';
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher';
 import Constants from '../util/constants/Constants';
@@ -20,7 +21,7 @@ import Constants from '../util/constants/Constants';
  */
 
 function SingleInstanceCapable<Target extends Object>() {
-  // TODO find a way to add TypedPropertyDescriptor
+  // TODO: find a way to add TypedPropertyDescriptor
   return function (target: Target, propertyKey: string | symbol, _: PropertyDescriptor) {
     const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY);
     metadataDispatcher.setMethodAsSingleInstanceCapable(propertyKey);
@@ -30,8 +31,8 @@ function SingleInstanceCapable<Target extends Object>() {
 /**
  * Builds a decorator for handling the .after method.
  *
- * @param {Event} event - The event to handle.
- * @param {HandlerType} handlerType - The type of handler (Before, After, On).
+ * @param event - The event to handle.
+ * @param handlerType - The type of handler (Before, After, On).
  */
 
 function buildAfter(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: HandlerType; isDraft: boolean }) {
@@ -60,8 +61,8 @@ function buildAfter(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: H
 /**
  * Builds a decorator for handling the .before method.
  *
- * @param {Event} event - The event to handle.
- * @param {HandlerType} handlerType - The type of handler (Before, After, On).
+ * @param event - The event to handle.
+ * @param handlerType - The type of handler (Before, After, On).
  */
 
 function buildBefore(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: HandlerType; isDraft: boolean }) {
@@ -90,8 +91,8 @@ function buildBefore(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: 
 /**
  * Builds a decorator for handling the .on method.
  *
- * @param {Event} event - The custom action event to handle.
- * @param {HandlerType} handlerType - The type of handler (Before, After, On).
+ * @param event - The custom action event to handle.
+ * @param handlerType - The type of handler (Before, After, On).
  */
 
 function buildOnAction(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: HandlerType; isDraft: boolean }) {
@@ -116,10 +117,34 @@ function buildOnAction(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType
 }
 
 /**
+ * Builds a decorator for handling the .on (event) method.
+ *
+ * @param event - The custom action event to handle.
+ * @param handlerType - The type of handler (Before, After, On).
+ */
+
+function buildOnEvent(options: { event: CRUD_EVENTS; handlerType: HandlerType; isDraft: boolean }) {
+  return function <Target extends Object>(name: CdsEvent) {
+    return function (target: Target, _: string | symbol, descriptor: TypedPropertyDescriptor<ReturnRequest>): void {
+      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const { event, handlerType, isDraft } = options;
+
+      metadataDispatcher.addMethodMetadata({
+        event,
+        handlerType,
+        callback: descriptor.value!,
+        eventName: name as unknown as string,
+        isDraft,
+      });
+    };
+  };
+}
+
+/**
  * Builds a decorator for handling the .on method.
  *
- * @param {Event} event - The custom action event to handle.
- * @param {HandlerType} handlerType - The type of handler (Before, After, On).
+ * @param event - The custom action event to handle.
+ * @param handlerType - The type of handler (Before, After, On).
  */
 
 function buildOnCRUD<Target extends Object>(options: {
@@ -380,6 +405,13 @@ const OnFunction = buildOnAction({ event: 'FUNC', handlerType: HandlerType.On, i
 
 /**
  *
+ * This decorator can be applied to methods that need to execute custom logic when a custom function event is triggered.
+ * @see [CDS-TS-Dispatcher - On function](https://github.com/dxfrontier/cds-ts-dispatcher#onfunction)
+ */
+const OnEvent = buildOnEvent({ event: 'EVENT', handlerType: HandlerType.On, isDraft: false });
+
+/**
+ *
  * This decorator can be applied to methods when a new draft is created from an active instance.
  * @see [CDS-TS-Dispatcher - On edit draft](https://github.com/dxfrontier/cds-ts-dispatcher#oneditdraft)
  */
@@ -507,7 +539,7 @@ export {
   AfterRead,
   AfterUpdate,
   AfterDelete,
-  // After events - Draft
+  // AFTER events - Draft
   AfterCreateDraft,
   AfterReadDraft,
   AfterUpdateDraft,
@@ -515,13 +547,14 @@ export {
   // ========================================================================================================================================================
 
   // ========================================================================================================================================================
-  // ON events
+  // ON events - Active entity
   OnCreate,
   OnRead,
   OnUpdate,
   OnDelete,
   OnAction,
   OnFunction,
+  OnEvent,
   OnBoundAction,
   OnBoundFunction,
   // ON events - Draft
@@ -537,19 +570,19 @@ export {
   // DRAFT specific events
   // Triggered on draft entity 'MyEntity.drafts'
 
-  // Before events
+  // BEFORE events
   BeforeNewDraft,
   BeforeCancelDraft,
   BeforeEditDraft,
   BeforeSaveDraft,
 
-  // After events
+  // AFTER events
   AfterNewDraft,
   AfterCancelDraft,
   AfterEditDraft,
   AfterSaveDraft,
 
-  // Action events
+  // ACTION events
   OnNewDraft,
   OnCancelDraft,
 

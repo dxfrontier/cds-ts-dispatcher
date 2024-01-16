@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type Request } from '@sap/cds/apis/events';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
@@ -13,16 +14,27 @@ enum HandlerType {
   OnDraft,
 }
 
-interface CdsFunction {
+type CdsFunction = {
   (...args: any[]): any;
   __parameters: object;
   __returns: unknown;
-}
+};
+
+type CdsEvent = object;
 
 type CDSTyperEntity<T> = Constructable<T>;
 
 type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION';
-type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'ACTION' | 'FUNC' | 'BOUND_ACTION' | 'BOUND_FUNC';
+type CRUD_EVENTS =
+  | 'READ'
+  | 'CREATE'
+  | 'UPDATE'
+  | 'DELETE'
+  | 'ACTION'
+  | 'FUNC'
+  | 'BOUND_ACTION'
+  | 'BOUND_FUNC'
+  | 'EVENT';
 
 type ServiceCallback = (srv: Service) => void;
 
@@ -41,18 +53,19 @@ type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['_
  */
 type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void | Error>;
 
-interface HandlerBuilder {
+type HandlerBuilder = {
   buildHandlers: () => void;
-}
+};
 
-interface Handler {
+type Handler = {
   event: CRUD_EVENTS | DRAFT_EVENTS;
   handlerType: HandlerType;
   callback: ReturnRequest | ReturnRequestAndNext | ReturnResultsAndRequest;
   actionName?: CdsFunction;
+  eventName?: string;
   isDraft?: boolean;
   isSingleInstance?: boolean;
-}
+};
 
 export {
   HandlerType,
@@ -67,6 +80,7 @@ export {
   //
   type CDSTyperEntity,
   type CdsFunction,
+  type CdsEvent,
   //
   type TypedRequest,
   type ActionRequest,

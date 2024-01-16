@@ -1,4 +1,4 @@
-# CDS-TS Dispatcher
+<h2> CDS-TS Dispatcher </h2>
 
 <img src="https://img.shields.io/badge/SAP-0FAAFF?style=for-the-badge&logo=sap&logoColor=white" /> <img src="https://img.shields.io/badge/ts--node-3178C6?style=for-the-badge&logo=ts-node&logoColor=white" /> <img src="https://img.shields.io/badge/Node%20js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" /> <img src="https://img.shields.io/badge/Express%20js-000000?style=for-the-badge&logo=express&logoColor=white" /> <img src="https://img.shields.io/badge/json-5E5C5C?style=for-the-badge&logo=json&logoColor=white" /> <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white" />
 
@@ -6,76 +6,76 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 
 ## Table of Contents
 
-- [CDS-TS Dispatcher](#cds-ts-dispatcher)
-  - [Table of Contents](#table-of-contents)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-    - [Install CDS-TS-Dispatcher - New project](#install-cds-ts-dispatcher---new-project)
-    - [Install CDS-TS-Dispatcher - Existing project](#install-cds-ts-dispatcher---existing-project)
-    - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
-      - [Option 1 - `Recommended`](#option-1---recommended)
-      - [Option 2](#option-2)
-      - [`Important`](#important)
-  - [Architecture](#architecture)
-  - [Usage](#usage)
-    - [`CDSDispatcher`](#cdsdispatcher)
-      - [Parameters](#parameters)
-      - [Method](#method)
-    - [`Decorators`](#decorators)
-      - [Class](#class)
-        - [EntityHandler](#entityhandler)
-        - [ServiceLogic](#servicelogic)
-        - [Repository](#repository)
-          - [`[Optional]` - BaseRepository](#optional---baserepository)
-        - [UnboundActions](#unboundactions)
-      - [Fields](#fields)
-        - [Inject](#inject)
-        - [Inject SRV](#inject-srv)
-      - [Methods - `active entity`](#methods---active-entity)
-        - [Before](#before)
-          - [BeforeCreate](#beforecreate)
-          - [BeforeRead](#beforeread)
-          - [BeforeUpdate](#beforeupdate)
-          - [BeforeDelete](#beforedelete)
-        - [After](#after)
-          - [AfterCreate](#aftercreate)
-          - [AfterRead](#afterread)
-          - [AfterUpdate](#afterupdate)
-          - [AfterDelete](#afterdelete)
-        - [On](#on)
-          - [OnCreate](#oncreate)
-          - [OnRead](#onread)
-          - [OnUpdate](#onupdate)
-          - [OnDelete](#ondelete)
-          - [OnAction](#onaction)
-          - [OnFunction](#onfunction)
-          - [OnBoundAction](#onboundaction)
-          - [OnBoundFunction](#onboundfunction)
-      - [Methods : `draft entity`](#methods--draft-entity)
-        - [Before](#before-1)
-          - [BeforeNewDraft](#beforenewdraft)
-          - [BeforeCancelDraft](#beforecanceldraft)
-          - [BeforeEditDraft](#beforeeditdraft)
-          - [BeforeSaveDraft](#beforesavedraft)
-        - [After](#after-1)
-          - [AfterNewDraft](#afternewdraft)
-          - [AfterCancelDraft](#aftercanceldraft)
-          - [AfterEditDraft](#aftereditdraft)
-          - [AfterSaveDraft](#aftersavedraft)
-        - [On](#on-1)
-          - [OnNewDraft](#onnewdraft)
-          - [OnCancelDraft](#oncanceldraft)
-          - [OnEditDraft](#oneditdraft)
-          - [OnSaveDraft](#onsavedraft)
-        - [`Other` draft handlers](#other-draft-handlers)
-      - [Method : `SingleInstanceCapable`](#method--singleinstancecapable)
-        - [Complementary Decorator Actions](#complementary-decorator-actions)
-        - [Examples](#examples)
-  - [`Deployment to BTP` using `MTA`](#deployment-to-btp-using-mta)
-  - [`Examples`](#examples-1)
-  - [Contributing](#contributing)
-  - [License](#license)
-  - [Authors](#authors)
+- [Table of Contents](#table-of-contents)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+  - [Install CDS-TS-Dispatcher - New project](#install-cds-ts-dispatcher---new-project)
+  - [Install CDS-TS-Dispatcher - Existing project](#install-cds-ts-dispatcher---existing-project)
+  - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
+    - [Option 1 - `Recommended`](#option-1---recommended)
+    - [Option 2](#option-2)
+    - [`Important`](#important)
+- [Architecture](#architecture)
+- [Usage](#usage)
+  - [`CDSDispatcher`](#cdsdispatcher)
+    - [Parameters](#parameters)
+    - [Method](#method)
+  - [`Decorators`](#decorators)
+    - [Class](#class)
+      - [EntityHandler](#entityhandler)
+      - [ServiceLogic](#servicelogic)
+      - [Repository](#repository)
+        - [`[Optional]` - BaseRepository](#optional---baserepository)
+      - [UnboundActions](#unboundactions)
+    - [Fields](#fields)
+      - [Inject](#inject)
+      - [Inject SRV](#inject-srv)
+    - [Methods - `active entity`](#methods---active-entity)
+      - [Before](#before)
+        - [BeforeCreate](#beforecreate)
+        - [BeforeRead](#beforeread)
+        - [BeforeUpdate](#beforeupdate)
+        - [BeforeDelete](#beforedelete)
+      - [After](#after)
+        - [AfterCreate](#aftercreate)
+        - [AfterRead](#afterread)
+        - [AfterUpdate](#afterupdate)
+        - [AfterDelete](#afterdelete)
+      - [On](#on)
+        - [OnCreate](#oncreate)
+        - [OnRead](#onread)
+        - [OnUpdate](#onupdate)
+        - [OnDelete](#ondelete)
+        - [OnAction](#onaction)
+        - [OnFunction](#onfunction)
+        - [OnEvent](#onevent)
+        - [OnBoundAction](#onboundaction)
+        - [OnBoundFunction](#onboundfunction)
+    - [Methods : `draft entity`](#methods--draft-entity)
+      - [Before](#before-1)
+        - [BeforeNewDraft](#beforenewdraft)
+        - [BeforeCancelDraft](#beforecanceldraft)
+        - [BeforeEditDraft](#beforeeditdraft)
+        - [BeforeSaveDraft](#beforesavedraft)
+      - [After](#after-1)
+        - [AfterNewDraft](#afternewdraft)
+        - [AfterCancelDraft](#aftercanceldraft)
+        - [AfterEditDraft](#aftereditdraft)
+        - [AfterSaveDraft](#aftersavedraft)
+      - [On](#on-1)
+        - [OnNewDraft](#onnewdraft)
+        - [OnCancelDraft](#oncanceldraft)
+        - [OnEditDraft](#oneditdraft)
+        - [OnSaveDraft](#onsavedraft)
+      - [`Other` draft handlers](#other-draft-handlers)
+    - [Method : `SingleInstanceCapable`](#method--singleinstancecapable)
+      - [Complementary Decorator Actions](#complementary-decorator-actions)
+      - [Examples](#examples)
+- [`Deployment to BTP` using `MTA`](#deployment-to-btp-using-mta)
+- [`Examples`](#examples-1)
+- [Contributing](#contributing)
+- [License](#license)
+- [Authors](#authors)
 
 ## Prerequisites
 
@@ -431,14 +431,44 @@ The `@UnboundActions` decorator is utilized at the `class-level` to annotate a `
 `Example`
 
 ```typescript
-import { UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
+import {
+  UnboundActions,
+  OnAction,
+  OnFunction,
+  OnEvent,
+  ActionRequest,
+  ActionReturn,
+  TypedRequest,
+} from '@dxfrontier/cds-ts-dispatcher';
+import { MyAction, MyFunction, MyEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @UnboundActions()
 class UnboundActionsHandler {
-  ...
+  // ... @Inject all dependencies, if needed.
+
   constructor() {}
-  // all unbound actions
-  ...
+
+  // Unbound action
+  @OnAction(MyAction)
+  public async onActionMethod(req: ActionRequest<typeof MyAction>, next: Function): ActionReturn<typeof MyAction> {
+    // ...
+  }
+
+  // Unbound Function
+  @OnFunction(MyFunction)
+  public async onFunctionMethod(
+    req: ActionRequest<typeof MyFunction>,
+    next: Function,
+  ): ActionReturn<typeof MyFunction> {
+    // ...
+  }
+
+  // Unbound event
+  @OnEvent(MyEvent)
+  public async onEventMethod(req: TypedRequest<MyEvent>) {
+    // ...
+  }
+}
 ```
 
 `Imported it in the CDSDispatcher`
@@ -1004,6 +1034,46 @@ this.on(AFunction, async (req) => {
 
 > [!NOTE]
 > AFunction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### OnEvent
+
+**@OnEvent**(`name` : CdsEvent)
+
+The `@OnEvent` decorator facilitates the listening of messages from a message broker.
+
+This decorator is particularly useful in conjunction with the [Emit method](https://cap.cloud.sap/docs/guides/messaging/#emitting-events) to handle triggered events.
+
+`Parameters`
+
+- `name (CdsEvent)` : Representing the `CDS event` defined in the `CDS file`.
+
+`Example`
+
+```typescript
+import { OnEvent, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { AEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnEvent(AEvent)
+public async onEventMethod(req: TypedRequest<AEvent>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('AEvent', async (req) => {
+  // ...
+});
+```
+
+> [!NOTE]
+> AEvent was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+> [!TIP]
+> More info can be found at <https://cap.cloud.sap/docs/guides/messaging/>
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

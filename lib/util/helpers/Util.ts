@@ -7,7 +7,7 @@ export const Util = {
   },
 
   isRequestSingleInstance<T extends Request>(handler: Handler, request: T): boolean {
-    return (request.params.length > 0 && handler?.isSingleInstance) ?? false;
+    return ('params' in request && request.params.length > 0 && handler?.isSingleInstance) ?? false;
   },
 
   isEmptyArray<T>(arr: T[]): arr is T[] {

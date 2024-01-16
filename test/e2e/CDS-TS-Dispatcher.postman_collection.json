@@ -701,19 +701,21 @@
 							"name": "@OnAction",
 							"item": [
 								{
-									"name": "On execute an action",
+									"name": "Entity set : Validate title to contain 10 % discount Copy",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"submitOrder contains a stock = 6\", function () {",
-													"    const {stock} = pm.response.json();",
-													"    pm.expect(stock).to.eql(6);",
+													"pm.test(\"Enity set : Title contains \\\"10 % discount!\\\"\", function () {",
+													"    const response = pm.response.json();",
+													"    response.value.forEach((item) => {",
+													"        pm.expect(item.title).to.include(\"10 % discount!\")",
+													"    })",
 													"});",
 													"",
-													"pm.test(\"Successful POST request\", function () {",
-													"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
 													"});"
 												],
 												"type": "text/javascript"
@@ -721,25 +723,16 @@
 										}
 									],
 									"request": {
-										"method": "POST",
+										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"book\" : 271,\n    \"quantity\": 5\n}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
+											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"{{catalogService}}",
-												"submitOrder"
+												"{{booksEntity}}"
 											]
 										}
 									},
@@ -781,6 +774,56 @@
 											"path": [
 												"{{catalogService}}",
 												"submitOrderFunction(book=271,quantity=6)"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "@OnEvent",
+							"item": [
+								{
+									"name": "On execute an action Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"submitOrder contains a stock = 6\", function () {",
+													"    const {stock} = pm.response.json();",
+													"    pm.expect(stock).to.eql(6);",
+													"});",
+													"",
+													"pm.test(\"Successful POST request\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"book\" : 271,\n    \"quantity\": 5\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"submitOrder"
 											]
 										}
 									},

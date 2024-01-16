@@ -108,13 +108,22 @@ class CDSDispatcher {
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   private getHandlerProps(handler: Handler, entityInstance: Constructable) {
-    const { event, actionName } = handler;
+    const { event, actionName, eventName } = handler;
     const entity = this.getActiveEntityOrDraft(handler, entityInstance);
+
+    // private routine for this func
+    const _formatEventName = (): string => {
+      const lastDotIndex = eventName!.lastIndexOf('.');
+      const subtractedEventName = eventName!.substring(lastDotIndex + 1);
+
+      return subtractedEventName;
+    };
 
     return {
       entity,
       event,
       actionName,
+      getEventName: _formatEventName,
     };
   }
 
@@ -135,7 +144,7 @@ class CDSDispatcher {
   }
 
   private registerOnHandler(handlerAndEntity: [Handler, Constructable]): void {
-    const { event, actionName, entity } = this.getHandlerProps(...handlerAndEntity);
+    const { event, actionName, getEventName, entity } = this.getHandlerProps(...handlerAndEntity);
 
     // CRUD_EVENTS.[ACTION, FUNC]
     if (event === 'ACTION' || event === 'FUNC') {
@@ -149,6 +158,15 @@ class CDSDispatcher {
     // CRUD_EVENTS.[BOUND_ACTION, BOUND_FUNC]
     if (event === 'BOUND_ACTION' || event === 'BOUND_FUNC') {
       this.srv.on(actionName!, entity.name, async (req, next) => {
+        return await this.executeOnCallback(handlerAndEntity, req, next);
+      });
+
+      return;
+    }
+
+    // CRUD_EVENTS.[EVENT]
+    if (event === 'EVENT') {
+      this.srv.on(getEventName(), async (req, next) => {
         return await this.executeOnCallback(handlerAndEntity, req, next);
       });
 

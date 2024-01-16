@@ -10,11 +10,12 @@ import {
   OnFunction,
   OnRead,
   OnUpdate,
+  OnEvent,
 } from '../../lib';
 import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { type CRUD_EVENTS, HandlerType, TypedRequest } from '../../lib/util/types/types';
-import { Book, submitOrder } from '../bookshop/@cds-models/CatalogService';
+import { Book, OrderedBook, submitOrder } from '../bookshop/@cds-models/CatalogService';
 
 @EntityHandler(Book)
 class BookHandler {
@@ -35,6 +36,9 @@ class BookHandler {
 
   @OnFunction(submitOrder)
   public async onFunctionMethod(req: Request, next: Function) {}
+
+  @OnEvent(OrderedBook)
+  public async onEvent(req: TypedRequest<OrderedBook>) {}
 
   @OnBoundAction(submitOrder)
   public async onBoundActionMethod(req: TypedRequest<Request>, next: Function) {}
@@ -57,6 +61,10 @@ describe('ON', () => {
         expect(foundEvent.handlerType).toBe(HandlerType.On);
         expect(foundEvent.isDraft).toBe(false);
 
+        if (foundEvent.event === 'EVENT') {
+          expect(foundEvent.eventName).toStrictEqual(OrderedBook);
+        }
+
         if (
           foundEvent.event === 'ACTION' ||
           foundEvent.event === 'FUNC' ||
@@ -78,6 +86,7 @@ describe('ON', () => {
   // ACTION & FUNCTION
   testEvent('ACTION', 'OnAction');
   testEvent('FUNC', 'OnFunction');
+  testEvent('EVENT', 'OnEvent');
 
   // BOUND ACTION & FUNCTION
   testEvent('BOUND_ACTION', 'OnBoundAction');
