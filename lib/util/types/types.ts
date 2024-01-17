@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type Request } from '@sap/cds/apis/events';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
-import { type Service, type ServiceImpl, type TypedRequest } from '@sap/cds/apis/services';
+import { type ServiceImpl, type TypedRequest } from '@sap/cds/apis/services';
+import type { Service } from '@sap/cds';
 
 enum HandlerType {
   Before,
