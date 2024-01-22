@@ -15,6 +15,7 @@
     "eslint:message": "echo 'Eslint started...'",
     "eslint": "npx eslint .",
     "eslint:fix": "npx eslint . --fix",
+    
     "prettier:message": "echo 'Prettier started ...'",
     "prettier": "npx prettier . --check",
     "prettier:fix": "npx prettier . --write",
