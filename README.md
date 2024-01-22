@@ -1029,6 +1029,9 @@ this.on(AnAction, async (req, next) => {
 > [!NOTE]
 > AnAction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
+> [!IMPORTANT]  
+> Decorator `@OnAction` should be used inside [@UnboundActions](#unboundactions) class.
+
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### OnFunction
@@ -1061,6 +1064,9 @@ this.on(AFunction, async (req) => {
 
 > [!NOTE]
 > AFunction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+> [!IMPORTANT]  
+> Decorator `@OnFunction` should be used inside [@UnboundActions](#unboundactions) class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1099,6 +1105,9 @@ this.on('AEvent', async (req) => {
 > [!NOTE]
 > AEvent was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
+> [!IMPORTANT]  
+> Decorator `@OnEvent` should be used inside [@UnboundActions](#unboundactions) class.
+
 > [!TIP]
 > More info can be found at <https://cap.cloud.sap/docs/guides/messaging/>
 
@@ -1127,11 +1136,14 @@ public onError(err: Error, req: Request) { // sync func
 `Equivalent to 'JS'`
 
 ```typescript
-this.on('error', async (err, req) => {
+this.on('error', (err, req) => {
   err.message = 'New message';
   // ...
 });
 ```
+
+> [!IMPORTANT]  
+> Decorator `@OnError` should be used inside [@UnboundActions](#unboundactions) class.
 
 > [!CAUTION]
 > OnError callback are expected to be a **`sync`** function, i.e., **`not async`**, not returning `Promises`.
