@@ -9,6 +9,8 @@ import {
   type Service,
   type TypedRequest,
   OnEvent,
+  OnError,
+  Request,
 } from '../../../../../../lib';
 import { OrderedBook, submitOrder, submitOrderFunction } from '../../../../@cds-models/CatalogService';
 
@@ -39,6 +41,13 @@ class UnboundActionsHandler {
   @OnEvent(OrderedBook)
   public async onEvent(req: TypedRequest<OrderedBook>) {
     //
+  }
+
+  @OnError()
+  public onError(err: Error, req: Request): void {
+    if (req.entity === 'CatalogService.Publishers') {
+      err.message = 'OnError';
+    }
   }
 }
 

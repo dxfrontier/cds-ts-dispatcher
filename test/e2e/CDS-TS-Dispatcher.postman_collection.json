@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "53ccef89-ca7a-4efe-8cb9-e7c620ef49a0",
+		"_postman_id": "14e21f9c-391b-41f8-8800-16b25be854ef",
 		"name": "CDS-TS-Dispatcher",
 		"description": "`SAP CAP` `NodeJS-based project` using TypesScript decorators for rapid development.\n\nThe goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -23,7 +23,11 @@
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Currency code is missing \", function () {",
+													"pm.test(\"Currency code is missing\", function () {",
+													"    pm.response.to.have.status(400);",
+													"});",
+													"",
+													"pm.test(\"Status code is 400\", function () {",
 													"    pm.response.to.have.status(400);",
 													"});"
 												],
@@ -485,7 +489,7 @@
 													"    pm.expect(response[0].message).to.contains('On Create executed')",
 													"});",
 													"",
-													"pm.test(\"Successful POST request\", function () {",
+													"pm.test(\"Status code is 200\", function () {",
 													"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
 													"});"
 												],
@@ -538,6 +542,10 @@
 													"            pm.expect(item.views.toString()).to.contains(\"444233\");",
 													"        }",
 													"    })",
+													"});",
+													"",
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
 													"});"
 												],
 												"type": "text/javascript"
@@ -567,19 +575,11 @@
 											"listen": "test",
 											"script": {
 												"exec": [
-													"// pm.test(\"1 item should have 'views : 444233'\", function () {",
-													"//     const response = pm.response.json();",
 													"",
-													"//     response.value.forEach((item) => {",
-													"//         if(item.views === 444233) {",
-													"//             pm.expect(item.views.toString()).to.contains(\"444233\");",
-													"//         }",
-													"//     })",
-													"// });",
 													"",
-													"// pm.test(\"Successful POST request\", function () {",
-													"//     pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-													"// });"
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+													"});"
 												],
 												"type": "text/javascript"
 											}
@@ -589,13 +589,19 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=1)",
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}?$filter=ID eq 1",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"{{catalogService}}",
-												"{{bookStatsEntity}}(ID=1)"
+												"{{bookStatsEntity}}"
+											],
+											"query": [
+												{
+													"key": "$filter",
+													"value": "ID eq 1"
+												}
 											]
 										}
 									},
@@ -620,8 +626,8 @@
 													"",
 													"});",
 													"",
-													"pm.test(\"Successful POST request\", function () {",
-													"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+													"pm.test(\"Status code is 200\", function () {",
+													"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
 													"});"
 												],
 												"type": "text/javascript"
@@ -671,8 +677,8 @@
 													"",
 													"});",
 													"",
-													"pm.test(\"Successful POST request\", function () {",
-													"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+													"pm.test(\"Status code is 200\", function () {",
+													"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
 													"});"
 												],
 												"type": "text/javascript"
@@ -796,8 +802,8 @@
 													"    pm.expect(stock).to.eql(6);",
 													"});",
 													"",
-													"pm.test(\"Successful POST request\", function () {",
-													"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+													"pm.test(\"Status code is 200\", function () {",
+													"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
 													"});"
 												],
 												"type": "text/javascript"
@@ -832,6 +838,47 @@
 							]
 						},
 						{
+							"name": "@OnError",
+							"item": [
+								{
+									"name": "Error pop-up",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"This get entity should return 200 and message 'OnError'\", function () {",
+													"    const response = pm.response.json();",
+													"    pm.expect(response.error.message).to.eql('OnError')",
+													"});",
+													"",
+													"pm.test(\"Status code is 400\", function () {",
+													"    pm.response.to.have.status(400);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{publishersEntity}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{publishersEntity}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
 							"name": "@OnBoundAction",
 							"item": [
 								{
@@ -849,8 +896,8 @@
 													"    pm.expect(response.stats).to.equals(444233);",
 													"});",
 													"",
-													"pm.test(\"Successful POST request\", function () {",
-													"    pm.expect(pm.response.code).to.be.oneOf([201, 202, 200]);",
+													"pm.test(\"Status code is 200\", function () {",
+													"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
 													"});"
 												],
 												"type": "text/javascript"
@@ -901,8 +948,8 @@
 													"    pm.expect(response.value).to.equals(true);",
 													"});",
 													"",
-													"pm.test(\"Status code is 204\", function () {",
-													"    pm.response.to.have.status(200);",
+													"pm.test(\"Status code is 200\", function () {",
+													"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
 													"});"
 												],
 												"type": "text/javascript"

@@ -33,6 +33,19 @@ export class Books extends Array<Book> {}
 Object.defineProperty(Book, 'name', { value: 'sap.capire.bookshop.Books' })
 Object.defineProperty(Books, 'name', { value: 'sap.capire.bookshop.Books' })
 
+export function _PublisherAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class Publisher extends Base {
+        ID?: number;
+        name?: string | null;
+      static actions: {
+    }
+  };
+}
+export class Publisher extends _._managedAspect(_PublisherAspect(__.Entity)) {}
+export class Publishers extends Array<Publisher> {}
+Object.defineProperty(Publisher, 'name', { value: 'sap.capire.bookshop.Publishers' })
+Object.defineProperty(Publishers, 'name', { value: 'sap.capire.bookshop.Publishers' })
+
 export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookStat extends Base {
         ID?: number | null;
