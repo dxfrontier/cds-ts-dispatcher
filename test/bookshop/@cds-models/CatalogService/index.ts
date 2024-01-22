@@ -71,6 +71,19 @@ export class Reviews extends Array<Review> {}
 Object.defineProperty(Review, 'name', { value: 'CatalogService.Reviews' })
 Object.defineProperty(Reviews, 'name', { value: 'CatalogService.Reviews' })
 
+export function _PublisherAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class Publisher extends Base {
+        ID?: number;
+        name?: string | null;
+      static actions: {
+    }
+  };
+}
+export class Publisher extends _._managedAspect(_PublisherAspect(__.Entity)) {}
+export class Publishers extends Array<Publisher> {}
+Object.defineProperty(Publisher, 'name', { value: 'CatalogService.Publishers' })
+Object.defineProperty(Publishers, 'name', { value: 'CatalogService.Publishers' })
+
 export function _BookEventAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookEvent extends Base {
         name?: string | null;

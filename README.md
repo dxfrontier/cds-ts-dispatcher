@@ -49,6 +49,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
         - [OnAction](#onaction)
         - [OnFunction](#onfunction)
         - [OnEvent](#onevent)
+        - [OnError](#onerror)
         - [OnBoundAction](#onboundaction)
         - [OnBoundFunction](#onboundfunction)
     - [Methods : `draft entity`](#methods--draft-entity)
@@ -294,10 +295,14 @@ The `CDSDispatcher` constructor allows you to create an instance for dispatching
 import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
 
 module.exports = new CDSDispatcher([
+  // Entities
   BookHandler,
   ReviewHandler,
+  BookStatsHandler,
+  // Draft
+  BookEventsHandler,
+  // Unbound actions
   UnboundActionsHandler,
-  // ...
 ]).initialize();
 ```
 
@@ -328,10 +333,11 @@ import { EntityHandler } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
-class CustomerHandler {
-  ...
+export class CustomerHandler {
+  // ...
   constructor() {}
-  ...
+  // ...
+}
 ```
 
 > [!NOTE]
@@ -353,10 +359,11 @@ When applying `ServiceLogic` decorator, the class becomes eligible to be used wi
 import { ServiceLogic } from '@dxfrontier/cds-ts-dispatcher';
 
 @ServiceLogic()
-class CustomerService {
-  ...
+export class CustomerService {
+  // ...
   constructor() {}
-  ...
+  // ...
+}
 ```
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
@@ -373,10 +380,11 @@ When applying `Repository` decorator, the class becomes eligible to be used with
 import { Repository } from '@dxfrontier/cds-ts-dispatcher';
 
 @Repository()
-class CustomerRepository {
-  ...
+export class CustomerRepository {
+  // ...
   constructor() {}
-  ...
+  // ...
+}
 ```
 
 ###### `[Optional]` - BaseRepository
@@ -390,7 +398,7 @@ It simplifies the implementation by offering a set of ready-to-use actions for i
 - `.find()`: Query the database to find specific data.
 - `.delete()`: Remove records from the database.
 - `.exists()`: Check the existence of data in the database.
-- ... and many other actions
+- and many more ...
 
 To get started, refer to the official documentation **[BaseRepository](https://github.com/dxfrontier/cds-ts-repository)**. Explore the capabilities it offers and enhance your data access layer with ease.
 
@@ -403,7 +411,7 @@ import { BaseRepository } from '@dxfrontier/cds-ts-repository';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @Repository()
-class CustomerRepository extends BaseRepository<MyEntity> {
+export class CustomerRepository extends BaseRepository<MyEntity> {
   constructor() {
     super(MyEntity);
   }
@@ -428,6 +436,13 @@ class CustomerRepository extends BaseRepository<MyEntity> {
 
 The `@UnboundActions` decorator is utilized at the `class-level` to annotate a `class` as a specialized class which will be used only for Unbound actions.
 
+The following decorators can be used inside of `@UnboundActions()` :
+
+- [@OnAction](#onaction)
+- [@OnFunction](#onfunction)
+- [@OnEvent](#onevent)
+- [@OnError](#onerror)
+
 `Example`
 
 ```typescript
@@ -439,12 +454,13 @@ import {
   ActionRequest,
   ActionReturn,
   TypedRequest,
+  Request,
 } from '@dxfrontier/cds-ts-dispatcher';
 import { MyAction, MyFunction, MyEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @UnboundActions()
-class UnboundActionsHandler {
-  // ... @Inject all dependencies, if needed.
+export class UnboundActionsHandler {
+  // ... @Inject dependencies, if needed.
 
   constructor() {}
 
@@ -466,6 +482,12 @@ class UnboundActionsHandler {
   // Unbound event
   @OnEvent(MyEvent)
   public async onEventMethod(req: TypedRequest<MyEvent>) {
+    // ...
+  }
+
+  // Unbound error
+  @OnError()
+  public onErrorMethod(err: Error, req: Request) {
     // ...
   }
 }
@@ -503,13 +525,17 @@ import { EntityHandler, Inject, SRV, Service } from "@dxfrontier/cds-ts-dispatch
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
-class CustomerHandler {
+export class CustomerHandler {
   ...
   @Inject(CustomerService) private customerService: CustomerService
+  @Inject(CustomerRepository) private customerService: CustomerRepository
+  @Inject(AnyOtherInjectableClass) private repository: AnyOtherInjectableClass
+
   @Inject(SRV) private srv: Service
-  ...
+  // ...
   constructor() {}
-  ...
+  // ...
+}
 ```
 
 > [!NOTE]
@@ -526,19 +552,20 @@ This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repos
 `Example`
 
 ```typescript
-import { EntityHandler, Inject, SRV, Service } from "@dxfrontier/cds-ts-dispatcher";
+import { EntityHandler, Inject, SRV, Service } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
 // OR @ServiceLogic()
 // OR @Repository()
 // OR @UnboundActions
-class CustomerHandler { // OR CustomerService, CustomerRepository
-  ...
-  @Inject(SRV) private srv: Service
-  ...
+export class CustomerHandler {
+  // @Inject dependencies
+  @Inject(SRV) private srv: Service;
+
   constructor() {}
-  ...
+  // ...
+}
 ```
 
 > [!NOTE]
@@ -558,7 +585,7 @@ The handlers receive one argument:
 
 See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) event**
 
-> [!NOTE]
+> [!TIP]
 > If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@BeforeCreateDraft(), BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()`
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
@@ -700,7 +727,7 @@ The handlers receive two arguments:
 
 See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
 
-> [!NOTE]
+> [!TIP]
 > If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@AfterCreateDraft(), AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()`
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
@@ -840,7 +867,7 @@ The handlers receive two arguments:
 
 See also the official SAP JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request) event**
 
-> [!NOTE]
+> [!TIP]
 > If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@OnCreateDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft()`
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
@@ -1074,6 +1101,43 @@ this.on('AEvent', async (req) => {
 
 > [!TIP]
 > More info can be found at <https://cap.cloud.sap/docs/guides/messaging/>
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### OnError
+
+**@OnError**()
+
+Use `@OnError` decorator to register custom error handler.
+
+Error handlers are invoked whenever an error occurs during event processing of all potential events and requests, and are used to augment or modify error messages, before they go out to clients.
+
+`Example`
+
+```typescript
+import { OnError, Request } from "@dxfrontier/cds-ts-dispatcher";
+
+@OnError()
+public onError(err: Error, req: Request) { // sync func
+  err.message = 'New message'
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('error', async (err, req) => {
+  err.message = 'New message';
+  // ...
+});
+```
+
+> [!CAUTION]
+> OnError callback are expected to be a **`sync`** function, i.e., **`not async`**, not returning `Promises`.
+
+> [!TIP]
+> More info can be found at <https://cap.cloud.sap/docs/node.js/core-services#srv-on-error>
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1586,7 +1650,7 @@ this.on('SAVE', MyEntity, async (req, next) => {
 All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
 
 > [!NOTE]
-> Except the `@OnAction(), @OnFunction()` as this are bound to the service and not to an entity.
+> Except the `@OnAction(), @OnFunction(), @OnEvent(), @OnError()` as this are bound to the service and not to an entity.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1685,11 +1749,13 @@ npm install --save-dev npm-run-all
     - npx @cap-js/cds-typer "*" --outputDirectory gen/srv/@cds-models
 ```
 
+`Steps explained`
+
 - `npm ci` - Will do a clean install
-- `npm run build:production` - will run the package.json script command for CDS build and transpilation of TS to JS
+- `npm run build:production` - will run the package.json script command for CDS build and transpilation of TS to JS and clean the `TS files`.
 - `npx @cap-js/cds-typer "*" --outputDirectory gen/srv/@cds-models` - will make sure the @cds-models are generated.
 
-5. Run to produce the `.mtar file`
+5. Run command to produce the `.mtar file`
 
 ```bash
 mbt build

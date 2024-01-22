@@ -37,6 +37,11 @@ entity Books : managed {
 
 }
 
+entity Publishers : managed {
+  key ID   : Integer;
+      name : String(111) @mandatory;
+}
+
 entity BookStats : managed {
   key ID            : Integer;
       views         : Integer;
@@ -115,7 +120,6 @@ entity Promotions {
 
       // Associations
       books       : Association to many Books;
-// Add more associations as needed
 }
 
 // **************************************************************************************************

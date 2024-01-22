@@ -14,6 +14,7 @@ import {
   type Service,
   type ServiceImpl,
   type Request,
+  type ReturnErrorRequest,
 } from '../types/types';
 import { SRV } from '../constants/Constants';
 
@@ -25,7 +26,10 @@ import cds from '@sap/cds';
 
 class CDSDispatcher {
   private srv: Service;
-  private container: Container;
+  private readonly container: Container = new Container({
+    skipBaseClassChecks: true,
+    autoBindInjectable: true,
+  });
 
   /**
    * Creates an instance of CDSDispatcher.
@@ -35,15 +39,6 @@ class CDSDispatcher {
     if (Util.isEmptyArray(entities)) {
       throw new Error('The new CDSDispatcher constructor cannot be empty!');
     }
-
-    this.initializeContainer();
-  }
-
-  private initializeContainer(): void {
-    this.container = new Container({
-      skipBaseClassChecks: true,
-      autoBindInjectable: true,
-    });
   }
 
   private storeService(srv: Service): void {
@@ -56,6 +51,13 @@ class CDSDispatcher {
     const isSingleInstance = Util.isRequestSingleInstance(handler, req);
 
     return await callback.call(entity, req, isSingleInstance);
+  }
+
+  private executeOnErrorCallback(handlerAndEntity: [Handler, Constructable], err: Error, req: Request): unknown | void {
+    const [handler, entity] = handlerAndEntity;
+    const callback = handler.callback as ReturnErrorRequest;
+
+    return callback.call(entity, err, req);
   }
 
   private async executeOnCallback(
@@ -146,7 +148,6 @@ class CDSDispatcher {
   private registerOnHandler(handlerAndEntity: [Handler, Constructable]): void {
     const { event, actionName, getEventName, entity } = this.getHandlerProps(...handlerAndEntity);
 
-    // CRUD_EVENTS.[ACTION, FUNC]
     if (event === 'ACTION' || event === 'FUNC') {
       this.srv.on(actionName!, async (req, next) => {
         return await this.executeOnCallback(handlerAndEntity, req, next);
@@ -155,7 +156,6 @@ class CDSDispatcher {
       return;
     }
 
-    // CRUD_EVENTS.[BOUND_ACTION, BOUND_FUNC]
     if (event === 'BOUND_ACTION' || event === 'BOUND_FUNC') {
       this.srv.on(actionName!, entity.name, async (req, next) => {
         return await this.executeOnCallback(handlerAndEntity, req, next);
@@ -164,7 +164,6 @@ class CDSDispatcher {
       return;
     }
 
-    // CRUD_EVENTS.[EVENT]
     if (event === 'EVENT') {
       this.srv.on(getEventName(), async (req, next) => {
         return await this.executeOnCallback(handlerAndEntity, req, next);
@@ -173,7 +172,15 @@ class CDSDispatcher {
       return;
     }
 
-    // CRUD_EVENTS.[NEW, CANCEL, CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
+    if (event === 'ERROR') {
+      this.srv.on('error', (err, req) => {
+        return this.executeOnErrorCallback(handlerAndEntity, err, req);
+      });
+
+      return;
+    }
+
+    // CRUD_EVENTS[NEW, CANCEL, CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
     this.srv.on(event, entity, async (req, next) => {
       return await this.executeOnCallback(handlerAndEntity, req, next);
     });

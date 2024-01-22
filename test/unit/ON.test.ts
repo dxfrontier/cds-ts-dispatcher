@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { Request } from '../../lib/index';
+import { OnError, Request } from '../../lib/index';
 import {
   EntityHandler,
   OnAction,
@@ -39,6 +39,9 @@ class BookHandler {
 
   @OnEvent(OrderedBook)
   public async onEvent(req: TypedRequest<OrderedBook>) {}
+
+  @OnError()
+  public async onError(error: Error, req: Request) {}
 
   @OnBoundAction(submitOrder)
   public async onBoundActionMethod(req: TypedRequest<Request>, next: Function) {}
@@ -87,6 +90,7 @@ describe('ON', () => {
   testEvent('ACTION', 'OnAction');
   testEvent('FUNC', 'OnFunction');
   testEvent('EVENT', 'OnEvent');
+  testEvent('ERROR', 'OnError');
 
   // BOUND ACTION & FUNCTION
   testEvent('BOUND_ACTION', 'OnBoundAction');
