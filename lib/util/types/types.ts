@@ -35,7 +35,8 @@ type CRUD_EVENTS =
   | 'FUNC'
   | 'BOUND_ACTION'
   | 'BOUND_FUNC'
-  | 'EVENT';
+  | 'EVENT'
+  | 'ERROR';
 
 type ServiceCallback = (srv: Service) => void;
 
@@ -43,6 +44,7 @@ type ReturnRequest = (req: Request, ...args: any[]) => Promise<any>;
 type ReturnResultsAndRequest = (results: any | any[] | boolean, req: Request, ...args: any[]) => Promise<any>;
 type ReturnRequestAndNext = (req: Request, next: Function, ...args: any[]) => Promise<any>;
 type ReturnSingleInstanceCapable = (isSingleInstance: boolean) => Promise<any>;
+type ReturnErrorRequest = (err: Error, req: Request) => any | void;
 
 /**
  * Use this type to have the '@sap/cds - Request' typed.
@@ -78,6 +80,7 @@ export {
   type ReturnResultsAndRequest,
   type ReturnRequestAndNext,
   type ReturnSingleInstanceCapable,
+  type ReturnErrorRequest,
   //
   type CDSTyperEntity,
   type CdsFunction,

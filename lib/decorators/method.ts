@@ -8,6 +8,7 @@ import {
   type DRAFT_EVENTS,
   type CdsFunction,
   type CdsEvent,
+  type ReturnErrorRequest,
 } from '../util/types/types';
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher';
 import Constants from '../util/constants/Constants';
@@ -134,6 +135,33 @@ function buildOnEvent(options: { event: CRUD_EVENTS; handlerType: HandlerType; i
         handlerType,
         callback: descriptor.value!,
         eventName: name as unknown as string,
+        isDraft,
+      });
+    };
+  };
+}
+
+/**
+ * Builds a decorator for handling the .on('error) method.
+ *
+ * @param event - The custom action event to handle.
+ * @param handlerType - The type of handler (Before, After, On).
+ */
+
+function buildOnError(options: { event: CRUD_EVENTS; handlerType: HandlerType; isDraft: boolean }) {
+  return function <Target extends Object>() {
+    return function (
+      target: Target,
+      _: string | symbol,
+      descriptor: TypedPropertyDescriptor<ReturnErrorRequest>,
+    ): void {
+      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const { event, handlerType, isDraft } = options;
+
+      metadataDispatcher.addMethodMetadata({
+        event,
+        handlerType,
+        callback: descriptor.value!,
         isDraft,
       });
     };
@@ -406,9 +434,16 @@ const OnFunction = buildOnAction({ event: 'FUNC', handlerType: HandlerType.On, i
 /**
  *
  * This decorator can be applied to methods that need to execute custom logic when a custom function event is triggered.
- * @see [CDS-TS-Dispatcher - On function](https://github.com/dxfrontier/cds-ts-dispatcher#onfunction)
+ * @see [CDS-TS-Dispatcher - On function](https://github.com/dxfrontier/cds-ts-dispatcher#onevent)
  */
 const OnEvent = buildOnEvent({ event: 'EVENT', handlerType: HandlerType.On, isDraft: false });
+
+/**
+ *
+ * This decorator can be applied to methods that needs to catch the errors.
+ * @see [CDS-TS-Dispatcher - On function](https://github.com/dxfrontier/cds-ts-dispatcher#onerror)
+ */
+const OnError = buildOnError({ event: 'ERROR', handlerType: HandlerType.On, isDraft: false });
 
 /**
  *
@@ -555,6 +590,7 @@ export {
   OnAction,
   OnFunction,
   OnEvent,
+  OnError,
   OnBoundAction,
   OnBoundFunction,
   // ON events - Draft
