@@ -2,6 +2,13 @@
 
 <img src="https://img.shields.io/badge/SAP-0FAAFF?style=for-the-badge&logo=sap&logoColor=white" /> <img src="https://img.shields.io/badge/ts--node-3178C6?style=for-the-badge&logo=ts-node&logoColor=white" /> <img src="https://img.shields.io/badge/Node%20js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" /> <img src="https://img.shields.io/badge/Express%20js-000000?style=for-the-badge&logo=express&logoColor=white" /> <img src="https://img.shields.io/badge/json-5E5C5C?style=for-the-badge&logo=json&logoColor=white" /> <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white" />
 
+![NPM Downloads](https://img.shields.io/npm/dm/%40dxfrontier%2Fcds-ts-dispatcher)
+![GitHub contributors](https://img.shields.io/github/contributors/dxfrontier/cds-ts-dispatcher)
+![GitHub issues](https://img.shields.io/github/issues/dxfrontier/cds-ts-dispatcher)
+![NPM Version](https://img.shields.io/npm/v/%40dxfrontier%2Fcds-ts-dispatcher)
+
+[![Test](https://github.com/dxfrontier/cds-ts-dispatcher/actions/workflows/tests.yml/badge.svg)](https://github.com/dxfrontier/cds-ts-dispatcher/actions/workflows/tests.yml) ![GitHub Repo stars](https://img.shields.io/github/stars/dxfrontier/cds-ts-dispatcher)
+
 The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement TS handlers provided by the SAP CAP framework.
 
 ## Table of Contents
@@ -9,8 +16,11 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 - [Table of Contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-  - [Install CDS-TS-Dispatcher - New project](#install-cds-ts-dispatcher---new-project)
-  - [Install CDS-TS-Dispatcher - Existing project](#install-cds-ts-dispatcher---existing-project)
+  - [Install CDS-TS-Dispatcher - `devcontainer`](#install-cds-ts-dispatcher---devcontainer)
+    - [Docker \& VSCode - `(local development)`](#docker--vscode---local-development)
+    - [SAP Business Application Studio - `(BAS)`](#sap-business-application-studio---bas)
+  - [Install CDS-TS-Dispatcher - `New project`](#install-cds-ts-dispatcher---new-project)
+  - [Install CDS-TS-Dispatcher - `Existing project`](#install-cds-ts-dispatcher---existing-project)
   - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
     - [Option 1 - `Recommended`](#option-1---recommended)
     - [Option 2](#option-2)
@@ -88,7 +98,84 @@ npm i -g @sap/cds-dk
 
 ## Installation
 
-### Install CDS-TS-Dispatcher - New project
+### Install CDS-TS-Dispatcher - `devcontainer`
+
+The `devcontainer` repository contains the `CDS-TS-Dispatcher` and `all dependencies` needed to boot a new project :
+
+`Tools` installed inside of the container :
+
+- `Controller` - `Service` - `Repository` project structure folders :
+  - `controller`
+  - `service`
+  - `repository`
+  - `util`
+  - `test`
+- `ESLint`, `Prettier`
+- `VSCode Extensions` best extensions for SAP CAP TypeScript development
+- `Cloud MTA Build tool` for building `MTA file`
+- `Git`, `Cds`, `Npm`, `Node`
+- `CDS-Typer` for building typescript entities out of `CDS files`
+- `tsconfig.json, .eslintrc, .prettierrc` - predefined properties
+- `package.json` - predefined `scripts`
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Docker & VSCode - `(local development)`
+
+1. Install [**Docker desktop**](https://www.docker.com/products/docker-desktop/)
+2. Clone `CDS-TS-Dispatcher container` using below command :
+
+```bash
+git clone https://github.com/dxfrontier/cds-ts-dispatcher-dev-container
+```
+
+3. Open project in `VSCode` using:
+
+```bash
+code cds-ts-dispatcher-dev-container
+```
+
+4. Change GIT remote origin to your origin
+
+```bash
+git remote remove origin
+git remote add origin https://github.com/user/YOUR_GIT_REPOSITORY.git
+git branch -M main
+git push -u origin main
+```
+
+6. Install [Remote development pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) VScode extension
+
+7. COMMAND + SHIFT + P on `MacOS` or CTRL + SHIFT + P on `Windows`
+
+   1. Type - `Rebuild and Reopen in Container` - This step will start creating the container project and start the Node server.
+
+8. Start development as usual.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### SAP Business Application Studio - `(BAS)`
+
+1. Clone `CDS-TS-Dispatcher container` using below command :
+
+```bash
+git clone https://github.com/dxfrontier/cds-ts-dispatcher-dev-container
+```
+
+2. Change GIT remote origin to your origin
+
+```bash
+git remote remove origin
+git remote add origin https://github.com/user/YOUR_GIT_REPOSITORY.git
+git branch -M main
+git push -u origin main
+```
+
+3. Start development as usual.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+### Install CDS-TS-Dispatcher - `New project`
 
 Use the following steps if you want to create a new **SAP CAP project.**
 
@@ -109,7 +196,7 @@ cds init
 
 ```bash
 npm install @dxfrontier/cds-ts-dispatcher @sap/cds express
-npm install --save-dev @types/node @cap-js/sqlite typescript
+npm install --save-dev @types/node @cap-js/sqlite ts-node  typescript
 ```
 
 4. Add a **tsconfig.json** :
@@ -156,7 +243,9 @@ tsc --init
 cds-ts watch
 ```
 
-### Install CDS-TS-Dispatcher - Existing project
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+### Install CDS-TS-Dispatcher - `Existing project`
 
 Use the following steps if you want to add only the **@dxfrontier/cds-ts-dispatcher to an existing project :**
 
@@ -233,6 +322,8 @@ npm install
 > [!TIP]
 > If above option is being used, this means whenever we change a `.CDS` file the changes will be reflected in the generated `@cds-models` folder.
 
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 #### Option 2
 
 Execute the command :
@@ -245,6 +336,8 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 
 > [!TIP]
 > If above option is being used, you have to run every time the command when you do a change in a `.CDS file`
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 #### `Important`
 
@@ -268,6 +361,8 @@ For more info see official **[SAP CDS-Typer](https://cap.cloud.sap/docs/tools/cd
 `Controller-Service-Repository` suggested folder structure
 
 ![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/architecture_folder_structure.png?raw=true) <= expanded folders => ![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/architecture_folder_structure_expanded.png?raw=true)
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ## Usage
 
@@ -1729,13 +1824,19 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 
 ## `Deployment to BTP` using `MTA`
 
+<!-- 1. Install [**MTA Build tool**](https://cap.cloud.sap/docs/get-started/) globally:
+
+```bash
+npm i -g mbt
+``` -->
+
 1. Add `mta.yaml` to your project using the following command :
 
 ```bash
 cds add mta
 ```
 
-2. Install `npm-run-all package`:
+2. Install `npm-run-all` package:
 
 ```bash
 npm install --save-dev npm-run-all
@@ -1761,19 +1862,25 @@ npm install --save-dev npm-run-all
     - npx @cap-js/cds-typer "*" --outputDirectory gen/srv/@cds-models
 ```
 
-`Steps explained`
+`Steps` explained :
 
 - `npm ci` - Will do a clean install
 - `npm run build:production` - will run the package.json script command for CDS build and transpilation of TS to JS and clean the `TS files`.
 - `npx @cap-js/cds-typer "*" --outputDirectory gen/srv/@cds-models` - will make sure the @cds-models are generated.
 
-5. Run command to produce the `.mtar file`
+5. Install [**MTA Build tool**](https://cap.cloud.sap/docs/get-started/) globally:
+
+```bash
+npm i -g mbt
+```
+
+6. Run command to produce the `.mtar file`
 
 ```bash
 mbt build
 ```
 
-6. Deploy your `mtar` to BTP
+7. Deploy your `mtar` to BTP
 
 ## `Examples`
 
@@ -1790,7 +1897,7 @@ Please make sure to update tests as appropriate.
 
 ![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)
 
-Copyright (c) 2023 DXFrontier
+Copyright (c) 2024 DXFrontier
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
