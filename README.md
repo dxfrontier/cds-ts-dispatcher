@@ -16,11 +16,11 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 - [Table of Contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-  - [Install CDS-TS-Dispatcher - `devcontainer`](#install-cds-ts-dispatcher---devcontainer)
+  - [`Option 1 :` Install CDS-TS-Dispatcher - `devcontainer`](#option-1--install-cds-ts-dispatcher---devcontainer)
     - [Docker \& VSCode - `(local development)`](#docker--vscode---local-development)
     - [SAP Business Application Studio - `(BAS)`](#sap-business-application-studio---bas)
-  - [Install CDS-TS-Dispatcher - `New project`](#install-cds-ts-dispatcher---new-project)
-  - [Install CDS-TS-Dispatcher - `Existing project`](#install-cds-ts-dispatcher---existing-project)
+  - [`Option 2 :` Install CDS-TS-Dispatcher - `New project`](#option-2--install-cds-ts-dispatcher---new-project)
+  - [`Option 3 :` Install CDS-TS-Dispatcher - `Existing project`](#option-3--install-cds-ts-dispatcher---existing-project)
   - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
     - [Option 1 - `Recommended`](#option-1---recommended)
     - [Option 2](#option-2)
@@ -98,7 +98,7 @@ npm i -g @sap/cds-dk
 
 ## Installation
 
-### Install CDS-TS-Dispatcher - `devcontainer`
+### `Option 1 :` Install CDS-TS-Dispatcher - `devcontainer`
 
 The `devcontainer` repository contains the `CDS-TS-Dispatcher` and `all dependencies` needed to boot a new project :
 
@@ -175,7 +175,7 @@ git push -u origin main
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-### Install CDS-TS-Dispatcher - `New project`
+### `Option 2 :` Install CDS-TS-Dispatcher - `New project`
 
 Use the following steps if you want to create a new **SAP CAP project.**
 
@@ -245,7 +245,7 @@ cds-ts watch
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-### Install CDS-TS-Dispatcher - `Existing project`
+### `Option 3 :` Install CDS-TS-Dispatcher - `Existing project`
 
 Use the following steps if you want to add only the **@dxfrontier/cds-ts-dispatcher to an existing project :**
 
