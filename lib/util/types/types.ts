@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type Request } from '@sap/cds/apis/events';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { type ServiceImpl, type TypedRequest } from '@sap/cds/apis/services';
@@ -14,6 +12,17 @@ enum HandlerType {
   Request,
   OnDraft,
 }
+
+/**
+ * Use this type to annotate the 'next' parameter of the Middleware use method
+ */
+type Next = () => Promise<unknown>;
+
+type NonEmptyArray<T> = [T, ...T[]];
+
+type MiddlewareImpl = {
+  use: (req: Request, next: Next) => Promise<unknown>;
+};
 
 type CdsFunction = {
   (...args: any[]): any;
@@ -46,6 +55,7 @@ type ReturnRequestAndNext = (req: Request, next: Function, ...args: any[]) => Pr
 type ReturnSingleInstanceCapable = (isSingleInstance: boolean) => Promise<any>;
 type ReturnErrorRequest = (err: Error, req: Request) => any | void;
 
+export type RequestType = (...args: any[]) => Promise<any>;
 /**
  * Use this type to have the '@sap/cds - Request' typed.
  */
@@ -58,6 +68,7 @@ type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void | Error
 
 type HandlerBuilder = {
   buildHandlers: () => void;
+  buildMiddlewares: () => void;
 };
 
 type Handler = {
@@ -75,6 +86,7 @@ export {
   type HandlerBuilder,
   type Handler,
   type ServiceCallback,
+  type NonEmptyArray,
   //
   type ReturnRequest,
   type ReturnResultsAndRequest,
@@ -92,6 +104,10 @@ export {
   //
   type CRUD_EVENTS,
   type DRAFT_EVENTS,
+
+  // Middleware
+  type MiddlewareImpl,
+  type Next,
 
   // Standard exports
   type Request,

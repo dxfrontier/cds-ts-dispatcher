@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type Handler, type Request } from '../types/types';
 
-export const Util = {
+const Util = {
   isNumber(data: any): boolean {
     return typeof data === 'number';
   },
@@ -12,6 +11,26 @@ export const Util = {
 
   isEmptyArray<T>(arr: T[]): arr is T[] {
     return arr.length === 0;
+  },
+
+  isRequestType: (arg: any): Request | undefined => {
+    if ('data' in arg && 'path' in arg) {
+      return arg as Request;
+    }
+  },
+
+  sortBeforeEvents(service: any) {
+    service._handlers.before.sort((a: { before: string }, b: { before: string }) => {
+      if (a.before < b.before) {
+        return -1;
+      }
+
+      if (a.before > b.before) {
+        return 1;
+      }
+
+      return 0;
+    });
   },
 };
 

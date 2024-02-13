@@ -9,14 +9,20 @@ import {
   type CdsFunction,
   type CdsEvent,
   type ReturnErrorRequest,
+  type MiddlewareImpl,
+  type RequestType,
+  type Request,
 } from '../util/types/types';
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher';
 import Constants from '../util/constants/Constants';
+import type { Constructable } from '@sap/cds/apis/internal/inference';
+import Util from '../util/helpers/Util';
 
 /**
  * A decorator function that designates a method as an execution with a single instance constraint.
  * @SingleInstanceHandler decorator should be applied last in the method decorators, as it is the first to evaluate whether the request is for a single request or an entity set.
  * Note a third parameter must be added when this decorator is applied :
+ * @example
  * isSingleInstance: boolean
  *
  */
@@ -28,6 +34,74 @@ function SingleInstanceCapable<Target extends Object>() {
     metadataDispatcher.setMethodAsSingleInstanceCapable(propertyKey);
   };
 }
+
+// Middleware
+// ****************************************************************************************
+function registerMiddlewareToMethod<Middleware extends Constructable<MiddlewareImpl>>(
+  middlewares: Middleware[],
+  descriptor: TypedPropertyDescriptor<RequestType>,
+): TypedPropertyDescriptor<RequestType> {
+  const originalMethod = descriptor.value;
+
+  descriptor.value = async function (...args: any[]) {
+    const executeMiddlewares = async (request: Request, index: number = 0): Promise<void> => {
+      if (index < middlewares.length) {
+        const CurrentMiddleware = middlewares[index];
+        const currentMiddlewareInstance = new CurrentMiddleware();
+
+        const next = async (): Promise<void> => {
+          await executeMiddlewares(request, index + 1);
+        };
+
+        await currentMiddlewareInstance.use(request, next);
+      }
+    };
+
+    const request = args.find(Util.isRequestType);
+
+    if (request) {
+      await executeMiddlewares(request as Request);
+    }
+
+    await originalMethod!.apply(this, args);
+  };
+
+  return descriptor;
+}
+
+function registerMiddlewareToClass<Middleware extends Constructable<MiddlewareImpl>, Target extends object>(
+  target: Target,
+  middlewareClasses: Middleware[],
+): void {
+  const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.MIDDLEWARE_KEY);
+  metadataDispatcher.setMiddlewares(middlewareClasses);
+}
+
+/**
+ * Decorator function that associates a method or class with specified middleware classes.
+ * @param ...MiddlewareClasses[] - The middleware classes to be applied.
+ */
+function Use<Middleware extends Constructable<MiddlewareImpl>>(...MiddlewareClasses: Middleware[]) {
+  return function <Target extends object>(
+    target: Target,
+    propertyKey?: string,
+    descriptor?: TypedPropertyDescriptor<RequestType>,
+  ) {
+    const isMethod = propertyKey !== undefined && descriptor !== undefined;
+
+    if (isMethod) {
+      // Method-level usage
+      registerMiddlewareToMethod(MiddlewareClasses, descriptor);
+      return;
+    }
+
+    // Class-level usage
+    registerMiddlewareToClass(target, MiddlewareClasses);
+  };
+}
+
+// End Middleware
+// ****************************************************************************************
 
 /**
  * Builds a decorator for handling the .after method.
@@ -42,7 +116,7 @@ function buildAfter(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: H
       target: Target,
       propertyKey: string | symbol,
       descriptor: TypedPropertyDescriptor<ReturnResultsAndRequest>,
-    ): void {
+    ) {
       const { event, handlerType, isDraft } = options;
       const isSingleInstance = MetadataDispatcher.getSingleInstanceCapableFlag(target, propertyKey);
 
@@ -553,6 +627,7 @@ const AfterEditDraft = buildAfter({ event: 'EDIT', handlerType: HandlerType.Afte
 const AfterSaveDraft = buildAfter({ event: 'SAVE', handlerType: HandlerType.After, isDraft: false });
 
 export {
+  Use,
   SingleInstanceCapable,
   // ========================================================================================================================================================
   // BEFORE events - Active entity

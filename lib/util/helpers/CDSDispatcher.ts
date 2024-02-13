@@ -15,14 +15,11 @@ import {
   type ServiceImpl,
   type Request,
   type ReturnErrorRequest,
+  type NonEmptyArray,
 } from '../types/types';
 import { SRV } from '../constants/Constants';
 
 import cds from '@sap/cds';
-
-/**
- * Use this class to manage the registration of the event handlers for the entities.
- */
 
 class CDSDispatcher {
   private srv: Service;
@@ -33,13 +30,11 @@ class CDSDispatcher {
 
   /**
    * Creates an instance of CDSDispatcher.
-   * @param {Constructable[]} entities - An array of entity classes to manage event handlers for.
+   * @param entities An array of entity classes to manage event handlers for.
+   * @example
+   * new CDSDispatcher([ Entity-1, Entity-2, Entity-n ]).initialize();
    */
-  constructor(private readonly entities: Constructable[]) {
-    if (Util.isEmptyArray(entities)) {
-      throw new Error('The new CDSDispatcher constructor cannot be empty!');
-    }
-  }
+  constructor(private readonly entities: NonEmptyArray<Constructable>) {}
 
   private storeService(srv: Service): void {
     this.srv = srv;
@@ -186,7 +181,7 @@ class CDSDispatcher {
     });
   }
 
-  private registerHandlerBy(handlerAndEntity: [Handler, Constructable]): void {
+  private buildHandlerBy(handlerAndEntity: [Handler, Constructable]): void {
     const [handler] = handlerAndEntity;
 
     switch (handler.handlerType) {
@@ -207,16 +202,119 @@ class CDSDispatcher {
     }
   }
 
+  private async executeMiddlewareChain(req: Request, entityInstance: Constructable, index: number = 0): Promise<void> {
+    const middlewares = MetadataDispatcher.getMiddlewares(entityInstance);
+
+    // private routine for this func
+    const isRejectUsed = (): boolean => {
+      return req instanceof Error;
+    };
+
+    // stop the chain if req.reject was used
+    if (isRejectUsed()) {
+      return;
+    }
+
+    if (index < middlewares.length) {
+      const CurrentMiddleware = middlewares[index];
+      const currentMiddlewareInstance = new CurrentMiddleware();
+
+      const next = async (): Promise<void> => {
+        await this.executeMiddlewareChain(req, entityInstance, index + 1);
+      };
+
+      await currentMiddlewareInstance.use(req, next);
+    }
+  }
+
+  private constructMiddleware(entityInstance: Constructable): void {
+    const ALL_EVENTS = '*';
+    const entity = MetadataDispatcher.getEntity(entityInstance);
+
+    // Active entity
+    if (entity?.name && entity?.drafts === null) {
+      this.srv.before(ALL_EVENTS, entity.name, async (req: Request) => {
+        await this.executeMiddlewareChain(req, entityInstance);
+      });
+
+      return;
+    }
+
+    // Draft entity
+    if (entity?.drafts) {
+      this.srv.before(ALL_EVENTS, entity.drafts, async (req: Request) => {
+        await this.executeMiddlewareChain(req, entityInstance);
+      });
+
+      return;
+    }
+
+    // @UnboundActions() events
+    if (entity === undefined) {
+      const handlers = MetadataDispatcher.getMetadataHandlers(entityInstance);
+
+      handlers.forEach((handler) => {
+        if (handler.event === 'ACTION' || handler.event === 'FUNC') {
+          this.srv.before(handler.actionName!.toString(), async (req: Request) => {
+            await this.executeMiddlewareChain(req, entityInstance);
+          });
+
+          return;
+        }
+
+        if (handler.event === 'EVENT') {
+          this.srv.before(handler.eventName!, async (req: Request) => {
+            await this.executeMiddlewareChain(req, entityInstance);
+          });
+
+          return;
+        }
+
+        if (handler.event === 'ERROR') {
+          this.srv.before('error', async (req: Request) => {
+            await this.executeMiddlewareChain(req, entityInstance);
+          });
+        }
+      });
+    }
+  }
+
+  private registerMiddlewares(entityInstance: Constructable): void {
+    const middlewares = MetadataDispatcher.getMiddlewares(entityInstance);
+
+    // Step out if no middlewares
+    if (!middlewares) {
+      return;
+    }
+
+    this.constructMiddleware(entityInstance);
+  }
+
+  private buildMiddlewareBy(entityInstance: Constructable): void {
+    this.registerMiddlewares(entityInstance);
+
+    // This routine will sort the 'Before' events over '*'. The '*' will be firstly and after the named ones as events are triggered in order.
+    Util.sortBeforeEvents(this.srv);
+  }
+
   private getHandlersBy(entityInstance: Constructable): HandlerBuilder | undefined {
     const handlers = MetadataDispatcher.getMetadataHandlers(entityInstance);
 
     if (handlers?.length > 0) {
+      // private routines for this func
+      const buildHandlers = (): void => {
+        handlers.forEach((handler) => {
+          this.buildHandlerBy([handler, entityInstance]);
+        });
+      };
+
+      const buildMiddlewares = (): void => {
+        this.buildMiddlewareBy(entityInstance);
+      };
+
       return {
-        buildHandlers: (): void => {
-          handlers.forEach((handler) => {
-            this.registerHandlerBy([handler, entityInstance]);
-          });
-        },
+        buildHandlers,
+        buildMiddlewares,
       };
     }
 
@@ -241,6 +339,7 @@ class CDSDispatcher {
 
       if (handlersFound) {
         entityHandlers.buildHandlers();
+        entityHandlers.buildMiddlewares();
       }
     });
   }
@@ -259,7 +358,9 @@ class CDSDispatcher {
 
   // PUBLIC ROUTINES
   /**
-   * Initialize the entities into the CDSDispatcher to register the handlers.
+   * Initializes the entities within the CDSDispatcher, registering their corresponding handlers.
+   *
+   * @returns An instance of ServiceImpl representing the initialized service implementation.
    */
   public initialize(): ServiceImpl {
     return cds.service.impl(this.buildServiceImplementation());
