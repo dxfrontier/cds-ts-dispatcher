@@ -84,6 +84,24 @@ export class Publishers extends Array<Publisher> {}
 Object.defineProperty(Publisher, 'name', { value: 'CatalogService.Publishers' })
 Object.defineProperty(Publishers, 'name', { value: 'CatalogService.Publishers' })
 
+export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class BookOrder extends Base {
+        ID?: number;
+        orderNumber?: string | null;
+        orderDate?: string | null;
+        totalAmount?: number | null;
+        status?: string | null;
+        customer?: __.Association.to<_sap_capire_bookshop.User> | null;
+        customer_ID?: number | null;
+      static actions: {
+    }
+  };
+}
+export class BookOrder extends _._managedAspect(_BookOrderAspect(__.Entity)) {}
+export class BookOrders extends Array<BookOrder> {}
+Object.defineProperty(BookOrder, 'name', { value: 'CatalogService.BookOrders' })
+Object.defineProperty(BookOrders, 'name', { value: 'CatalogService.BookOrders' })
+
 export function _BookEventAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookEvent extends Base {
         name?: string | null;

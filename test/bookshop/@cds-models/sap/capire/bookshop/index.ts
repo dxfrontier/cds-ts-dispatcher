@@ -172,3 +172,21 @@ export class Promotion extends _PromotionAspect(__.Entity) {static drafts: typeo
 export class Promotions extends Array<Promotion> {static drafts: typeof Promotion}
 Object.defineProperty(Promotion, 'name', { value: 'sap.capire.bookshop.Promotions' })
 Object.defineProperty(Promotions, 'name', { value: 'sap.capire.bookshop.Promotions' })
+
+export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class BookOrder extends Base {
+        ID?: number;
+        orderNumber?: string | null;
+        orderDate?: string | null;
+        totalAmount?: number | null;
+        status?: string | null;
+        customer?: __.Association.to<User> | null;
+        customer_ID?: number | null;
+      static actions: {
+    }
+  };
+}
+export class BookOrder extends _._managedAspect(_BookOrderAspect(__.Entity)) {}
+export class BookOrders extends Array<BookOrder> {}
+Object.defineProperty(BookOrder, 'name', { value: 'sap.capire.bookshop.BookOrders' })
+Object.defineProperty(BookOrders, 'name', { value: 'sap.capire.bookshop.BookOrders' })
