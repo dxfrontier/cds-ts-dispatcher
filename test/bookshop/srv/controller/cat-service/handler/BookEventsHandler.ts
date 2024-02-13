@@ -12,6 +12,7 @@ import {
   SRV,
   Service,
   SingleInstanceCapable,
+  Use,
 } from '../../../../../../lib';
 import { BookEvent } from '../../../../@cds-models/CatalogService';
 

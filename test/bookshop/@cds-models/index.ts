@@ -5,13 +5,6 @@ export type Language = __.Association.to<_sap_common.Language>;
 export type Currency = __.Association.to<_sap_common.Currency>;
 export type Country = __.Association.to<_sap_common.Country>;
 export type User = string;
-export type HelloRequest = {
-    greeterName?: string | null;
-    toName?: string | null;
-};
-export type HelloResponse = {
-    greetingMessage?: string | null;
-};
 // enum
 export const Roles = {
   USER: "USER",
@@ -73,3 +66,27 @@ export function _extensibleAspect<TBase extends new (...args: any[]) => object>(
   };
 }
 export class extensible extends _extensibleAspect(__.Entity) {}
+export function _HelloRequestAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class HelloRequest extends Base {
+        greeterName?: string | null;
+        toName?: string | null;
+      static actions: {
+    }
+  };
+}
+export class HelloRequest extends _HelloRequestAspect(__.Entity) {}
+export class HelloRequest_ extends Array<HelloRequest> {}
+Object.defineProperty(HelloRequest, 'name', { value: 'HelloRequest' })
+Object.defineProperty(HelloRequest_, 'name', { value: 'HelloRequest' })
+
+export function _HelloResponseAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class HelloResponse extends Base {
+        greetingMessage?: string | null;
+      static actions: {
+    }
+  };
+}
+export class HelloResponse extends _HelloResponseAspect(__.Entity) {}
+export class HelloResponse_ extends Array<HelloResponse> {}
+Object.defineProperty(HelloResponse, 'name', { value: 'HelloResponse' })
+Object.defineProperty(HelloResponse_, 'name', { value: 'HelloResponse' })

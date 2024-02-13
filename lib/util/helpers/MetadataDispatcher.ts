@@ -1,5 +1,5 @@
 import Constants from '../constants/Constants';
-import { type Handler } from '../types/types';
+import type { MiddlewareImpl, Handler } from '../types/types';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import 'reflect-metadata';
 
@@ -23,9 +23,12 @@ export class MetadataDispatcher<T extends Object> {
   }
 
   // PUBLIC STATIC METHODS
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static getEntity(entity: Constructable): { drafts: any } {
+  public static getEntity(entity: Constructable): { drafts: any; name: string } {
     return Reflect.getMetadata(Constants.DECORATOR.ENTITY_HANDLER_NAME, entity.constructor);
+  }
+
+  public static getMiddlewares(entity: Constructable): Array<Constructable<MiddlewareImpl>> {
+    return Reflect.getMetadata(Constants.DECORATOR.MIDDLEWARE_NAME, entity.constructor);
   }
 
   public static getMetadataHandlers(entity: Constructable): Handler[] {
@@ -43,6 +46,10 @@ export class MetadataDispatcher<T extends Object> {
 
   public setMethodAsSingleInstanceCapable(propertyKey: string | symbol): void {
     Reflect.defineMetadata(Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY, true, this.target, propertyKey);
+  }
+
+  public setMiddlewares<Middleware extends Constructable<MiddlewareImpl>>(middlewares: Middleware[]): void {
+    Reflect.defineMetadata(Constants.DECORATOR.MIDDLEWARE_NAME, middlewares, this.target);
   }
 
   public addEntityHandlerMetadata(entity: Constructable): void {

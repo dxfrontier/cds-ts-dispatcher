@@ -205,8 +205,13 @@
 											"script": {
 												"exec": [
 													"pm.test(\"Delete an item returns text 'Item deleted : true'\", function () {",
-													"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-													"    pm.expect(response[0].message).to.contains('Item deleted : true')",
+													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"",
+													"     headers.forEach((header) => {",
+													"        if(header.message === 'Item deleted : true') {",
+													"            pm.expect(header.message).to.contains('Item deleted : true')",
+													"        }",
+													"    })",
 													"});",
 													"",
 													"pm.test(\"Status code is 204\", function () {",
@@ -1749,6 +1754,95 @@
 					"description": "Integration between multiple decorators"
 				},
 				{
+					"name": "Middleware",
+					"item": [
+						{
+							"name": "Entity Middleware was executed and the request contains status 200 and message 'Middleware2'",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Headers contains text 'Middleware2'\", function () {",
+											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+											"",
+											"     headers.forEach((header) => {",
+											"        if(header.message === 'Middleware2') {",
+											"            pm.expect(header.message).to.contains('Middleware2')",
+											"        }",
+											"    })",
+											"});",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookOrdersEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookOrdersEntity}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Method Middleware was executed and the request contains status 200 and message 'MiddlewareAfterRead2'",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Headers contains text 'MiddlewareAfterRead2'\", function () {",
+											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+											"",
+											"     headers.forEach((header) => {",
+											"        if(header.message === 'MiddlewareAfterRead2') {",
+											"            pm.expect(header.message).to.contains('MiddlewareAfterRead2')",
+											"        }",
+											"    })",
+											"});",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookOrdersEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookOrdersEntity}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Others",
 					"item": [
 						{
@@ -1760,7 +1854,12 @@
 										"exec": [
 											"pm.test(\"Headers contains text 'Single instance'\", function () {",
 											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"    pm.expect(headers[0].message).to.contains('Single instance')",
+											"",
+											"    headers.forEach((header) => {",
+											"        if(header.message === 'Single instance') {",
+											"            pm.expect(header.message).to.contains('Single instance')",
+											"        }",
+											"    })",
 											"});",
 											"",
 											"pm.test(\"Status code is 200\", function () {",
@@ -1796,7 +1895,12 @@
 										"exec": [
 											"pm.test(\"Headers contains text 'Entity set'\", function () {",
 											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"    pm.expect(headers[0].message).to.contains('Entity set')",
+											"",
+											"    headers.forEach((header) => {",
+											"        if(header.message === 'Entity set') {",
+											"            pm.expect(header.message).to.contains('Entity set')",
+											"        }",
+											"    })",
 											"});",
 											"",
 											"pm.test(\"Status code is 200\", function () {",

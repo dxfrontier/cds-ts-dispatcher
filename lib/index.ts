@@ -6,6 +6,8 @@ export {
   type ActionReturn,
   type Request,
   type Service,
+  type MiddlewareImpl,
+  type Next,
 } from './util/types/types';
 export * from './util/helpers/CDSDispatcher';
 export { SRV } from './util/constants/Constants';

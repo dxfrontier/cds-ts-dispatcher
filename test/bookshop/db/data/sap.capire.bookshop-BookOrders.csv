@@ -1,0 +1,2 @@
+ID,orderNumber,orderDate,totalAmount,status,customer_ID
+1,5,2024-01-01,130,Shiped,2

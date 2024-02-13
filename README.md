@@ -28,8 +28,6 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 - [Architecture](#architecture)
 - [Usage](#usage)
   - [`CDSDispatcher`](#cdsdispatcher)
-    - [Parameters](#parameters)
-    - [Method](#method)
   - [`Decorators`](#decorators)
     - [Class](#class)
       - [EntityHandler](#entityhandler)
@@ -37,21 +35,22 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
       - [Repository](#repository)
         - [`[Optional]` - BaseRepository](#optional---baserepository)
       - [UnboundActions](#unboundactions)
-    - [Fields](#fields)
+      - [Use](#use)
+    - [Field](#field)
       - [Inject](#inject)
       - [Inject SRV](#inject-srv)
-    - [Methods - `active entity`](#methods---active-entity)
-      - [Before](#before)
+    - [Method - `active entity`](#method---active-entity)
+      - [`Before`](#before)
         - [BeforeCreate](#beforecreate)
         - [BeforeRead](#beforeread)
         - [BeforeUpdate](#beforeupdate)
         - [BeforeDelete](#beforedelete)
-      - [After](#after)
+      - [`After`](#after)
         - [AfterCreate](#aftercreate)
         - [AfterRead](#afterread)
         - [AfterUpdate](#afterupdate)
         - [AfterDelete](#afterdelete)
-      - [On](#on)
+      - [`On`](#on)
         - [OnCreate](#oncreate)
         - [OnRead](#onread)
         - [OnUpdate](#onupdate)
@@ -62,28 +61,31 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
         - [OnError](#onerror)
         - [OnBoundAction](#onboundaction)
         - [OnBoundFunction](#onboundfunction)
-    - [Methods : `draft entity`](#methods--draft-entity)
-      - [Before](#before-1)
+      - [`Middleware`](#middleware)
+        - [Use](#use-1)
+    - [Method - `draft entity`](#method---draft-entity)
+      - [`Before`](#before-1)
         - [BeforeNewDraft](#beforenewdraft)
         - [BeforeCancelDraft](#beforecanceldraft)
         - [BeforeEditDraft](#beforeeditdraft)
         - [BeforeSaveDraft](#beforesavedraft)
-      - [After](#after-1)
+      - [`After`](#after-1)
         - [AfterNewDraft](#afternewdraft)
         - [AfterCancelDraft](#aftercanceldraft)
         - [AfterEditDraft](#aftereditdraft)
         - [AfterSaveDraft](#aftersavedraft)
-      - [On](#on-1)
+      - [`On`](#on-1)
         - [OnNewDraft](#onnewdraft)
         - [OnCancelDraft](#oncanceldraft)
         - [OnEditDraft](#oneditdraft)
         - [OnSaveDraft](#onsavedraft)
-      - [`Other` draft handlers](#other-draft-handlers)
-    - [Method : `SingleInstanceCapable`](#method--singleinstancecapable)
-      - [Complementary Decorator Actions](#complementary-decorator-actions)
-      - [Examples](#examples)
+      - [`Middleware`](#middleware-1)
+        - [Use](#use-2)
+      - [`Other`](#other)
+  - [`Other decorators`](#other-decorators)
+    - [SingleInstanceCapable](#singleinstancecapable)
 - [`Deployment to BTP` using `MTA`](#deployment-to-btp-using-mta)
-- [`Examples`](#examples-1)
+- [`Examples`](#examples)
 - [Contributing](#contributing)
 - [License](#license)
 - [Authors](#authors)
@@ -113,6 +115,7 @@ The `devcontainer` repository contains the `CDS-TS-Dispatcher` and `all dependen
 - `ESLint`, `Prettier`
 - `VSCode Extensions` best extensions for SAP CAP TypeScript development
 - `Cloud MTA Build tool` for building `MTA file`
+- `Cloud Foundry CLI (CF)`
 - `Git`, `Cds`, `Npm`, `Node`
 - `CDS-Typer` for building typescript entities out of `CDS files`
 - `tsconfig.json, .eslintrc, .prettierrc` - predefined properties
@@ -123,7 +126,7 @@ The `devcontainer` repository contains the `CDS-TS-Dispatcher` and `all dependen
 #### Docker & VSCode - `(local development)`
 
 1. Install [**Docker desktop**](https://www.docker.com/products/docker-desktop/)
-2. Clone `CDS-TS-Dispatcher container` using below command :
+2. Clone [CDS-TS-Dispatcher devcontainer](https://github.com/dxfrontier/cds-ts-dispatcher-dev-container.git) using below command :
 
 ```bash
 git clone https://github.com/dxfrontier/cds-ts-dispatcher-dev-container
@@ -372,13 +375,14 @@ For more info see official **[SAP CDS-Typer](https://cap.cloud.sap/docs/tools/cd
 
 The `CDSDispatcher` constructor allows you to create an instance for dispatching and managing entities.
 
-<!-- `CDSDispatcher` class will initialize all **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository). -->
+<!--
+`CDSDispatcher` class will initialize all **[Entity handlers](#entityhandler)** and all dependencies : [Services](#servicelogic), [Repositories](#repository), [UnboundActions](#unboundactions). -->
 
-#### Parameters
+`Parameters`
 
 - `entities (Array)`: An array of **[Entity handler](#entityhandler)(s)** (Constructable) that represent the entities in the CDS.
 
-#### Method
+`Method`
 
 - `initialize`: The `initialize` method of the `CDSDispatcher` class is used to initialize **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository).
 
@@ -389,7 +393,7 @@ The `CDSDispatcher` constructor allows you to create an instance for dispatching
 ```typescript
 import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
 
-module.exports = new CDSDispatcher([
+export = new CDSDispatcher([
   // Entities
   BookHandler,
   ReviewHandler,
@@ -399,6 +403,9 @@ module.exports = new CDSDispatcher([
   // Unbound actions
   UnboundActionsHandler,
 ]).initialize();
+
+// or use
+// module.exports = new CDSDispatcher([ ...
 ```
 
 `Visual image`
@@ -484,7 +491,7 @@ export class CustomerRepository {
 
 ###### `[Optional]` - BaseRepository
 
-The **[BaseRepository](https://github.com/dxfrontier/cds-ts-repository)** was designed to reduce the boilerplate code required to implement data access layer for persistance entities.
+The **[CDS-TS-Repository - BaseRepository](https://github.com/dxfrontier/cds-ts-repository)** was designed to reduce the boilerplate code required to implement data access layer for persistance entities.
 
 It simplifies the implementation by offering a set of ready-to-use actions for interacting with the database. These actions include:
 
@@ -494,8 +501,6 @@ It simplifies the implementation by offering a set of ready-to-use actions for i
 - `.delete()`: Remove records from the database.
 - `.exists()`: Check the existence of data in the database.
 - and many more ...
-
-To get started, refer to the official documentation **[BaseRepository](https://github.com/dxfrontier/cds-ts-repository)**. Explore the capabilities it offers and enhance your data access layer with ease.
 
 `Example`
 
@@ -512,13 +517,16 @@ export class CustomerRepository extends BaseRepository<MyEntity> {
   }
 
   public async aMethod() {
-    const created = this.create(...)
-    const createdMany = this.createMany(...)
-    const updated = this.update(...)
+    const created = await this.create(...)
+    const createdMany = await this.createMany(...)
+    const updated = await this.update(...)
     // ...
   }
 }
 ```
+
+To get started, refer to the official documentation **[CDS-TS-Repository - BaseRepository](https://github.com/dxfrontier/cds-ts-repository)**.
+Explore the capabilities it offers and enhance your data access layer with ease.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
@@ -601,7 +609,75 @@ module.exports = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### Fields
+##### Use
+
+**@Use**(`...Middleware[]`)
+
+The `@Use` decorator simplify the integration of middlewares into your classes.
+
+When `@Use` decorator applied at the `class-level` this decorator inject middlewares into the class and gain access to the `req: Request and next: Next` middleware object across all events `(@AfterRead, @OnRead ...)` within that class.
+
+Middleware decorators can perform the following tasks:
+
+- Execute any code.
+- Make changes to the request object.
+- End the request-response cycle.
+- Call the next middleware function in the stack.
+- If the current middleware function does not end the request-response cycle, it must call `next()` to pass control to the next middleware function. Otherwise, the request will be left hanging.
+
+`Parameters`
+
+- `...Middleware[])`: Middleware classes to be injected.
+
+`Example:` middleware implementation
+
+```typescript
+import type { Request } from '@sap/cds';
+import type { MiddlewareImpl, Next } from '@dxfrontier/cds-ts-dispatcher';
+
+export class MiddlewareClass implements MiddlewareImpl {
+  public async use(req: Request, next: Next) {
+    console.log('Middleware use method called.');
+
+    next(); // call next middleware
+  }
+}
+```
+
+`Example` usage
+
+```typescript
+import { EntityHandler, Use, Inject, SRV, Service } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+import { Middleware1, Middleware2, MiddlewareN } from 'YOUR_MIDDLEWARE_LOCATION';
+
+@EntityHandler(MyEntity)
+@Use(Middleware1, Middleware2, MiddlewareN)
+export class CustomerHandler {
+  // ...
+  @Inject(SRV) private srv: Service;
+  // ...
+  constructor() {}
+  // ...
+}
+```
+
+> [!TIP]
+> Think of it as a reusable class, enhancing the functionality of every event within its scope.
+
+> [!TIP]
+> Middlewares when applied with `@Use` are executed before the normal events.
+
+> [!WARNING]
+> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Field
 
 ##### Inject
 
@@ -642,7 +718,7 @@ export class CustomerHandler {
 
 **@Inject**(SRV) `private srv: Service`
 
-This specialized `@Inject` can be used as a `constant` in `@ServiceLogic, @Repository, @EntityHandler and @UnboundActions` classes, it can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
+This specialized `@Inject` can be used as a `constant` in `@ServiceLogic`, `@Repository`, `@EntityHandler` and `@UnboundActions` classes, it can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
 
 `Example`
 
@@ -668,9 +744,9 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### Methods - `active entity`
+#### Method - `active entity`
 
-##### Before
+##### `Before`
 
 Use `@BeforeCreate(), @BeforeRead(), @BeforeUpdate(), @BeforeDelete()` to register handlers to run before `.on` handlers, frequently used for `validating user input.`
 
@@ -809,7 +885,7 @@ this.before('DELETE', MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### After
+##### `After`
 
 Use `@AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.`
 
@@ -951,7 +1027,7 @@ this.after('DELETE', MyEntity, async (deleted, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### On
+##### `On`
 
 Use `@OnCreate(), @OnRead(), @OnUpdate(), @OnDelete(), OnAction(), @OnFunction(), @OnBoundAction(), @OnBoundFunction()` handlers to fulfill requests, e.g. by reading/writing data from/to databases handlers.
 
@@ -1318,9 +1394,80 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### Methods : `draft entity`
+##### `Middleware`
 
-##### Before
+###### Use
+
+**@Use**(`...Middleware[]`)
+
+The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your classes.
+
+Middleware decorators can perform the following tasks:
+
+- Execute any code.
+- Make changes to the request object.
+- End the request-response cycle.
+- Call the next middleware function in the stack.
+- If the current middleware function does not end the request-response cycle, it must call `next()` to pass control to the next middleware function. Otherwise, the request will be left hanging.
+
+`Parameters`
+
+- `...Middleware[])`: Middleware classes to be injected.
+
+`Example:` middleware implementation
+
+```typescript
+import type { Request } from '@sap/cds';
+import type { MiddlewareImpl, Next } from '@dxfrontier/cds-ts-dispatcher';
+
+export class MiddlewareClass implements MiddlewareImpl {
+  public async use(req: Request, next: Next) {
+    console.log('Middleware use method called.');
+
+    next(); // call next middleware
+  }
+}
+```
+
+`Example` usage
+
+```typescript
+import { EntityHandler, Use, Inject, SRV, Service } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class CustomerHandler {
+  // ...
+  @Inject(SRV) private srv: Service;
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  @Use(MiddlewareClass)
+  private async addDiscount(results: MyEntity[], req: Request) {
+    // ...
+  }
+
+  // ...
+}
+```
+
+> [!TIP]
+> Middlewares when applied with `@Use` are executed before the normal events.
+
+> [!WARNING]
+> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Method - `draft entity`
+
+##### `Before`
 
 Use `@BeforeNewDraft(), @BeforeCancelDraft(), @BeforeEditDraft(), @BeforeSaveDraft(), @BeforeCreateDraft(), @BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()` to register handlers to run before `.on` handlers, frequently used for `validating user input.`
 
@@ -1462,7 +1609,7 @@ this.before('SAVE', MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### After
+##### `After`
 
 Use `@AfterNewDraft(), @AfterCancelDraft(), @AfterEditDraft(), @AfterSaveDraft(), @AfterCreateDraft(), @AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.` The handlers receive two arguments:
 
@@ -1608,7 +1755,7 @@ this.after('SAVE', MyEntity, async (results, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### On
+##### `On`
 
 Use `@OnNewDraft(), @OnCancelDraft(), @OnCancelDraft(), @OnSaveDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnCreateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft()` handlers to support for both, active and draft entities.
 
@@ -1752,7 +1899,78 @@ this.on('SAVE', MyEntity, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### `Other` draft handlers
+##### `Middleware`
+
+###### Use
+
+**@Use**(`...Middleware[]`)
+
+The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your classes.
+
+Middleware decorators can perform the following tasks:
+
+- Execute any code.
+- Make changes to the request object.
+- End the request-response cycle.
+- Call the next middleware function in the stack.
+- If the current middleware function does not end the request-response cycle, it must call `next()` to pass control to the next middleware function. Otherwise, the request will be left hanging.
+
+`Parameters`
+
+- `...Middleware[])`: Middleware classes to be injected.
+
+`Example:` middleware implementation
+
+```typescript
+import type { Request } from '@sap/cds';
+import type { MiddlewareImpl, Next } from '@dxfrontier/cds-ts-dispatcher';
+
+export class MiddlewareClass implements MiddlewareImpl {
+  public async use(req: Request, next: Next) {
+    console.log('Middleware use method called.');
+
+    next();
+  }
+}
+```
+
+`Example` usage
+
+```typescript
+import { EntityHandler, Use, Inject, SRV, Service } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class CustomerHandler {
+  // ...
+  @Inject(SRV) private srv: Service;
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  @Use(MiddlewareClass)
+  private async addDiscount(results: MyEntity[], req: Request) {
+    // ...
+  }
+
+  // ...
+}
+```
+
+> [!TIP]
+> Middlewares when applied with `@Use` are executed before the normal events.
+
+> [!WARNING]
+> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### `Other`
 
 All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
 
@@ -1761,21 +1979,19 @@ All active entity [On](#on), [Before](#before), [After](#after) events have also
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### Method : `SingleInstanceCapable`
+### `Other decorators`
+
+#### SingleInstanceCapable
 
 **@SingleInstanceCapable()**
 
 The `@SingleInstanceCapable()` decorator is applied at the method level to indicate that all decorators used in conjunction with this decorator will handle both single instance and entity set requests, this behaves like a **switch** when the REQUEST is entity set and single instance, so you can manage different behavior.
-
-##### Complementary Decorator Actions
 
 `@SingleInstanceCapable` can be used together with the following decorator actions :
 
 - [@AfterRead()](#afterread)
 - [@BeforeRead()](#beforeread)
 - [@OnRead()](#onread)
-
-##### Examples
 
 `Example 1` : Handling single instance request
 
@@ -1799,8 +2015,8 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 
 `Example 2` : Differing behavior for single instance and entity set requests
 
-- Example single request : http://localhost:4004/odata/v4/main/ `MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
-- Example entity set request : http://localhost:4004/odata/v4/main/ `MyEntity`
+- Single request example : http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
+- Entity set request example : http://localhost:4004/odata/v4/main/`MyEntity`
 
 ```typescript
 @AfterRead()

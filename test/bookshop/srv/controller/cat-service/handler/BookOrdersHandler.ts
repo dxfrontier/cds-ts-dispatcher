@@ -1,8 +1,7 @@
+import { BookOrder } from '#cds-models/CatalogService';
 import {
   AfterCreate,
-  AfterDelete,
   AfterRead,
-  AfterUpdate,
   EntityHandler,
   Inject,
   Request,
@@ -10,10 +9,8 @@ import {
   Service,
   SingleInstanceCapable,
   Use,
-  type TypedRequest,
   BeforeRead,
 } from '../../../../../../lib';
-import { Book } from '../../../../@cds-models/CatalogService';
 import { MiddlewareMethodAfterRead1 } from '../../../middleware/MiddlewareAfterRead1';
 import { MiddlewareMethodAfterRead2 } from '../../../middleware/MiddlewareAfterRead2';
 import { MiddlewareMethodBeforeRead } from '../../../middleware/MiddlewareBeforeRead';
@@ -21,47 +18,25 @@ import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
 import BookService from '../../../service/BookService';
 
-@EntityHandler(Book)
+@EntityHandler(BookOrder)
 @Use(MiddlewareEntity1, MiddlewareEntity2)
-class BookHandler {
+export class BookOrdersHandler {
   @Inject(SRV) private readonly srv: Service;
   @Inject(BookService) private readonly bookService: BookService;
 
   @AfterCreate()
-  private async validateCurrencyCodes(result: Book, req: Request) {
+  private async validateCurrencyCodes(result: BookOrder, req: Request) {
     this.bookService.validateData(result, req);
   }
 
   @BeforeRead()
-  @Use(MiddlewareMethodBeforeRead)
+  @Use(MiddlewareMethodBeforeRead) // THIS IS OK
   private async bla(req: Request) {
     console.log('****************** Before read event');
   }
 
   @AfterRead()
   @SingleInstanceCapable()
-  @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2)
-  private async addDiscount(results: Book[], req: Request, isSingleInstance: boolean) {
-    await this.srv.emit('OrderedBook', { book: 'dada', quantity: 3, buyer: req.user.id });
-
-    if (isSingleInstance) {
-      req.notify('Single instance');
-    } else {
-      req.notify('Entity set');
-    }
-
-    this.bookService.enrichTitle(results);
-  }
-
-  @AfterUpdate()
-  private async addDefaultDescription(result: Book, req: TypedRequest<Book>) {
-    void this.bookService.addDefaultTitleText(result, req);
-  }
-
-  @AfterDelete()
-  private async deleteItem(deleted: boolean, req: Request) {
-    req.notify(`Item deleted : ${deleted}`);
-  }
+  @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2) // THIS IS OK
+  private async addDiscount(results: BookOrder[], req: Request, isSingleInstance: boolean) {}
 }
-
-export default BookHandler;
