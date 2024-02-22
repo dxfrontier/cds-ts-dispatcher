@@ -16,11 +16,11 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 - [Table of Contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-  - [`Option 1 :` Install CDS-TS-Dispatcher - `devcontainer`](#option-1--install-cds-ts-dispatcher---devcontainer)
+  - [`Option 1 :` Install CDS-TS-Dispatcher - `New project`](#option-1--install-cds-ts-dispatcher---new-project)
+  - [`Option 2 :` Install CDS-TS-Dispatcher - `Existing project`](#option-2--install-cds-ts-dispatcher---existing-project)
+  - [`Option 3 :` Install CDS-TS-Dispatcher - `.devcontainer`](#option-3--install-cds-ts-dispatcher---devcontainer)
     - [Docker \& VSCode - `(local development)`](#docker--vscode---local-development)
     - [SAP Business Application Studio - `(BAS)`](#sap-business-application-studio---bas)
-  - [`Option 2 :` Install CDS-TS-Dispatcher - `New project`](#option-2--install-cds-ts-dispatcher---new-project)
-  - [`Option 3 :` Install CDS-TS-Dispatcher - `Existing project`](#option-3--install-cds-ts-dispatcher---existing-project)
   - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
     - [Option 1 - `Recommended`](#option-1---recommended)
     - [Option 2](#option-2)
@@ -100,7 +100,137 @@ npm i -g @sap/cds-dk
 
 ## Installation
 
-### `Option 1 :` Install CDS-TS-Dispatcher - `devcontainer`
+### `Option 1 :` Install CDS-TS-Dispatcher - `New project`
+
+Use the following steps if you want to create a new **SAP CAP project.**
+
+1. Create new folder :
+
+```bash
+mkdir new-sap-cap-project
+cd new-sap-cap-project
+```
+
+2. Initialize the CDS folder structure :
+
+```bash
+cds init
+```
+
+1. Add the the following NPM packages :
+
+```bash
+npm install @dxfrontier/cds-ts-dispatcher @sap/cds express
+npm install --save-dev @types/node @cap-js/sqlite ts-node  typescript
+```
+
+4. Add a **tsconfig.json** :
+
+```bash
+tsc --init
+```
+
+5. It is recommended to use the following **tsconfig.json** properties:
+
+```json
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "strictPropertyInitialization": false,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    /* Allow decorators */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* Strictness */
+    "strict": true,
+
+    "lib": ["es2022"],
+
+    "outDir": "./gen/srv"
+  },
+  "include": ["./srv"]
+}
+```
+
+6. Run the `CDS-TS` server
+
+```bash
+cds-ts watch
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+### `Option 2 :` Install CDS-TS-Dispatcher - `Existing project`
+
+Use the following steps if you want to add only the **@dxfrontier/cds-ts-dispatcher to an existing project :**
+
+```bash
+npm install @dxfrontier/cds-ts-dispatcher
+```
+
+It is recommended to use the following **tsconfig.json** properties:
+
+```json
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "strictPropertyInitialization": false,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    /* Allow decorators */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* Strictness */
+    "strict": true,
+
+    "lib": ["es2022"],
+
+    "outDir": "./gen/srv"
+  },
+  "include": ["./srv"]
+}
+```
+
+> [!WARNING]
+> If below message appears
+>
+> ```bash
+> -----------------------------------------------------------------------
+> WARNING: Package '@sap/cds' was loaded from different installations: [
+>  '***/node_modules/@sap/cds/lib/index.js',
+>  '***/node_modules/@dxfrontier/cds-ts-dispatcher/node_modules/@sap/cds/lib/index.js'
+> ] Rather ensure a single install only to avoid hard-to-resolve errors.
+> -----------------------------------------------------------------------
+> ```
+>
+> Run the following command :
+>
+> ```bash
+> npm install @sap/cds@latest
+> ```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+### `Option 3 :` Install CDS-TS-Dispatcher - `.devcontainer`
 
 The `devcontainer` repository contains the `CDS-TS-Dispatcher` and `all dependencies` needed to boot a new project :
 
@@ -175,136 +305,6 @@ git push -u origin main
 ```
 
 3. Start development as usual.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-### `Option 2 :` Install CDS-TS-Dispatcher - `New project`
-
-Use the following steps if you want to create a new **SAP CAP project.**
-
-1. Create new folder :
-
-```bash
-mkdir new-sap-cap-project
-cd new-sap-cap-project
-```
-
-2. Initialize the CDS folder structure :
-
-```bash
-cds init
-```
-
-1. Add the the following NPM packages :
-
-```bash
-npm install @dxfrontier/cds-ts-dispatcher @sap/cds express
-npm install --save-dev @types/node @cap-js/sqlite ts-node  typescript
-```
-
-4. Add a **tsconfig.json** :
-
-```bash
-tsc --init
-```
-
-5. It is recommended to use the following **tsconfig.json** properties:
-
-```json
-{
-  "compilerOptions": {
-    /* Base Options: */
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowJs": true,
-    "strictPropertyInitialization": false,
-    "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true,
-    "strictNullChecks": true,
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-
-    /* Allow decorators */
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-
-    /* Strictness */
-    "strict": true,
-
-    "lib": ["es2022"],
-
-    "outDir": "./gen/srv"
-  },
-  "include": ["./srv"]
-}
-```
-
-6. Run the `CDS-TS` server
-
-```bash
-cds-ts watch
-```
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-### `Option 3 :` Install CDS-TS-Dispatcher - `Existing project`
-
-Use the following steps if you want to add only the **@dxfrontier/cds-ts-dispatcher to an existing project :**
-
-```bash
-npm install @dxfrontier/cds-ts-dispatcher
-```
-
-It is recommended to use the following **tsconfig.json** properties:
-
-```json
-{
-  "compilerOptions": {
-    /* Base Options: */
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowJs": true,
-    "strictPropertyInitialization": false,
-    "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true,
-    "strictNullChecks": true,
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-
-    /* Allow decorators */
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-
-    /* Strictness */
-    "strict": true,
-
-    "lib": ["es2022"],
-
-    "outDir": "./gen/srv"
-  },
-  "include": ["./srv"]
-}
-```
-
-> [!WARNING]
-> If below message appears
->
-> ```bash
-> -----------------------------------------------------------------------
-> WARNING: Package '@sap/cds' was loaded from different installations: [
->  '***/node_modules/@sap/cds/lib/index.js',
->  '***/node_modules/@dxfrontier/cds-ts-dispatcher/node_modules/@sap/cds/lib/index.js'
-> ] Rather ensure a single install only to avoid hard-to-resolve errors.
-> -----------------------------------------------------------------------
-> ```
->
-> Run the following command :
->
-> ```bash
-> npm install @sap/cds@latest
-> ```
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -613,9 +613,9 @@ module.exports = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
 
 **@Use**(`...Middleware[]`)
 
-The `@Use` decorator simplify the integration of middlewares into your classes.
+The `@Use` decorator simplifies the integration of middlewares into your classes.
 
-When `@Use` decorator applied at the `class-level` this decorator inject middlewares into the class and gain access to the `req: Request and next: Next` middleware object across all events `(@AfterRead, @OnRead ...)` within that class.
+When `@Use` decorator applied at the `class-level` this decorator inject middlewares into the class and gain access to the `req: Request` and `next: Next` middleware across all events `(@AfterRead, @OnRead ...)` within that class.
 
 Middleware decorators can perform the following tasks:
 
@@ -664,7 +664,7 @@ export class CustomerHandler {
 ```
 
 > [!TIP]
-> Think of it as a reusable class, enhancing the functionality of every event within its scope.
+> Think of it (middleware) like as a reusable class, enhancing the functionality of every event within the class.
 
 > [!TIP]
 > Middlewares when applied with `@Use` are executed before the normal events.
@@ -757,7 +757,7 @@ The handlers receive one argument:
 See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) event**
 
 > [!TIP]
-> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@BeforeCreateDraft(), BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()`
+> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@BeforeCreateDraft(), @BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()`
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -899,7 +899,7 @@ The handlers receive two arguments:
 See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
 
 > [!TIP]
-> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@AfterCreateDraft(), AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()`
+> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@AfterCreateDraft(), @AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()`
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1400,7 +1400,7 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 **@Use**(`...Middleware[]`)
 
-The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your classes.
+The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your method.
 
 Middleware decorators can perform the following tasks:
 
@@ -1905,7 +1905,7 @@ this.on('SAVE', MyEntity, async (req, next) => {
 
 **@Use**(`...Middleware[]`)
 
-The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your classes.
+The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your method.
 
 Middleware decorators can perform the following tasks:
 
