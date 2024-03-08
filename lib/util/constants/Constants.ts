@@ -1,4 +1,4 @@
-export const constants = {
+const constants = {
   DECORATOR: {
     MIDDLEWARE_KEY: 'MIDDLEWARE_KEY',
     MIDDLEWARE_NAME: 'MIDDLEWARE',
@@ -12,6 +12,6 @@ export const constants = {
 /**
  * Use SRV to inject the CDS Service into your class as a dependency.
  */
-export const SRV = 'srv';
+const SRV = 'srv';
 
-export default constants;
+export { constants, SRV };

@@ -1,4 +1,4 @@
-import constants from '../constants/constants';
+import { constants } from '../constants/constants';
 import type { MiddlewareImpl, Handler } from '../types/types';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import 'reflect-metadata';

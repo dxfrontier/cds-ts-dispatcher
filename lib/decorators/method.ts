@@ -14,7 +14,7 @@ import {
   type Request,
 } from '../util/types/types';
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher';
-import constants from '../util/constants/constants';
+import { constants } from '../util/constants/constants';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import util from '../util/helpers/util';
 

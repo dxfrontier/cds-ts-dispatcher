@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import constants from '../util/constants/constants';
+import { constants } from '../util/constants/constants';
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher';
 import { injectable } from 'inversify';
 import { type CDSTyperEntity } from '../util/types/types';
