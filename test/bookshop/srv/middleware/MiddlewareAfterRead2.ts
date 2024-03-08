@@ -8,6 +8,6 @@ export class MiddlewareMethodAfterRead2 implements MiddlewareImpl {
 
     req.notify('MiddlewareAfterRead2');
 
-    next();
+    await next();
   }
 }

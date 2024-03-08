@@ -640,7 +640,7 @@ export class MiddlewareClass implements MiddlewareImpl {
   public async use(req: Request, next: Next) {
     console.log('Middleware use method called.');
 
-    next(); // call next middleware
+    await next(); // call next middleware
   }
 }
 ```
@@ -1930,7 +1930,7 @@ export class MiddlewareClass implements MiddlewareImpl {
   public async use(req: Request, next: Next) {
     console.log('Middleware use method called.');
 
-    next();
+    await next();
   }
 }
 ```

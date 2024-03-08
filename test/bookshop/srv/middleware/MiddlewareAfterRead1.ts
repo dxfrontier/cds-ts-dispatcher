@@ -6,6 +6,6 @@ export class MiddlewareMethodAfterRead1 implements MiddlewareImpl {
   public async use(req: TypedRequest<Book>, next: Next) {
     console.log('Middleware 1: @AfterRead');
 
-    next();
+    await next();
   }
 }

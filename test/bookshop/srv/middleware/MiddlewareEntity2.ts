@@ -8,6 +8,6 @@ export class MiddlewareEntity2 implements MiddlewareImpl {
 
     req.notify('Middleware2');
 
-    next();
+    await next();
   }
 }

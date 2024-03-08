@@ -44,23 +44,28 @@ function registerMiddlewareToMethod<Middleware extends Constructable<MiddlewareI
   const originalMethod = descriptor.value;
 
   descriptor.value = async function (...args: any[]) {
-    const executeMiddlewares = async (request: Request, index: number = 0): Promise<void> => {
+    const executeMiddlewareChain = async (req: Request, index: number = 0): Promise<void> => {
+      // stop the chain if req.reject was used
+      if (Util.isRejectUsed(req)) {
+        return;
+      }
+
       if (index < middlewares.length) {
         const CurrentMiddleware = middlewares[index];
         const currentMiddlewareInstance = new CurrentMiddleware();
 
         const next = async (): Promise<void> => {
-          await executeMiddlewares(request, index + 1);
+          await executeMiddlewareChain(req, index + 1);
         };
 
-        await currentMiddlewareInstance.use(request, next);
+        await currentMiddlewareInstance.use(req, next);
       }
     };
 
-    const request = args.find(Util.isRequestType);
+    const req = args.find(Util.isRequestType);
 
-    if (request) {
-      await executeMiddlewares(request as Request);
+    if (req) {
+      await executeMiddlewareChain(req as Request);
     }
 
     await originalMethod!.apply(this, args);

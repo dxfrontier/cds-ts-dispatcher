@@ -32,6 +32,10 @@ const Util = {
       return 0;
     });
   },
+
+  isRejectUsed(req: Request): boolean {
+    return req instanceof Error;
+  },
 };
 
 export default Util;
