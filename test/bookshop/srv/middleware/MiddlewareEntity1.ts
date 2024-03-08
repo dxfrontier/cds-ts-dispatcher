@@ -6,6 +6,6 @@ export class MiddlewareEntity1 implements MiddlewareImpl {
   public async use(req: TypedRequest<Book>, next: Next) {
     console.log('Middleware entity 1 : EXECUTED');
 
-    next();
+    await next();
   }
 }

@@ -205,13 +205,8 @@ class CDSDispatcher {
   private async executeMiddlewareChain(req: Request, entityInstance: Constructable, index: number = 0): Promise<void> {
     const middlewares = MetadataDispatcher.getMiddlewares(entityInstance);
 
-    // private routine for this func
-    const isRejectUsed = (): boolean => {
-      return req instanceof Error;
-    };
-
     // stop the chain if req.reject was used
-    if (isRejectUsed()) {
+    if (Util.isRejectUsed(req)) {
       return;
     }
 

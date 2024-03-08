@@ -16,7 +16,7 @@ enum HandlerType {
 /**
  * Use this type to annotate the 'next' parameter of the Middleware use method
  */
-type Next = () => unknown;
+type Next = () => Promise<unknown>;
 
 type NonEmptyArray<T> = [T, ...T[]];
 
