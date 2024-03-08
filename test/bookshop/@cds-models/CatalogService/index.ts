@@ -27,7 +27,7 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
         stats?: __.Association.to<_sap_capire_bookshop.BookStat> | null;
         stats_ID?: number | null;
       static actions: {
-    }
+      }
   };
 }
 export class Book extends _._managedAspect(_BookAspect(__.Entity)) {}
@@ -45,7 +45,7 @@ export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base
         placeOfDeath?: string | null;
         books?: __.Association.to.many<_sap_capire_bookshop.Books>;
       static actions: {
-    }
+      }
   };
 }
 export class Author extends _._managedAspect(_AuthorAspect(__.Entity)) {}
@@ -63,7 +63,7 @@ export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base
         rating?: number | null;
         comment?: string | null;
       static actions: {
-    }
+      }
   };
 }
 export class Review extends _._managedAspect(_ReviewAspect(__.Entity)) {}
@@ -76,7 +76,7 @@ export function _PublisherAspect<TBase extends new (...args: any[]) => object>(B
         ID?: number;
         name?: string | null;
       static actions: {
-    }
+      }
   };
 }
 export class Publisher extends _._managedAspect(_PublisherAspect(__.Entity)) {}
@@ -94,7 +94,7 @@ export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(B
         customer?: __.Association.to<_sap_capire_bookshop.User> | null;
         customer_ID?: number | null;
       static actions: {
-    }
+      }
   };
 }
 export class BookOrder extends _._managedAspect(_BookOrderAspect(__.Entity)) {}
@@ -107,7 +107,7 @@ export function _BookEventAspect<TBase extends new (...args: any[]) => object>(B
         name?: string | null;
         types?: _.BookTypes | null;
       static actions: {
-    }
+      }
   };
 }
 export class BookEvent extends _._managedAspect(_._cuidAspect(_BookEventAspect(__.Entity))) {static drafts: typeof BookEvent}
@@ -123,17 +123,17 @@ export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Ba
         book?: __.Association.to<_sap_capire_bookshop.Book> | null;
         book_ID?: number | null;
       static actions: {
-        GenerateReport: { (ID: __.DeepRequired<Book>['ID'] | null):         {
-                    book?: __.DeepRequired<Book>['title'] | null;
-                    stats?: __.DeepRequired<BookStat>['views'] | null;
-                    rating?: __.DeepRequired<BookStat>['averageRating'] | null;
-        }, __parameters: {ID: __.DeepRequired<Book>['ID'] | null}, __returns:         {
-                    book?: __.DeepRequired<Book>['title'] | null;
-                    stats?: __.DeepRequired<BookStat>['views'] | null;
-                    rating?: __.DeepRequired<BookStat>['averageRating'] | null;
-        } }
+        GenerateReport: { (ID: __.DeepRequired<Book>['ID'] | null):       {
+                book?: __.DeepRequired<Book>['title'] | null;
+                stats?: __.DeepRequired<BookStat>['views'] | null;
+                rating?: __.DeepRequired<BookStat>['averageRating'] | null;
+      }, __parameters: {ID: __.DeepRequired<Book>['ID'] | null}, __returns:       {
+                book?: __.DeepRequired<Book>['title'] | null;
+                stats?: __.DeepRequired<BookStat>['views'] | null;
+                rating?: __.DeepRequired<BookStat>['averageRating'] | null;
+      } }
         NotifyAuthor: { (ID: __.DeepRequired<Author>['ID'] | null): boolean, __parameters: {ID: __.DeepRequired<Author>['ID'] | null}, __returns: boolean }
-    }
+      }
   };
 }
 export class BookStat extends _._managedAspect(_BookStatAspect(__.Entity)) {}
@@ -152,7 +152,7 @@ export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Ba
         symbol?: string | null;
         minorUnit?: number | null;
       static actions: {
-    }
+      }
   };
 }
 export class Currency extends _sap_common._CodeListAspect(_CurrencyAspect(__.Entity)) {}
@@ -167,7 +167,7 @@ export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base:
         parent_ID?: number | null;
         children?: __.Composition.of.many<_sap_capire_bookshop.Genres>;
       static actions: {
-    }
+      }
   };
 }
 export class Genre extends _sap_common._CodeListAspect(_GenreAspect(__.Entity)) {}

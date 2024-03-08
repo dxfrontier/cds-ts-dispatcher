@@ -8,7 +8,7 @@ export function _UserActivityLogAspect<TBase extends new (...args: any[]) => obj
         ID?: number;
         actionType?: string | null;
       static actions: {
-    }
+      }
   };
 }
 export class UserActivityLog extends _._managedAspect(_UserActivityLogAspect(__.Entity)) {static drafts: typeof UserActivityLog}
@@ -26,7 +26,7 @@ export function _PromotionAspect<TBase extends new (...args: any[]) => object>(B
         discount?: number | null;
         books?: __.Association.to.many<_sap_capire_bookshop.Books>;
       static actions: {
-    }
+      }
   };
 }
 export class Promotion extends _PromotionAspect(__.Entity) {static drafts: typeof Promotion}
@@ -42,7 +42,7 @@ export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: 
         role?: _.Roles | null;
         reviews?: __.Association.to.many<_sap_capire_bookshop.Reviews>;
       static actions: {
-    }
+      }
   };
 }
 export class User extends _._managedAspect(_UserAspect(__.Entity)) {}

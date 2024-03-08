@@ -27,4 +27,4 @@ export type EntitySet<T> = T[] & {
 
 export type DeepRequired<T> = { 
     [K in keyof T]: DeepRequired<T[K]>
-} & Required<T>;
+} & Exclude<Required<T>, null>;
