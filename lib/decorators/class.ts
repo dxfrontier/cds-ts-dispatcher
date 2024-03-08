@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import Constants from '../util/constants/Constants';
+import constants from '../util/constants/constants';
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher';
 import { injectable } from 'inversify';
 import { type CDSTyperEntity } from '../util/types/types';
@@ -14,7 +14,7 @@ import { type CDSTyperEntity } from '../util/types/types';
 
 function EntityHandler<T, Target extends new (...args: never) => unknown>(entity: CDSTyperEntity<T>) {
   return function (target: Target) {
-    const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.ENTITY_HANDLER_NAME);
+    const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.ENTITY_HANDLER_NAME);
 
     metadataDispatcher.addEntityHandlerMetadata(entity);
 

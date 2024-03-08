@@ -232,7 +232,7 @@ It is recommended to use the following **tsconfig.json** properties:
 
 ### `Option 3 :` Install CDS-TS-Dispatcher - `.devcontainer`
 
-The `devcontainer` repository contains the `CDS-TS-Dispatcher` and `all dependencies` needed to boot a new project :
+The `CDS-TS-Dispatcher dev container` repository contains the [CDS-TS-Dispatcher](https://github.com/dxfrontier/cds-ts-dispatcher) & [CDS-TS-Repository](https://github.com/dxfrontier/cds-ts-repository) and `all dependencies` needed to boot a new project :
 
 `Tools` installed inside of the container :
 
@@ -240,6 +240,7 @@ The `devcontainer` repository contains the `CDS-TS-Dispatcher` and `all dependen
   - `controller`
   - `service`
   - `repository`
+  - `middleware`
   - `util`
   - `test`
 - `ESLint`, `Prettier`

@@ -1,6 +1,6 @@
 import { type Handler, type Request } from '../types/types';
 
-const Util = {
+const util = {
   isNumber(data: any): boolean {
     return typeof data === 'number';
   },
@@ -34,4 +34,4 @@ const Util = {
   },
 };
 
-export default Util;
+export default util;

@@ -14,9 +14,9 @@ import {
   type Request,
 } from '../util/types/types';
 import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher';
-import Constants from '../util/constants/Constants';
+import constants from '../util/constants/constants';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
-import Util from '../util/helpers/Util';
+import util from '../util/helpers/util';
 
 /**
  * A decorator function that designates a method as an execution with a single instance constraint.
@@ -30,7 +30,7 @@ import Util from '../util/helpers/Util';
 function SingleInstanceCapable<Target extends Object>() {
   // TODO: find a way to add TypedPropertyDescriptor
   return function (target: Target, propertyKey: string | symbol, _: PropertyDescriptor) {
-    const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY);
+    const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY);
     metadataDispatcher.setMethodAsSingleInstanceCapable(propertyKey);
   };
 }
@@ -57,7 +57,7 @@ function registerMiddlewareToMethod<Middleware extends Constructable<MiddlewareI
       }
     };
 
-    const request = args.find(Util.isRequestType);
+    const request = args.find(util.isRequestType);
 
     if (request) {
       await executeMiddlewares(request as Request);
@@ -73,7 +73,7 @@ function registerMiddlewareToClass<Middleware extends Constructable<MiddlewareIm
   target: Target,
   middlewareClasses: Middleware[],
 ): void {
-  const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.MIDDLEWARE_KEY);
+  const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.MIDDLEWARE_KEY);
   metadataDispatcher.setMiddlewares(middlewareClasses);
 }
 
@@ -120,7 +120,7 @@ function buildAfter(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: H
       const { event, handlerType, isDraft } = options;
       const isSingleInstance = MetadataDispatcher.getSingleInstanceCapableFlag(target, propertyKey);
 
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
         event,
@@ -150,7 +150,7 @@ function buildBefore(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: 
       const { event, handlerType, isDraft } = options;
       const isSingleInstance = MetadataDispatcher.getSingleInstanceCapableFlag(target, propertyKey);
 
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
         event,
@@ -177,7 +177,7 @@ function buildOnAction(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType
       _: string | symbol,
       descriptor: TypedPropertyDescriptor<ReturnRequestAndNext>,
     ): void {
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
       const { event, handlerType, isDraft } = options;
 
       metadataDispatcher.addMethodMetadata({
@@ -201,7 +201,7 @@ function buildOnAction(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType
 function buildOnEvent(options: { event: CRUD_EVENTS; handlerType: HandlerType; isDraft: boolean }) {
   return function <Target extends Object>(name: CdsEvent) {
     return function (target: Target, _: string | symbol, descriptor: TypedPropertyDescriptor<ReturnRequest>): void {
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
       const { event, handlerType, isDraft } = options;
 
       metadataDispatcher.addMethodMetadata({
@@ -229,7 +229,7 @@ function buildOnError(options: { event: CRUD_EVENTS; handlerType: HandlerType; i
       _: string | symbol,
       descriptor: TypedPropertyDescriptor<ReturnErrorRequest>,
     ): void {
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
       const { event, handlerType, isDraft } = options;
 
       metadataDispatcher.addMethodMetadata({
@@ -263,7 +263,7 @@ function buildOnCRUD<Target extends Object>(options: {
       const { event, handlerType, isDraft } = options;
       const isSingleInstance = MetadataDispatcher.getSingleInstanceCapableFlag(target, propertyKey);
 
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
         event,

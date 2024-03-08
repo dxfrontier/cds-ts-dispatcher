@@ -7,6 +7,8 @@ module.exports.Country = csn.Countries
 module.exports.Countries = csn.Countries
 module.exports.Currency = csn.Currencies
 module.exports.Currencies = csn.Currencies
+module.exports.Timezone = csn.Timezones
+module.exports.Timezones = csn.Timezones
 // events
 // actions
 // enums

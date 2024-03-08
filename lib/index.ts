@@ -10,7 +10,7 @@ export {
   type Next,
 } from './util/types/types';
 export * from './util/helpers/CDSDispatcher';
-export { SRV } from './util/constants/Constants';
+export { SRV } from './util/constants/constants';
 
 // Exported to uppercase to be in guidance with other decorators.
 export { inject as Inject } from 'inversify';

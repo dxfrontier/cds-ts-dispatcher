@@ -1,4 +1,4 @@
-export const Constants = {
+export const constants = {
   DECORATOR: {
     MIDDLEWARE_KEY: 'MIDDLEWARE_KEY',
     MIDDLEWARE_NAME: 'MIDDLEWARE',
@@ -14,4 +14,4 @@ export const Constants = {
  */
 export const SRV = 'srv';
 
-export default Constants;
+export default constants;

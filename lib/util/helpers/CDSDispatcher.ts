@@ -1,6 +1,6 @@
 import { Container } from 'inversify';
 import { MetadataDispatcher } from './MetadataDispatcher';
-import Util from './Util';
+import util from './util';
 
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import {
@@ -17,7 +17,7 @@ import {
   type ReturnErrorRequest,
   type NonEmptyArray,
 } from '../types/types';
-import { SRV } from '../constants/Constants';
+import { SRV } from '../constants/constants';
 
 import cds from '@sap/cds';
 
@@ -43,7 +43,7 @@ class CDSDispatcher {
   private async executeBeforeCallback(handlerAndEntity: [Handler, Constructable], req: Request): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
     const callback = handler.callback as ReturnRequest;
-    const isSingleInstance = Util.isRequestSingleInstance(handler, req);
+    const isSingleInstance = util.isRequestSingleInstance(handler, req);
 
     return await callback.call(entity, req, isSingleInstance);
   }
@@ -62,7 +62,7 @@ class CDSDispatcher {
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
     const callback = handler.callback as ReturnRequestAndNext;
-    const isSingleInstance = Util.isRequestSingleInstance(handler, req);
+    const isSingleInstance = util.isRequestSingleInstance(handler, req);
 
     return await callback.call(entity, req, next, isSingleInstance);
   }
@@ -74,10 +74,10 @@ class CDSDispatcher {
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
     const callback = handler.callback as ReturnResultsAndRequest;
-    const isSingleInstance = Util.isRequestSingleInstance(handler, req);
+    const isSingleInstance = util.isRequestSingleInstance(handler, req);
 
     if (!Array.isArray(results)) {
-      if (Util.isNumber(results)) {
+      if (util.isNumber(results)) {
         // private routine for this func
         const _isDeleted = (data: unknown): boolean => data === 1;
         const deleted = _isDeleted(results);
@@ -294,7 +294,7 @@ class CDSDispatcher {
     this.registerMiddlewares(entityInstance);
 
     // This routine will sort the 'Before' events over '*'. The '*' will be firstly and after the named ones as events are triggered in order.
-    Util.sortBeforeEvents(this.srv);
+    util.sortBeforeEvents(this.srv);
   }
 
   private getHandlersBy(entityInstance: Constructable): HandlerBuilder | undefined {

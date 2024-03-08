@@ -7,7 +7,7 @@ export function _CodeListAspect<TBase extends new (...args: any[]) => object>(Ba
         name?: string | null;
         descr?: string | null;
       static actions: {
-    }
+      }
   };
 }
 export class CodeList extends _CodeListAspect(__.Entity) {}
@@ -19,7 +19,7 @@ export function _TextsAspectAspect<TBase extends new (...args: any[]) => object>
     */
         locale?: Locale;
       static actions: {
-    }
+      }
   };
 }
 export class TextsAspect extends _TextsAspectAspect(__.Entity) {}
@@ -35,7 +35,7 @@ export function _LanguageAspect<TBase extends new (...args: any[]) => object>(Ba
     */
         code?: Locale;
       static actions: {
-    }
+      }
   };
 }
 export class Language extends _CodeListAspect(_LanguageAspect(__.Entity)) {}
@@ -52,7 +52,7 @@ export function _CountryAspect<TBase extends new (...args: any[]) => object>(Bas
   return class Country extends Base {
         code?: string;
       static actions: {
-    }
+      }
   };
 }
 export class Country extends _CodeListAspect(_CountryAspect(__.Entity)) {}
@@ -71,10 +71,27 @@ export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Ba
         symbol?: string | null;
         minorUnit?: number | null;
       static actions: {
-    }
+      }
   };
 }
 export class Currency extends _CodeListAspect(_CurrencyAspect(__.Entity)) {}
 export class Currencies extends Array<Currency> {}
 Object.defineProperty(Currency, 'name', { value: 'sap.common.Currencies' })
 Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
+
+/**
+* Code list for time zones
+* 
+* See https://cap.cloud.sap/docs/cds/common#entity-timezones
+*/
+export function _TimezoneAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class Timezone extends Base {
+        code?: string;
+      static actions: {
+      }
+  };
+}
+export class Timezone extends _CodeListAspect(_TimezoneAspect(__.Entity)) {}
+export class Timezones extends Array<Timezone> {}
+Object.defineProperty(Timezone, 'name', { value: 'sap.common.Timezones' })
+Object.defineProperty(Timezones, 'name', { value: 'sap.common.Timezones' })
