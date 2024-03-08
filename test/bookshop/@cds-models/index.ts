@@ -4,6 +4,7 @@ import * as __ from './_';
 export type Language = __.Association.to<_sap_common.Language>;
 export type Currency = __.Association.to<_sap_common.Currency>;
 export type Country = __.Association.to<_sap_common.Country>;
+export type Timezone = __.Association.to<_sap_common.Timezone>;
 export type User = string;
 // enum
 export const Roles = {
@@ -25,7 +26,7 @@ export function _cuidAspect<TBase extends new (...args: any[]) => object>(Base: 
   return class cuid extends Base {
         ID?: string;
       static actions: {
-    }
+      }
   };
 }
 export class cuid extends _cuidAspect(__.Entity) {}
@@ -43,7 +44,7 @@ export function _managedAspect<TBase extends new (...args: any[]) => object>(Bas
     */
         modifiedBy?: User | null;
       static actions: {
-    }
+      }
   };
 }
 export class managed extends _managedAspect(__.Entity) {}
@@ -53,7 +54,7 @@ export function _temporalAspect<TBase extends new (...args: any[]) => object>(Ba
         validFrom?: string | null;
         validTo?: string | null;
       static actions: {
-    }
+      }
   };
 }
 export class temporal extends _temporalAspect(__.Entity) {}
@@ -62,7 +63,7 @@ export function _extensibleAspect<TBase extends new (...args: any[]) => object>(
   return class extensible extends Base {
         extensions__?: string | null;
       static actions: {
-    }
+      }
   };
 }
 export class extensible extends _extensibleAspect(__.Entity) {}
@@ -71,7 +72,7 @@ export function _HelloRequestAspect<TBase extends new (...args: any[]) => object
         greeterName?: string | null;
         toName?: string | null;
       static actions: {
-    }
+      }
   };
 }
 export class HelloRequest extends _HelloRequestAspect(__.Entity) {}
@@ -83,7 +84,7 @@ export function _HelloResponseAspect<TBase extends new (...args: any[]) => objec
   return class HelloResponse extends Base {
         greetingMessage?: string | null;
       static actions: {
-    }
+      }
   };
 }
 export class HelloResponse extends _HelloResponseAspect(__.Entity) {}
