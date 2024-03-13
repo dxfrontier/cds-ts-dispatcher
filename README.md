@@ -121,7 +121,7 @@ cds init
 
 ```bash
 npm install @dxfrontier/cds-ts-dispatcher @sap/cds express
-npm install --save-dev @types/node @cap-js/sqlite ts-node  typescript
+npm install --save-dev @types/node @cap-js/sqlite ts-node typescript
 ```
 
 4. Add a **tsconfig.json** :
@@ -376,9 +376,6 @@ For more info see official **[SAP CDS-Typer](https://cap.cloud.sap/docs/tools/cd
 
 The `CDSDispatcher` constructor allows you to create an instance for dispatching and managing entities.
 
-<!--
-`CDSDispatcher` class will initialize all **[Entity handlers](#entityhandler)** and all dependencies : [Services](#servicelogic), [Repositories](#repository), [UnboundActions](#unboundactions). -->
-
 `Parameters`
 
 - `entities (Array)`: An array of **[Entity handler](#entityhandler)(s)** (Constructable) that represent the entities in the CDS.
@@ -597,12 +594,14 @@ export class UnboundActionsHandler {
 }
 ```
 
-`Imported it in the CDSDispatcher`
+`Imported it` in the CDSDispatcher
 
 ```typescript
 import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
 
-module.exports = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
+export = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
+// or
+// use module.exports = new CDSDispatcher( ... )
 ```
 
 > [!NOTE]
@@ -730,7 +729,7 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 @EntityHandler(MyEntity)
 // OR @ServiceLogic()
 // OR @Repository()
-// OR @UnboundActions
+// OR @UnboundActions()
 export class CustomerHandler {
   // @Inject dependencies
   @Inject(SRV) private srv: Service;
