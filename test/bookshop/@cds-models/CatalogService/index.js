@@ -12,6 +12,10 @@ module.exports.Publisher = csn.Publishers
 module.exports.Publishers = csn.Publishers
 module.exports.BookOrder = csn.BookOrders
 module.exports.BookOrders = csn.BookOrders
+module.exports.BookRecommendation = csn.BookRecommendations
+module.exports.BookRecommendations = csn.BookRecommendations
+module.exports.BookFormat = csn.BookFormats
+module.exports.BookFormats = csn.BookFormats
 module.exports.BookEvent = csn.BookEvents
 module.exports.BookEvents = csn.BookEvents
 module.exports.BookStat = csn.BookStats
@@ -23,6 +27,7 @@ module.exports.Genres = csn.Genres
 // events
 module.exports.OrderedBook = 'CatalogService.OrderedBook'
 // actions
+module.exports.changeBookProperties = 'changeBookProperties'
 module.exports.submitOrder = 'submitOrder'
 module.exports.submitOrderFunction = 'submitOrderFunction'
 // enums

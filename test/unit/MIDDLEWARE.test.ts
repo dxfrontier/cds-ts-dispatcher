@@ -1,13 +1,16 @@
+import type { Constructable } from '@sap/cds/apis/internal/inference';
+
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, EntityHandler, Use } from '../../lib';
-import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
-import { type Constructable } from '@sap/cds/apis/internal/inference';
-import { type CRUD_EVENTS, HandlerType, TypedRequest } from '../../lib/util/types/types';
+import { MetadataDispatcher } from '../../lib/core/MetadataDispatcher';
+import { HandlerType } from '../../lib/types/enum';
 import { Book } from '../bookshop/@cds-models/CatalogService';
-import { MiddlewareEntity1 } from '../util/middleware/MiddlewareEntity1';
-import { MiddlewareEntity2 } from '../util/middleware/MiddlewareEntity2';
 import { MiddlewareMethodAfterRead1 } from '../util/middleware/MiddlewareAfterRead1';
 import { MiddlewareMethodAfterRead2 } from '../util/middleware/MiddlewareAfterRead2';
+import { MiddlewareEntity1 } from '../util/middleware/MiddlewareEntity1';
+import { MiddlewareEntity2 } from '../util/middleware/MiddlewareEntity2';
+
+import type { CRUD_EVENTS, TypedRequest } from '../../lib/types/types';
 
 @EntityHandler(Book)
 @Use(MiddlewareEntity1, MiddlewareEntity2)

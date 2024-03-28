@@ -32,7 +32,7 @@ class BookService {
 
   public async verifyStock(req: ActionRequest<typeof submitOrder>) {
     const { book, quantity } = req.data;
-    const bookFound = await this.bookRepository.findOne({ ID: book });
+    const bookFound = await this.bookRepository.findOne({ ID: book! });
 
     if (quantity != null) {
       if (quantity < 1) {

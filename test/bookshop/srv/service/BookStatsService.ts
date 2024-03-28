@@ -24,7 +24,7 @@ class BookStatsService {
     const statsID = req.params[0] as string;
 
     const bookStats = await this.bookStatsRepository.findOne({ ID: parseInt(statsID) });
-    const book = await this.bookRepository.findOne({ ID: bookStats!.book_ID });
+    const book = await this.bookRepository.findOne({ ID: bookStats!.book_ID! });
 
     return {
       book: book!.title,

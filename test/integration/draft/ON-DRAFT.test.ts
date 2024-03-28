@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { Request } from '../../../lib/util/types/types';
+import { Request } from '../../../lib/types/types';
 import { EntityHandler, OnCancelDraft, OnEditDraft, OnNewDraft, OnSaveDraft } from '../../../lib';
-import { MetadataDispatcher } from '../../../lib/util/helpers/MetadataDispatcher';
+import { MetadataDispatcher } from '../../../lib/core/MetadataDispatcher';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { Book } from '../../bookshop/@cds-models/CatalogService';
 

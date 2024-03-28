@@ -18,22 +18,28 @@ namespace sap.capire.bookshop;
 // **************************************************************************************************
 
 entity Books : managed {
-  key ID       : Integer;
-      title    : localized String(111)  @mandatory;
-      descr    : localized String(1111);
-      stock    : Integer;
-      price    : Decimal;
-      currency : Currency;
-      image    : LargeBinary            @Core.MediaType: 'image/png';
+  key ID                  : Integer;
+      title               : localized String(111)  @mandatory;
+      descr               : localized String(1111);
+      stock               : Integer;
+      price               : Decimal;
+      currency            : Currency;
+      image               : LargeBinary            @Core.MediaType: 'image/png';
       // Associations
-      author   : Association to Authors @mandatory;
-      genre    : Association to Genres;
+      author              : Association to Authors @mandatory;
+      genre               : Association to Genres;
 
-      reviews  : Association to many Reviews
-                   on reviews.book = $self;
+      reviews             : Association to many Reviews
+                              on reviews.book = $self;
 
-      stats    : Association to one BookStats
-                   on stats.book = $self;
+      stats               : Association to one BookStats
+                              on stats.book = $self;
+
+      bookFormats         : Association to many BookFormats
+                              on bookFormats.book = $self;
+
+      bookRecomanddations : Association to many BookRecommendations
+                              on bookRecomanddations.book = $self;
 
 }
 
@@ -116,9 +122,6 @@ entity Promotions {
       startDate   : Date        @mandatory;
       endDate     : Date        @mandatory;
       discount    : Decimal     @mandatory;
-      // Add more fields as needed
-
-      // Associations
       books       : Association to many Books;
 }
 
@@ -131,4 +134,29 @@ entity BookOrders : managed {
 
       customer    : Association to Users @mandatory; // Assuming each order is associated with a customer.
 }
-// **************************************************************************************************
+
+entity BookRecommendations : managed {
+  key ID          : Integer;
+      rating      : Integer
+      @assert.range: [
+        1,
+        5
+      ];
+      comment     : String(500);
+      description : String(500);
+      // Associations
+      book        : Association to Books;
+      recommended : Association to Books;
+}
+
+entity BookFormats : managed {
+  key ID              : Integer;
+      format          : String(50) @mandatory;
+      price           : Decimal    @mandatory;
+      pages           : Integer    @mandatory;
+      language        : String(50);
+      publicationDate : Date;
+      // Associations
+      book            : Association to Books;
+}
+// ********************************************************************cds******************************

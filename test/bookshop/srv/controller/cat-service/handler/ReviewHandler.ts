@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
   BeforeCreate,
   BeforeDelete,
@@ -7,10 +6,10 @@ import {
   EntityHandler,
   Inject,
   Request,
-  SRV,
   Service,
   SingleInstanceCapable,
-  type TypedRequest,
+  SRV,
+  TypedRequest,
 } from '../../../../../../lib';
 import { Review } from '../../../../@cds-models/CatalogService';
 import ReviewService from '../../../service/ReviewService';

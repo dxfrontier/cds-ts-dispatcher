@@ -1,7 +1,7 @@
 import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { EntityHandler, SingleInstanceCapable } from '../../lib';
 import { Request } from '../../lib/index';
-import Constants from '../../lib/util/constants/Constants';
+import constants from '../../lib/constants/constants';
 import { Book } from '../bookshop/@cds-models/CatalogService';
 
 function createCustomerInstance(): Constructable {
@@ -22,7 +22,7 @@ describe('SINGLE-INSTANCE', () => {
       };
 
       const isSingleInstance: boolean = Reflect.getMetadata(
-        Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY,
+        constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY,
         newCustomer(createCustomerInstance()),
         'doSomething',
       );

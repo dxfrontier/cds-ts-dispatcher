@@ -23,6 +23,10 @@ module.exports.Promotion = csn.Promotions
 module.exports.Promotions = csn.Promotions
 module.exports.BookOrder = csn.BookOrders
 module.exports.BookOrders = csn.BookOrders
+module.exports.BookRecommendation = csn.BookRecommendations
+module.exports.BookRecommendations = csn.BookRecommendations
+module.exports.BookFormat = csn.BookFormats
+module.exports.BookFormats = csn.BookFormats
 // events
 // actions
 // enums

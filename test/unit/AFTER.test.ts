@@ -1,9 +1,11 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import type { Constructable } from '@sap/cds/apis/internal/inference';
+
 import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, EntityHandler } from '../../lib';
-import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
-import { type Constructable } from '@sap/cds/apis/internal/inference';
-import { type CRUD_EVENTS, HandlerType, TypedRequest } from '../../lib/util/types/types';
+import { MetadataDispatcher } from '../../lib/core/MetadataDispatcher';
+import { HandlerType } from '../../lib/types/enum';
 import { Book } from '../bookshop/@cds-models/CatalogService';
+
+import type { CRUD_EVENTS, TypedRequest } from '../../lib/types/types';
 
 @EntityHandler(Book)
 class BookHandler {

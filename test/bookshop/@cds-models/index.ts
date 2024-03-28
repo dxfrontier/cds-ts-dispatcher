@@ -76,9 +76,7 @@ export function _HelloRequestAspect<TBase extends new (...args: any[]) => object
   };
 }
 export class HelloRequest extends _HelloRequestAspect(__.Entity) {}
-export class HelloRequest_ extends Array<HelloRequest> {}
 Object.defineProperty(HelloRequest, 'name', { value: 'HelloRequest' })
-Object.defineProperty(HelloRequest_, 'name', { value: 'HelloRequest' })
 
 export function _HelloResponseAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class HelloResponse extends Base {
@@ -88,6 +86,4 @@ export function _HelloResponseAspect<TBase extends new (...args: any[]) => objec
   };
 }
 export class HelloResponse extends _HelloResponseAspect(__.Entity) {}
-export class HelloResponse_ extends Array<HelloResponse> {}
 Object.defineProperty(HelloResponse, 'name', { value: 'HelloResponse' })
-Object.defineProperty(HelloResponse_, 'name', { value: 'HelloResponse' })
