@@ -1,22 +1,106 @@
+/* eslint-disable array-callback-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import 'reflect-metadata';
-import {
-  HandlerType,
-  type ReturnRequest,
-  type ReturnRequestAndNext,
-  type ReturnResultsAndRequest,
-  type CRUD_EVENTS,
-  type DRAFT_EVENTS,
-  type CdsFunction,
-  type CdsEvent,
-  type ReturnErrorRequest,
-  type MiddlewareImpl,
-  type RequestType,
-  type Request,
-} from '../util/types/types';
-import { MetadataDispatcher } from '../util/helpers/MetadataDispatcher';
-import Constants from '../util/constants/Constants';
+
+import constants from '../constants/constants';
+import { MetadataDispatcher } from '../core/MetadataDispatcher';
+import { HandlerType } from '../types/enum';
+import formatterUtil from '../util/helpers/formatterUtil';
+import middlewareUtil from '../util/helpers/middlewareUtil';
+import validatorUtil from '../util/helpers/validatorUtil';
+import util from '../util/util';
+
+import type {
+  CdsEvent,
+  CdsFunction,
+  CRUD_EVENTS,
+  DRAFT_EVENTS,
+  MiddlewareImpl,
+  RequestType,
+  ReturnErrorRequest,
+  ReturnRequest,
+  ReturnRequestAndNext,
+  ReturnResultsAndRequest,
+} from '../types/types';
+
 import type { Constructable } from '@sap/cds/apis/internal/inference';
-import Util from '../util/helpers/Util';
+import type { Validators } from '../types/validator';
+import type { Formatters } from '../types/formatter';
+// TODO: add @see link to formatter after is up to github
+
+/**
+ * Use `FieldsFormatter` decorator to `enhance / format` the fields.
+ *
+ * @param formatter The formatter method to apply.
+ * @param fields An array of fields to apply the formatter method on.
+ * @example
+ * // Enhance the 'title' field of Book entity by removing the letter 'W' using the 'blacklist' action.
+ * "@FieldsFormatter<Book>({ action: 'blacklist', charsToRemove: 'W' }, 'title')"
+ */
+function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: Array<keyof T>) {
+  return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+    const originalMethod = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      const results = formatterUtil.getResults<T>(args);
+      const req = util.findRequest(args);
+
+      const isAfterEventManyResults = util.lodash.isArray(results);
+      const isAfterEventOneResult = !util.lodash.isUndefined(results) && !isAfterEventManyResults;
+      const isCustomFormatter = formatter.action === 'customFormatter';
+
+      for (const field of fields) {
+        // All 3 if's are applied on 'Results' (AFTER events)
+        if (isCustomFormatter) {
+          await formatterUtil.handleCustomFormatter(req, formatter, results);
+          break;
+        }
+
+        if (isAfterEventManyResults) {
+          formatterUtil.handleManyItems<T>(formatter, results, field);
+          break;
+        }
+
+        if (isAfterEventOneResult) {
+          formatterUtil.handleOneItem<T>(formatter, results, field);
+          break;
+        }
+
+        // Applied only for 'Request' (ON, BEFORE events)
+        formatterUtil.handleOneItemOfRequest<T>(req, formatter, field);
+      }
+
+      return await originalMethod.apply(this, args);
+    };
+  };
+}
+
+/**
+ * Use `Validate` decorator to validate fields.
+ *
+ * @param validator The validation method to apply.
+ * @param fields An array of fields to validate.
+ * @example
+ * // Validates the 'comment' field of 'MyEntity' entity using the 'contains' validator with the seed 'text'.
+ * "@Validate<MyEntity>({ validator: 'contains', seed: 'text' }, 'comment')"
+ * // If 'comment' contains 'text', the validation will not raise an error message.
+ */
+
+function Validate<T>(validator: Validators, ...fields: Array<keyof T>) {
+  return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+    const originalMethod = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      const req = util.findRequest(args);
+
+      for (const field of fields) {
+        validatorUtil.applyValidator(req, validator, field as string);
+      }
+
+      return await originalMethod.apply(this, args);
+    };
+  };
+}
 
 /**
  * A decorator function that designates a method as an execution with a single instance constraint.
@@ -28,59 +112,15 @@ import Util from '../util/helpers/Util';
  */
 
 function SingleInstanceCapable<Target extends Object>() {
-  // TODO: find a way to add TypedPropertyDescriptor
+  // ? TODO: find a way to add TypedPropertyDescriptor
   return function (target: Target, propertyKey: string | symbol, _: PropertyDescriptor) {
-    const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY);
+    const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.SINGLE_INSTANCE_FLAG_KEY);
     metadataDispatcher.setMethodAsSingleInstanceCapable(propertyKey);
   };
 }
 
 // Middleware
 // ****************************************************************************************
-function registerMiddlewareToMethod<Middleware extends Constructable<MiddlewareImpl>>(
-  middlewares: Middleware[],
-  descriptor: TypedPropertyDescriptor<RequestType>,
-): TypedPropertyDescriptor<RequestType> {
-  const originalMethod = descriptor.value;
-
-  descriptor.value = async function (...args: any[]) {
-    const executeMiddlewareChain = async (req: Request, index: number = 0): Promise<void> => {
-      // stop the chain if req.reject was used
-      if (Util.isRejectUsed(req)) {
-        return;
-      }
-
-      if (index < middlewares.length) {
-        const CurrentMiddleware = middlewares[index];
-        const currentMiddlewareInstance = new CurrentMiddleware();
-
-        const next = async (): Promise<void> => {
-          await executeMiddlewareChain(req, index + 1);
-        };
-
-        await currentMiddlewareInstance.use(req, next);
-      }
-    };
-
-    const req = args.find(Util.isRequestType);
-
-    if (req) {
-      await executeMiddlewareChain(req as Request);
-    }
-
-    await originalMethod!.apply(this, args);
-  };
-
-  return descriptor;
-}
-
-function registerMiddlewareToClass<Middleware extends Constructable<MiddlewareImpl>, Target extends object>(
-  target: Target,
-  middlewareClasses: Middleware[],
-): void {
-  const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.MIDDLEWARE_KEY);
-  metadataDispatcher.setMiddlewares(middlewareClasses);
-}
 
 /**
  * Decorator function that associates a method or class with specified middleware classes.
@@ -96,12 +136,12 @@ function Use<Middleware extends Constructable<MiddlewareImpl>>(...MiddlewareClas
 
     if (isMethod) {
       // Method-level usage
-      registerMiddlewareToMethod(MiddlewareClasses, descriptor);
+      middlewareUtil.registerToMethod(MiddlewareClasses, descriptor);
       return;
     }
 
     // Class-level usage
-    registerMiddlewareToClass(target, MiddlewareClasses);
+    middlewareUtil.registerToClass(target, MiddlewareClasses);
   };
 }
 
@@ -125,7 +165,7 @@ function buildAfter(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: H
       const { event, handlerType, isDraft } = options;
       const isSingleInstance = MetadataDispatcher.getSingleInstanceCapableFlag(target, propertyKey);
 
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
         event,
@@ -155,7 +195,7 @@ function buildBefore(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType: 
       const { event, handlerType, isDraft } = options;
       const isSingleInstance = MetadataDispatcher.getSingleInstanceCapableFlag(target, propertyKey);
 
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
         event,
@@ -182,7 +222,7 @@ function buildOnAction(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType
       _: string | symbol,
       descriptor: TypedPropertyDescriptor<ReturnRequestAndNext>,
     ): void {
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
       const { event, handlerType, isDraft } = options;
 
       metadataDispatcher.addMethodMetadata({
@@ -206,7 +246,7 @@ function buildOnAction(options: { event: CRUD_EVENTS | DRAFT_EVENTS; handlerType
 function buildOnEvent(options: { event: CRUD_EVENTS; handlerType: HandlerType; isDraft: boolean }) {
   return function <Target extends Object>(name: CdsEvent) {
     return function (target: Target, _: string | symbol, descriptor: TypedPropertyDescriptor<ReturnRequest>): void {
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
       const { event, handlerType, isDraft } = options;
 
       metadataDispatcher.addMethodMetadata({
@@ -234,7 +274,7 @@ function buildOnError(options: { event: CRUD_EVENTS; handlerType: HandlerType; i
       _: string | symbol,
       descriptor: TypedPropertyDescriptor<ReturnErrorRequest>,
     ): void {
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
       const { event, handlerType, isDraft } = options;
 
       metadataDispatcher.addMethodMetadata({
@@ -268,7 +308,7 @@ function buildOnCRUD<Target extends Object>(options: {
       const { event, handlerType, isDraft } = options;
       const isSingleInstance = MetadataDispatcher.getSingleInstanceCapableFlag(target, propertyKey);
 
-      const metadataDispatcher = new MetadataDispatcher(target, Constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
         event,
@@ -632,8 +672,11 @@ const AfterEditDraft = buildAfter({ event: 'EDIT', handlerType: HandlerType.Afte
 const AfterSaveDraft = buildAfter({ event: 'SAVE', handlerType: HandlerType.After, isDraft: false });
 
 export {
+  // Standalone events
   Use,
   SingleInstanceCapable,
+  Validate,
+  FieldsFormatter,
   // ========================================================================================================================================================
   // BEFORE events - Active entity
   BeforeCreate,
