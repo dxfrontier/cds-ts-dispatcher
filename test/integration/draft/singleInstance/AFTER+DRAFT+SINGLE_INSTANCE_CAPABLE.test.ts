@@ -9,9 +9,9 @@ import {
   AfterUpdateDraft,
   EntityHandler,
 } from '../../../../lib';
-import { MetadataDispatcher } from '../../../../lib/util/helpers/MetadataDispatcher';
+import { MetadataDispatcher } from '../../../../lib/core/MetadataDispatcher';
 import { type Constructable } from '@sap/cds/apis/internal/inference';
-import { Request } from '../../../../lib/util/types/types';
+import { Request } from '../../../../lib/types/types';
 import { Book } from '../../../bookshop/@cds-models/CatalogService';
 
 @EntityHandler(Book)

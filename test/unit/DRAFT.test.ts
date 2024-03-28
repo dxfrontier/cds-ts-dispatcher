@@ -1,29 +1,25 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { EntityHandler, Request } from '../../lib/index';
+import type { Constructable } from '@sap/cds/apis/internal/inference';
+
 import {
+  AfterCancelDraft,
+  AfterEditDraft,
+  AfterNewDraft,
+  AfterSaveDraft,
+  BeforeCancelDraft,
+  BeforeEditDraft,
+  BeforeNewDraft,
+  BeforeSaveDraft,
   OnCancelDraft,
   OnEditDraft,
   OnNewDraft,
   OnSaveDraft,
-  BeforeSaveDraft,
-  BeforeNewDraft,
-  BeforeCancelDraft,
-  BeforeEditDraft,
-  AfterNewDraft,
-  AfterSaveDraft,
-  AfterEditDraft,
-  AfterCancelDraft,
 } from '../../lib';
-import { MetadataDispatcher } from '../../lib/util/helpers/MetadataDispatcher';
-import { type Constructable } from '@sap/cds/apis/internal/inference';
-import {
-  type CRUD_EVENTS,
-  type DRAFT_EVENTS,
-  type Handler,
-  HandlerType,
-  TypedRequest,
-} from '../../lib/util/types/types';
+import { MetadataDispatcher } from '../../lib/core/MetadataDispatcher';
+import { EntityHandler } from '../../lib/index';
+import { HandlerType } from '../../lib/types/enum';
 import { BookEvent } from '../bookshop/@cds-models/CatalogService';
+
+import type { CRUD_EVENTS, DRAFT_EVENTS, Handler, TypedRequest, Request } from '../../lib/types/types';
 
 @EntityHandler(BookEvent)
 class BookEventsHandler {

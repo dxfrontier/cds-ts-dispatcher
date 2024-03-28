@@ -1,6 +1,6 @@
 {
   "name": "@dxfrontier/cds-ts-dispatcher",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement TS handlers provided by the SAP CAP framework.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -25,7 +25,7 @@
     "test:unit": "npm run build:entities:test --prefix ./test/bookshop && jest",
     "test:live-server:e2e-tests": "start-server-and-test start:bookshop http://localhost:4004 tests:e2e",
     "test:all": "run-s test:unit test:live-server:e2e-tests",
-    "prepare": "husky install",
+    "prepare": "husky",
     "build:message": "echo 'Build started...'",
     "build:clean": "echo 'Clean dist folder' && npx rimraf ./dist/{*.js,*.map,*.ts,*.mts,*.mjs}",
     "build:ts": "tsup",
@@ -62,16 +62,23 @@
   },
   "homepage": "https://github.com/dxfrontier/cds-ts-dispatcher#readme",
   "dependencies": {
-    "@sap/cds": "^7.7.1",
+    "@sap/cds": "^7.8.0",
+    "http-status-codes": "^2.3.0",
     "inversify": "^6.0.2",
-    "reflect-metadata": "^0.2.1"
+    "lodash": "^4.17.21",
+    "reflect-metadata": "^0.2.1",
+    "string-placeholder": "^1.0.2",
+    "validator": "^13.11.0"
   },
   "devDependencies": {
-    "@cap-js/cds-typer": "0.17.0",
-    "@cap-js/sqlite": "^1.5.1",
-    "@dxfrontier/cds-ts-repository": "^1.0.8",
-    "@swc/core": "^1.4.6",
+    "@cap-js/cds-typer": "0.18.2",
+    "@cap-js/sqlite": "^1.6.0",
+    "@dxfrontier/cds-ts-repository": "^1.0.12",
+    "@swc/core": "^1.4.11",
     "@types/jest": "^29.5.12",
+    "@types/lodash": "^4.17.0",
+    "@types/string-placeholder": "^1.0.3",
+    "@types/validator": "^13.11.9",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.57.0",
@@ -83,13 +90,13 @@
     "husky": "^9.0.11",
     "jest": "^29.7.0",
     "lint-staged": "^15.2.2",
-    "newman": "^6.1.1",
+    "newman": "^6.1.2",
     "npm-run-all": "^4.1.5",
     "prettier": "3.2.5",
     "start-server-and-test": "^2.0.3",
     "ts-jest": "^29.1.2",
     "tsup": "^8.0.2",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.3"
   },
   "lint-staged": {
     "**/*.{ts, tsx}": [

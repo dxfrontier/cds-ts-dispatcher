@@ -1,32 +1,40 @@
-using {sap.capire.bookshop as my} from '../../../db/schema';
+using {sap.capire.bookshop as Base} from '../../../db/schema';
 
 service CatalogService {
 
-  entity Books      as projection on my.Books;
-  entity Authors    as projection on my.Authors
-  entity Reviews    as projection on my.Reviews;
-  entity Publishers as projection on my.Publishers;
-  entity BookOrders as projection on my.BookOrders;
+  entity Books               as projection on Base.Books;
+  entity Authors             as projection on Base.Authors
+  entity Reviews             as projection on Base.Reviews;
+  entity Publishers          as projection on Base.Publishers;
+  entity BookOrders          as projection on Base.BookOrders;
+  entity BookRecommendations as projection on Base.BookRecommendations;
+  entity BookFormats         as projection on Base.BookFormats;
 
   @odata.draft.enabled: true
-  entity BookEvents as projection on my.BookEvents;
+  entity BookEvents          as projection on Base.BookEvents;
 
-  entity BookStats  as projection on my.BookStats actions { // Bound action / function
-                         action   GenerateReport(ID : Books:ID) returns {
-                           book : Books:title;
-                           stats : BookStats:views;
-                           rating : BookStats:averageRating
-                         };
-                         function NotifyAuthor(ID : Authors:ID) returns Boolean;
-                       };
+  entity BookStats           as projection on Base.BookStats actions { // Bound action / function
+                                  action   GenerateReport(ID : Books:ID) returns {
+                                    book : Books:title;
+                                    stats : BookStats:views;
+                                    rating : BookStats:averageRating
+                                  };
+                                  function NotifyAuthor(ID : Authors:ID) returns Boolean;
+                                };
 
   // Unbound action
-  action   submitOrder(book : Books:ID, quantity : Integer)         returns {
+  action   changeBookProperties(format : BookFormats:format, language : BookFormats:language) returns {
+    language : String;
+    format : BookFormats:format
+  };
+
+  // Unbound action
+  action   submitOrder(book : Books:ID, quantity : Integer)                                   returns {
     stock : Integer
   };
 
   // Unbound function
-  function submitOrderFunction(book : Books:ID, quantity : Integer) returns {
+  function submitOrderFunction(book : Books:ID, quantity : Integer)                           returns {
     stock : Integer
   };
 

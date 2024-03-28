@@ -1,5 +1,5 @@
 import { TypedRequest } from '@sap/cds';
-import { MiddlewareImpl, Next } from '../../../../lib/util/types/types';
+import { MiddlewareImpl, Next } from '../../../../lib/types/types';
 import { Book } from '#cds-models/CatalogService';
 
 export class MiddlewareEntity2 implements MiddlewareImpl {

@@ -3,15 +3,15 @@ import {
   AfterDelete,
   AfterRead,
   AfterUpdate,
+  BeforeRead,
   EntityHandler,
   Inject,
   Request,
-  SRV,
   Service,
   SingleInstanceCapable,
+  SRV,
+  TypedRequest,
   Use,
-  type TypedRequest,
-  BeforeRead,
 } from '../../../../../../lib';
 import { Book } from '../../../../@cds-models/CatalogService';
 import { MiddlewareMethodAfterRead1 } from '../../../middleware/MiddlewareAfterRead1';
@@ -34,14 +34,16 @@ class BookHandler {
 
   @BeforeRead()
   @Use(MiddlewareMethodBeforeRead)
-  private async bla(req: Request) {
+  private async beforeReadEvent(req: TypedRequest<Book>) {
     console.log('****************** Before read event');
   }
 
   @AfterRead()
+  // req.user.is('CERTAIN_ROLE')
+  // @ScopedUserLogic(handleClass)
   @SingleInstanceCapable()
   @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2)
-  private async addDiscount(results: Book[], req: Request, isSingleInstance: boolean) {
+  private async addDiscount(results: Book[], req: Request, isSingleInstance?: boolean) {
     await this.srv.emit('OrderedBook', { book: 'dada', quantity: 3, buyer: req.user.id });
 
     if (isSingleInstance) {

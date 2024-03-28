@@ -31,7 +31,8 @@
 													"    pm.response.to.have.status(400);",
 													"});"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -83,7 +84,8 @@
 													"    pm.response.to.have.status(200);",
 													"});"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -163,7 +165,8 @@
 													"    pm.response.to.have.status(200);",
 													"});"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -264,7 +267,8 @@
 													"    pm.response.to.have.status(400);",
 													"});"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -273,7 +277,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"ID\": 23,\n    \"reviewer_ID\": 1,\n    \"book_ID\": 203,\n    \"rating\": 2,\n    \"comment\": \"This...\"\n}",
+											"raw": "{\n    \"ID\": 23,\n    \"reviewer_ID\": 1,\n    \"book_ID\": 203,\n    \"rating\": 2,\n    \"comment\": \"Message must be larger than 10\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -377,7 +381,7 @@
 							"name": "@BeforeUpdate",
 							"item": [
 								{
-									"name": "Update property \"comment\" with the value \"No ...\"",
+									"name": "Update property \"comment\" with a new value",
 									"event": [
 										{
 											"listen": "test",
@@ -392,7 +396,8 @@
 													"    pm.response.to.have.status(400);",
 													"});"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -401,7 +406,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"comment\": \"No...\"\n}",
+											"raw": "{\n    \"comment\": \"Must be largen than 10 chars\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -553,13 +558,26 @@
 													"    pm.response.to.have.status(200);",
 													"});"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
 									"request": {
 										"method": "GET",
 										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
 										"url": {
 											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
 											"host": [
@@ -712,38 +730,41 @@
 							"name": "@OnAction",
 							"item": [
 								{
-									"name": "Entity set : Validate title to contain 10 % discount Copy",
+									"name": "Execute submit order",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Enity set : Title contains \\\"10 % discount!\\\"\", function () {",
-													"    const response = pm.response.json();",
-													"    response.value.forEach((item) => {",
-													"        pm.expect(item.title).to.include(\"10 % discount!\")",
-													"    })",
-													"});",
-													"",
 													"pm.test(\"Status code is 200\", function () {",
 													"    pm.response.to.have.status(200);",
 													"});"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
 									"request": {
-										"method": "GET",
+										"method": "POST",
 										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"book\": 1,\n    \"quantity\" : 3\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
 										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+											"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"{{catalogService}}",
-												"{{booksEntity}}"
+												"submitOrder"
 											]
 										}
 									},
@@ -1846,86 +1867,829 @@
 					"name": "Others",
 					"item": [
 						{
-							"name": "@SingleInstanceCapable - Single instance",
-							"event": [
+							"name": "@FieldsFormatter",
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Headers contains text 'Single instance'\", function () {",
-											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"",
-											"    headers.forEach((header) => {",
-											"        if(header.message === 'Single instance') {",
-											"            pm.expect(header.message).to.contains('Single instance')",
-											"        }",
-											"    })",
-											"});",
-											"",
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=252)",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"{{catalogService}}",
-										"{{booksEntity}}(ID=252)"
+									"name": "After",
+									"item": [
+										{
+											"name": "@AfterRead",
+											"item": [
+												{
+													"name": "Format fields with 'customFormatter'",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 200\", function () {",
+																	"    pm.response.to.have.status(200);",
+																	"});",
+																	"",
+																	"pm.test(\"Some items from 'response' should be 'toLowerCase' - 'customFormatter'\", function () {",
+																	"    const response = pm.response.json();",
+																	"",
+																	"    response.value.forEach((item) => {",
+																	"        // Check only some of them",
+																	"        if(item.format === item.format.toLowerCase()) {",
+																	"            pm.expect(item.format).to.eql(item.format.toLowerCase());",
+																	"        }",
+																	"    })",
+																	"});"
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookFormatsEntity}}",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookFormatsEntity}}"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "Format fields with results",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 200\", function () {",
+																	"    pm.response.to.have.status(200);",
+																	"});",
+																	"",
+																	"pm.test(\"Some items from 'response' should be 'toUpperCase'\", function () {",
+																	"    const response = pm.response.json();",
+																	"",
+																	"    response.value.forEach((item) => {",
+																	"        // Check only some of them",
+																	"        if(item.format === item.format.toUpperCase()) {",
+																	"            pm.expect(item.format).to.eql(item.format.toUpperCase());",
+																	"        }",
+																	"    })",
+																	"});"
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookFormatsEntity}}",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookFormatsEntity}}"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										}
+									]
+								},
+								{
+									"name": "Before",
+									"item": [
+										{
+											"name": "@BeforeCreate",
+											"item": [
+												{
+													"name": "Blacklist letters 'le' from POST body 'format' field",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 201\", function () {",
+																	"    pm.response.to.have.status(201);",
+																	"});",
+																	"",
+																	"pm.test(\"Response should contain property 'format' with value 'epub'\", function () {",
+																	"    const response = pm.response.json();",
+																	"    pm.expect(response.format).to.eql('epub');",
+																	"});",
+																	""
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"ID\": 5,\n    \"format\": \"EPUBle\",\n    \"price\": 30,\n    \"pages\": 450,\n    \"language\": \"BE\",\n    \"publicationDate\": \"2023-01-01\",\n    \"book_ID\": 252\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookFormatsEntity}}",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookFormatsEntity}}"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										},
+										{
+											"name": "@BeforeUpdate",
+											"item": [
+												{
+													"name": "Truncate body field 'format' after length 7, the result will be 'epub...'",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 200\", function () {",
+																	"    pm.response.to.have.status(200);",
+																	"});",
+																	"",
+																	"pm.test(\"Response should contain property 'format' with value 'epub'\", function () {",
+																	"    const response = pm.response.json();",
+																	"    pm.expect(response.format).to.eql('epub...');",
+																	"});",
+																	""
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "PATCH",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"format\": \"EPUBleeeeeeee\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookFormatsEntity}}(ID=2)",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookFormatsEntity}}(ID=2)"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										}
+									]
+								},
+								{
+									"name": "On",
+									"item": [
+										{
+											"name": "@OnUpdate",
+											"item": [
+												{
+													"name": "Format field 'format'  with 'trim' method when update an item",
+													"request": {
+														"method": "PATCH",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"format\": \"    MOBI\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookFormatsEntity}}(ID=3)",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookFormatsEntity}}(ID=3)"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										},
+										{
+											"name": "@OnCreate",
+											"item": [
+												{
+													"name": "Format field 'language' using 'ltrim' method when a new item is created",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 201\", function () {",
+																	"    pm.response.to.have.status(201);",
+																	"});",
+																	"",
+																	"pm.test(\"Response should contain property 'language' trimmed of whitespaces\", function () {",
+																	"    const response = pm.response.json();",
+																	"    pm.expect(response.language).to.eql(response.language.toUpperCase());",
+																	"",
+																	"});",
+																	""
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"ID\": 4,\n    \"format\": \"PDF\",\n    \"price\": 50,\n    \"pages\": 250,\n    \"language\": \"    NL\",\n    \"publicationDate\": \"2024-01-01\",\n    \"book_ID\": 252\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookFormatsEntity}}",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookFormatsEntity}}"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										},
+										{
+											"name": "@OnAction",
+											"item": [
+												{
+													"name": "Format field 'language' toLowerCase', 'ltrim'",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 200\", function () {",
+																	"    pm.response.to.have.status(200);",
+																	"});",
+																	"",
+																	"pm.test(\"Response should contain property 'language' with 'lowerCase'\", function () {",
+																	"    const response = pm.response.json();",
+																	"    pm.expect(response.language).to.eql(response.language.toLowerCase());",
+																	"});",
+																	""
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"language\": \"    GR\",\n    \"format\": \"PDF\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/changeBookProperties",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"changeBookProperties"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										}
 									]
 								}
-							},
-							"response": []
+							],
+							"description": "@_**FieldsFormatter**_ will be tested for all events `After`,`Before`, `On`"
 						},
 						{
-							"name": "@SingleInstanceCapable - Entity set",
-							"event": [
+							"name": "@Validate",
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Headers contains text 'Entity set'\", function () {",
-											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"",
-											"    headers.forEach((header) => {",
-											"        if(header.message === 'Entity set') {",
-											"            pm.expect(header.message).to.contains('Entity set')",
-											"        }",
-											"    })",
-											"});",
-											"",
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"{{catalogService}}",
-										"{{booksEntity}}"
+									"name": "After",
+									"item": []
+								},
+								{
+									"name": "Before",
+									"item": [
+										{
+											"name": "@BeforeCreate",
+											"item": [
+												{
+													"name": "Validate fields - comment - isLowercase",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 201\", function () {",
+																	"    pm.response.to.have.status(201);",
+																	"});"
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"ID\": 5,\n    \"book_ID\": 201,\n    \"recommended_ID\": 203,\n    \"rating\": 5,\n    \"comment\": \"yeeepp greattt !\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookRecommendationsEntity}}",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookRecommendationsEntity}}"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "Validate fields - comment - does not meet the isLowercase constraints",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 400\", function () {",
+																	"    pm.response.to.have.status(400);",
+																	"});"
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"ID\": 5,\n    \"book_ID\": 201,\n    \"recommended_ID\": 203,\n    \"rating\": 5,\n    \"comment\": \"YEEEEEEE greattt !\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookRecommendationsEntity}}",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookRecommendationsEntity}}"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "Validate fields with 'comment' field not in the body request",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 201\", function () {",
+																	"    pm.response.to.have.status(201);",
+																	"});",
+																	"",
+																	"pm.test(\"Response should contain property 'comment' with value 'null'\", function () {",
+																	"    const response = pm.response.json();",
+																	"    pm.expect(response.comment).to.be.null",
+																	"});",
+																	""
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"ID\": 6,\n    \"book_ID\": 207,\n    \"recommended_ID\": 203,\n    \"rating\": 2\n    // \"comment\": \"BLEAH\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookRecommendationsEntity}}",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookRecommendationsEntity}}"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "Validate fields with 'description field in the body for endsWith letter 'N'",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 201\", function () {",
+																	"    pm.response.to.have.status(201);",
+																	"});"
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"ID\": 7,\n    \"book_ID\": 207,\n    \"recommended_ID\": 203,\n    \"rating\": 2,\n    \"comment\": \"bleah\",\n    \"description\": \"This will check if the description endsWith letter 'N' : HAVE A DESCRIPTION\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookRecommendationsEntity}}",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookRecommendationsEntity}}"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										},
+										{
+											"name": "@BeforeUpdate",
+											"item": [
+												{
+													"name": "Validate fields - comment - startsWith 'COMMENT:'",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 200\", function () {",
+																	"    pm.response.to.have.status(200);",
+																	"});"
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "PATCH",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"comment\": \"COMMENT: this a test for the startsWith method\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookRecommendationsEntity}}(ID=2)",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookRecommendationsEntity}}(ID=2)"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										}
+									]
+								},
+								{
+									"name": "On",
+									"item": [
+										{
+											"name": "@OnCreate",
+											"item": [
+												{
+													"name": "Validate fields - book_ID - isAlphanumeric 'book_ID'",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 201\", function () {",
+																	"    pm.response.to.have.status(201);",
+																	"});"
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"ID\": 8,\n    \"book_ID\": 201,\n    \"recommended_ID\": 203,\n    \"rating\": 5,\n    \"comment\": \"yeeepp greattt !\",\n    \"description\": \"This will check if the description endsWith letter 'N' : HAVE A DESCRIPTION\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookRecommendationsEntity}}",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookRecommendationsEntity}}"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										},
+										{
+											"name": "@OnUpdate",
+											"item": [
+												{
+													"name": "Validate fields - comment - isLength to have the min : 5 chars",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 200\", function () {",
+																	"    pm.response.to.have.status(200);",
+																	"});"
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "PATCH",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"comment\": \"COMMENT: this a test for the isLength method\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/{{bookRecommendationsEntity}}(ID=2)",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"{{bookRecommendationsEntity}}(ID=2)"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										},
+										{
+											"name": "@OnAction",
+											"item": [
+												{
+													"name": "Format field 'language' toLowerCase', 'ltrim' Copy",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 200\", function () {",
+																	"    pm.response.to.have.status(200);",
+																	"});",
+																	"",
+																	"pm.test(\"Response should contain property 'language' with 'lowerCase'\", function () {",
+																	"    const response = pm.response.json();",
+																	"    pm.expect(response.format).to.eql('PDF');",
+																	"});",
+																	""
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"language\": \"    GR\",\n    \"format\": \"PDF\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{baseUrl}}/{{catalogService}}/changeBookProperties",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"{{catalogService}}",
+																"changeBookProperties"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										}
 									]
 								}
-							},
-							"response": []
+							],
+							"description": "_**@Validate**_ will be tested for all events `After`,`Before`, `On`"
+						},
+						{
+							"name": "@SingleInstanceCapable",
+							"item": [
+								{
+									"name": "@SingleInstanceCapable - Single instance",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Headers contains text 'Single instance'\", function () {",
+													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"",
+													"    headers.forEach((header) => {",
+													"        if(header.message === 'Single instance') {",
+													"            pm.expect(header.message).to.contains('Single instance')",
+													"        }",
+													"    })",
+													"});",
+													"",
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=252)",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{booksEntity}}(ID=252)"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "@SingleInstanceCapable - Entity set",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Headers contains text 'Entity set'\", function () {",
+													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"",
+													"    headers.forEach((header) => {",
+													"        if(header.message === 'Entity set') {",
+													"            pm.expect(header.message).to.contains('Entity set')",
+													"        }",
+													"    })",
+													"});",
+													"",
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{booksEntity}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
 						}
 					],
 					"description": "All other decorators which are not SAP standard."

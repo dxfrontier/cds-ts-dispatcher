@@ -24,13 +24,15 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
         reviews?: __.Association.to.many<Reviews>;
         stats?: __.Association.to<BookStat> | null;
         stats_ID?: number | null;
+        bookFormats?: __.Association.to.many<BookFormats>;
+        bookRecomanddations?: __.Association.to.many<BookRecommendations>;
       static actions: {
       }
   };
 }
 export class Book extends _._managedAspect(_BookAspect(__.Entity)) {}
-export class Books extends Array<Book> {}
 Object.defineProperty(Book, 'name', { value: 'sap.capire.bookshop.Books' })
+export class Books extends Array<Book> {}
 Object.defineProperty(Books, 'name', { value: 'sap.capire.bookshop.Books' })
 
 export function _PublisherAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -42,8 +44,8 @@ export function _PublisherAspect<TBase extends new (...args: any[]) => object>(B
   };
 }
 export class Publisher extends _._managedAspect(_PublisherAspect(__.Entity)) {}
-export class Publishers extends Array<Publisher> {}
 Object.defineProperty(Publisher, 'name', { value: 'sap.capire.bookshop.Publishers' })
+export class Publishers extends Array<Publisher> {}
 Object.defineProperty(Publishers, 'name', { value: 'sap.capire.bookshop.Publishers' })
 
 export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -58,8 +60,8 @@ export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Ba
   };
 }
 export class BookStat extends _._managedAspect(_BookStatAspect(__.Entity)) {}
-export class BookStats extends Array<BookStat> {}
 Object.defineProperty(BookStat, 'name', { value: 'sap.capire.bookshop.BookStats' })
+export class BookStats extends Array<BookStat> {}
 Object.defineProperty(BookStats, 'name', { value: 'sap.capire.bookshop.BookStats' })
 
 export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -76,8 +78,8 @@ export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base
   };
 }
 export class Author extends _._managedAspect(_AuthorAspect(__.Entity)) {}
-export class Authors extends Array<Author> {}
 Object.defineProperty(Author, 'name', { value: 'sap.capire.bookshop.Authors' })
+export class Authors extends Array<Author> {}
 Object.defineProperty(Authors, 'name', { value: 'sap.capire.bookshop.Authors' })
 
 export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -91,8 +93,8 @@ export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base:
   };
 }
 export class Genre extends _sap_common._CodeListAspect(_GenreAspect(__.Entity)) {}
-export class Genres extends Array<Genre> {}
 Object.defineProperty(Genre, 'name', { value: 'sap.capire.bookshop.Genres' })
+export class Genres extends Array<Genre> {}
 Object.defineProperty(Genres, 'name', { value: 'sap.capire.bookshop.Genres' })
 
 export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -109,8 +111,8 @@ export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base
   };
 }
 export class Review extends _._managedAspect(_ReviewAspect(__.Entity)) {}
-export class Reviews extends Array<Review> {}
 Object.defineProperty(Review, 'name', { value: 'sap.capire.bookshop.Reviews' })
+export class Reviews extends Array<Review> {}
 Object.defineProperty(Reviews, 'name', { value: 'sap.capire.bookshop.Reviews' })
 
 export function _BookEventAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -122,8 +124,8 @@ export function _BookEventAspect<TBase extends new (...args: any[]) => object>(B
   };
 }
 export class BookEvent extends _._managedAspect(_._cuidAspect(_BookEventAspect(__.Entity))) {static drafts: typeof BookEvent}
-export class BookEvents extends Array<BookEvent> {static drafts: typeof BookEvent}
 Object.defineProperty(BookEvent, 'name', { value: 'sap.capire.bookshop.BookEvents' })
+export class BookEvents extends Array<BookEvent> {static drafts: typeof BookEvent}
 Object.defineProperty(BookEvents, 'name', { value: 'sap.capire.bookshop.BookEvents' })
 
 export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -138,8 +140,8 @@ export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: 
   };
 }
 export class User extends _._managedAspect(_UserAspect(__.Entity)) {}
-export class Users extends Array<User> {}
 Object.defineProperty(User, 'name', { value: 'sap.capire.bookshop.Users' })
+export class Users extends Array<User> {}
 Object.defineProperty(Users, 'name', { value: 'sap.capire.bookshop.Users' })
 
 export function _UserActivityLogAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -151,8 +153,8 @@ export function _UserActivityLogAspect<TBase extends new (...args: any[]) => obj
   };
 }
 export class UserActivityLog extends _._managedAspect(_UserActivityLogAspect(__.Entity)) {static drafts: typeof UserActivityLog}
-export class UserActivityLog_ extends Array<UserActivityLog> {static drafts: typeof UserActivityLog}
 Object.defineProperty(UserActivityLog, 'name', { value: 'sap.capire.bookshop.UserActivityLog' })
+export class UserActivityLog_ extends Array<UserActivityLog> {static drafts: typeof UserActivityLog}
 Object.defineProperty(UserActivityLog_, 'name', { value: 'sap.capire.bookshop.UserActivityLog' })
 
 export function _PromotionAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -169,8 +171,8 @@ export function _PromotionAspect<TBase extends new (...args: any[]) => object>(B
   };
 }
 export class Promotion extends _PromotionAspect(__.Entity) {static drafts: typeof Promotion}
-export class Promotions extends Array<Promotion> {static drafts: typeof Promotion}
 Object.defineProperty(Promotion, 'name', { value: 'sap.capire.bookshop.Promotions' })
+export class Promotions extends Array<Promotion> {static drafts: typeof Promotion}
 Object.defineProperty(Promotions, 'name', { value: 'sap.capire.bookshop.Promotions' })
 
 export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -187,6 +189,44 @@ export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(B
   };
 }
 export class BookOrder extends _._managedAspect(_BookOrderAspect(__.Entity)) {}
-export class BookOrders extends Array<BookOrder> {}
 Object.defineProperty(BookOrder, 'name', { value: 'sap.capire.bookshop.BookOrders' })
+export class BookOrders extends Array<BookOrder> {}
 Object.defineProperty(BookOrders, 'name', { value: 'sap.capire.bookshop.BookOrders' })
+
+export function _BookRecommendationAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class BookRecommendation extends Base {
+        ID?: number;
+        rating?: number | null;
+        comment?: string | null;
+        description?: string | null;
+        book?: __.Association.to<Book> | null;
+        book_ID?: number | null;
+        recommended?: __.Association.to<Book> | null;
+        recommended_ID?: number | null;
+      static actions: {
+      }
+  };
+}
+export class BookRecommendation extends _._managedAspect(_BookRecommendationAspect(__.Entity)) {}
+Object.defineProperty(BookRecommendation, 'name', { value: 'sap.capire.bookshop.BookRecommendations' })
+export class BookRecommendations extends Array<BookRecommendation> {}
+Object.defineProperty(BookRecommendations, 'name', { value: 'sap.capire.bookshop.BookRecommendations' })
+
+export function _BookFormatAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class BookFormat extends Base {
+        ID?: number;
+        format?: string | null;
+        price?: number | null;
+        pages?: number | null;
+        language?: string | null;
+        publicationDate?: string | null;
+        book?: __.Association.to<Book> | null;
+        book_ID?: number | null;
+      static actions: {
+      }
+  };
+}
+export class BookFormat extends _._managedAspect(_BookFormatAspect(__.Entity)) {}
+Object.defineProperty(BookFormat, 'name', { value: 'sap.capire.bookshop.BookFormats' })
+export class BookFormats extends Array<BookFormat> {}
+Object.defineProperty(BookFormats, 'name', { value: 'sap.capire.bookshop.BookFormats' })

@@ -2,9 +2,7 @@
 const cds = require('@sap/cds')
 const csn = cds.entities('')
 module.exports.HelloRequest = csn.HelloRequest
-module.exports.HelloRequest_ = csn.HelloRequest
 module.exports.HelloResponse = csn.HelloResponse
-module.exports.HelloResponse_ = csn.HelloResponse
 // events
 // actions
 // enums

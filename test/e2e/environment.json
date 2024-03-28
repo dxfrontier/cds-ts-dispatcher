@@ -87,6 +87,18 @@
 			"enabled": true
 		},
 		{
+			"key": "bookFormatsEntity",
+			"value": "BookFormats",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "bookRecommendationsEntity",
+			"value": "BookRecommendations",
+			"type": "default",
+			"enabled": true
+		},
+		{
 			"key": "--------------------------------",
 			"value": null,
 			"type": "default",
@@ -100,6 +112,6 @@
 		}
 	],
 	"_postman_variable_scope": "environment",
-	"_postman_exported_at": "2024-02-13T15:16:32.234Z",
-	"_postman_exported_using": "Postman/10.22.3"
+	"_postman_exported_at": "2024-03-28T14:59:16.077Z",
+	"_postman_exported_using": "Postman/10.24.7"
 }
