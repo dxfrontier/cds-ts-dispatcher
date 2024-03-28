@@ -7,7 +7,7 @@
 ![json](https://img.shields.io/badge/json-5E5C5C?style=for-the-badge&logo=json&logoColor=white)
 ![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)
 
-![NPM Downloads](https://img.shields.io/npm/dt/@dxfrontier/cds-ts-dispatcher?logo=npm)
+![NPM Downloads](https://img.shields.io/npm/dy/@dxfrontier/cds-ts-dispatcher?logo=npm)
 ![NPM Downloads](https://img.shields.io/npm/dm/%40dxfrontier%2Fcds-ts-dispatcher?logo=npm)
 ![NPM Version](https://img.shields.io/npm/v/%40dxfrontier%2Fcds-ts-dispatcher?logo=npm)
 
@@ -38,17 +38,17 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 - [Usage](#usage)
   - [`CDSDispatcher`](#cdsdispatcher)
   - [`Decorators`](#decorators)
-    - [Class](#class)
+    - [`Class`](#class)
       - [EntityHandler](#entityhandler)
       - [ServiceLogic](#servicelogic)
       - [Repository](#repository)
         - [`[Optional]` - BaseRepository](#optional---baserepository)
       - [UnboundActions](#unboundactions)
       - [Use](#use)
-    - [Field](#field)
+    - [`Field`](#field)
       - [Inject](#inject)
       - [Inject SRV](#inject-srv)
-    - [Method - `active entity`](#method---active-entity)
+    - [`Method` - `active entity`](#method---active-entity)
       - [`Before`](#before)
         - [BeforeCreate](#beforecreate)
         - [BeforeRead](#beforeread)
@@ -70,9 +70,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
         - [OnError](#onerror)
         - [OnBoundAction](#onboundaction)
         - [OnBoundFunction](#onboundfunction)
-      - [`Middleware`](#middleware)
-        - [Use](#use-1)
-    - [Method - `draft entity`](#method---draft-entity)
+    - [`Method` - `draft entity`](#method---draft-entity)
       - [`Before`](#before-1)
         - [BeforeNewDraft](#beforenewdraft)
         - [BeforeCancelDraft](#beforecanceldraft)
@@ -88,12 +86,13 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
         - [OnCancelDraft](#oncanceldraft)
         - [OnEditDraft](#oneditdraft)
         - [OnSaveDraft](#onsavedraft)
-      - [`Middleware`](#middleware-1)
-        - [Use](#use-2)
-      - [`Other`](#other)
-  - [`Other decorators`](#other-decorators)
-    - [SingleInstanceCapable](#singleinstancecapable)
-- [`Deployment to BTP` using `MTA`](#deployment-to-btp-using-mta)
+      - [`Other` - draft decorators](#other---draft-decorators)
+    - [`Method` - `helpers`](#method---helpers)
+      - [SingleInstanceCapable](#singleinstancecapable)
+      - [Validate](#validate)
+      - [FieldsFormatter](#fieldsformatter)
+      - [Use](#use-1)
+- [`Deploy` to BTP using MTA](#deploy-to-btp-using-mta)
 - [`Examples`](#examples)
 - [Contributing](#contributing)
 - [License](#license)
@@ -423,7 +422,7 @@ export = new CDSDispatcher([
 
 ### `Decorators`
 
-#### Class
+#### `Class`
 
 ##### EntityHandler
 
@@ -686,7 +685,7 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### Field
+#### `Field`
 
 ##### Inject
 
@@ -753,7 +752,7 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### Method - `active entity`
+#### `Method` - `active entity`
 
 ##### `Before`
 
@@ -1067,6 +1066,8 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 @OnCreate()
 public async onCreateMethod(req: TypedRequest<MyEntity>, next: Function) {
   // ...
+
+  return next();
 }
 ```
 
@@ -1098,6 +1099,8 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 @OnRead()
 public async onReadMethod(req: TypedRequest<MyEntity>, next: Function) {
   // ...
+
+  return next();
 }
 ```
 
@@ -1130,6 +1133,8 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 @OnUpdate()
 public async onUpdateMethod(req: TypedRequest<MyEntity>, next: Function) {
   // ...
+
+  return next();
 }
 ```
 
@@ -1161,6 +1166,8 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 @OnDelete()
 public async onDeleteMethod(req: TypedRequest<MyEntity>, next: Function) {
   // ...
+
+  return next();
 }
 ```
 
@@ -1403,78 +1410,7 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### `Middleware`
-
-###### Use
-
-**@Use**(`...Middleware[]`)
-
-The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your method.
-
-Middleware decorators can perform the following tasks:
-
-- Execute any code.
-- Make changes to the request object.
-- End the request-response cycle.
-- Call the next middleware function in the stack.
-- If the current middleware function does not end the request-response cycle, it must call `next()` to pass control to the next middleware function. Otherwise, the request will be left hanging.
-
-`Parameters`
-
-- `...Middleware[])`: Middleware classes to be injected.
-
-`Example:` middleware implementation
-
-```typescript
-import type { Request } from '@sap/cds';
-import type { MiddlewareImpl, Next } from '@dxfrontier/cds-ts-dispatcher';
-
-export class MiddlewareClass implements MiddlewareImpl {
-  public async use(req: Request, next: Next) {
-    console.log('Middleware use method called.');
-
-    await next(); // call next middleware
-  }
-}
-```
-
-`Example` usage
-
-```typescript
-import { EntityHandler, Use, Inject, SRV, Service } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@EntityHandler(MyEntity)
-export class CustomerHandler {
-  // ...
-  @Inject(SRV) private srv: Service;
-  // ...
-  constructor() {}
-
-  @AfterRead()
-  @Use(MiddlewareClass)
-  private async addDiscount(results: MyEntity[], req: Request) {
-    // ...
-  }
-
-  // ...
-}
-```
-
-> [!TIP]
-> Middlewares when applied with `@Use` are executed before the normal events.
-
-> [!WARNING]
-> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-#### Method - `draft entity`
+#### `Method` - `draft entity`
 
 ##### `Before`
 
@@ -1908,9 +1844,474 @@ this.on('SAVE', MyEntity, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### `Middleware`
+<!-- ##### `Middleware`
 
-###### Use
+###### Use -->
+
+<!-- **@Use**(`...Middleware[]`)
+
+The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your method.
+
+Middleware decorators can perform the following tasks:
+
+- Execute any code.
+- Make changes to the request object.
+- End the request-response cycle.
+- Call the next middleware function in the stack.
+- If the current middleware function does not end the request-response cycle, it must call `next()` to pass control to the next middleware function. Otherwise, the request will be left hanging.
+
+`Parameters`
+
+- `...Middleware[])`: Middleware classes to be injected.
+
+`Example:` middleware implementation
+
+```typescript
+import type { Request } from '@sap/cds';
+import type { MiddlewareImpl, Next } from '@dxfrontier/cds-ts-dispatcher';
+
+export class MiddlewareClass implements MiddlewareImpl {
+  public async use(req: Request, next: Next) {
+    console.log('Middleware use method called.');
+
+    await next();
+  }
+}
+```
+
+`Example` usage
+
+```typescript
+import { EntityHandler, Use, Inject, SRV, Service } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class CustomerHandler {
+  // ...
+  @Inject(SRV) private srv: Service;
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  @Use(MiddlewareClass)
+  private async addDiscount(results: MyEntity[], req: Request) {
+    // ...
+  }
+
+  // ...
+}
+```
+
+> [!TIP]
+> Middlewares when applied with `@Use` are executed before the normal events.
+
+> [!WARNING]
+> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p> -->
+
+##### `Other` - draft decorators
+
+All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
+
+> [!NOTE]
+> Except the `@OnAction(), @OnFunction(), @OnEvent(), @OnError()` as this are bound to the service and not to an entity.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### `Method` - `helpers`
+
+##### SingleInstanceCapable
+
+**@SingleInstanceCapable()**
+
+The `@SingleInstanceCapable()` decorator is applied at the method level to indicate that all decorators used in conjunction with this decorator will handle both single instance and entity set requests, this behaves like a **switch** when the REQUEST is entity set and single instance, so you can manage different behavior.
+
+`@SingleInstanceCapable` can be used together with the following decorator actions :
+
+- [@AfterRead()](#afterread)
+- [@BeforeRead()](#beforeread)
+- [@OnRead()](#onread)
+
+`Example 1` : Handling single instance request
+
+- Example single request : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
+
+```typescript
+
+import { AfterRead, SingleInstanceCapable, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterRead()
+@SingleInstanceCapable()
+public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
+  if(isSingleInstance) {
+    // This will be executed only when single instance read is performed
+    // isSingleInstance flag will be `true`
+    return this.customerService.handleSingleInstance(req)
+  }
+}
+```
+
+`Example 2` : Differing behavior for single instance and entity set requests
+
+- Single request example : http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
+- Entity set request example : http://localhost:4004/odata/v4/main/`MyEntity`
+
+```typescript
+@AfterRead()
+@SingleInstanceCapable()
+@BeforeRead()
+public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
+  if(isSingleInstance) {
+    // This method will be executed for 'AfterRead` single instance
+    return this.customerService.handleSingleInstance(req)
+  }
+
+  // This method will be executed for `BeforeRead` both cases : single instance & entity set
+  return this.customerService.handleEntitySet(req)
+}
+```
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### Validate
+
+**@Validate\<T\>({validator, options?}, ...Fields[])**
+
+The `@Validate` decorator is utilized as a `method-level` decorator, used to validate `fields` of your entity before reaching your event callback.
+
+> [!TIP]
+> Think of it as a `pre-validation` helper.
+
+The `@Validate` decorator can be used when you want to `validate` the `Request`.`data` _(Request Body)_ of the `Request` object on the following decorators :
+
+- `ON`
+  - [@OnCreate()](#oncreate)
+  - [@OnUpdate()](#onupdate)
+  - [@OnAction()](#onaction)
+  - [@OnBoundAction()](#onboundaction)
+  - [@OnFunction()](#onfunction)
+  - [@OnBoundFunction()](#onboundfunction)
+- `BEFORE`
+  - [@BeforeCreate()](#beforecreate)
+  - [@BeforeUpdate()](#beforeupdate)
+
+`Parameters`
+
+- `validator`: Choose from a list of predefined `Validators`.
+- `options?`: _[Optional]_ Additional options for customizing the validation process.
+- `...Fields[]`: Specify the fields of your entity that require validation.
+
+`Returns`
+
+The decorator will raise a `Request.reject` message if the validation requirements are not met.
+
+`Validators`
+
+Below is a list of available validators:
+
+| Action           | Description                                                                                              | Options                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ---------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| contains         | Check if the string contains the seed.                                                                   | <p> **ignoreCase**: boolean \| undefined; _default : false_ </p> <p> **minOccurrences**: number \| undefined; _default 1_ </p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| equals           | Check if the string matches the comparison.                                                              |
+| matches          | Check if the string matches the pattern.                                                                 |
+| startsWith       | Checks if the string starts with the given `target` string.                                              |
+| endsWith         | Checks if the string ends with the given `target` string.                                                |
+| isMailtoURI      | Check if the string is a Mailto URI format.                                                              | **allow_display_name:** If set to `true`, the validator will also match `Display Name <email-address>`. _Default: false_ <br> **require_display_name:** If set to `true`, the validator will reject strings without the format `Display Name <email-address>`. _Default: false_ <br> **allow_utf8_local_part:** If set to `false`, the validator will not allow any non-English UTF8 character in the email address' local part. _Default: true_ <br> **require_tld:** If set to `false`, email addresses without a TLD in their domain will also be matched. _Default: true_ <br> **ignore_max_length:** If set to `true`, the validator will not check for the standard max length of an email. _Default: false_ <br> **allow_ip_domain:** If set to `true`, the validator will allow IP addresses in the host part. _Default: false_ <br> **domain_specific_validation:** If set to `true`, some additional validation will be enabled, e.g., disallowing certain syntactically valid email addresses that are rejected by GMail. _Default: false_ <br> **host_blacklist:** An array of strings. If the part of the email after the `@` symbol matches any string in the array, validation fails. <br> **host_whitelist:** An array of strings. If the part of the email after the `@` symbol does not match any string in the array, validation fails. <br> **blacklisted_chars:** A string. If any character in the string appears in the name part of the email, validation fails.                                                                                                                                                                                                                                    |
+| isNumeric        | Check if the string contains only numbers.                                                               | <p> <b>no_symbols:</b> If set to `true`, the validator will reject numeric strings that feature a symbol (e.g., `+`, `-`, or `.`). \_Default: false\* </p> <p> <b>locale:</b> An object specifying the locale information for alpha validation. </p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| isTime           | Check if the string is a valid time e.g. `23:01:59`.                                                     | <p> <b>hourFormat:</b> Specify the hour format to validate. Use `'hour12'` for 12-hour format and `'hour24'` for 24-hour format. _Default: 'hour24'_ </p> <p> <b>mode:</b> Specify the time format to validate. Use `'default'` for HH:MM format and `'withSeconds'` for HH:MM:SS format. _Default: 'default'_ </p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| isLatLong        | check if the string is a valid latitude-longitude coordinate in the format `lat,long` or `lat, long`.    |
+| isMD5            | check if the string is a MD5 hash.                                                                       |
+| isMimeType       | check if the string matches to a valid [MIME type] format.                                               |
+| isPort           | check if the string is a valid port number.                                                              |
+| isSlug           | check if the string is of type slug.                                                                     |
+| isISBN           | check if the string is an [ISBN]                                                                         | <b> version: </b> "10", "13", 10, 13;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| isEmail          | check if the string is an email.                                                                         | Same as `isMailtoURI`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| isAlpha          | Check if the string contains only letters (a-zA-Z).                                                      |
+| isAlphanumeric   | Check if the string contains only letters and numbers.                                                   |
+| isCreditCard     | Check if the string is a credit card.                                                                    | <p> <b>provider:</b> Specify the credit card provider to validate. Use one of the following: `'amex'`, `'dinersclub'`, `'discover'`, `'jcb'`, `'mastercard'`, `'unionpay'`, `'visa'`, or `''` for any provider. _Default: undefined_ </p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| isCurrency       | Check if the string is a valid currency amount.                                                          | **symbol:** The currency symbol to be expected. _Default: '$'_ <br> **require_symbol:** If set to `true`, the validator will expect the currency symbol to be present. _Default: false_ <br> **allow_space_after_symbol:** If set to `true`, the validator will allow a space after the currency symbol. _Default: false_ <br> **symbol_after_digits:** If set to `true`, the currency symbol will be expected after the digits. _Default: false_ <br> **allow_negatives:** If set to `true`, negative currency values will be allowed. _Default: true_ <br> **parens_for_negatives:** If set to `true`, negative currency values will be enclosed in parentheses. _Default: false_ <br> **negative_sign_before_digits:** If set to `true`, the negative sign will be placed before the digits. _Default: false_ <br> **negative_sign_after_digits:** If set to `true`, the negative sign will be placed after the digits. _Default: false_ <br> **allow_negative_sign_placeholder:** If set to `true`, the validator will allow a placeholder `-` for negative values. _Default: false_ <br> **thousands_separator:** The thousands separator to be expected. _Default: ','_ <br> **decimal_separator:** The decimal separator to be expected. _Default: '.'_ <br> **allow_decimal:** If set to `true`, decimal values will be allowed. _Default: true_ <br> **require_decimal:** If set to `true`, a decimal value will be required. _Default: false_ <br> **digits_after_decimal:** An array of numbers representing the exact number of digits allowed after the decimal point. _Default: [2]_ <br> **allow_space_after_digits:** If set to `true`, the validator will allow a space after the digits. _Default: false_ |
+| isDataURI        | Check if the string is a [data URI format](https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs). |
+| isDate           | Check if the string is a valid date.                                                                     | **format:** A string representing the expected date format. _Default: undefined_ <br> **strictMode:** If set to `true`, the validator will reject inputs different from the specified format. _Default: false_ <br> **delimiters:** An array of allowed date delimiters. _Default: ['/', '-']_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| isEmpty          | Check if the string has a length of zero.                                                                | **ignore_whitespace:** If set to `true`, whitespace characters will be ignored. _Default: false_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| isIBAN           | Check if a string is an IBAN.                                                                            | **whitelist**: An array of IBAN countries to whitelist. _Default: undefined_ <br> **blacklist**: An array of IBAN countries to blacklist. _Default: undefined_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| isIMEI           | Check if the string is a valid IMEI.                                                                     | **allow_hyphens**: If set to `true`, allows IMEI numbers with hyphens. _Default: false_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| isIP             | Check if the string is an IP (version 4 or 6).                                                           | ` "4", "6", 4, 6;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| isIdentityCard   | Check if the string is a valid identity card code.                                                       | **locale**: An array of supported locales for identity cards. Acceptable values: "ar-LY", "ar-TN", "ES", "FI", "he-IL", "IN", "IR", "IT", "LK", "NO", "PL", "TH", "zh-CN", "zh-HK", "zh-TW" or 'any'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| isIn             | Check if the string is in an array of allowed values.                                                    |
+| isJSON           | Check if the string is valid JSON (note: uses `JSON.parse`).                                             |
+| isJWT            | Check if the string is a valid JWT token.                                                                |
+| isLength         | Check if the string's length falls in a range.                                                           | **min**: The minimum length allowed for the string. _Default: 0_ <br> **max**: The maximum length allowed for the string. _Default: undefined_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| isLowercase      | Check if the string is lowercase.                                                                        |
+| isMobilePhone    | Check if the string is a mobile phone number.                                                            | **strictMode**: If set to `true`, the mobile phone number must be supplied with the country code and must start with `+`. _Default: false_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| isPassportNumber | Check if the string is a valid passport number relative to a specific country code.                      |
+| isPostalCode     | Check if the string is a postal code.                                                                    | `"AD", "AT", "AU", "BE", "BG", "BR", "CA", "CH", "CN", "CZ", "DE", "DK", "DZ", "EE", "ES", "FI", "FR", "GB", "GR", "HR", "HU", "ID", "IE", "IL", "IN", "IR", "IS", "IT", "JP", "KE", "KR", "LI", "LT", "LU", "LV", "MX", "MT", "NL", "NO", "NZ", "PL", "PR", "PT", "RO", "RU", "SA", "SE", "SI", "SK", "TN", "TW", "UA", "US", "ZA", "ZM"           `                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| isURL            | Check if the string is a URL.                                                                            | **protocols**: An array of allowed protocols. _Default: ['http', 'https', 'ftp']_ <br> **require_tld**: If set to `true`, URLs must have a top-level domain. _Default: true_ <br> **require_protocol**: If set to `true`, URLs must have a protocol. _Default: false_ <br> **require_host**: If set to `true`, URLs must have a host. _Default: true_ <br> **require_port**: If set to `true`, isURL will check if a port is present in the URL. _Default: false_ <br> **require_valid_protocol**: If set to `true`, URLs must have a valid protocol. _Default: true_ <br> **allow_underscores**: If set to `true`, underscores are allowed in URLs. _Default: false_ <br> **host_whitelist**: An array of allowed hosts. <br> **host_blacklist**: An array of disallowed hosts. <br> **allow_trailing_dot**: If set to `true`, trailing dots are allowed in URLs. _Default: false_ <br> **allow_protocol_relative_urls**: If set to `true`, protocol-relative URLs are allowed. _Default: false_ <br> **disallow_auth**: If set to `true`, authentication credentials in URLs are disallowed. _Default: false_ <br> **allow_fragments**: If set to `true`, URL fragments are allowed. _Default: true_ <br> **allow_query_components**: If set to `true`, URL query components are allowed. _Default: true_ <br> **validate_length**: If set to `true`, URLs will be validated for length. _Default: true_                                                                                                                                                                                                                                                                                                                  |
+| isUUID           | Check if the string is a UUID (version 1, 2, 3, 4, or 5).                                                |
+| isUppercase      | Check if the string is uppercase.                                                                        |
+| isVAT            | Checks that the string is a valid VAT number.                                                            |
+| isWhitelisted    | Checks if characters appear in the whitelist.                                                            |
+
+`Example 1`
+
+```typescript
+import {
+  EntityHandler,
+  Inject,
+  SRV,
+  Service,
+  Validate,
+  BeforeUpdate,
+  TypedRequest,
+} from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class CustomerHandler {
+  // ...
+  @Inject(SRV) private srv: Service;
+  // ...
+  constructor() {}
+
+  @BeforeCreate()
+  @Validate<MyEntity>({ action: 'isLowercase' }, 'comment')
+  @Validate<MyEntity>({ action: 'endsWith', target: 'N' }, 'description')
+  public async beforeCreate(req: TypedRequest<MyEntity>) {
+    // ...
+  }
+
+  @BeforeUpdate()
+  @Validate<MyEntity>({ action: 'startsWith', target: 'COMMENT:' }, 'comment')
+  @Validate<MyEntity>({ action: 'isAlphanumeric' }, 'description')
+  public async beforeUpdate(req: TypedRequest<MyEntity>) {
+    // ...
+  }
+
+  @OnCreate()
+  @Validate<MyEntity>({ action: 'isAlphanumeric' }, 'book_ID')
+  public async onCreate(req: TypedRequest<MyEntity>, next: Function) {
+    // ...
+    return next();
+  }
+
+  @OnUpdate()
+  @Validate<MyEntity>({ action: 'isLength', options: { min: 5 } }, 'comment')
+  public async onUpdate(req: TypedRequest<MyEntity>, next: Function) {
+    // ...
+    return next();
+  }
+
+  // ...
+}
+```
+
+`Example 2`: `@Validate` is used inside of `@UnboundActions`
+
+```ts
+@UnboundActions()
+class UnboundActionsHandler {
+  @OnAction(someAction)
+  @Validate<ExposeFields<typeof someAction>>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
+  public async onActionMethod(req: ActionRequest<typeof someAction>, _: Function): ActionReturn<typeof someAction> {
+    // ...
+  }
+
+  @OnFunction(someFunction)
+  @Validate<ExposeFields<typeof someFunction>>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
+  public async onFunctionMethod(
+    req: ActionRequest<typeof someFunction>,
+    next: Function,
+  ): ActionReturn<typeof someFunction> {
+    // ...
+  }
+
+  @OnEvent(OrderedBook)
+  @Validate<OrderedBook>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
+  public async onEvent(req: TypedRequest<OrderedBook>) {
+    // ...
+  }
+}
+```
+
+> [!IMPORTANT]
+> To get the fields for [@OnAction](#onaction), [@OnBoundAction](#onboundaction), [@OnFunction](#onfunction), [@OnBoundFunction](#onboundfunction) you must use the `ExposeFields` type inside of the `@Validate` decorator.
+
+<!-- > [!TIP]
+> See best practices for [Validators](#faq---tips) -->
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### FieldsFormatter
+
+**@FieldsFormatter\<T\>({enhancements, options?}, ...Fields[])**
+
+The `@FieldsFormatter` is used as a `method level` decorator to `modify`/`enhance` fields.
+
+The `@FieldsFormatter` decorator can be used on the following decorators :
+
+1. When you want to `modify`/`enhance` the `results` of your callback.
+
+   - `AFTER`
+     - [@AfterRead()](#afterread)
+
+2. When you want to `modify`/`enhance` the `Request.data` of the `Request` object.
+
+   - `ON`
+     - [@OnCreate()](#oncreate)
+     - [@OnUpdate()](#onupdate)
+     - [@OnAction()](#onaction)
+     - [@OnBoundAction()](#onboundaction)
+     - [@OnFunction()](#onfunction)
+     - [@OnBoundFunction()](#onboundfunction)
+   - `BEFORE`
+     - [@BeforeCreate()](#beforecreate)
+     - [@BeforeUpdate()](#beforeupdate)
+
+`Parameters`
+
+- `formatter`: Choose from a list of predefined `Formatters`.
+- `options?`: [Optional] Additional options for customizing the formatter process.
+- `...Fields[]`: Specify the fields of your entity that require formatting.
+
+`Formatters`
+
+Here are the available formatter methods:
+
+| Action          | Description                                                            |
+| --------------- | ---------------------------------------------------------------------- |
+| blacklist       | Remove characters that appear in the blacklist.                        |
+| ltrim           | Trim characters from the left-side of the input.                       |
+| rtrim           | Trim characters from the right-side of the input.                      |
+| trim            | Trim characters from both sides of the input.                          |
+| escape          | Remove characters that do not appear in the whitelist.                 |
+| unescape        | Replaces HTML encoded entities with `<`, `>`, `&`, `'`, `"`, and `/`.  |
+| toLower         | Converts string, as a whole, to lower case.                            |
+| toUpper         | Converts string, as a whole, to upper case.                            |
+| upperFirst      | Converts the first character of the string to upper case.              |
+| lowerFirst      | Converts the first character of the string to lower case.              |
+| customFormatter | Apply a custom formatter when standard ones do not satisfy your needs. |
+
+`Example 1`
+
+```typescript
+import {
+  EntityHandler,
+  Inject,
+  SRV,
+  Service,
+  AfterRead,
+  FieldsFormatter,
+  TypedRequest,
+  BeforeCreate,
+  BeforeUpdate,
+  AfterRead,
+  OnCreate,
+  OnUpdate,
+} from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class CustomerHandler {
+  // ...
+  @Inject(SRV) private srv: Service;
+  // ...
+  constructor() {}
+
+  @BeforeCreate()
+  @FieldsFormatter<MyEntity>({ action: 'blacklist', charsToRemove: 'le' }, 'format')
+  public async beforeCreate(req: TypedRequest<MyEntity>) {
+    // ...
+  }
+
+  @BeforeUpdate()
+  @FieldsFormatter<MyEntity>({ action: 'truncate', options: { length: 7 } }, 'format')
+  public async beforeUpdate(req: TypedRequest<MyEntity>) {
+    // ...
+  }
+
+  @AfterRead()
+  @FieldsFormatter<MyEntity>({ action: 'toUpper' }, 'format')
+  @FieldsFormatter<MyEntity>(
+    {
+      action: 'customFormatter',
+      callback(req, results) {
+        if (results) {
+          // make first item 'toLowerCase' and leave the rest 'toUpper'
+          results[0].format = results[0].format?.toLowerCase();
+        }
+      },
+    },
+    'format',
+  )
+  public async afterRead(results: MyEntity[], req: TypedRequest<MyEntity>) {
+    // ...
+  }
+
+  @OnCreate()
+  @FieldsFormatter<MyEntity>({ action: 'ltrim' }, 'language')
+  public async onCreate(req: TypedRequest<MyEntity>, next: Function) {
+    // ...
+    return next();
+  }
+
+  @OnUpdate()
+  @FieldsFormatter<MyEntity>({ action: 'trim' }, 'format')
+  public async onUpdate(req: TypedRequest<MyEntity>, next: Function) {
+    // ...
+    return next();
+  }
+
+  // ...
+}
+```
+
+`Example 2` : using `@FieldsFormatter` decorator inside the [@UnboundActions](#unboundactions)
+
+```ts
+@UnboundActions()
+class UnboundActionsHandler {
+  @OnAction(AnAction)
+  @FieldsFormatter<ExposeFields<typeof AnAction>>({ action: 'toLower' }, 'descr', 'bookName')
+  public async onActionMethod(req: ActionRequest<typeof AnAction>, _: Function): ActionReturn<typeof AnAction> {
+    // ...
+    return next();
+  }
+
+  @OnFunction(AFunction)
+  @FieldsFormatter<ExposeFields<typeof AFunction>>({ action: 'toUpper' }, 'lastName')
+  public async onFunctionMethod(req: ActionRequest<typeof AFunction>, next: Function): ActionReturn<typeof AFunction> {
+    // ...
+    return next();
+  }
+
+  @OnEvent(AnEvent)
+  @FieldsFormatter<AnEvent>({ action: 'upperFirst' }, 'name')
+  public async onEvent(req: TypedRequest<AnEvent>) {
+    // ...
+  }
+}
+```
+
+> [!IMPORTANT]
+> To get the fields for [@OnAction()](#onaction), [@OnBoundAction()](#onboundaction), [@OnFunction()](#onfunction), [@OnBoundFunction()](#onboundfunction) you must use the `ExposeFields` type inside of the `@FieldsFormatter` decorator.
+
+<!-- > [!TIP]
+> See best practices for [Formatters](#faq---tips) -->
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### Use
 
 **@Use**(`...Middleware[]`)
 
@@ -1979,75 +2380,7 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### `Other`
-
-All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
-
-> [!NOTE]
-> Except the `@OnAction(), @OnFunction(), @OnEvent(), @OnError()` as this are bound to the service and not to an entity.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-### `Other decorators`
-
-#### SingleInstanceCapable
-
-**@SingleInstanceCapable()**
-
-The `@SingleInstanceCapable()` decorator is applied at the method level to indicate that all decorators used in conjunction with this decorator will handle both single instance and entity set requests, this behaves like a **switch** when the REQUEST is entity set and single instance, so you can manage different behavior.
-
-`@SingleInstanceCapable` can be used together with the following decorator actions :
-
-- [@AfterRead()](#afterread)
-- [@BeforeRead()](#beforeread)
-- [@OnRead()](#onread)
-
-`Example 1` : Handling single instance request
-
-- Example single request : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
-
-```typescript
-
-import { AfterRead, SingleInstanceCapable, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterRead()
-@SingleInstanceCapable()
-public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
-  if(isSingleInstance) {
-    // This will be executed only when single instance read is performed
-    // isSingleInstance flag will be `true`
-    return this.customerService.handleSingleInstance(req)
-  }
-}
-```
-
-`Example 2` : Differing behavior for single instance and entity set requests
-
-- Single request example : http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
-- Entity set request example : http://localhost:4004/odata/v4/main/`MyEntity`
-
-```typescript
-@AfterRead()
-@SingleInstanceCapable()
-@BeforeRead()
-public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
-  if(isSingleInstance) {
-    // This method will be executed for 'AfterRead` single instance
-    return this.customerService.handleSingleInstance(req)
-  }
-
-  // This method will be executed for `BeforeRead` both cases : single instance & entity set
-  return this.customerService.handleEntitySet(req)
-}
-```
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-## `Deployment to BTP` using `MTA`
+## `Deploy` to BTP using MTA
 
 <!-- 1. Install [**MTA Build tool**](https://cap.cloud.sap/docs/get-started/) globally:
 
@@ -2106,6 +2439,93 @@ mbt build
 ```
 
 7. Deploy your `mtar` to BTP
+<!--
+
+## `FAQ` - Tips
+
+<details>
+
+<summary>Can I stack multiple decorators on the same callback ? </summary>
+
+Yes, you can stack multiple decorators, if the decorator has the same typed parameters like the other decorators, then it can be used, otherwise an error will appear at the design time.
+
+`Example 1`
+
+```ts
+@AfterRead()
+@SingleInstanceCapable()
+@Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2)
+@FieldsFormatter<MyEntity>({ action: 'blacklist', charsToRemove: 'Mysterious' }, 'title')
+private async aMethod(results: MyEntity[], req: Request, isSingleInstance?: boolean) {
+  // ...
+}
+```
+
+`Example 2`
+
+```ts
+@BeforeRead()
+@BeforeCreate()
+@BeforeUpdate()
+@BeforeDelete()
+@SingleInstanceCapable()
+private async addDiscount(req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
+  // ..
+}
+```
+
+</details>
+
+<details>
+<!-- 
+<summary>Is the sequence of decorators important ? </summary>
+
+Yes, it is important as typescript executes the decorators :
+
+- for `Class` - from `bottom` to `top`
+- for `method` - from `top` to `bottom`
+
+```ts
+@AfterRead() // First executed
+@Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2) // Second
+@FieldsFormatter<Book>({ action: 'blacklist', charsToRemove: 'Mysterious' }, 'title') // Third
+@SingleInstanceCapable() // First executed
+private async addDiscount(results: Book[], req: Request, isSingleInstance?: boolean) {
+  // ...
+}
+```
+
+</details>
+
+<details> -->
+
+<summary>Best practice for Validators and Formatters </summary>
+
+<!-- Yes, it is important as typescript executes the decorator from `bottom` to `top`. -->
+
+You can create a separate file named 'validators.ts' or 'formatters.ts'
+
+```ts
+dddada;
+```
+
+</details>
+
+<details>
+
+<summary>Best practice for Customer Formatters </summary>
+
+<!-- Yes, it is important as typescript executes the decorator from `bottom` to `top`. -->
+
+You can create a separate file named 'validators.ts' or 'formatters.ts'
+
+```ts
+dddada;
+```
+
+</details>
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p> -->
 
 ## `Examples`
 
