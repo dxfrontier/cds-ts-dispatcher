@@ -1,0 +1,90 @@
+{
+  "name": "CDS-TS-Dispatcher TypeScript",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20-bullseye",
+  "features": {
+    "ghcr.io/devcontainers-contrib/features/curl-apt-get:1": {}
+  },
+  "forwardPorts": [4004],
+  "postCreateCommand": "bash .devcontainer/scripts/install-dependencies.sh",
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Jest
+        "Orta.vscode-jest",
+        "firsttris.vscode-jest-runner",
+
+        // Rest
+        "humao.rest-client",
+
+        // VSCode
+        "aaron-bond.better-comments",
+        "alefragnani.Bookmarks",
+        "alefragnani.project-manager",
+
+        // NPM
+        "christian-kohler.npm-intellisense",
+        "mskelton.npm-outdated",
+
+        // Theme
+        "PKief.material-icon-theme",
+        "zhuangtongfa.material-theme",
+
+        // SAP CAP
+        "SAPSE.vscode-cds",
+        "SAPOSS.app-studio-toolkit",
+        "SAPOSS.app-studio-remote-access",
+        "SAPOS.yeoman-ui",
+
+        // Docker
+        "ms-vscode-remote.remote-containers",
+        "ms-azuretools.vscode-docker",
+
+        // .env
+        "mikestead.dotenv", //DotENV
+
+        // UI5
+        "SAPSE.sap-ux-fiori-tools-extension-pack",
+
+        // SQLite
+        "qwtel.sqlite-viewer",
+
+        // CSV
+        "janisdd.vscode-edit-csv",
+        "mechatroner.rainbow-csv",
+
+        // TypeScript
+        "usernamehw.errorlens",
+        "dbaeumer.vscode-eslint",
+        "oderwat.indent-rainbow",
+        "esbenp.prettier-vscode",
+        "YoavBls.pretty-ts-errors",
+        "streetsidesoftware.code-spell-checker",
+        "wayou.vscode-todo-highlight",
+        "mike-co.import-sorter",
+
+        // XML & YAML
+        "redhat.vscode-yaml",
+        "DotJoshJohnson.xml",
+        "SAPOSS.xml-toolkit",
+
+        // Git
+        "waderyan.gitblame",
+        "donjayamanne.githistory",
+        "GitHub.vscode-pull-request-github",
+
+        // README
+        "yzhang.markdown-all-in-one",
+        "DavidAnson.vscode-markdownlint",
+        "bierner.jsdoc-markdown-highlighting",
+
+        // Others
+        "VisualStudioExptTeam.vscodeintellicode",
+        "christian-kohler.path-intellisense",
+        "donjayamanne.python-extension-pack",
+        "AykutSarac.jsoncrack-vscode"
+      ]
+    }
+  },
+  "remoteUser": "node"
+}

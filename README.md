@@ -93,6 +93,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
       - [FieldsFormatter](#fieldsformatter)
       - [Use](#use-1)
 - [`Deploy` to BTP using MTA](#deploy-to-btp-using-mta)
+- [`Best practices`, `tips`](#best-practices-tips)
 - [`Examples`](#examples)
 - [Contributing](#contributing)
 - [License](#license)
@@ -1985,14 +1986,14 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 
 ##### Validate
 
-**@Validate\<T\>({validator, options?}, ...Fields[])**
+**@Validate\<T\>({ action, options? }, ...fields: Array\<keyof T>)**
 
 The `@Validate` decorator is utilized as a `method-level` decorator, used to validate `fields` of your entity before reaching your event callback.
 
 > [!TIP]
-> Think of it as a `pre-validation` helper.
+> Think of it like to a `pre-validation` helper.
 
-The `@Validate` decorator can be used when you want to `validate` the `Request`.`data` _(Request Body)_ of the `Request` object on the following decorators :
+The `@Validate` decorator can be used when you want to `validate` the `Request`.`data` _(Request Body)_ of the `@sap/cds - Request` object on the following decorators :
 
 - `ON`
   - [@OnCreate()](#oncreate)
@@ -2021,7 +2022,7 @@ Below is a list of available validators:
 
 | Action           | Description                                                                                              | Options                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| contains         | Check if the string contains the seed.                                                                   | <p> **ignoreCase**: boolean \| undefined; _default : false_ </p> <p> **minOccurrences**: number \| undefined; _default 1_ </p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| contains         | Check if the string contains the seed.                                                                   | **ignoreCase**: boolean \| undefined; _default : false_ <br /> **minOccurrences**: number \| undefined; _default 1_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | equals           | Check if the string matches the comparison.                                                              |
 | matches          | Check if the string matches the pattern.                                                                 |
 | startsWith       | Checks if the string starts with the given `target` string.                                              |
@@ -2060,6 +2061,18 @@ Below is a list of available validators:
 | isUppercase      | Check if the string is uppercase.                                                                        |
 | isVAT            | Checks that the string is a valid VAT number.                                                            |
 | isWhitelisted    | Checks if characters appear in the whitelist.                                                            |
+| isInt            | Check if the string is an integer.                                                                       | **min**: to check the integer min boundary <br> **max**: to check the integer max boundary <br> **allow_leading_zeroes**: if `false`, will disallow integer values with leading zeroes. _Default: true_ <br> **lt**: enforce integers being greater than the value provided <br> **gt**: enforce integers being less than the value provided                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| isHexadecimal    | Check if the string is a hexadecimal number.                                                             |
+| isFloat          | Check if the string is a float.                                                                          | **min**: less or equal <br> **max**: greater or equal <br> **gt**: greater than <br> **lt**: less than <br> **locale**: FloatLocale                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| isHash           | Check if the string is a hash of export type algorithm.                                                  | "md4", "md5", "sha1", "sha256", "sha384", "sha512", "ripemd128", "ripemd160", "tiger128", "tiger160", "tiger192", "crc32", "crc32b"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| isEAN            | Check if the string is an EAN (European Article Number).                                                 |
+| isDecimal        | Check if the string represents a decimal number, such as `0.1`, `.3`, `1.1`, `1.00003`, `4.0` etc.       | **force_decimal**: If set to `true`, the validator will only return `true` if the string contains a decimal number. _Default: false_ <br> **decimal_digits**: Specifies the number of decimal digits allowed. It can be given as a range like `'1,3'`, a specific value like `'3'`, or min like `'1,'`. _Default: '1,'_ <br> **locale**: The locale to use for number formatting. _Default: 'en-US'_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| isBoolean        | Check if a string is a boolean.                                                                          | **loose**: If set to `true`, the validator will match a valid boolean string of any case, including ['true', 'True', 'TRUE'], and also 'yes' and 'no'. If set to `false`, the validator will strictly match ['true', 'false', '0', '1']. _Default: false_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| isBIC            | Check if a string is a BIC (Bank Identification Code) or SWIFT code.                                     |
+| isBefore         | Check if the string is a date that's before the specified date.                                          |
+| isAfter          | Check if the string is a date that's after the specified date.                                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 `Example 1`
 
@@ -2146,14 +2159,11 @@ class UnboundActionsHandler {
 > [!IMPORTANT]
 > To get the fields for [@OnAction](#onaction), [@OnBoundAction](#onboundaction), [@OnFunction](#onfunction), [@OnBoundFunction](#onboundfunction) you must use the `ExposeFields` type inside of the `@Validate` decorator.
 
-<!-- > [!TIP]
-> See best practices for [Validators](#faq---tips) -->
-
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### FieldsFormatter
 
-**@FieldsFormatter\<T\>({enhancements, options?}, ...Fields[])**
+**@FieldsFormatter\<T\>({ action, options? }, ...fields: Array\<keyof T>)**
 
 The `@FieldsFormatter` is used as a `method level` decorator to `modify`/`enhance` fields.
 
@@ -2164,7 +2174,7 @@ The `@FieldsFormatter` decorator can be used on the following decorators :
    - `AFTER`
      - [@AfterRead()](#afterread)
 
-2. When you want to `modify`/`enhance` the `Request.data` of the `Request` object.
+2. When you want to `modify`/`enhance` the `Request`.`data` _(Request Body)_ of the `@sap/cds - Request` object.
 
    - `ON`
      - [@OnCreate()](#oncreate)
@@ -2187,19 +2197,23 @@ The `@FieldsFormatter` decorator can be used on the following decorators :
 
 Here are the available formatter methods:
 
-| Action          | Description                                                            |
-| --------------- | ---------------------------------------------------------------------- |
-| blacklist       | Remove characters that appear in the blacklist.                        |
-| ltrim           | Trim characters from the left-side of the input.                       |
-| rtrim           | Trim characters from the right-side of the input.                      |
-| trim            | Trim characters from both sides of the input.                          |
-| escape          | Remove characters that do not appear in the whitelist.                 |
-| unescape        | Replaces HTML encoded entities with `<`, `>`, `&`, `'`, `"`, and `/`.  |
-| toLower         | Converts string, as a whole, to lower case.                            |
-| toUpper         | Converts string, as a whole, to upper case.                            |
-| upperFirst      | Converts the first character of the string to upper case.              |
-| lowerFirst      | Converts the first character of the string to lower case.              |
-| customFormatter | Apply a custom formatter when standard ones do not satisfy your needs. |
+| Action          | Description                                                                                                                                                                            |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| blacklist       | Remove characters that appear in the blacklist.                                                                                                                                        |
+| ltrim           | Trim characters from the left-side of the input.                                                                                                                                       |
+| rtrim           | Trim characters from the right-side of the input.                                                                                                                                      |
+| trim            | Trim characters from both sides of the input.                                                                                                                                          |
+| escape          | Replace `<`, `>`, `&`, `'`, `"` and `/` with HTML entities.                                                                                                                            |
+| unescape        | Replaces HTML encoded entities with `<`, `>`, `&`, `'`, `"` and `/`.                                                                                                                   |
+| toLower         | Converts string, as a whole, to lower case.                                                                                                                                            |
+| toUpper         | Converts string, as a whole, to upper case.                                                                                                                                            |
+| upperFirst      | Converts the first character of the string to upper case.                                                                                                                              |
+| lowerFirst      | Converts the first character of the string to lower case.                                                                                                                              |
+| replace         | Replaces matches for pattern in string with replacement. <br /> **Note**: This method is based on String#replace.                                                                      |
+| truncate        | Truncates string if it’s longer than the given maximum string length. <br /> The last characters of the truncated, string are replaced with the omission string which defaults to "…". |
+| customFormatter | Apply a custom formatter when standard ones do not satisfy your needs.                                                                                                                 |
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 `Example 1`
 
@@ -2276,6 +2290,9 @@ export class CustomerHandler {
 }
 ```
 
+> [!TIP]
+> See best practice for [customFormatter](#best-practices-tips)
+
 `Example 2` : using `@FieldsFormatter` decorator inside the [@UnboundActions](#unboundactions)
 
 ```ts
@@ -2305,9 +2322,6 @@ class UnboundActionsHandler {
 
 > [!IMPORTANT]
 > To get the fields for [@OnAction()](#onaction), [@OnBoundAction()](#onboundaction), [@OnFunction()](#onfunction), [@OnBoundFunction()](#onboundfunction) you must use the `ExposeFields` type inside of the `@FieldsFormatter` decorator.
-
-<!-- > [!TIP]
-> See best practices for [Formatters](#faq---tips) -->
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -2439,15 +2453,14 @@ mbt build
 ```
 
 7. Deploy your `mtar` to BTP
-<!--
 
-## `FAQ` - Tips
+## `Best practices`, `tips`
 
 <details>
 
 <summary>Can I stack multiple decorators on the same callback ? </summary>
 
-Yes, you can stack multiple decorators, if the decorator has the same typed parameters like the other decorators, then it can be used, otherwise an error will appear at the design time.
+Yes, you can stack multiple decorators, if the decorators have the same typed parameters like the other decorators, then you can stack them, otherwise an error will appear at the design time.
 
 `Example 1`
 
@@ -2477,7 +2490,7 @@ private async addDiscount(req: TypedRequest<MyEntity>, isSingleInstance: boolean
 </details>
 
 <details>
-<!-- 
+
 <summary>Is the sequence of decorators important ? </summary>
 
 Yes, it is important as typescript executes the decorators :
@@ -2486,46 +2499,55 @@ Yes, it is important as typescript executes the decorators :
 - for `method` - from `top` to `bottom`
 
 ```ts
-@AfterRead() // First executed
-@Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2) // Second
-@FieldsFormatter<Book>({ action: 'blacklist', charsToRemove: 'Mysterious' }, 'title') // Third
-@SingleInstanceCapable() // First executed
-private async addDiscount(results: Book[], req: Request, isSingleInstance?: boolean) {
-  // ...
+@SecondClassDecorator() // second executed
+@FirstClassDecorator() // first executed
+class MyClass {
+  @FirstDecorator() // first executed
+  @SecondDecorator() // second executed
+  myMethod() {
+    console.log('Method called');
+  }
 }
-```
-
-</details>
-
-<details> -->
-
-<summary>Best practice for Validators and Formatters </summary>
-
-<!-- Yes, it is important as typescript executes the decorator from `bottom` to `top`. -->
-
-You can create a separate file named 'validators.ts' or 'formatters.ts'
-
-```ts
-dddada;
 ```
 
 </details>
 
 <details>
 
-<summary>Best practice for Customer Formatters </summary>
+<summary>Best practices for @FieldsFormatter - customFormatter</summary>
 
-<!-- Yes, it is important as typescript executes the decorator from `bottom` to `top`. -->
-
-You can create a separate file named 'validators.ts' or 'formatters.ts'
+To have all the custom formatters in one place you can create a new `formatters.ts` where you will place all custom formatters and use `export` to make them visible.
 
 ```ts
-dddada;
+// formatter.ts
+export const customFormatter: Formatters<BookFormat> = {
+  action: 'customFormatter',
+  callback(req, results) {
+    if (results && results.length > 0) {
+      // make first item 'toLowerCase' and leave the rest 'toUpperCase'
+      results[0].format = results[0].format?.toLowerCase();
+    }
+  },
+};
 ```
+
+`Import the customFormatter` into your handler
+
+```ts
+@AfterRead()
+@FieldsFormatter<MyEntity>(customFormatter, 'format') // import it here
+public async afterRead(results: MyEntity[], req: TypedRequest<MyEntity>) {
+  // ...
+}
+```
+
+[!TIP]
+
+> To get all the Formatters typing you can import the `Formatters\<T>` type where `T` is the entity of your `CDS` provided by [CDS-Typer](#generate-cds-typed-entities)
 
 </details>
 
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p> -->
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ## `Examples`
 

@@ -151,9 +151,9 @@ entity BookRecommendations : managed {
 
 entity BookFormats : managed {
   key ID              : Integer;
-      format          : String(50) @mandatory;
-      price           : Decimal    @mandatory;
-      pages           : Integer    @mandatory;
+      format          : String(50);
+      price           : Decimal @mandatory;
+      pages           : Integer @mandatory;
       language        : String(50);
       publicationDate : Date;
       // Associations

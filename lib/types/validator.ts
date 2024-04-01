@@ -2,6 +2,7 @@ import type {
   AlphaLocale,
   AlphanumericLocale,
   ContainsOptions,
+  HashAlgorithm,
   IdentityCardLocale,
   IPVersion,
   IsAlphanumericOptions,
@@ -10,8 +11,11 @@ import type {
   IsCreditCardOptions,
   IsCurrencyOptions,
   IsDateOptions,
+  IsDecimalOptions,
   IsEmailOptions,
+  IsFloatOptions,
   IsIMEIOptions,
+  IsIntOptions,
   IsLengthOptions,
   IsMobilePhoneOptions,
   IsNumericOptions,
@@ -24,18 +28,51 @@ import type {
 
 import type { IsIBANOptions } from 'validator/lib/isIBAN';
 import type { CdsFunction } from './types';
+import type { Options } from 'validator/lib/isBoolean';
 
 // * ########################################################################################################
 // * START Validator types
 // * ########################################################################################################
 
-// TODO: to be added 'isInt', 'isHexadecimal', 'isHash', 'isFloat', 'isEAN', 'isDecimal', 'isBoolean', 'isBIC', 'isBefore', 'isAfter'
-
-// TODO: from lodash 'isNull', 'hasIn', 'has'
-
 // Types which has properties : 'action' and 'options'
+export type IsBoolean = {
+  /**
+   * check if a string is a boolean.
+   */
+  action: 'isBoolean';
+  options?: Options;
+};
 
-// validator.isMailtoURI
+export type IsDecimal = {
+  /**
+   * Check if the string represents a decimal number,
+   * such as `0.1`, `.3`, `1.1`, `1.00003`, `4.0` etc.
+   *
+   * @param [options] - Options
+   */
+  action: 'isDecimal';
+  options?: IsDecimalOptions;
+};
+
+export type IsFloat = {
+  /**
+   * Check if the string is an integer.
+   *
+   * @param [options] - Options
+   */
+  action: 'isFloat';
+  options?: IsFloatOptions;
+};
+
+export type IsInt = {
+  /**
+   * Check if the string is an integer.
+   *
+   * @param [options] - Options
+   */
+  action: 'isInt';
+  options?: IsIntOptions;
+};
 
 export type IsMailtoURI = {
   /**
@@ -161,6 +198,10 @@ export type IsLength = {
 };
 
 export type ValidatorsWithOptions =
+  | IsBoolean
+  | IsDecimal
+  | IsFloat
+  | IsInt
   | IsMailtoURI
   | IsNumeric
   | IsTime
@@ -227,6 +268,27 @@ export type ValidatorsWithLocale = IsPostalCode | IsIdentityCard;
 // ######################################################################################################
 
 // Types which has only 'action' property
+
+export type IsBIC = {
+  /**
+   * Check if a string is a BIC (Bank Identification Code) or SWIFT code.
+   */
+  action: 'isBIC';
+};
+
+export type IsEAN = {
+  /**
+   * Check if the string is an EAN (European Article Number).
+   */
+  action: 'isEAN';
+};
+
+export type IsHexadecimal = {
+  /**
+   * Check if the string is a hexadecimal number.
+   */
+  action: 'isHexadecimal';
+};
 
 export type IsLatLong = {
   /**
@@ -310,6 +372,9 @@ export type IsJWT = {
 };
 
 export type ValidatorsWithNoOptions =
+  | IsBIC
+  | IsEAN
+  | IsHexadecimal
   | IsLatLong
   | IsMD5
   | IsMimeType
@@ -325,6 +390,36 @@ export type ValidatorsWithNoOptions =
 // ######################################################################################################
 
 //  Types which has properties various properties
+
+export type IsAfter = {
+  /**
+   * Check if the string is a date that's after the specified date.
+   *
+   * @param [date] - Date string (defaults to now)
+   */
+  action: 'isAfter';
+  date?: string;
+};
+
+export type IsBefore = {
+  /**
+   * Check if the string is a date that's before the specified date.
+   *
+   * @param [date] - Date string (defaults to now)
+   */
+  action: 'isBefore';
+  date?: string;
+};
+
+export type IsHash = {
+  /**
+   * Check if the string is a hash of export type algorithm.
+   *
+   * @param algorithm - HashAlgorithm
+   */
+  action: 'isHash';
+  algorithm: HashAlgorithm;
+};
 
 export type IsIP = {
   /**
@@ -398,7 +493,17 @@ export type Matches = {
   pattern: RegExp;
 };
 
-export type ValidatorsWithMultipleOptions = IsIP | IsISBN | IsIn | IsWhitelisted | IsEquals | Contains | Matches;
+export type ValidatorsWithMultipleOptions =
+  | IsAfter
+  | IsBefore
+  | IsHash
+  | IsIP
+  | IsISBN
+  | IsIn
+  | IsWhitelisted
+  | IsEquals
+  | Contains
+  | Matches;
 
 // ######################################################################################################
 
@@ -492,10 +597,18 @@ export type ValidatorBase = {
 
   /**
    * If `mandatoryFieldValidation : true` this will mandatory check the `Request.data` object for the field which needs to be validated.
-   * if `mandatoryFieldValidation: false` or omitted, this will let the `Request.data` not to have the field in the `body` and the validation will just be omitted.
+   * if `mandatoryFieldValidation : false` or omitted, this will let the `Request.data` not to have the field in the `body` and the validation will just be omitted.
    * `Default` is set to `false`
    */
   mandatoryFieldValidation?: boolean;
+
+  // ? ASK: which should do the opposite of the actions ... add it to 'ValidatorBase' but only to validators and not to formatters....
+
+  // /**
+  //  * If `negateAction : true`, the validator's action will be negated (e.g., `isAlpha` becomes `isNotAlpha`, `isNull` becomes `isNotNull`, `startsWith` becomes `notStartsWith`, ...).
+  //  * `Default` is set to `false`
+  //  */
+  // negateAction?: boolean;
 };
 
 export type LodashValidators = ValidatorBase & (StartsWith | EndsWith);

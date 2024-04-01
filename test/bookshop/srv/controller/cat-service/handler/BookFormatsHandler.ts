@@ -12,6 +12,7 @@ import {
   TypedRequest,
 } from '../../../../../../lib';
 import { BookFormat } from '../../../../@cds-models/CatalogService';
+import { customFormatter } from '../../../util/formatter';
 
 @EntityHandler(BookFormat)
 class BookFormatsHandler {
@@ -31,18 +32,7 @@ class BookFormatsHandler {
 
   @AfterRead()
   @FieldsFormatter<BookFormat>({ action: 'toUpper' }, 'format')
-  @FieldsFormatter<BookFormat>(
-    {
-      action: 'customFormatter',
-      callback(req, results) {
-        if (results) {
-          // make first item 'toLowerCase' and leave the rest 'toUpperCase'
-          results[0].format = results[0].format?.toLowerCase();
-        }
-      },
-    },
-    'format',
-  )
+  @FieldsFormatter<BookFormat>(customFormatter, 'format')
   public async afterRead(results: BookFormat[], req: TypedRequest<BookFormat>) {
     // ...
   }
