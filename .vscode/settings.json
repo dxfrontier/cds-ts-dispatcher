@@ -9,5 +9,12 @@
 
   "editor.inlayHints.fontFamily": "Anonymous Pro",
   "editor.inlayHints.fontSize": 10,
-  "editor.inlayHints.padding": true
+  "editor.inlayHints.padding": true,
+
+  "window.zoomLevel": -0.7,
+
+  "workbench.colorTheme": "One Dark Pro Darker",
+
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true
 }
