@@ -9,7 +9,7 @@ const middlewareUtil = {
   registerToMethod<Middleware extends Constructable<MiddlewareImpl>>(
     middlewares: Middleware[],
     descriptor: TypedPropertyDescriptor<RequestType>,
-  ): TypedPropertyDescriptor<RequestType> {
+  ) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
@@ -39,8 +39,6 @@ const middlewareUtil = {
 
       await originalMethod!.apply(this, args);
     };
-
-    return descriptor;
   },
 
   registerToClass<Middleware extends Constructable<MiddlewareImpl>, Target extends object>(

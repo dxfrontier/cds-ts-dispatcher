@@ -1,10 +1,8 @@
-import type { Request } from '@sap/cds/apis/events';
+import type { Request, Service } from '@sap/cds';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { ServiceImpl, TypedRequest } from '@sap/cds/apis/services';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { HandlerType } from './enum';
-
-import type { Service } from '@sap/cds';
 
 /**
  * Use this type to annotate the 'next' parameter of the Middleware use method

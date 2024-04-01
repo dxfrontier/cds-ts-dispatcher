@@ -29,7 +29,7 @@ const validatorUtil = {
     options.req.reject(StatusCodes.BAD_REQUEST, message);
   },
 
-  applyValidator(req: Request, validator: Validators, field: string): void {
+  canValidate(req: Request, validator: Validators, field: string): boolean {
     const value = req.data[field];
 
     if (util.isFieldEmpty(value) && validator.mandatoryFieldValidation) {
@@ -38,8 +38,14 @@ const validatorUtil = {
 
     // If the field is empty, no further validation is needed
     if (util.isFieldEmpty(value)) {
-      return;
+      return false;
     }
+
+    return true;
+  },
+
+  applyValidator(req: Request, validator: Validators, field: string): void {
+    const value = req.data[field];
 
     const input = String(value);
     const customMessage: string | null = validator.customMessage ?? null;
@@ -50,9 +56,10 @@ const validatorUtil = {
       // START 'Lodash' formatters
 
       case 'startsWith':
-      case 'endsWith':
+      case 'endsWith': {
         isValid = util.lodash[validator.action](input, validator.target, validator.position);
         break;
+      }
 
       // END 'Lodash'
 
@@ -60,6 +67,10 @@ const validatorUtil = {
 
       // START 'Validator' formatters
 
+      case 'isBoolean':
+      case 'isDecimal':
+      case 'isFloat':
+      case 'isInt':
       case 'isMailtoURI':
       case 'isNumeric':
       case 'isTime':
@@ -83,6 +94,9 @@ const validatorUtil = {
         break;
       }
 
+      case 'isBIC':
+      case 'isEAN':
+      case 'isHexadecimal':
       case 'isLatLong':
       case 'isMD5':
       case 'isMimeType':
@@ -143,6 +157,17 @@ const validatorUtil = {
 
       case 'matches': {
         isValid = validatorActions[validator.action](input, validator.pattern);
+        break;
+      }
+
+      case 'isHash': {
+        isValid = validatorActions[validator.action](input, validator.algorithm);
+        break;
+      }
+
+      case 'isBefore':
+      case 'isAfter': {
+        isValid = validatorActions[validator.action](input, validator.date);
         break;
       }
 
