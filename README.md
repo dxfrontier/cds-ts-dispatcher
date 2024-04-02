@@ -18,7 +18,7 @@
 ![GitHub top language](https://img.shields.io/github/languages/top/dxfrontier/cds-ts-dispatcher?logo=git)
 ![GitHub Repo stars](https://img.shields.io/github/stars/dxfrontier/cds-ts-dispatcher?style=flat&logo=git)
 
-The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement TS handlers provided by the SAP CAP framework.
+The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement **TS handlers** provided by the SAP CAP framework.
 
 ## Table of Contents
 
@@ -442,12 +442,26 @@ import { EntityHandler } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
-export class CustomerHandler {
+export class BookHandler {
   // ...
   constructor() {}
-  // ...
+  // ... all events like @AfterRead, @BeforeRead ...
 }
 ```
+
+> [!TIP]
+> After creation of `BookHandler` class, you can `import it` into the [CDSDispatcher](#cdsdispatcher).
+>
+> ```typescript
+> import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
+>
+> export = new CDSDispatcher([
+>   // Entities
+>   BookHandler,
+>   // Unbound actions
+>   // ...
+> ]).initialize();
+> ```
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
@@ -556,17 +570,10 @@ The following decorators can be used inside of `@UnboundActions()` :
 `Example`
 
 ```typescript
-import {
-  UnboundActions,
-  OnAction,
-  OnFunction,
-  OnEvent,
-  ActionRequest,
-  ActionReturn,
-  TypedRequest,
-  Request,
-} from '@dxfrontier/cds-ts-dispatcher';
+import { UnboundActions, OnAction, OnFunction, OnEvent } from '@dxfrontier/cds-ts-dispatcher';
 import { MyAction, MyFunction, MyEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { ActionRequest, ActionReturn, TypedRequest, Request } from '@dxfrontier/cds-ts-dispatcher';
 
 @UnboundActions()
 export class UnboundActionsHandler {
@@ -576,13 +583,13 @@ export class UnboundActionsHandler {
 
   // Unbound action
   @OnAction(MyAction)
-  public async onActionMethod(req: ActionRequest<typeof MyAction>, next: Function): ActionReturn<typeof MyAction> {
+  private async onActionMethod(req: ActionRequest<typeof MyAction>, next: Function): ActionReturn<typeof MyAction> {
     // ...
   }
 
   // Unbound Function
   @OnFunction(MyFunction)
-  public async onFunctionMethod(
+  private async onFunctionMethod(
     req: ActionRequest<typeof MyFunction>,
     next: Function,
   ): ActionReturn<typeof MyFunction> {
@@ -591,13 +598,13 @@ export class UnboundActionsHandler {
 
   // Unbound event
   @OnEvent(MyEvent)
-  public async onEventMethod(req: TypedRequest<MyEvent>) {
+  private async onEventMethod(req: TypedRequest<MyEvent>) {
     // ...
   }
 
   // Unbound error
   @OnError()
-  public onErrorMethod(err: Error, req: Request) {
+  private onErrorMethod(err: Error, req: Request) {
     // ...
   }
 }
@@ -641,8 +648,7 @@ Middleware decorators can perform the following tasks:
 `Example:` middleware implementation
 
 ```typescript
-import type { Request } from '@sap/cds';
-import type { MiddlewareImpl, Next } from '@dxfrontier/cds-ts-dispatcher';
+import type { MiddlewareImpl, Next, Request } from '@dxfrontier/cds-ts-dispatcher';
 
 export class MiddlewareClass implements MiddlewareImpl {
   public async use(req: Request, next: Next) {
@@ -656,7 +662,8 @@ export class MiddlewareClass implements MiddlewareImpl {
 `Example` usage
 
 ```typescript
-import { EntityHandler, Use, Inject, SRV, Service } from '@dxfrontier/cds-ts-dispatcher';
+import { EntityHandler, Use, Inject, SRV } from '@dxfrontier/cds-ts-dispatcher';
+import type { Service } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 import { Middleware1, Middleware2, MiddlewareN } from 'YOUR_MIDDLEWARE_LOCATION';
@@ -673,10 +680,10 @@ export class CustomerHandler {
 ```
 
 > [!TIP]
-> Think of it (middleware) like as a reusable class, enhancing the functionality of every event within the class.
-
-> [!TIP]
-> Middlewares when applied with `@Use` are executed before the normal events.
+>
+> 1. Think of it _(middleware)_ like as a reusable class, enhancing the functionality of all events within the class.
+> 2. Middlewares when applied with `@Use` are executed before the normal events.
+> 3. If you need to apply middleware to `method` you can have a look over method specific [@Use](#use-1) decorator .
 
 > [!WARNING]
 > If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
@@ -701,7 +708,9 @@ The `@Inject` decorator is utilized as a `field-level` decorator and allows you 
 `Example`
 
 ```typescript
-import { EntityHandler, Inject, SRV, Service } from "@dxfrontier/cds-ts-dispatcher";
+import { EntityHandler, Inject, SRV } from "@dxfrontier/cds-ts-dispatcher";
+import type { Service } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
@@ -732,7 +741,9 @@ This specialized `@Inject` can be used as a `constant` in `@ServiceLogic`, `@Rep
 `Example`
 
 ```typescript
-import { EntityHandler, Inject, SRV, Service } from '@dxfrontier/cds-ts-dispatcher';
+import { EntityHandler, Inject, SRV } from '@dxfrontier/cds-ts-dispatcher';
+import type { Service } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @EntityHandler(MyEntity)
@@ -766,7 +777,12 @@ The handlers receive one argument:
 See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) event**
 
 > [!TIP]
-> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@BeforeCreateDraft(), @BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()`
+> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use
+>
+> - @BeforeCreateDraft()
+> - @BeforeReadDraft()
+> - @BeforeUpdateDraft()
+> - @BeforeDeleteDraft()
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -779,11 +795,13 @@ It is important to note that decorator `@BeforeCreate()` will be triggered based
 `Example`
 
 ```typescript
-import { BeforeCreate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeCreate } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeCreate()
-public async beforeCreateMethod(req: TypedRequest<MyEntity>) {
+private async beforeCreateMethod(req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -810,11 +828,13 @@ It is important to note that decorator `@BeforeRead()` will be triggered based o
 `Example`
 
 ```typescript
-import { BeforeRead, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeRead } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeRead()
-public async beforeReadMethod(req: TypedRequest<MyEntity>) {
+private async beforeReadMethod(req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -841,11 +861,13 @@ It is important to note that decorator `@BeforeUpdate()` will be triggered based
 `Example`
 
 ```typescript
-import { BeforeUpdate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeUpdate } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeUpdate()
-public async beforeUpdateMethod(req: TypedRequest<MyEntity>) {
+private async beforeUpdateMethod(req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -872,11 +894,13 @@ It is important to note that decorator `@BeforeDelete()` will be triggered based
 `Example`
 
 ```typescript
-import { BeforeDelete, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeDelete } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeDelete()
-public async beforeDeleteMethod(req: TypedRequest<MyEntity>) {
+private async beforeDeleteMethod(req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -908,7 +932,12 @@ The handlers receive two arguments:
 See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
 
 > [!TIP]
-> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@AfterCreateDraft(), @AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()`
+> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use ?>
+>
+> - @AfterCreateDraft()
+> - @AfterReadDraft()
+> - @AfterUpdateDraft()
+> - @AfterDeleteDraft()
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -921,11 +950,13 @@ It is important to note that decorator `@AfterCreate()` will be triggered based 
 `Example`
 
 ```typescript
-import { AfterCreate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterCreate } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterCreate()
-public async afterCreateMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterCreateMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -952,11 +983,13 @@ this.after('CREATE', MyEntity, async (result, req) => {
 It is important to note that decorator `@AfterRead()` will be triggered based on the [EntityHandler](#entityhandler) `argument` `MyEntity`
 
 ```typescript
-import { AfterRead, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterRead } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterRead()
-public async afterReadMethod(results: MyEntity[], req: TypedRequest<MyEntity>) {
+private async afterReadMethod(results: MyEntity[], req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -983,11 +1016,13 @@ It is important to note that decorator `@AfterUpdate()` will be triggered based 
 `Example`
 
 ```typescript
-import { AfterUpdate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterUpdate } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterUpdate()
-public async afterUpdateMethod(result: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterUpdateMethod(result: MyEntity, req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1014,11 +1049,13 @@ It is important to note that decorator `@AfterDelete()` will be triggered based 
 `Example`
 
 ```typescript
-import { AfterDelete, Request} from "@dxfrontier/cds-ts-dispatcher";
+import { AfterDelete} from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterDelete()
-public async afterDeleteMethod(deleted: boolean, req: Request) {
+private async afterDeleteMethod(deleted: boolean, req: Request) {
   // ...
 }
 ```
@@ -1048,7 +1085,14 @@ The handlers receive two arguments:
 See also the official SAP JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request) event**
 
 > [!TIP]
-> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use `@OnCreateDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft()`
+> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use >
+>
+> - @OnCreateDraft()
+> - @OnReadDraft()
+> - @OnUpdateDraft()
+> - @OnDeleteDraft()
+> - @OnBoundActionDraft()
+> - @OnBoundFunctionDraft()
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1061,11 +1105,13 @@ It is important to note that decorator `@OnCreate()` will be triggered based on 
 `Example`
 
 ```typescript
-import { OnCreate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { OnCreate } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnCreate()
-public async onCreateMethod(req: TypedRequest<MyEntity>, next: Function) {
+private async onCreateMethod(req: TypedRequest<MyEntity>, next: Function) {
   // ...
 
   return next();
@@ -1094,11 +1140,13 @@ It is important to note that decorator `@OnRead()` will be triggered based on th
 `Example`
 
 ```typescript
-import { OnRead, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { OnRead } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnRead()
-public async onReadMethod(req: TypedRequest<MyEntity>, next: Function) {
+private async onReadMethod(req: TypedRequest<MyEntity>, next: Function) {
   // ...
 
   return next();
@@ -1128,11 +1176,13 @@ It is important to note that decorator `@OnUpdate()` will be triggered based on 
 
 ```typescript
 
-import { OnUpdate, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { OnUpdate } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnUpdate()
-public async onUpdateMethod(req: TypedRequest<MyEntity>, next: Function) {
+private async onUpdateMethod(req: TypedRequest<MyEntity>, next: Function) {
   // ...
 
   return next();
@@ -1161,11 +1211,13 @@ It is important to note that decorator `@OnDelete()` will be triggered based on 
 `Example`
 
 ```typescript
-import { OnDelete, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { OnDelete } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnDelete()
-public async onDeleteMethod(req: TypedRequest<MyEntity>, next: Function) {
+private async onDeleteMethod(req: TypedRequest<MyEntity>, next: Function) {
   // ...
 
   return next();
@@ -1197,11 +1249,13 @@ this.on('DELETE', MyEntity, async (req, next) => {
 
 ```typescript
 
-import { OnAction, ActionRequest, ActionReturn } from "@dxfrontier/cds-ts-dispatcher";
+import { OnAction } from "@dxfrontier/cds-ts-dispatcher";
+import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+
 import { AnAction } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnAction(AnAction)
-public async onActionMethod(req: ActionRequest<typeof AnAction>, next: Function): ActionReturn<typeof AnAction> {
+private async onActionMethod(req: ActionRequest<typeof AnAction>, next: Function): ActionReturn<typeof AnAction> {
   // ...
 }
 ```
@@ -1233,11 +1287,13 @@ this.on(AnAction, async (req, next) => {
 `Example`
 
 ```typescript
-import { OnFunction, ActionRequest, ActionReturn } from "@dxfrontier/cds-ts-dispatcher";
+import { OnFunction } from "@dxfrontier/cds-ts-dispatcher";
+import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+
 import { AFunction } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnFunction(AFunction)
-public async onFunctionMethod(req: ActionRequest<typeof AFunction>, next: Function): ActionReturn<typeof AFunction> {
+private async onFunctionMethod(req: ActionRequest<typeof AFunction>, next: Function): ActionReturn<typeof AFunction> {
   // ...
 }
 ```
@@ -1273,11 +1329,13 @@ This decorator is particularly useful in conjunction with the [Emit method](http
 `Example`
 
 ```typescript
-import { OnEvent, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { OnEvent } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { AEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnEvent(AEvent)
-public async onEventMethod(req: TypedRequest<AEvent>) {
+private async onEventMethod(req: TypedRequest<AEvent>) {
   // ...
 }
 ```
@@ -1290,8 +1348,7 @@ this.on('AEvent', async (req) => {
 });
 ```
 
-> [!NOTE]
-> AEvent was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> [!NOTE] > **AEvent** was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 > [!IMPORTANT]  
 > Decorator `@OnEvent` should be used inside [@UnboundActions](#unboundactions) class.
@@ -1312,10 +1369,11 @@ Error handlers are invoked whenever an error occurs during event processing of a
 `Example`
 
 ```typescript
-import { OnError, Request } from "@dxfrontier/cds-ts-dispatcher";
+import { OnError } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 @OnError()
-public onError(err: Error, req: Request) { // sync func
+private onError(err: Error, req: Request) { // sync func
   err.message = 'New message'
   // ...
 }
@@ -1354,11 +1412,13 @@ It is important to note that decorator `@OnBoundAction()` will be triggered base
 `Example`
 
 ```typescript
-import { OnBoundAction, ActionRequest, ActionReturn } from "@dxfrontier/cds-ts-dispatcher";
+import { OnBoundAction } from "@dxfrontier/cds-ts-dispatcher";
+import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnBoundAction(MyEntity.actions.AnAction)
-public async onActionMethod(req: ActionRequest<typeof MyEntity.actions.AnAction>, next: Function): ActionReturn<typeof MyEntity.actions.AnAction> {
+private async onActionMethod(req: ActionRequest<typeof MyEntity.actions.AnAction>, next: Function): ActionReturn<typeof MyEntity.actions.AnAction> {
   // ...
 }
 ```
@@ -1389,11 +1449,13 @@ It is important to note that decorator `@OnBoundFunction()` will be triggered ba
 `Example`
 
 ```typescript
-import { OnBoundFunction, ActionRequest, ActionReturn } from "@dxfrontier/cds-ts-dispatcher";
+import { OnBoundFunction } from "@dxfrontier/cds-ts-dispatcher";
+import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnBoundFunction(MyEntity.actions.AFunction)
-public async onFunctionMethod(req: ActionRequest<typeof MyEntity.actions.AFunction>, next: Function): ActionReturn<typeof MyEntity.actions.AFunction> {
+private async onFunctionMethod(req: ActionRequest<typeof MyEntity.actions.AFunction>, next: Function): ActionReturn<typeof MyEntity.actions.AFunction> {
   // ...
 }
 ```
@@ -1435,10 +1497,12 @@ It is important to note that decorator `@BeforeNewDraft()` will be triggered bas
 
 ```typescript
 import { BeforeNewDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeNewDraft()
-public async beforeCreateDraftMethod(req: TypedRequest<MyEntity>) {
+private async beforeCreateDraftMethod(req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1467,11 +1531,13 @@ It is important to note that decorator `@BeforeCancelDraft()` will be triggered 
 `Example`
 
 ```typescript
-import { BeforeCancelDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeCancelDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeCancelDraft()
-public async beforeCancelDraftMethod(req: TypedRequest<MyEntity>) {
+private async beforeCancelDraftMethod(req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1500,11 +1566,13 @@ It is important to note that decorator `@BeforeEditDraft()` will be triggered ba
 `Example`
 
 ```typescript
-import { BeforeEditDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeEditDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeEditDraft()
-public async beforeEditDraftMethod(req: TypedRequest<MyEntity>) {
+private async beforeEditDraftMethod(req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1533,11 +1601,13 @@ It is important to note that decorator `@BeforeSaveDraft()` will be triggered ba
 `Example`
 
 ```typescript
-import { BeforeSaveDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeSaveDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeSaveDraft()
-public async beforeSaveDraftMethod(req: TypedRequest<MyEntity>) {
+private async beforeSaveDraftMethod(req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1580,11 +1650,13 @@ It is important to note that decorator `@AfterNewDraft()` will be triggered base
 `Example`
 
 ```typescript
-import { AfterNewDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterNewDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterNewDraft()
-public async afterNewDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterNewDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1613,11 +1685,13 @@ It is important to note that decorator `@AfterCancelDraft()` will be triggered b
 `Example`
 
 ```typescript
-import { AfterCancelDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterCancelDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterCancelDraft()
-public async afterCancelDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterCancelDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1646,11 +1720,13 @@ It is important to note that decorator `@AfterEditDraft()` will be triggered bas
 `Example`
 
 ```typescript
-import { AfterEditDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterEditDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterEditDraft()
-public async afterEditDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterEditDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1679,11 +1755,13 @@ It is important to note that decorator `@AfterSaveDraft()` will be triggered bas
 `Example`
 
 ```typescript
-import { AfterSaveDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterSaveDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterSaveDraft()
-public async afterSaveDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterSaveDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1723,11 +1801,13 @@ It is important to note that decorator `@OnNewDraft()` will be triggered based o
 `Example`
 
 ```typescript
-import { OnNewDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { OnNewDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnNewDraft()
-public async onNewDraft(req: TypedRequest<MyEntity>, next: Function) {
+private async onNewDraft(req: TypedRequest<MyEntity>, next: Function) {
   // ...
 }
 ```
@@ -1756,11 +1836,13 @@ It is important to note that decorator `@OnCancelDraft()` will be triggered base
 `Example`
 
 ```typescript
-import { OnCancelDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { OnCancelDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnCancelDraft()
-public async onCancelDraft(req: TypedRequest<MyEntity>, next: Function) {
+private async onCancelDraft(req: TypedRequest<MyEntity>, next: Function) {
   // ...
 }
 ```
@@ -1789,11 +1871,13 @@ It is important to note that decorator `@OnEditDraft()` will be triggered based 
 `Example`
 
 ```typescript
-import { OnEditDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { OnEditDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnEditDraft()
-public async onEditDraft(req: TypedRequest<MyEntity>, next: Function) {
+private async onEditDraft(req: TypedRequest<MyEntity>, next: Function) {
   // ...
 }
 ```
@@ -1823,11 +1907,13 @@ It is important to note that decorator `@OnSaveDraft()` will be triggered based 
 
 ```typescript
 
-import { OnSaveDraft, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
+import { OnSaveDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnSaveDraft()
-public async onSaveDraft(req: TypedRequest<MyEntity>, next: Function) {
+private async onSaveDraft(req: TypedRequest<MyEntity>, next: Function) {
   // ...
 }
 ```
@@ -1844,77 +1930,6 @@ this.on('SAVE', MyEntity, async (req, next) => {
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-<!-- ##### `Middleware`
-
-###### Use -->
-
-<!-- **@Use**(`...Middleware[]`)
-
-The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your method.
-
-Middleware decorators can perform the following tasks:
-
-- Execute any code.
-- Make changes to the request object.
-- End the request-response cycle.
-- Call the next middleware function in the stack.
-- If the current middleware function does not end the request-response cycle, it must call `next()` to pass control to the next middleware function. Otherwise, the request will be left hanging.
-
-`Parameters`
-
-- `...Middleware[])`: Middleware classes to be injected.
-
-`Example:` middleware implementation
-
-```typescript
-import type { Request } from '@sap/cds';
-import type { MiddlewareImpl, Next } from '@dxfrontier/cds-ts-dispatcher';
-
-export class MiddlewareClass implements MiddlewareImpl {
-  public async use(req: Request, next: Next) {
-    console.log('Middleware use method called.');
-
-    await next();
-  }
-}
-```
-
-`Example` usage
-
-```typescript
-import { EntityHandler, Use, Inject, SRV, Service } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@EntityHandler(MyEntity)
-export class CustomerHandler {
-  // ...
-  @Inject(SRV) private srv: Service;
-  // ...
-  constructor() {}
-
-  @AfterRead()
-  @Use(MiddlewareClass)
-  private async addDiscount(results: MyEntity[], req: Request) {
-    // ...
-  }
-
-  // ...
-}
-```
-
-> [!TIP]
-> Middlewares when applied with `@Use` are executed before the normal events.
-
-> [!WARNING]
-> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p> -->
 
 ##### `Other` - draft decorators
 
@@ -1944,13 +1959,14 @@ The `@SingleInstanceCapable()` decorator is applied at the method level to indic
 - Example single request : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
 
 ```typescript
+import { AfterRead, SingleInstanceCapable } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 
-import { AfterRead, SingleInstanceCapable, TypedRequest } from "@dxfrontier/cds-ts-dispatcher";
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterRead()
 @SingleInstanceCapable()
-public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
+private async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
   if(isSingleInstance) {
     // This will be executed only when single instance read is performed
     // isSingleInstance flag will be `true`
@@ -1965,10 +1981,15 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 - Entity set request example : http://localhost:4004/odata/v4/main/`MyEntity`
 
 ```typescript
+import { AfterRead, BeforeRead, SingleInstanceCapable } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
 @AfterRead()
 @SingleInstanceCapable()
 @BeforeRead()
-public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
+private async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
   if(isSingleInstance) {
     // This method will be executed for 'AfterRead` single instance
     return this.customerService.handleSingleInstance(req)
@@ -1991,7 +2012,7 @@ public async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedReq
 The `@Validate` decorator is utilized as a `method-level` decorator, used to validate `fields` of your entity before reaching your event callback.
 
 > [!TIP]
-> Think of it like to a `pre-validation` helper.
+> Think of it as a `pre-validation` helper.
 
 The `@Validate` decorator can be used when you want to `validate` the `Request`.`data` _(Request Body)_ of the `@sap/cds - Request` object on the following decorators :
 
@@ -2008,7 +2029,7 @@ The `@Validate` decorator can be used when you want to `validate` the `Request`.
 
 `Parameters`
 
-- `validator`: Choose from a list of predefined `Validators`.
+- `action`: Choose from a list of predefined `Validators`.
 - `options?`: _[Optional]_ Additional options for customizing the validation process.
 - `...Fields[]`: Specify the fields of your entity that require validation.
 
@@ -2055,7 +2076,7 @@ Below is a list of available validators:
 | isLowercase      | Check if the string is lowercase.                                                                        |
 | isMobilePhone    | Check if the string is a mobile phone number.                                                            | **strictMode**: If set to `true`, the mobile phone number must be supplied with the country code and must start with `+`. _Default: false_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | isPassportNumber | Check if the string is a valid passport number relative to a specific country code.                      |
-| isPostalCode     | Check if the string is a postal code.                                                                    | `"AD", "AT", "AU", "BE", "BG", "BR", "CA", "CH", "CN", "CZ", "DE", "DK", "DZ", "EE", "ES", "FI", "FR", "GB", "GR", "HR", "HU", "ID", "IE", "IL", "IN", "IR", "IS", "IT", "JP", "KE", "KR", "LI", "LT", "LU", "LV", "MX", "MT", "NL", "NO", "NZ", "PL", "PR", "PT", "RO", "RU", "SA", "SE", "SI", "SK", "TN", "TW", "UA", "US", "ZA", "ZM"           `                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| isPostalCode     | Check if the string is a postal code.                                                                    | "AD", "AT", "AU", "BE", "BG", "BR", "CA", "CH", "CN", "CZ", "DE", "DK", "DZ", "EE", "ES", "FI", "FR", "GB", "GR", "HR", "HU", "ID", "IE", "IL", "IN", "IR", "IS", "IT", "JP", "KE", "KR", "LI", "LT", "LU", "LV", "MX", "MT", "NL", "NO", "NZ", "PL", "PR", "PT", "RO", "RU", "SA", "SE", "SI", "SK", "TN", "TW", "UA", "US", "ZA", "ZM"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | isURL            | Check if the string is a URL.                                                                            | **protocols**: An array of allowed protocols. _Default: ['http', 'https', 'ftp']_ <br> **require_tld**: If set to `true`, URLs must have a top-level domain. _Default: true_ <br> **require_protocol**: If set to `true`, URLs must have a protocol. _Default: false_ <br> **require_host**: If set to `true`, URLs must have a host. _Default: true_ <br> **require_port**: If set to `true`, isURL will check if a port is present in the URL. _Default: false_ <br> **require_valid_protocol**: If set to `true`, URLs must have a valid protocol. _Default: true_ <br> **allow_underscores**: If set to `true`, underscores are allowed in URLs. _Default: false_ <br> **host_whitelist**: An array of allowed hosts. <br> **host_blacklist**: An array of disallowed hosts. <br> **allow_trailing_dot**: If set to `true`, trailing dots are allowed in URLs. _Default: false_ <br> **allow_protocol_relative_urls**: If set to `true`, protocol-relative URLs are allowed. _Default: false_ <br> **disallow_auth**: If set to `true`, authentication credentials in URLs are disallowed. _Default: false_ <br> **allow_fragments**: If set to `true`, URL fragments are allowed. _Default: true_ <br> **allow_query_components**: If set to `true`, URL query components are allowed. _Default: true_ <br> **validate_length**: If set to `true`, URLs will be validated for length. _Default: true_                                                                                                                                                                                                                                                                                                                  |
 | isUUID           | Check if the string is a UUID (version 1, 2, 3, 4, or 5).                                                |
 | isUppercase      | Check if the string is uppercase.                                                                        |
@@ -2081,11 +2102,13 @@ import {
   EntityHandler,
   Inject,
   SRV,
-  Service,
   Validate,
+  BeforeCreate,
   BeforeUpdate,
-  TypedRequest,
+  OnCreate,
+  OnUpdate,
 } from '@dxfrontier/cds-ts-dispatcher';
+import type { TypedRequest, Service } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
@@ -2099,27 +2122,27 @@ export class CustomerHandler {
   @BeforeCreate()
   @Validate<MyEntity>({ action: 'isLowercase' }, 'comment')
   @Validate<MyEntity>({ action: 'endsWith', target: 'N' }, 'description')
-  public async beforeCreate(req: TypedRequest<MyEntity>) {
+  private async beforeCreate(req: TypedRequest<MyEntity>) {
     // ...
   }
 
   @BeforeUpdate()
   @Validate<MyEntity>({ action: 'startsWith', target: 'COMMENT:' }, 'comment')
   @Validate<MyEntity>({ action: 'isAlphanumeric' }, 'description')
-  public async beforeUpdate(req: TypedRequest<MyEntity>) {
+  private async beforeUpdate(req: TypedRequest<MyEntity>) {
     // ...
   }
 
   @OnCreate()
   @Validate<MyEntity>({ action: 'isAlphanumeric' }, 'book_ID')
-  public async onCreate(req: TypedRequest<MyEntity>, next: Function) {
+  private async onCreate(req: TypedRequest<MyEntity>, next: Function) {
     // ...
     return next();
   }
 
   @OnUpdate()
   @Validate<MyEntity>({ action: 'isLength', options: { min: 5 } }, 'comment')
-  public async onUpdate(req: TypedRequest<MyEntity>, next: Function) {
+  private async onUpdate(req: TypedRequest<MyEntity>, next: Function) {
     // ...
     return next();
   }
@@ -2131,33 +2154,45 @@ export class CustomerHandler {
 `Example 2`: `@Validate` is used inside of `@UnboundActions`
 
 ```ts
+import { UnboundActions, OnAction, OnFunction, OnEvent, Validate } from '@dxfrontier/cds-ts-dispatcher';
+import type { ExposeFields, TypedRequest, ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+
+import { SomeAction, SomeFunction, OrderedBook } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
 @UnboundActions()
 class UnboundActionsHandler {
-  @OnAction(someAction)
-  @Validate<ExposeFields<typeof someAction>>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
-  public async onActionMethod(req: ActionRequest<typeof someAction>, _: Function): ActionReturn<typeof someAction> {
+  @OnAction(SomeAction)
+  @Validate<ExposeFields<typeof SomeAction>>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
+  private async onActionMethod(req: ActionRequest<typeof SomeAction>, _: Function): ActionReturn<typeof SomeAction> {
     // ...
   }
 
-  @OnFunction(someFunction)
-  @Validate<ExposeFields<typeof someFunction>>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
-  public async onFunctionMethod(
-    req: ActionRequest<typeof someFunction>,
+  @OnFunction(SomeFunction)
+  @Validate<ExposeFields<typeof SomeFunction>>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
+  private async onFunctionMethod(
+    req: ActionRequest<typeof SomeFunction>,
     next: Function,
-  ): ActionReturn<typeof someFunction> {
+  ): ActionReturn<typeof SomeFunction> {
     // ...
   }
 
   @OnEvent(OrderedBook)
   @Validate<OrderedBook>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
-  public async onEvent(req: TypedRequest<OrderedBook>) {
+  private async onEvent(req: TypedRequest<OrderedBook>) {
     // ...
   }
 }
 ```
 
 > [!IMPORTANT]
-> To get the fields for [@OnAction](#onaction), [@OnBoundAction](#onboundaction), [@OnFunction](#onfunction), [@OnBoundFunction](#onboundfunction) you must use the `ExposeFields` type inside of the `@Validate` decorator.
+> To get the fields for
+>
+> - [@OnAction](#onaction)
+> - [@OnBoundAction](#onboundaction)
+> - [@OnFunction](#onfunction)
+> - [@OnBoundFunction](#onboundfunction)
+>
+> you must use the `ExposeFields type` inside of the `@Validate` decorator.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -2189,7 +2224,7 @@ The `@FieldsFormatter` decorator can be used on the following decorators :
 
 `Parameters`
 
-- `formatter`: Choose from a list of predefined `Formatters`.
+- `action`: Choose from a list of predefined `Formatters`.
 - `options?`: [Optional] Additional options for customizing the formatter process.
 - `...Fields[]`: Specify the fields of your entity that require formatting.
 
@@ -2197,21 +2232,24 @@ The `@FieldsFormatter` decorator can be used on the following decorators :
 
 Here are the available formatter methods:
 
-| Action          | Description                                                                                                                                                                            |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| blacklist       | Remove characters that appear in the blacklist.                                                                                                                                        |
-| ltrim           | Trim characters from the left-side of the input.                                                                                                                                       |
-| rtrim           | Trim characters from the right-side of the input.                                                                                                                                      |
-| trim            | Trim characters from both sides of the input.                                                                                                                                          |
-| escape          | Replace `<`, `>`, `&`, `'`, `"` and `/` with HTML entities.                                                                                                                            |
-| unescape        | Replaces HTML encoded entities with `<`, `>`, `&`, `'`, `"` and `/`.                                                                                                                   |
-| toLower         | Converts string, as a whole, to lower case.                                                                                                                                            |
-| toUpper         | Converts string, as a whole, to upper case.                                                                                                                                            |
-| upperFirst      | Converts the first character of the string to upper case.                                                                                                                              |
-| lowerFirst      | Converts the first character of the string to lower case.                                                                                                                              |
-| replace         | Replaces matches for pattern in string with replacement. <br /> **Note**: This method is based on String#replace.                                                                      |
-| truncate        | Truncates string if it’s longer than the given maximum string length. <br /> The last characters of the truncated, string are replaced with the omission string which defaults to "…". |
-| customFormatter | Apply a custom formatter when standard ones do not satisfy your needs.                                                                                                                 |
+| Action          | Description                                                                                                                                                                                                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| blacklist       | Remove characters that appear in the blacklist.                                                                                                                                                                                                                            |
+| ltrim           | Trim characters from the left-side of the input.                                                                                                                                                                                                                           |
+| rtrim           | Trim characters from the right-side of the input.                                                                                                                                                                                                                          |
+| trim            | Trim characters from both sides of the input.                                                                                                                                                                                                                              |
+| escape          | Replace `<`, `>`, `&`, `'`, `"` and `/` with HTML entities.                                                                                                                                                                                                                |
+| unescape        | Replaces HTML encoded entities with `<`, `>`, `&`, `'`, `"` and `/`.                                                                                                                                                                                                       |
+| toLower         | Converts string, as a whole, to lower case.                                                                                                                                                                                                                                |
+| toUpper         | Converts string, as a whole, to upper case.                                                                                                                                                                                                                                |
+| upperFirst      | Converts the first character of the string to upper case.                                                                                                                                                                                                                  |
+| lowerFirst      | Converts the first character of the string to lower case.                                                                                                                                                                                                                  |
+| replace         | Replaces matches for pattern in string with replacement. <br /> **Note**: This method is based on String#replace.                                                                                                                                                          |
+| truncate        | Truncates string if it’s longer than the given maximum string length. <br /> The last characters of the truncated, string are replaced with the omission string which defaults to "…".                                                                                     |
+| snakeCase       | Snake case (or snake*case) is the process of writing compound words so that the words are separated with an underscore symbol (*) instead of a space. The first letter is usually changed to lowercase. Some examples of Snake case would be `"foo_bar" or "hello_world".` |
+| kebabCase       | Kebab case, also known as "spinal case" or "hyphen case," involves writing compound words in lowercase letters and separating them with hyphens ("-"). For example, the phrase "user settings panel" would be represented as `"user-settings-panel"` in the kebab case.    |
+| camelCase       | The format indicates the first word starting with either case, then the following words having an initial uppercase letter. `CustomerName, LastName ...`                                                                                                                   |
+| customFormatter | Apply a custom formatter when standard ones do not satisfy your needs.                                                                                                                                                                                                     |
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -2222,16 +2260,14 @@ import {
   EntityHandler,
   Inject,
   SRV,
-  Service,
-  AfterRead,
-  FieldsFormatter,
-  TypedRequest,
   BeforeCreate,
   BeforeUpdate,
   AfterRead,
   OnCreate,
   OnUpdate,
+  FieldsFormatter,
 } from '@dxfrontier/cds-ts-dispatcher';
+import type { Service, TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
@@ -2244,13 +2280,13 @@ export class CustomerHandler {
 
   @BeforeCreate()
   @FieldsFormatter<MyEntity>({ action: 'blacklist', charsToRemove: 'le' }, 'format')
-  public async beforeCreate(req: TypedRequest<MyEntity>) {
+  private async beforeCreate(req: TypedRequest<MyEntity>) {
     // ...
   }
 
   @BeforeUpdate()
   @FieldsFormatter<MyEntity>({ action: 'truncate', options: { length: 7 } }, 'format')
-  public async beforeUpdate(req: TypedRequest<MyEntity>) {
+  private async beforeUpdate(req: TypedRequest<MyEntity>) {
     // ...
   }
 
@@ -2268,20 +2304,20 @@ export class CustomerHandler {
     },
     'format',
   )
-  public async afterRead(results: MyEntity[], req: TypedRequest<MyEntity>) {
+  private async afterRead(results: MyEntity[], req: TypedRequest<MyEntity>) {
     // ...
   }
 
   @OnCreate()
   @FieldsFormatter<MyEntity>({ action: 'ltrim' }, 'language')
-  public async onCreate(req: TypedRequest<MyEntity>, next: Function) {
+  private async onCreate(req: TypedRequest<MyEntity>, next: Function) {
     // ...
     return next();
   }
 
   @OnUpdate()
   @FieldsFormatter<MyEntity>({ action: 'trim' }, 'format')
-  public async onUpdate(req: TypedRequest<MyEntity>, next: Function) {
+  private async onUpdate(req: TypedRequest<MyEntity>, next: Function) {
     // ...
     return next();
   }
@@ -2296,32 +2332,44 @@ export class CustomerHandler {
 `Example 2` : using `@FieldsFormatter` decorator inside the [@UnboundActions](#unboundactions)
 
 ```ts
+import { UnboundActions, OnAction, OnFunction, OnEvent, FieldsFormatter } from '@dxfrontier/cds-ts-dispatcher';
+import type { ActionRequest, ActionReturn, ExposeFields } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
 @UnboundActions()
 class UnboundActionsHandler {
   @OnAction(AnAction)
   @FieldsFormatter<ExposeFields<typeof AnAction>>({ action: 'toLower' }, 'descr', 'bookName')
-  public async onActionMethod(req: ActionRequest<typeof AnAction>, _: Function): ActionReturn<typeof AnAction> {
+  private async onActionMethod(req: ActionRequest<typeof AnAction>, _: Function): ActionReturn<typeof AnAction> {
     // ...
     return next();
   }
 
   @OnFunction(AFunction)
   @FieldsFormatter<ExposeFields<typeof AFunction>>({ action: 'toUpper' }, 'lastName')
-  public async onFunctionMethod(req: ActionRequest<typeof AFunction>, next: Function): ActionReturn<typeof AFunction> {
+  private async onFunctionMethod(req: ActionRequest<typeof AFunction>, next: Function): ActionReturn<typeof AFunction> {
     // ...
     return next();
   }
 
   @OnEvent(AnEvent)
   @FieldsFormatter<AnEvent>({ action: 'upperFirst' }, 'name')
-  public async onEvent(req: TypedRequest<AnEvent>) {
+  private async onEvent(req: TypedRequest<AnEvent>) {
     // ...
   }
 }
 ```
 
 > [!IMPORTANT]
-> To get the fields for [@OnAction()](#onaction), [@OnBoundAction()](#onboundaction), [@OnFunction()](#onfunction), [@OnBoundFunction()](#onboundfunction) you must use the `ExposeFields` type inside of the `@FieldsFormatter` decorator.
+> To get the fields for
+>
+> - [@OnAction()](#onaction)
+> - [@OnBoundAction()](#onboundaction)
+> - [@OnFunction()](#onfunction)
+> - [@OnBoundFunction()](#onboundfunction)
+>
+> you must use the `ExposeFields type` inside of the `@FieldsFormatter` decorator.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -2346,8 +2394,7 @@ Middleware decorators can perform the following tasks:
 `Example:` middleware implementation
 
 ```typescript
-import type { Request } from '@sap/cds';
-import type { MiddlewareImpl, Next } from '@dxfrontier/cds-ts-dispatcher';
+import type { MiddlewareImpl, Next, Request } from '@dxfrontier/cds-ts-dispatcher';
 
 export class MiddlewareClass implements MiddlewareImpl {
   public async use(req: Request, next: Next) {
@@ -2361,7 +2408,8 @@ export class MiddlewareClass implements MiddlewareImpl {
 `Example` usage
 
 ```typescript
-import { EntityHandler, Use, Inject, SRV, Service } from '@dxfrontier/cds-ts-dispatcher';
+import { EntityHandler, Use, Inject, SRV } from '@dxfrontier/cds-ts-dispatcher';
+import type { Service, Request } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
@@ -2384,7 +2432,9 @@ export class CustomerHandler {
 ```
 
 > [!TIP]
-> Middlewares when applied with `@Use` are executed before the normal events.
+>
+> 1. Middlewares when applied with `@Use` are executed before the normal events.
+> 2. If you need to apply middleware to `class` you can have a look over class specific [@Use](#use) decorator .
 
 > [!WARNING]
 > If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
@@ -2536,7 +2586,7 @@ export const customFormatter: Formatters<BookFormat> = {
 ```ts
 @AfterRead()
 @FieldsFormatter<MyEntity>(customFormatter, 'format') // import it here
-public async afterRead(results: MyEntity[], req: TypedRequest<MyEntity>) {
+private async afterRead(results: MyEntity[], req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
