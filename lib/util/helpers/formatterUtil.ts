@@ -50,6 +50,9 @@ const formatterUtil = {
       }
 
       // No arguments
+      case 'camelCase':
+      case 'kebabCase':
+      case 'snakeCase':
       case 'toUpper':
       case 'toLower':
       case 'upperFirst':

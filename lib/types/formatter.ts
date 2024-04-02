@@ -1,6 +1,10 @@
 import type { TypedRequest } from './types';
 import type { ReplaceFunction, TruncateOptions } from 'lodash';
 
+// * ########################################################################################################
+// * Start Validator types
+// * ########################################################################################################
+
 export type BlacklistAction = {
   /**
    * Remove characters that appear in the blacklist.
@@ -60,6 +64,35 @@ export type Escape = {
   action: 'escape';
 };
 
+// * ########################################################################################################
+// * END Validator types
+// * ########################################################################################################
+
+// * ########################################################################################################
+// * Start Lodash types
+// * ########################################################################################################
+
+export type SnakeCase = {
+  /**
+   * Converts string to kebab case.
+   */
+  action: 'snakeCase';
+};
+
+export type KebabCase = {
+  /**
+   * Converts string to kebab case.
+   */
+  action: 'kebabCase';
+};
+
+export type CamelCase = {
+  /**
+   * Converts string to camel case.
+   */
+  action: 'camelCase';
+};
+
 export type ToLower = {
   /**
    * Converts `string`, as a whole, to lower case.
@@ -114,11 +147,24 @@ export type Replace = {
   replacement: ReplaceFunction | string;
 };
 
+// * ########################################################################################################
+// * END Lodash types
+// * ########################################################################################################
+
 export type Custom<T> = {
   action: 'customFormatter';
   callback: (req: TypedRequest<T>, results?: T[]) => Promise<void | Error> | void | Error;
 };
 
-export type LodashFormatters = ToLower | ToUpper | UpperFirst | LowerFirst | Truncate | Replace;
+export type LodashFormatters =
+  | SnakeCase
+  | KebabCase
+  | CamelCase
+  | ToLower
+  | ToUpper
+  | UpperFirst
+  | LowerFirst
+  | Truncate
+  | Replace;
 export type ValidatorFormatters = BlacklistAction | LTrim | RTrim | Trim | Unescape | Escape;
 export type Formatters<T> = ValidatorFormatters | LodashFormatters | Custom<T>;

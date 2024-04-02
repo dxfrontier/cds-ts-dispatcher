@@ -601,14 +601,6 @@ export type ValidatorBase = {
    * `Default` is set to `false`
    */
   mandatoryFieldValidation?: boolean;
-
-  // ? ASK: which should do the opposite of the actions ... add it to 'ValidatorBase' but only to validators and not to formatters....
-
-  // /**
-  //  * If `negateAction : true`, the validator's action will be negated (e.g., `isAlpha` becomes `isNotAlpha`, `isNull` becomes `isNotNull`, `startsWith` becomes `notStartsWith`, ...).
-  //  * `Default` is set to `false`
-  //  */
-  // negateAction?: boolean;
 };
 
 export type LodashValidators = ValidatorBase & (StartsWith | EndsWith);
