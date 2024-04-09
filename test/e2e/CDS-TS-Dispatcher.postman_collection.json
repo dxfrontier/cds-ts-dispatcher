@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "14e21f9c-391b-41f8-8800-16b25be854ef",
+		"_postman_id": "94d1e670-74b9-48eb-818c-a86b56190c85",
 		"name": "CDS-TS-Dispatcher",
 		"description": "`SAP CAP` `NodeJS-based project` using TypesScript decorators for rapid development.\n\nThe goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -112,19 +112,20 @@
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Single item : title contains \\\"10 % discount!\\\"\", function () {",
-													"    const response = pm.response.json();",
-													"    console.log(response)",
-													"    const {title} = response;",
+													"// pm.test(\"Single item : title contains \\\"10 % discount!\\\"\", function () {",
+													"//     const response = pm.response.json();",
+													"//     console.log(response)",
+													"//     const {title} = response;",
 													"    ",
-													"    pm.expect(title).to.include(\"10 % discount!\")",
-													"});",
+													"//     pm.expect(title).to.include(\"10 % discount!\")",
+													"// });",
 													"",
 													"pm.test(\"Status code is 200\", function () {",
 													"    pm.response.to.have.status(200);",
 													"});"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],

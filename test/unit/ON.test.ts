@@ -18,7 +18,7 @@ import { OnError, Request } from '../../lib/index';
 import { HandlerType } from '../../lib/types/enum';
 import { Book, OrderedBook, submitOrder } from '../bookshop/@cds-models/CatalogService';
 
-import type { CRUD_EVENTS, TypedRequest } from '../../lib/types/types';
+import type { CRUD_EVENTS, EVENTS, TypedRequest } from '../../lib/types/types';
 
 @EntityHandler(Book)
 class BookHandler {
@@ -57,7 +57,7 @@ const newBook = (Book: Constructable) => new Book();
 const decoratorProps = MetadataDispatcher.getMetadataHandlers(newBook(BookHandler));
 
 describe('ON', () => {
-  function testEvent(event: CRUD_EVENTS, eventName: string): void {
+  function testEvent(event: EVENTS, eventName: string): void {
     describe(`@${eventName}`, () => {
       test(`It should RETURN : all defined properties for this @${eventName} decorator`, () => {
         const foundEvent = decoratorProps.filter((item) => item.event === event)[0];

@@ -19,7 +19,8 @@ import { EntityHandler } from '../../lib/index';
 import { HandlerType } from '../../lib/types/enum';
 import { BookEvent } from '../bookshop/@cds-models/CatalogService';
 
-import type { CRUD_EVENTS, DRAFT_EVENTS, Handler, TypedRequest, Request } from '../../lib/types/types';
+import type { Handler } from '../../lib/types/internalTypes';
+import type { CRUD_EVENTS, DRAFT_EVENTS, TypedRequest, Request } from '../../lib/types/types';
 
 @EntityHandler(BookEvent)
 class BookEventsHandler {
@@ -75,7 +76,6 @@ describe('DRAFT', () => {
         expect(foundEvent.event).toBe(event);
         expect(foundEvent.isDraft).toBe(isDraft);
         expect(foundEvent.handlerType).toBe(handlerType);
-        expect(foundEvent.isSingleInstance).toBeUndefined();
       });
     });
   }

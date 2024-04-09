@@ -5,9 +5,11 @@ import {
   BeforeUpdate,
   EntityHandler,
   Inject,
+  Req,
   Request,
   Service,
   SingleInstanceCapable,
+  SingleInstanceSwitch,
   SRV,
   TypedRequest,
 } from '../../../../../../lib';
@@ -20,23 +22,23 @@ class ReviewHandler {
   @Inject(ReviewService) private readonly reviewService: ReviewService;
 
   @BeforeCreate()
-  private async validateCurrencyCodes(req: TypedRequest<Review>) {
+  private async validateCurrencyCodes(@Req() req: TypedRequest<Review>) {
     this.reviewService.validateComment(req);
   }
 
   @BeforeRead()
   @SingleInstanceCapable()
-  private async addDiscount(req: TypedRequest<Review>, isSingleInstance: boolean) {
+  private async addDiscount(@Req() req: TypedRequest<Review>, @SingleInstanceSwitch() isSingleInstance: boolean) {
     req.notify(400, 'Before read executed');
   }
 
   @BeforeUpdate()
-  private async addDefaultDescription(req: TypedRequest<Review>) {
+  private async addDefaultDescription(@Req() req: TypedRequest<Review>) {
     this.reviewService.validateComment(req);
   }
 
   @BeforeDelete()
-  private async deleteItem(req: Request) {
+  private async deleteItem(@Req() req: Request) {
     req.notify(204, 'Item deleted');
   }
 }

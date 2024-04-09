@@ -1,12 +1,15 @@
 import {
   ActionRequest,
   ActionReturn,
+  Error,
   FieldsFormatter,
   Inject,
+  Next,
   OnAction,
   OnError,
   OnEvent,
   OnFunction,
+  Req,
   Request,
   Service,
   SRV,
@@ -35,8 +38,8 @@ class UnboundActionsHandler {
   @FieldsFormatter<ExposeFields<typeof changeBookProperties>>({ action: 'ltrim' }, 'language')
   @Validate<ExposeFields<typeof changeBookProperties>>({ action: 'isIn', values: ['PDF', 'E-Kindle'] }, 'format')
   public async onChangeBookFormatAction(
-    req: ActionRequest<typeof changeBookProperties>,
-    _: Function,
+    @Req() req: ActionRequest<typeof changeBookProperties>,
+    @Next() next: Function,
   ): ActionReturn<typeof changeBookProperties> {
     return {
       language: req.data.language,
@@ -45,7 +48,10 @@ class UnboundActionsHandler {
   }
 
   @OnAction(submitOrder)
-  public async onActionMethod(req: ActionRequest<typeof submitOrder>, _: Function): ActionReturn<typeof submitOrder> {
+  public async onActionMethod(
+    @Req() req: ActionRequest<typeof submitOrder>,
+    @Next() next: Function,
+  ): ActionReturn<typeof submitOrder> {
     return {
       stock: req.data.quantity! + 1,
     };
@@ -53,8 +59,8 @@ class UnboundActionsHandler {
 
   @OnFunction(submitOrderFunction)
   public async onFunctionMethod(
-    req: ActionRequest<typeof submitOrderFunction>,
-    next: Function,
+    @Req() req: ActionRequest<typeof submitOrderFunction>,
+    @Next() next: Function,
   ): ActionReturn<typeof submitOrderFunction> {
     return {
       stock: req.data.quantity! + 1,
@@ -62,12 +68,12 @@ class UnboundActionsHandler {
   }
 
   @OnEvent(OrderedBook)
-  public async onEvent(req: TypedRequest<OrderedBook>) {
+  public async onEvent(@Req() req: TypedRequest<OrderedBook>) {
     //
   }
 
   @OnError()
-  public onError(err: Error, req: Request): void {
+  public onError(@Error() err: Error, @Req() req: Request): void {
     if (req.entity === 'CatalogService.Publishers') {
       err.message = 'OnError';
     }

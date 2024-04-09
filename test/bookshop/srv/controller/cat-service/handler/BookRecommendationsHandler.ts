@@ -3,8 +3,10 @@ import {
   BeforeUpdate,
   EntityHandler,
   Inject,
+  Next,
   OnCreate,
   OnUpdate,
+  Req,
   Service,
   SRV,
   TypedRequest,
@@ -19,26 +21,26 @@ class BookRecommendationsHandler {
   @BeforeCreate()
   @Validate<BookRecommendation>({ action: 'isLowercase' }, 'comment')
   @Validate<BookRecommendation>({ action: 'endsWith', target: 'N' }, 'description')
-  public async beforeCreate(req: TypedRequest<BookRecommendation>) {
+  public async beforeCreate(@Req() req: TypedRequest<BookRecommendation>) {
     // ...
   }
 
   @BeforeUpdate()
   @Validate<BookRecommendation>({ action: 'startsWith', target: 'COMMENT:' }, 'comment')
   @Validate<BookRecommendation>({ action: 'isAlphanumeric' }, 'description')
-  public async beforeUpdate(req: TypedRequest<BookRecommendation>) {
+  public async beforeUpdate(@Req() req: TypedRequest<BookRecommendation>) {
     // ...
   }
 
   @OnCreate()
   @Validate<BookRecommendation>({ action: 'isAlphanumeric' }, 'book_ID')
-  public async onCreate(req: TypedRequest<BookRecommendation>, next: Function) {
+  public async onCreate(@Req() req: TypedRequest<BookRecommendation>, @Next() next: Function) {
     return next();
   }
 
   @OnUpdate()
   @Validate<BookRecommendation>({ action: 'isLength', options: { min: 5 } }, 'comment')
-  public async onUpdate(req: TypedRequest<BookRecommendation>, next: Function) {
+  public async onUpdate(@Req() req: TypedRequest<BookRecommendation>, @Next() next: Function) {
     return next();
   }
 }

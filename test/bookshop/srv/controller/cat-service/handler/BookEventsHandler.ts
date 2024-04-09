@@ -4,14 +4,18 @@ import {
   AfterReadDraft,
   EntityHandler,
   Inject,
+  Next,
   OnCancelDraft,
   OnEditDraft,
   OnNewDraft,
   OnSaveDraft,
+  Req,
   Request,
-  SRV,
+  Results,
   Service,
   SingleInstanceCapable,
+  SingleInstanceSwitch,
+  SRV,
   Use,
 } from '../../../../../../lib';
 import { BookEvent } from '../../../../@cds-models/CatalogService';
@@ -21,35 +25,38 @@ class BookEventsHandler {
   @Inject(SRV) private readonly srv: Service;
 
   @OnNewDraft()
-  public async onNewDraftMethod(req: Request, next: Function) {
+  public async onNewDraftMethod(@Req() req: Request, @Next() next: Function) {
     req.notify('On new draft');
     return next();
   }
 
   @OnCancelDraft()
-  public async onCancelDraftMethod(req: Request, next: Function) {
+  public async onCancelDraftMethod(@Req() req: Request, @Next() next: Function) {
     req.notify('On cancel draft');
     return next();
   }
 
   @OnEditDraft()
-  public async onEditDraftMethod(req: Request, next: Function) {
+  public async onEditDraftMethod(@Req() req: Request, @Next() next: Function) {
     req.notify('On edit draft');
     return next();
   }
 
   @OnSaveDraft()
-  public async onSaveDraftMethod(req: Request, next: Function) {
+  public async onSaveDraftMethod(@Req() req: Request, @Next() next: Function) {
     req.notify('On save draft');
     return next();
   }
 
   @AfterRead()
   @AfterReadDraft()
-  @SingleInstanceCapable()
-  public async afterReadDraftMethod(results: BookEvent[], req: Request, isSingleInstance: boolean) {
+  public async afterReadDraftMethod(
+    @Results() results: BookEvent[],
+    @Req() req: Request,
+    @SingleInstanceSwitch() isSingleInstance: boolean,
+  ) {
     // handle single instance
-    if (results.length === 0) {
+    if (Array.isArray(results) && results.length === 0) {
       return;
     }
 

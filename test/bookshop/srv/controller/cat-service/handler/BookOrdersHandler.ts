@@ -1,15 +1,18 @@
 import { BookOrder } from '#cds-models/CatalogService';
+
 import {
   AfterCreate,
   AfterRead,
+  BeforeRead,
   EntityHandler,
   Inject,
+  Req,
   Request,
-  SRV,
+  Results,
   Service,
-  SingleInstanceCapable,
+  SingleInstanceSwitch,
+  SRV,
   Use,
-  BeforeRead,
 } from '../../../../../../lib';
 import { MiddlewareMethodAfterRead1 } from '../../../middleware/MiddlewareAfterRead1';
 import { MiddlewareMethodAfterRead2 } from '../../../middleware/MiddlewareAfterRead2';
@@ -25,7 +28,7 @@ export class BookOrdersHandler {
   @Inject(BookService) private readonly bookService: BookService;
 
   @AfterCreate()
-  private async validateCurrencyCodes(result: BookOrder, req: Request) {
+  private async validateCurrencyCodes(@Results() result: BookOrder, @Req() req: Request) {
     this.bookService.validateData(result, req);
   }
 
@@ -36,7 +39,10 @@ export class BookOrdersHandler {
   }
 
   @AfterRead()
-  @SingleInstanceCapable()
   @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2) // THIS IS OK
-  private async addDiscount(results: BookOrder[], req: Request, isSingleInstance: boolean) {}
+  private async addDiscount(
+    @Results() results: BookOrder[],
+    @Req() req: Request,
+    @SingleInstanceSwitch() isSingleInstance: boolean,
+  ) {}
 }

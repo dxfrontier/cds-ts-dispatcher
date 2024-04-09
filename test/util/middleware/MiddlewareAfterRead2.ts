@@ -1,12 +1,13 @@
 import { TypedRequest } from '@sap/cds';
-import { MiddlewareImpl, Next } from '../../../lib';
+
+import { MiddlewareImpl, NextFunction } from '../../../lib';
 import { Book } from '../../bookshop/@cds-models/CatalogService';
 
 export class MiddlewareMethodAfterRead2 implements MiddlewareImpl {
-  public async use(req: TypedRequest<Book>, next: Next) {
+  public async use(req: TypedRequest<Book>, next: NextFunction) {
     console.log('Middleware 2: @AfterRead');
 
-    next();
+    await next();
     // req.reject(500, 'STOP');
   }
 }
