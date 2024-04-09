@@ -21,10 +21,10 @@
     "check": "run-s eslint:message eslint prettier:message prettier",
     "fix": "run-s eslint:message eslint:fix prettier:message prettier:fix",
     "start:bookshop": "npm run start --prefix ./test/bookshop",
-    "tests:e2e": "newman run ./test/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/e2e/environment.json --bail",
+    "tests:newman": "newman run ./test/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/e2e/environment.json --bail",
     "test:unit": "npm run build:entities:test --prefix ./test/bookshop && jest",
-    "test:live-server:e2e-tests": "start-server-and-test start:bookshop http://localhost:4004 tests:e2e",
-    "test:all": "run-s test:unit test:live-server:e2e-tests",
+    "test:e2e": "start-server-and-test start:bookshop http://localhost:4004 tests:newman",
+    "test:all": "run-s test:unit test:e2e",
     "prepare": "husky",
     "build:message": "echo 'Build started...'",
     "build:clean": "echo 'Clean dist folder' && npx rimraf ./dist/{*.js,*.map,*.ts,*.mts,*.mjs}",
@@ -73,8 +73,8 @@
   "devDependencies": {
     "@cap-js/cds-typer": "0.19.0",
     "@cap-js/sqlite": "^1.6.0",
-    "@dxfrontier/cds-ts-repository": "^1.0.12",
-    "@swc/core": "^1.4.11",
+    "@dxfrontier/cds-ts-repository": "^1.0.14",
+    "@swc/core": "^1.4.13",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.17.0",
     "@types/string-placeholder": "^1.0.3",
@@ -85,7 +85,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard-with-typescript": "^43.0.1",
     "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-n": "^17.1.0",
     "eslint-plugin-promise": "^6.1.1",
     "husky": "^9.0.11",
     "jest": "^29.7.0",
@@ -96,13 +96,14 @@
     "start-server-and-test": "^2.0.3",
     "ts-jest": "^29.1.2",
     "tsup": "^8.0.2",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.4"
   },
   "lint-staged": {
     "**/*.{ts, tsx}": [
       "npm run eslint:fix",
       "npm run prettier:fix",
-      "npm run test:unit --bail --findRelatedTests ./test"
+      "npm run test:unit --bail --findRelatedTests ./test",
+      "npm run test:e2e"
     ]
   }
 }
