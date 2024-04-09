@@ -61,4 +61,4 @@ jobs:
         run: npm i -g typescript
 
       - name: Start server and start e2e tests
-        run: npm run test:live-server:e2e-tests
+        run: npm run test:e2e
