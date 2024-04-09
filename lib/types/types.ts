@@ -1,81 +1,123 @@
-import type { Request, Service } from '@sap/cds';
+import type { Request, Service, CdsFunction, column_expr, predicate } from '@sap/cds';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { ServiceImpl, TypedRequest } from '@sap/cds/apis/services';
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { HandlerType } from './enum';
 
-/**
- * Use this type to annotate the 'next' parameter of the Middleware use method
- */
-export type Next = () => Promise<unknown>;
-
-export type NonEmptyArray<T> = [T, ...T[]];
-
-export type MiddlewareImpl = {
-  use: (req: Request, next: Next) => Promise<unknown>;
-};
-
-export type CdsFunction = {
-  (...args: any[]): any;
-  __parameters: object;
-  __returns: unknown;
-};
+// **************************************************************************************************************************
+// Common types
+// **************************************************************************************************************************
 
 export type CdsEvent = object;
-
 export type CDSTyperEntity<T> = Constructable<T>;
-
-export type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION';
-export type CRUD_EVENTS =
-  | 'READ'
-  | 'CREATE'
-  | 'UPDATE'
-  | 'DELETE'
-  | 'ACTION'
-  | 'FUNC'
-  | 'BOUND_ACTION'
-  | 'BOUND_FUNC'
-  | 'EVENT'
-  | 'ERROR';
-
-export type ServiceCallback = (srv: Service) => void;
-
-export type ReturnRequest = (req: Request, ...args: any[]) => Promise<any>;
-export type ReturnResultsAndRequest = (results: any | any[] | boolean, req: Request, ...args: any[]) => Promise<any>;
-export type ReturnRequestAndNext = (req: Request, next: Function, ...args: any[]) => Promise<any>;
-export type ReturnSingleInstanceCapable = (isSingleInstance: boolean) => Promise<any>;
-export type ReturnErrorRequest = (err: Error, req: Request) => any | void;
-
 export type RequestType = (...args: any[]) => Promise<any>;
-/**
- * Use this type to have the '@sap/cds - Request' typed.
- */
-export type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['__parameters'] };
 
-/**
- * Use this type to have the 'return' of the action typed.
- */
-export type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void | Error>;
+export type ERROR_EVENT = 'ERROR';
+export type ON_EVENT = 'EVENT';
+export type ACTION_EVENTS = 'ACTION' | 'BOUND_ACTION';
+export type FUNCTION_EVENTS = 'FUNC' | 'BOUND_FUNC';
+export type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE';
+export type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION';
+
+export type EVENTS = CRUD_EVENTS | ACTION_EVENTS | FUNCTION_EVENTS | ERROR_EVENT | ON_EVENT | DRAFT_EVENTS;
 
 export type HandlerBuilder = {
   buildHandlers: () => void;
   buildMiddlewares: () => void;
 };
 
-export type Handler = {
-  event: CRUD_EVENTS | DRAFT_EVENTS;
-  handlerType: HandlerType;
-  callback: ReturnRequest | ReturnRequestAndNext | ReturnResultsAndRequest;
-  actionName?: CdsFunction;
-  eventName?: string;
-  isDraft?: boolean;
-  isSingleInstance?: boolean;
+export type ValidatorField = string | number | undefined | null | boolean;
+
+// **************************************************************************************************************************
+// @Use decorator types
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @Use decorator types
+// **************************************************************************************************************************
+
+/**
+ * Use `NextFunction` type to annotate the `next` parameter of the `Middleware` use method.
+ */
+export type NextFunction = () => Promise<unknown>;
+
+export type MiddlewareImpl = {
+  use: (req: Request, next: NextFunction) => Promise<unknown>;
 };
 
-export type ValidatorField = string | number | undefined | null | boolean;
+// **************************************************************************************************************************
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @OnAction, @OnBoundAction, @OnFunction, @OnBoundFunction types
+// **************************************************************************************************************************
+
+/**
+ * Use `ActionRequest` type to have the `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
+ */
+export type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['__parameters'] };
+
+/**
+ * Use `ActionReturn` type to have the 'return' of the `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
+ */
+export type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void | Error>;
+
+// **************************************************************************************************************************
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @GetRequestProperty() decorator types
+// **************************************************************************************************************************
+
+export type GetUserTypeType = Request['user'];
+export type GetTimestampType = Request['timestamp'];
+export type GetTenantType = Request['tenant'];
+export type GetTargetType = Request['target'];
+export type GetSubjectType = Request['subject'];
+export type GetQueryType = Request['query'];
+export type GetPathType = Request['params'];
+export type GetParamsType = Request['params'];
+export type GetMethodType = Request['method'];
+export type GetIdType = Request['id'];
+export type GetHttpType = Request['http'];
+export type GetHeadersType = Request['headers'];
+export type GetFeaturesType = Request['features'];
+export type GetEventType = Request['event'];
+export type GetEntityType = Request['entity'];
+export type GetLocaleType = Request['locale'];
+// **************************************************************************************************************************
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @IsPresent() & @GetQueryProperty() decorator types
+// **************************************************************************************************************************
+
+// COMMON for SELECT, INSERT, UPDATE, DELETE
+export type GetColumnsType = column_expr[] | string[];
+export type GetWhereType = predicate;
+
+// SELECT
+export type GetDistinctType = SELECT<any>['SELECT']['distinct'];
+export type GetExcludingType = SELECT<any>['SELECT']['excluding'];
+export type GetOneType = SELECT<any>['SELECT']['one'];
+export type GetLimitType = SELECT<any>['SELECT']['limit'];
+export type GetLimitRowsType = number;
+export type GetLimitOffsetType = number;
+export type GetGroupByType = SELECT<any>['SELECT']['groupBy'];
+export type GetHavingType = SELECT<any>['SELECT']['having'];
+export type GetOrderByType = SELECT<any>['SELECT']['orderBy'];
+
+// INSERT
+export type GetAsType = INSERT<any>['INSERT']['as'];
+export type GetEntriesType = INSERT<any>['INSERT']['entries'];
+export type GetRowsType = INSERT<any>['INSERT']['rows'];
+export type GetValuesType = INSERT<any>['INSERT']['values'];
+export type GetIntoType = INSERT<any>['INSERT']['into'];
+
+// **************************************************************************************************************************
+// **************************************************************************************************************************
 
 export {
   // Standard exports
+  type CdsFunction,
   type TypedRequest,
   type Request,
   type Service,

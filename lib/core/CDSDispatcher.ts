@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Container } from 'inversify';
 
@@ -9,21 +10,10 @@ import middlewareUtil from '../util/helpers/middlewareUtil';
 import util from '../util/util';
 import { MetadataDispatcher } from './MetadataDispatcher';
 
+import type { NonEmptyArray, Handler, HandlerBuilder } from '../types/internalTypes';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 
-import type {
-  Handler,
-  HandlerBuilder,
-  NonEmptyArray,
-  Request,
-  ReturnErrorRequest,
-  ReturnRequest,
-  ReturnRequestAndNext,
-  ReturnResultsAndRequest,
-  Service,
-  ServiceCallback,
-  ServiceImpl,
-} from '../types/types';
+import type { Request, Service, ServiceImpl } from '../types/types';
 
 class CDSDispatcher {
   private srv: Service;
@@ -46,15 +36,14 @@ class CDSDispatcher {
 
   private async executeBeforeCallback(handlerAndEntity: [Handler, Constructable], req: Request): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback as ReturnRequest;
-    const isSingleInstance = util.isRequestSingleInstance(handler, req);
+    const callback = handler.callback;
 
-    return await callback.call(entity, req, isSingleInstance);
+    return await callback.call(entity, req);
   }
 
   private executeOnErrorCallback(handlerAndEntity: [Handler, Constructable], err: Error, req: Request): unknown | void {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback as ReturnErrorRequest;
+    const callback = handler.callback;
 
     return callback.call(entity, err, req);
   }
@@ -65,10 +54,9 @@ class CDSDispatcher {
     next: Function,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback as ReturnRequestAndNext;
-    const isSingleInstance = util.isRequestSingleInstance(handler, req);
+    const callback = handler.callback;
 
-    return await callback.call(entity, req, next, isSingleInstance);
+    return await callback.call(entity, req, next);
   }
 
   private async executeAfterCallback(
@@ -77,8 +65,7 @@ class CDSDispatcher {
     results: unknown | unknown[] | number,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback as ReturnResultsAndRequest;
-    const isSingleInstance = util.isRequestSingleInstance(handler, req);
+    const callback = handler.callback;
 
     if (!Array.isArray(results)) {
       if (util.lodash.isNumber(results)) {
@@ -87,16 +74,16 @@ class CDSDispatcher {
         const deleted = _isDeleted(results);
 
         // DELETE single request
-        return await callback.call(entity, deleted, req, isSingleInstance);
+        return await callback.call(entity, deleted, req);
       }
 
       // READ, UPDATE single request
-      return await callback.call(entity, results, req, isSingleInstance);
+      return await callback.call(entity, results, req);
     }
 
     if (Array.isArray(results)) {
       // READ entity set
-      return await callback.call(entity, results, req, isSingleInstance);
+      return await callback.call(entity, results, req);
     }
   }
 
@@ -107,7 +94,6 @@ class CDSDispatcher {
     return entity;
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   private getHandlerProps(handler: Handler, entityInstance: Constructable) {
     const { event, actionName, eventName } = handler;
     const entity = this.getActiveEntityOrDraft(handler, entityInstance);
@@ -348,8 +334,8 @@ class CDSDispatcher {
     this.registerHandlers();
   }
 
-  private buildServiceImplementation(): ServiceCallback {
-    return (srv: Service) => {
+  private buildServiceImplementation() {
+    return (srv: Service): void => {
       this.storeService(srv);
       this.buildEntityHandlers();
     };
