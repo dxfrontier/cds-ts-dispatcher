@@ -4,6 +4,7 @@ import {
   EntityHandler,
   Inject,
   Next,
+  NextEvent,
   OnCreate,
   OnUpdate,
   Req,
@@ -34,13 +35,13 @@ class BookRecommendationsHandler {
 
   @OnCreate()
   @Validate<BookRecommendation>({ action: 'isAlphanumeric' }, 'book_ID')
-  public async onCreate(@Req() req: TypedRequest<BookRecommendation>, @Next() next: Function) {
+  public async create(@Req() req: TypedRequest<BookRecommendation>, @Next() next: NextEvent) {
     return next();
   }
 
   @OnUpdate()
   @Validate<BookRecommendation>({ action: 'isLength', options: { min: 5 } }, 'comment')
-  public async onUpdate(@Req() req: TypedRequest<BookRecommendation>, @Next() next: Function) {
+  public async update(@Req() req: TypedRequest<BookRecommendation>, @Next() next: NextEvent) {
     return next();
   }
 }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
   AfterDeleteDraft,
   AfterEditDraft,
@@ -6,34 +5,36 @@ import {
   AfterSaveDraft,
   EntityHandler,
   Inject,
+  Req,
+  Result,
   SRV,
-  type TypedRequest,
-  type Service,
 } from '../../../../../../lib';
 import { Promotion } from '../../../../@cds-models/AdminService';
+
+import type { TypedRequest, Service } from '../../../../../../lib';
 
 @EntityHandler(Promotion)
 class PromotionHandler {
   @Inject(SRV) private readonly srv: Service;
 
   @AfterNewDraft()
-  public async afterNewDraftCreated(results: Promotion, req: TypedRequest<Promotion>) {
+  public async afterNewDraft(@Result() result: Promotion, @Req() req: TypedRequest<Promotion>) {
     req.notify(201, 'After new draft executed');
   }
 
   @AfterSaveDraft()
-  public async afterSaveDraft(results: Promotion, req: TypedRequest<Promotion>) {
+  public async afterSaveDraft(@Result() result: Promotion, req: TypedRequest<Promotion>) {
     req.notify(201, 'After save draft executed');
   }
 
   @AfterEditDraft()
-  public async afterEditDraft(results: Promotion, req: TypedRequest<Promotion>) {
+  public async afterEditDraft(@Result() result: Promotion, @Req() req: TypedRequest<Promotion>) {
     req.notify(201, 'After edit draft executed');
   }
 
   @AfterDeleteDraft()
-  public async afterDeleteDraft(deleted: boolean, req: TypedRequest<Promotion>) {
-    // debugger;
+  public async afterDeleteDraft(@Result() deleted: boolean, @Req() req: TypedRequest<Promotion>) {
+    // ...
   }
 }
 

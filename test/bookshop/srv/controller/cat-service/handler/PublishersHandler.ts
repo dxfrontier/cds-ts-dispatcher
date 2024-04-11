@@ -21,7 +21,7 @@ export class PublishersHandler {
   @Inject(BookService) private readonly bookService: BookService;
 
   @AfterRead()
-  private async addDiscount(
+  private async afterRead(
     @Results() results: Publisher[],
     @Req() req: Request,
     @SingleInstanceSwitch() isSingleInstance: boolean,

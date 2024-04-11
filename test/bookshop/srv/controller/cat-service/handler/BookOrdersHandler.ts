@@ -28,19 +28,19 @@ export class BookOrdersHandler {
   @Inject(BookService) private readonly bookService: BookService;
 
   @AfterCreate()
-  private async validateCurrencyCodes(@Results() result: BookOrder, @Req() req: Request) {
+  private async afterCreate(@Results() result: BookOrder, @Req() req: Request) {
     this.bookService.validateData(result, req);
   }
 
   @BeforeRead()
   @Use(MiddlewareMethodBeforeRead) // THIS IS OK
-  private async bla(req: Request) {
+  private async beforeRead(req: Request) {
     console.log('****************** Before read event');
   }
 
   @AfterRead()
   @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2) // THIS IS OK
-  private async addDiscount(
+  private async afterRead(
     @Results() results: BookOrder[],
     @Req() req: Request,
     @SingleInstanceSwitch() isSingleInstance: boolean,

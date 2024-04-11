@@ -6,6 +6,7 @@ import {
   FieldsFormatter,
   Inject,
   Next,
+  NextEvent,
   OnCreate,
   OnUpdate,
   Req,
@@ -25,14 +26,12 @@ class BookFormatsHandler {
   @FieldsFormatter<BookFormat>({ action: 'blacklist', charsToRemove: 'le' }, 'format')
   public async beforeCreate(@Req() req: TypedRequest<BookFormat>) {
     // ...
-    debugger;
   }
 
   @BeforeUpdate()
   @FieldsFormatter<BookFormat>({ action: 'truncate', options: { length: 7 } }, 'format')
   public async beforeUpdate(@Req() req: TypedRequest<BookFormat>) {
     // ...
-    debugger;
   }
 
   @AfterRead()
@@ -40,21 +39,17 @@ class BookFormatsHandler {
   @FieldsFormatter<BookFormat>(customFormatter, 'format')
   public async afterRead(@Results() results: BookFormat[], @Req() req: TypedRequest<BookFormat>) {
     // ...
-
-    debugger;
   }
 
   @OnCreate()
   @FieldsFormatter<BookFormat>({ action: 'ltrim' }, 'language')
-  public async onCreate(@Req() req: TypedRequest<BookFormat>, @Next() next: Function) {
-    debugger;
+  public async create(@Req() req: TypedRequest<BookFormat>, @Next() next: NextEvent) {
     return next();
   }
 
   @OnUpdate()
   @FieldsFormatter<BookFormat>({ action: 'trim' }, 'format')
-  public async onUpdate(@Req() req: TypedRequest<BookFormat>, @Next() next: Function) {
-    debugger;
+  public async update(@Req() req: TypedRequest<BookFormat>, @Next() next: NextEvent) {
     return next();
   }
 }

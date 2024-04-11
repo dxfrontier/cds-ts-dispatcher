@@ -7,34 +7,14 @@ import {
   AfterUpdate,
   BeforeRead,
   EntityHandler,
-  GetColumnsType,
-  GetDistinctType,
-  GetEntityType,
-  GetEventType,
-  GetExcludingType,
-  GetFeaturesType,
-  GetGroupByType,
-  GetHavingType,
-  GetHeadersType,
-  GetHttpType,
-  GetIdType,
-  GetLimitOffsetType,
-  GetLimitRowsType,
-  GetLimitType,
-  GetLocaleType,
-  GetMethodType,
-  GetOneType,
-  GetOrderByType,
-  GetParamsType,
-  GetQueryProperty,
+  GetQuery,
   GetQueryType,
-  GetRequestProperty,
-  GetSubjectType,
-  GetWhereType,
+  GetRequest,
   Inject,
   IsColumnSupplied,
   IsPresent,
   IsRole,
+  Jwt,
   Req,
   Request,
   Result,
@@ -60,35 +40,53 @@ class BookHandler {
   @Inject(BookService) private readonly bookService: BookService;
 
   @AfterCreate()
-  private async validateCurrencyCodes(
+  private async afterCreate(
     @Result() result: Book,
     @Req() req: Request,
-    @IsPresent('INSERT', 'columns') columns: boolean,
+    @IsPresent('INSERT', 'columns') hasColumns: boolean,
+    // @GetQuery('INSERT', 'as') as: GetQueryType['as'],
+    // @GetQuery('INSERT', 'columns') columns: GetQueryType['columns']['FOR_INSERT'],
+    // @GetQuery('INSERT', 'entries') entries: GetQueryType['entries'],
+    // @GetQuery('INSERT', 'into') into: GetQueryType['into'],
+    // @GetQuery('INSERT', 'rows') rows: GetQueryType['rows'],
+    // @GetQuery('INSERT', 'values') values: GetQueryType['values'],
+
+    ///
+
+    @GetQuery('UPDATE', 'data') data: GetQueryType['data'],
+    // @GetQuery('UPDATE', 'entity') entity: GetQueryType['entity'],
+    // @GetQuery('UPDATE', 'where') where: GetQueryType['where'],
+
+    // @GetQuery('UPSERT', 'columns') columns: GetQueryType['columns'],
+    // @GetQuery('UPSERT', 'entries') entries: GetQueryType['entries'],
+    // @GetQuery('UPSERT', 'into') into: GetQueryType['into'],
+    // @GetQuery('UPSERT', 'rows') rows: GetQueryType['rows'],
+    // @GetQuery('UPSERT', 'values') values: GetQueryType['values'],
+
+    @GetQuery('DELETE', 'from') from: GetQueryType['from'],
+    @GetQuery('DELETE', 'where') columns: GetQueryType['where'],
   ) {
     this.bookService.validateData(result, req);
   }
 
   @BeforeRead()
   @Use(MiddlewareMethodBeforeRead)
-  private async beforeReadEvent(@Req() req: TypedRequest<Book>) {
+  private async beforeRead(@Req() req: TypedRequest<Book>) {
     console.log('****************** Before read event');
   }
 
   // *******************************************************
 
   // TODO: add @OnReject()
-  // TODO: add @Jwt() for retrieval of the token
-  // TODO:
   // ? @IsPresent rename to : @IsQueryOptionFill, @IsFilled, @IsProvided, @IsSupplied
 
-  // req.user.is('CERTAIN_ROLE')
   // @ScopedUserLogic(handleClass)
 
   // *******************************************************
 
   @AfterRead()
   @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2)
-  private async addDiscount(
+  private async afterRead(
     @Req() req: Request,
     @Results() results: Book[],
 
@@ -96,55 +94,45 @@ class BookHandler {
 
     @IsColumnSupplied<Book>('price') hasPrice: boolean,
 
-    // TODO: exclude REQUEST from IsPresent
     @IsPresent('SELECT', 'columns') hasColumns: boolean,
 
-    @IsRole('role') role: string,
+    @IsRole('role', 'anotherRole') role: boolean,
 
-    @GetQueryProperty('SELECT', 'columns') columns: GetColumnsType,
-
-    @GetQueryProperty('SELECT', 'distinct') distinct: GetDistinctType,
-    @GetQueryProperty('SELECT', 'excluding') excluding: GetExcludingType,
-    @GetQueryProperty('SELECT', 'groupBy') groupBy: GetGroupByType,
-    @GetQueryProperty('SELECT', 'having') having: GetHavingType,
-
-    @GetQueryProperty('SELECT', 'one') one: GetOneType,
-    @GetQueryProperty('SELECT', 'orderBy') orderBy: GetOrderByType,
-    @GetQueryProperty('SELECT', 'where') where: GetWhereType,
-
-    @GetQueryProperty('SELECT', 'limit') limit: GetLimitType,
-    @GetQueryProperty('SELECT', 'limit.rows') limitRows: GetLimitRowsType,
-    @GetQueryProperty('SELECT', 'limit.offset') limitOffset: GetLimitOffsetType,
+    @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['FOR_SELECT'],
+    @GetQuery('SELECT', 'distinct') distinct: GetQueryType['distinct'],
+    @GetQuery('SELECT', 'excluding') excluding: GetQueryType['excluding'],
+    @GetQuery('SELECT', 'excluding') from: GetQueryType['from']['FOR_SELECT'],
+    @GetQuery('SELECT', 'groupBy') groupBy: GetQueryType['groupBy'],
+    @GetQuery('SELECT', 'having') having: GetQueryType['having'],
+    @GetQuery('SELECT', 'limit') limit: GetQueryType['limit'],
+    @GetQuery('SELECT', 'limit.rows') limitRows: GetQueryType['limit']['rows'],
+    @GetQuery('SELECT', 'limit.offset') limitOffset: GetQueryType['limit']['offset'],
+    @GetQuery('SELECT', 'mixin') mixin: GetQueryType['mixin'],
+    @GetQuery('SELECT', 'one') one: GetQueryType['one'],
+    @GetQuery('SELECT', 'orderBy') orderBy: GetQueryType['orderBy'],
+    @GetQuery('SELECT', 'where') where: GetQueryType['where'],
 
     // All good here
-    @GetRequestProperty('entity') entity: GetEntityType,
-    @GetRequestProperty('event') event: GetEventType,
-    @GetRequestProperty('features') features: GetFeaturesType,
-    @GetRequestProperty('headers') headers: GetHeadersType,
-    @GetRequestProperty('http') http: GetHttpType,
-    @GetRequestProperty('id') id: GetIdType,
-    @GetRequestProperty('locale') locale: GetLocaleType,
-    @GetRequestProperty('method') method: GetMethodType,
-    @GetRequestProperty('params') params: GetParamsType,
-    @GetRequestProperty('query') query: GetQueryType,
-    @GetRequestProperty('subject') subject: GetSubjectType,
-    @GetRequestProperty('target') target: GetMethodType,
-    @GetRequestProperty('tenant') tenant: GetParamsType,
-    @GetRequestProperty('timestamp') timestamp: GetQueryType,
-    @GetRequestProperty('user') user: GetSubjectType,
+    @GetRequest('entity') entity: Request['entity'],
+    @GetRequest('event') event: Request['event'],
+    @GetRequest('features') features: Request['features'],
+    @GetRequest('headers') headers: Request['headers'],
+    @GetRequest('http') http: Request['http'],
+    @GetRequest('id') id: Request['id'],
+    @GetRequest('locale') locale: Request['locale'],
+    @GetRequest('method') method: Request['method'],
+    @GetRequest('params') params: Request['params'],
+    @GetRequest('query') query: Request['query'],
+    @GetRequest('subject') subject: Request['subject'],
+    @GetRequest('target') target: Request['target'],
+    @GetRequest('tenant') tenant: Request['tenant'],
+    @GetRequest('timestamp') timestamp: Request['timestamp'],
+    @GetRequest('user') user: Request['user'],
+
+    @Jwt() token: string | undefined,
   ) {
     await this.srv.emit('OrderedBook', { book: 'dada', quantity: 3, buyer: req.user.id });
 
-    // const aaacolumns = req.query.SELECT?.columns.forEach((column) => {
-    //   column
-    // });
-
-    // req.
-    const bla = locale;
-
-    // const bla = req.query.INSERT?.columns;
-
-    req.query;
     if (singleInstance) {
       req.notify('Single instance');
       return;
@@ -152,16 +140,18 @@ class BookHandler {
       req.notify('Entity set');
     }
 
+    // req.query.SELECT?.limit?.offset['val'];
+
     this.bookService.enrichTitle(results);
   }
 
   @AfterUpdate()
-  private async addDefaultDescription(@Result() result: Book, @Req() req: TypedRequest<Book>) {
+  private async afterUpdate(@Result() result: Book, @Req() req: TypedRequest<Book>) {
     void this.bookService.addDefaultTitleText(result, req);
   }
 
   @AfterDelete()
-  private async deleteItem(@Result() deleted: boolean, @Req() req: Request) {
+  private async afterDelete(@Result() deleted: boolean, @Req() req: Request) {
     req.notify(`Item deleted : ${deleted}`);
   }
 }

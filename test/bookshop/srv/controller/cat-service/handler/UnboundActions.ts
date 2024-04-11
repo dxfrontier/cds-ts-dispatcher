@@ -5,6 +5,7 @@ import {
   FieldsFormatter,
   Inject,
   Next,
+  NextEvent,
   OnAction,
   OnError,
   OnEvent,
@@ -37,9 +38,9 @@ class UnboundActionsHandler {
   @FieldsFormatter<ExposeFields<typeof changeBookProperties>>({ action: 'toLower' }, 'language')
   @FieldsFormatter<ExposeFields<typeof changeBookProperties>>({ action: 'ltrim' }, 'language')
   @Validate<ExposeFields<typeof changeBookProperties>>({ action: 'isIn', values: ['PDF', 'E-Kindle'] }, 'format')
-  public async onChangeBookFormatAction(
+  public async changeBookProperties(
     @Req() req: ActionRequest<typeof changeBookProperties>,
-    @Next() next: Function,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof changeBookProperties> {
     return {
       language: req.data.language,
@@ -48,9 +49,9 @@ class UnboundActionsHandler {
   }
 
   @OnAction(submitOrder)
-  public async onActionMethod(
+  public async submitOrder(
     @Req() req: ActionRequest<typeof submitOrder>,
-    @Next() next: Function,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof submitOrder> {
     return {
       stock: req.data.quantity! + 1,
@@ -58,9 +59,9 @@ class UnboundActionsHandler {
   }
 
   @OnFunction(submitOrderFunction)
-  public async onFunctionMethod(
+  public async submitOrderFunction(
     @Req() req: ActionRequest<typeof submitOrderFunction>,
-    @Next() next: Function,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof submitOrderFunction> {
     return {
       stock: req.data.quantity! + 1,
@@ -68,12 +69,12 @@ class UnboundActionsHandler {
   }
 
   @OnEvent(OrderedBook)
-  public async onEvent(@Req() req: TypedRequest<OrderedBook>) {
+  public async orderedBook(@Req() req: TypedRequest<OrderedBook>) {
     //
   }
 
   @OnError()
-  public onError(@Error() err: Error, @Req() req: Request): void {
+  public error(@Error() err: Error, @Req() req: Request): void {
     if (req.entity === 'CatalogService.Publishers') {
       err.message = 'OnError';
     }

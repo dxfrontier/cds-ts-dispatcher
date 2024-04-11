@@ -20,7 +20,7 @@ import { BookStat } from '../../../../@cds-models/CatalogService';
 import AuthorService from '../../../service/AuthorService';
 import BookStatsService from '../../../service/BookStatsService';
 
-import type { TypedRequest, Service, Request, ActionRequest, ActionReturn } from '../../../../../../lib';
+import type { TypedRequest, Service, Request, ActionRequest, ActionReturn, NextEvent } from '../../../../../../lib';
 
 @EntityHandler(BookStat)
 class BookStatsHandler {
@@ -29,16 +29,15 @@ class BookStatsHandler {
   @Inject(AuthorService) private readonly authorService: AuthorService;
 
   @OnCreate()
-  public async onCreateMethod(@Req() req: TypedRequest<BookStat>, @Next() next: Function) {
+  public async create(@Req() req: TypedRequest<BookStat>, @Next() next: NextEvent) {
     req.notify(201, 'On Create executed');
     return next();
   }
 
   @OnRead()
-  @SingleInstanceCapable()
-  public async onReadMethod(
+  public async read(
     @Req() req: TypedRequest<BookStat>,
-    @Next() next: Function,
+    @Next() next: NextEvent,
     @SingleInstanceSwitch() isSingleInstance: boolean,
   ) {
     if (isSingleInstance) {
@@ -49,30 +48,30 @@ class BookStatsHandler {
   }
 
   @OnUpdate()
-  public async onUpdateMethod(@Req() req: TypedRequest<BookStat>, @Next() next: Function) {
+  public async update(@Req() req: TypedRequest<BookStat>, @Next() next: NextEvent) {
     req.notify(201, 'On update executed');
     return next();
   }
 
   @OnDelete()
-  public async onDeleteMethod(@Req() req: Request, @Next() next: Function) {
+  public async delete(@Req() req: Request, @Next() next: NextEvent) {
     req.notify('Item deleted');
   }
 
   // This action will be triggered on the 'BookStat' entity
   @OnBoundAction(BookStat.actions.GenerateReport)
-  public async onBoundActionMethod(
+  public async generateReport(
     @Req() req: ActionRequest<typeof BookStat.actions.GenerateReport>,
-    @Next() next: Function,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof BookStat.actions.GenerateReport> {
     return await this.bookStatsService.handleReport(req);
   }
 
   // This function will be triggered on the 'BookStat' entity
   @OnBoundFunction(BookStat.actions.NotifyAuthor)
-  public async onBoundFunctionMethod(
+  public async notifyAuthor(
     @Req() req: ActionRequest<typeof BookStat.actions.NotifyAuthor>,
-    @Next() next: Function,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof BookStat.actions.NotifyAuthor> {
     return await this.authorService.notifyAuthor(req);
   }

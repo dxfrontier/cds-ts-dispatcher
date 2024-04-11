@@ -5,6 +5,7 @@ import {
   EntityHandler,
   Inject,
   Next,
+  NextEvent,
   OnCancelDraft,
   OnEditDraft,
   OnNewDraft,
@@ -25,32 +26,32 @@ class BookEventsHandler {
   @Inject(SRV) private readonly srv: Service;
 
   @OnNewDraft()
-  public async onNewDraftMethod(@Req() req: Request, @Next() next: Function) {
+  public async newDraft(@Req() req: Request, @Next() next: NextEvent) {
     req.notify('On new draft');
     return next();
   }
 
   @OnCancelDraft()
-  public async onCancelDraftMethod(@Req() req: Request, @Next() next: Function) {
+  public async cancel(@Req() req: Request, @Next() next: NextEvent) {
     req.notify('On cancel draft');
     return next();
   }
 
   @OnEditDraft()
-  public async onEditDraftMethod(@Req() req: Request, @Next() next: Function) {
+  public async edit(@Req() req: Request, @Next() next: NextEvent) {
     req.notify('On edit draft');
     return next();
   }
 
   @OnSaveDraft()
-  public async onSaveDraftMethod(@Req() req: Request, @Next() next: Function) {
+  public async save(@Req() req: Request, @Next() next: NextEvent) {
     req.notify('On save draft');
     return next();
   }
 
   @AfterRead()
   @AfterReadDraft()
-  public async afterReadDraftMethod(
+  public async afterReadDraft(
     @Results() results: BookEvent[],
     @Req() req: Request,
     @SingleInstanceSwitch() isSingleInstance: boolean,
