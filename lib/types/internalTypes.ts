@@ -1,21 +1,24 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
-import { Query } from '@sap/cds';
+import { EventContext, Query } from '@sap/cds';
 
 import constants from '../constants/constants';
 import { HandlerType } from './enum';
 
-import type { CdsFunction, EVENTS, RequestType, Request } from './types';
+import type { CdsFunction, EVENTS, RequestType, Request, NextEvent } from './types';
 
 // **************************************************************************************************************************
 // Common types
 // **************************************************************************************************************************
 
-export type NonEmptyArray<T> = [T, ...T[]];
-
-export type HandlerBuilder = {
-  buildHandlers: () => void;
-  buildMiddlewares: () => void;
+export type TemporaryArgs = {
+  req: Request;
+  next: NextEvent;
+  event: EventContext;
+  error: Error;
+  results: unknown | unknown[];
 };
+
+export type NonEmptyArray<T> = [T, ...T[]];
 
 export type Handler = {
   event: EVENTS;
@@ -30,7 +33,7 @@ export type Handler = {
 // **************************************************************************************************************************
 
 // **************************************************************************************************************************
-// @IsPresent() & @GetQueryProperty() decorator types
+// @IsPresent() & @GetQuery() decorator types
 // **************************************************************************************************************************
 
 type ExtraProperties = 'limit.rows' | 'limit.offset';
@@ -61,10 +64,10 @@ export type QueryDeleteProps = {
   props: keyof DELETE<any>['DELETE'];
 };
 
-// FIXME: 'REQUEST' should not be on QueryKeys
+type ExtraRequestKey = 'REQ';
 
-type ExtraRequestKey = 'REQUEST';
 export type QueryKeys = Exclude<keyof Query | ExtraRequestKey, 'DROP' | 'CREATE'>;
+export type CRUDQueryKeys = Exclude<QueryKeys, 'REQ'>;
 
 export type PickQueryPropsByKey<Key extends QueryKeys> = Key extends QueryInsertProps['type']
   ? QueryInsertProps['props']
@@ -83,24 +86,24 @@ type OnlyParameterIndexDecorator = {
 };
 
 type IsRoleProperties = {
-  type: 'USER';
-  property: string;
-};
-
-type RequestProperties = {
-  type: 'REQUEST';
-  property: keyof Request;
+  type: 'ROLE';
+  property: string[];
 };
 
 type IsColumnValueSupplied = {
   type: 'CHECK_COLUMN_VALUE';
-  property: string | number | symbol;
+  property: string;
 };
 
 type QueryProperties<Key extends QueryKeys> = {
   type: 'QUERY';
   property: PickQueryPropsByKey<Key>;
-  requestQueryKey: Key;
+  key: Key;
+};
+
+export type RequestProperties = {
+  type: 'REQ';
+  property: keyof Request;
 };
 
 export type MetadataFields = {
@@ -114,7 +117,7 @@ export type MetadataFields = {
 );
 
 export type MetadataInputs = {
-  metadataKey: keyof typeof constants.DECORATOR;
+  metadataKey: keyof typeof constants.DECORATOR.PARAMETER;
   target: object;
   propertyKey: string | symbol;
   metadataFields: MetadataFields;

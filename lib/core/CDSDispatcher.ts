@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Container } from 'inversify';
 
 import cds from '@sap/cds';
@@ -10,7 +9,7 @@ import middlewareUtil from '../util/helpers/middlewareUtil';
 import util from '../util/util';
 import { MetadataDispatcher } from './MetadataDispatcher';
 
-import type { NonEmptyArray, Handler, HandlerBuilder } from '../types/internalTypes';
+import type { NonEmptyArray, Handler } from '../types/internalTypes';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 
 import type { Request, Service, ServiceImpl } from '../types/types';
@@ -23,7 +22,7 @@ class CDSDispatcher {
   });
 
   /**
-   * Creates an instance of CDSDispatcher.
+   * Creates an instance of `CDS Dispatcher`.
    * @param entities An array of entity classes to manage event handlers for.
    * @example
    * new CDSDispatcher([ Entity-1, Entity-2, Entity-n ]).initialize();
@@ -81,10 +80,8 @@ class CDSDispatcher {
       return await callback.call(entity, results, req);
     }
 
-    if (Array.isArray(results)) {
-      // READ entity set
-      return await callback.call(entity, results, req);
-    }
+    // READ entity set
+    return await callback.call(entity, results, req);
   }
 
   private getActiveEntityOrDraft(handler: Handler, entityInstance: Constructable): Constructable {
@@ -282,24 +279,21 @@ class CDSDispatcher {
     middlewareUtil.sortBeforeEvents(this.srv);
   }
 
-  private getHandlersBy(entityInstance: Constructable): HandlerBuilder | undefined {
+  private getHandlersBy(entityInstance: Constructable) {
     const handlers = MetadataDispatcher.getMetadataHandlers(entityInstance);
 
     if (handlers?.length > 0) {
       // private routines for this func
-      const buildHandlers = (): void => {
-        handlers.forEach((handler) => {
-          this.buildHandlerBy([handler, entityInstance]);
-        });
-      };
-
-      const buildMiddlewares = (): void => {
-        this.buildMiddlewareBy(entityInstance);
-      };
 
       return {
-        buildHandlers,
-        buildMiddlewares,
+        buildHandlers: () => {
+          handlers.forEach((handler) => {
+            this.buildHandlerBy([handler, entityInstance]);
+          });
+        },
+        buildMiddlewares: () => {
+          this.buildMiddlewareBy(entityInstance);
+        },
       };
     }
 
@@ -343,9 +337,9 @@ class CDSDispatcher {
 
   // PUBLIC ROUTINES
   /**
-   * Initializes the entities within the CDSDispatcher, registering their corresponding handlers.
+   * Initializes the entities within the `CDS Dispatcher`, registering their corresponding handlers.
    *
-   * @returns An instance of ServiceImpl representing the initialized service implementation.
+   * @returns An instance of `ServiceImpl` representing the registered service implementation.
    */
   public initialize(): ServiceImpl {
     return cds.service.impl(this.buildServiceImplementation());

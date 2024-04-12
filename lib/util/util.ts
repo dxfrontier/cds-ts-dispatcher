@@ -7,7 +7,7 @@ import { Request as RequestClass } from '@sap/cds';
 import constants from '../constants/constants';
 
 import type { Validators } from '../types/validator';
-import type { Request, ValidatorField } from '../types/types';
+import type { NextEvent, Request, ValidatorField } from '../types/types';
 import type { Formatters } from '../types/formatter';
 
 const util = {
@@ -18,6 +18,14 @@ const util = {
    */
   lodash,
 
+  isNextEvent(arg: any): arg is NextEvent {
+    return typeof arg === 'function';
+  },
+
+  /**
+   * This method will clean the args for a clean re-indexation for the new decorators.
+   * If no decorators are found in the registry, this will be omitted.
+   */
   cleanArgs(args: any[]): void {
     args.length = 0;
   },

@@ -6,14 +6,11 @@ import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { MiddlewareImpl } from '../types/types';
 import type { Handler } from '../types/internalTypes';
 
-export class MetadataDispatcher<T extends Object> {
+export class MetadataDispatcher {
   constructor(
-    private readonly target: T,
+    private readonly target: object,
     private readonly metadataKey: string | symbol,
-  ) {
-    this.target = target;
-    this.metadataKey = metadataKey;
-  }
+  ) {}
 
   // PRIVATE ROUTINES
 
@@ -25,23 +22,23 @@ export class MetadataDispatcher<T extends Object> {
     return this.hasMetadataSet() ? Reflect.getMetadata(this.metadataKey, this.target) : [];
   }
 
-  // PUBLIC STATIC METHODS
+  // STATIC METHODS
+
   public static getEntity(entity: Constructable): { drafts: any; name: string } {
     return Reflect.getMetadata(constants.DECORATOR.ENTITY_HANDLER_NAME, entity.constructor);
   }
 
-  // @Use
   public static getMiddlewares(entity: Constructable): Array<Constructable<MiddlewareImpl>> {
     return Reflect.getMetadata(constants.DECORATOR.MIDDLEWARE_NAME, entity.constructor);
   }
 
-  // @After, @Before, @On decorators
   public static getMetadataHandlers(entity: Constructable): Handler[] {
     return Reflect.getMetadata(constants.DECORATOR.METHOD_ACCUMULATOR_NAME, entity);
   }
 
   // PUBLIC METHODS
-  public setMiddlewares<Middleware extends Constructable<MiddlewareImpl>>(middlewares: Middleware[]): void {
+
+  public setMiddlewares(middlewares: Array<Constructable<MiddlewareImpl>>): void {
     Reflect.defineMetadata(constants.DECORATOR.MIDDLEWARE_NAME, middlewares, this.target);
   }
 

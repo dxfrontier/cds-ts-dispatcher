@@ -1,145 +1,212 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-import type { Request } from '@sap/cds';
+/* eslint-disable prefer-const */
+import 'reflect-metadata';
+
+import { EventContext, Request } from '@sap/cds';
 
 import constants from '../constants/constants';
-import isColumnSuppliedUtil from '../util/helpers/isColumnSuppliedUtil';
-import isPresentAndGetDecoratorUtil from '../util/helpers/isPresentAndGetDecoratorUtil';
-import isRoleUtil from '../util/helpers/isRoleUtil';
-import requestPropertyUtil from '../util/helpers/requestPropertyUtil';
-import singleInstanceSwitchUtil from '../util/helpers/singleInstanceSwitchUtil';
+import parameterUtil from '../util/helpers/parameterUtil';
 import util from '../util/util';
 
-import type { MetadataFields, MetadataInputs } from '../types/internalTypes';
+import type { MetadataFields, MetadataInputs, TemporaryArgs } from '../types/internalTypes';
+
 export class ArgumentMethodProcessor {
-  private readonly req: Request;
-  private readonly temporaryArgs: any[];
+  private readonly temporaryArgs: TemporaryArgs = Object.create({});
 
   constructor(
     private readonly target: object,
     private readonly propertyName: string | symbol,
     private args: any[],
   ) {
-    this.req = util.findRequest(this.args);
-    this.temporaryArgs = [...this.args];
+    this.onLoadReorderArgsByType();
   }
 
-  // Private routines
-  private getMetadata(metadataKey: keyof typeof constants.DECORATOR): MetadataFields[] | undefined {
-    return Reflect.getOwnMetadata(constants.DECORATOR[metadataKey], this.target, this.propertyName);
+  // PRIVATE ROUTINES
+
+  /**
+   * This method is executed on creation of the instance ArgumentMethodProcessor and serves as a ordering of the args based on the type for later use
+   * @private
+   */
+  private onLoadReorderArgsByType(): void {
+    this.args.forEach((arg) => {
+      switch (true) {
+        case arg instanceof Request:
+          this.temporaryArgs.req = arg;
+          break;
+
+        case arg instanceof Error:
+          this.temporaryArgs.error = arg;
+          break;
+
+        case arg instanceof EventContext:
+          this.temporaryArgs.event = arg;
+          break;
+
+        case arg instanceof Array:
+          this.temporaryArgs.results = arg;
+          break;
+
+        case util.isNextEvent(arg):
+          this.temporaryArgs.next = arg;
+          break;
+
+        case util.lodash.isBoolean(arg):
+          this.temporaryArgs.results = arg;
+          break;
+
+        case !util.lodash.isArray(arg) && util.lodash.isObject(arg):
+          this.temporaryArgs.results = arg;
+          break;
+
+        default:
+          util.throwErrorMessage('Option not handled in ArgumentMethodProcessor.ts');
+      }
+    });
   }
 
-  private existsDecorator(metadataKey: keyof typeof constants.DECORATOR): boolean | undefined {
+  private getMetadata(metadataKey: keyof typeof constants.DECORATOR.PARAMETER): MetadataFields[] | undefined {
+    return Reflect.getOwnMetadata(constants.DECORATOR.PARAMETER[metadataKey], this.target, this.propertyName);
+  }
+
+  private existsDecorator(metadataKey: keyof typeof constants.DECORATOR.PARAMETER): boolean | undefined {
     const metadata = this.getMetadata(metadataKey);
 
-    if (metadata !== undefined) {
+    if (!util.lodash.isUndefined(metadata)) {
       return metadata.length > 0;
     }
   }
 
-  private applyDecorator(decorator: { metadataKey: keyof typeof constants.DECORATOR; data: unknown }): void {
-    const metadata = this.getMetadata(decorator.metadataKey)!;
+  /**
+   * This method will retrieve the assigned decorators, this means that it will check if for the current parameter if there's any decorator assigned
+   * @private
+   */
+  private getAttachedDecorators(): Array<keyof typeof constants.DECORATOR.PARAMETER> {
+    const decorators = Object.keys(constants.DECORATOR.PARAMETER) as Array<keyof typeof constants.DECORATOR.PARAMETER>;
+    return decorators.filter((decorator) => this.existsDecorator(decorator));
+  }
 
+  private hasDecoratorsAttached(): boolean {
+    return this.getAttachedDecorators().length > 0;
+  }
+
+  /**
+   * This method is used only for single decorators, the ones which can appear only once, like Next, Req, Results ...
+   * @private
+   */
+  private applySingleDecoratorByKey(decorator: {
+    metadataKey: keyof typeof constants.DECORATOR.PARAMETER;
+    data: unknown;
+  }): void {
+    const metadata = this.getMetadata(decorator.metadataKey)!;
     this.args[metadata[0].parameterIndex] = decorator.data;
   }
 
-  private applyIsPresentOrGetDecorator(decorator: {
-    type: 'Get' | 'IsPresent';
-    metadataKey: keyof typeof constants.DECORATOR;
-  }): void {
-    const metadata = this.getMetadata(decorator.metadataKey)!;
+  private applyMultipleDecoratorsByKey(metadataKey: keyof typeof constants.DECORATOR.PARAMETER): void {
+    const metadata = this.getMetadata(metadataKey)!;
 
-    isPresentAndGetDecoratorUtil.handleQueryOptions(decorator.type, metadata, this.args);
+    switch (metadataKey) {
+      case 'IS_ROLE':
+        parameterUtil.applyIsRole(this.temporaryArgs.req, this.args, metadata);
+        break;
+
+      case 'GET_REQUEST':
+        parameterUtil.handleRequestOptions(this.temporaryArgs.req, this.args, metadata);
+        break;
+
+      case 'IS_COLUMN_SUPPLIED':
+        parameterUtil.applyIsColumnSupplied(this.temporaryArgs.req, this.args, metadata);
+        break;
+
+      case 'IS_PRESENT':
+      case 'GET_QUERY':
+        parameterUtil.applyIsPresentOrGetDecorator(
+          metadataKey === 'GET_QUERY' ? 'Get' : 'IsPresent',
+          metadata,
+          this.temporaryArgs.req,
+          this.args,
+        );
+        break;
+
+      default:
+        util.throwErrorMessage('Unsupported decorator key');
+    }
   }
 
-  private applyGetRequestPropertyDecorator(): void {
-    const metadata = this.getMetadata('GET_REQUEST_PROPERTY')!;
+  // STATIC ROUTINES
 
-    requestPropertyUtil.handleRequestOptions(metadata, this.args);
-  }
-
-  // Public static routines
   public static createMetadataBy(metadata: MetadataInputs): void {
-    const queryOptions =
-      Reflect.getOwnMetadata(constants.DECORATOR[metadata.metadataKey], metadata.target, metadata.propertyKey) || [];
+    const createOrGetMetadata =
+      Reflect.getOwnMetadata(
+        constants.DECORATOR.PARAMETER[metadata.metadataKey],
+        metadata.target,
+        metadata.propertyKey,
+      ) || [];
 
-    queryOptions.push(metadata.metadataFields);
+    createOrGetMetadata.push(metadata.metadataFields);
 
     Reflect.defineMetadata(
-      constants.DECORATOR[metadata.metadataKey],
-      queryOptions,
+      constants.DECORATOR.PARAMETER[metadata.metadataKey],
+      createOrGetMetadata,
       metadata.target,
       metadata.propertyKey,
     );
   }
 
-  // Public routines
-  public applyArgumentDecorators(): void {
-    // Handle @Req() decorator
+  // PUBLIC ROUTINES
 
-    if (this.existsDecorator('REQUEST')) {
+  /**
+   * Registration of decorators
+   */
+  public applyDecorators(): void {
+    if (this.hasDecoratorsAttached()) {
       util.cleanArgs(this.args);
-      this.applyDecorator({ metadataKey: 'REQUEST', data: this.req });
     }
 
-    // Handle @Results & @Result decorators, convenient for 'create' and 'update' and 'delete'
-    if (this.existsDecorator('RESULTS')) {
-      const results: unknown[] = this.temporaryArgs[0];
-      this.applyDecorator({ metadataKey: 'RESULTS', data: results });
-    }
+    this.getAttachedDecorators().forEach((metadataKey) => {
+      switch (metadataKey) {
+        /**
+         * @Req(), @Error(), @Next(), @Results(), @Result(), @Jwt, @SingleInstanceSwitch are single decorators
+         * This means that decorators can be added only once per callback.
+         */
+        case 'ERROR':
+        case 'NEXT':
+        case 'RESULTS':
+        case 'REQ': {
+          let key = util.lodash.lowerCase(metadataKey) as 'req' | 'results' | 'next' | 'error';
+          this.applySingleDecoratorByKey({ metadataKey, data: this.temporaryArgs[key] });
+          break;
+        }
 
-    // Handle @Next() decorator
-    if (this.existsDecorator('NEXT_FUNCTION')) {
-      const next: Function = this.temporaryArgs[1];
-      this.applyDecorator({ metadataKey: 'NEXT_FUNCTION', data: next });
-    }
+        case 'JWT':
+          this.applySingleDecoratorByKey({
+            metadataKey,
+            data: parameterUtil.retrieveJwt(this.temporaryArgs.req),
+          });
+          break;
 
-    // Handle @Error decorator
-    if (this.existsDecorator('ERROR')) {
-      const error: Error = this.temporaryArgs[0];
-      this.applyDecorator({ metadataKey: 'ERROR', data: error });
-    }
+        case 'SINGLE_INSTANCE_SWITCH':
+          this.applySingleDecoratorByKey({
+            metadataKey,
+            data: parameterUtil.isSingleInstance(this.temporaryArgs.req),
+          });
+          break;
 
-    // Handle @SingleInstanceSwitch decorator
-    if (this.existsDecorator('SINGLE_INSTANCE_SWITCH')) {
-      this.applyDecorator({
-        metadataKey: 'SINGLE_INSTANCE_SWITCH',
-        data: singleInstanceSwitchUtil.isSingleInstance(this.req),
-      });
-    }
+        /**
+         * @IsColumnSupplied, @IsRole, @GetRequest, @GetQuery, @IsPresent,  are multiple decorators.
+         * This means that the decorators can be added multiple times per callback.
+         */
+        case 'GET_QUERY':
+        case 'IS_PRESENT':
+        case 'IS_ROLE':
+        case 'GET_REQUEST':
+        case 'IS_COLUMN_SUPPLIED': {
+          this.applyMultipleDecoratorsByKey(metadataKey);
+          break;
+        }
 
-    // Handle @IsColumnSupplied decorator
-    if (this.existsDecorator('IS_COLUMN_SUPPLIED')) {
-      const column = this.getMetadata('IS_COLUMN_SUPPLIED')![0];
-
-      this.applyDecorator({
-        metadataKey: 'IS_COLUMN_SUPPLIED',
-        data: isColumnSuppliedUtil.isColumSupplied(this.req, column),
-      });
-    }
-
-    // Handle @IsRole decorator
-    if (this.existsDecorator('IS_ROLE')) {
-      const role = this.getMetadata('IS_ROLE')![0];
-
-      this.applyDecorator({
-        metadataKey: 'IS_COLUMN_SUPPLIED',
-        data: isRoleUtil.isRoleSupplied(this.req, role),
-      });
-    }
-
-    // Handle @GetRequestProperty decorator
-    if (this.existsDecorator('GET_REQUEST_PROPERTY')) {
-      this.applyGetRequestPropertyDecorator();
-    }
-
-    // Handle @GetQueryProperty decorator
-    if (this.existsDecorator('GET_QUERY_PROPERTY')) {
-      this.applyIsPresentOrGetDecorator({ type: 'Get', metadataKey: 'GET_QUERY_PROPERTY' });
-    }
-
-    // Handle @IsPresent decorator
-    if (this.existsDecorator('IS_PRESENT')) {
-      this.applyIsPresentOrGetDecorator({ type: 'IsPresent', metadataKey: 'IS_PRESENT' });
-    }
+        default:
+          util.throwErrorMessage('Parameter decorator option not handled !');
+          break;
+      }
+    });
   }
 }
