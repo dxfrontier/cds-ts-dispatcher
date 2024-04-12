@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import {
   AfterCreate,
   AfterDelete,
@@ -77,9 +75,6 @@ class BookHandler {
 
   // *******************************************************
 
-  // TODO: add @OnReject()
-  // ? @IsPresent rename to : @IsQueryOptionFill, @IsFilled, @IsProvided, @IsSupplied
-
   // @ScopedUserLogic(handleClass)
 
   // *******************************************************
@@ -89,46 +84,11 @@ class BookHandler {
   private async afterRead(
     @Req() req: Request,
     @Results() results: Book[],
-
     @SingleInstanceSwitch() singleInstance: boolean,
-
     @IsColumnSupplied<Book>('price') hasPrice: boolean,
-
     @IsPresent('SELECT', 'columns') hasColumns: boolean,
-
     @IsRole('role', 'anotherRole') role: boolean,
-
-    @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['FOR_SELECT'],
-    @GetQuery('SELECT', 'distinct') distinct: GetQueryType['distinct'],
-    @GetQuery('SELECT', 'excluding') excluding: GetQueryType['excluding'],
-    @GetQuery('SELECT', 'excluding') from: GetQueryType['from']['FOR_SELECT'],
-    @GetQuery('SELECT', 'groupBy') groupBy: GetQueryType['groupBy'],
-    @GetQuery('SELECT', 'having') having: GetQueryType['having'],
-    @GetQuery('SELECT', 'limit') limit: GetQueryType['limit'],
-    @GetQuery('SELECT', 'limit.rows') limitRows: GetQueryType['limit']['rows'],
-    @GetQuery('SELECT', 'limit.offset') limitOffset: GetQueryType['limit']['offset'],
-    @GetQuery('SELECT', 'mixin') mixin: GetQueryType['mixin'],
-    @GetQuery('SELECT', 'one') one: GetQueryType['one'],
-    @GetQuery('SELECT', 'orderBy') orderBy: GetQueryType['orderBy'],
-    @GetQuery('SELECT', 'where') where: GetQueryType['where'],
-
-    // All good here
-    @GetRequest('entity') entity: Request['entity'],
-    @GetRequest('event') event: Request['event'],
-    @GetRequest('features') features: Request['features'],
-    @GetRequest('headers') headers: Request['headers'],
-    @GetRequest('http') http: Request['http'],
-    @GetRequest('id') id: Request['id'],
     @GetRequest('locale') locale: Request['locale'],
-    @GetRequest('method') method: Request['method'],
-    @GetRequest('params') params: Request['params'],
-    @GetRequest('query') query: Request['query'],
-    @GetRequest('subject') subject: Request['subject'],
-    @GetRequest('target') target: Request['target'],
-    @GetRequest('tenant') tenant: Request['tenant'],
-    @GetRequest('timestamp') timestamp: Request['timestamp'],
-    @GetRequest('user') user: Request['user'],
-
     @Jwt() token: string | undefined,
   ) {
     await this.srv.emit('OrderedBook', { book: 'dada', quantity: 3, buyer: req.user.id });
@@ -139,8 +99,6 @@ class BookHandler {
     } else {
       req.notify('Entity set');
     }
-
-    // req.query.SELECT?.limit?.offset['val'];
 
     this.bookService.enrichTitle(results);
   }

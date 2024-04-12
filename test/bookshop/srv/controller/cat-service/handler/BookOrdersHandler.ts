@@ -23,7 +23,7 @@ import BookService from '../../../service/BookService';
 
 @EntityHandler(BookOrder)
 @Use(MiddlewareEntity1, MiddlewareEntity2)
-export class BookOrdersHandler {
+class BookOrdersHandler {
   @Inject(SRV) private readonly srv: Service;
   @Inject(BookService) private readonly bookService: BookService;
 
@@ -46,3 +46,5 @@ export class BookOrdersHandler {
     @SingleInstanceSwitch() isSingleInstance: boolean,
   ) {}
 }
+
+export default BookOrdersHandler;

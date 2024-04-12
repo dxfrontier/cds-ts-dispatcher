@@ -23,7 +23,7 @@ class PromotionHandler {
   }
 
   @AfterSaveDraft()
-  public async afterSaveDraft(@Result() result: Promotion, req: TypedRequest<Promotion>) {
+  public async afterSaveDraft(@Result() result: Promotion, @Req() req: TypedRequest<Promotion>) {
     req.notify(201, 'After save draft executed');
   }
 

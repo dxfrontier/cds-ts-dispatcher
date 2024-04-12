@@ -128,6 +128,25 @@ Object.defineProperty(BookEvent, 'name', { value: 'sap.capire.bookshop.BookEvent
 export class BookEvents extends Array<BookEvent> {static drafts: typeof BookEvent}
 Object.defineProperty(BookEvents, 'name', { value: 'sap.capire.bookshop.BookEvents' })
 
+export function _BookSaleAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class BookSale extends Base {
+        ID?: number;
+        saleDate?: string | null;
+        saleAmount?: number | null;
+        quantity?: number | null;
+        book?: __.Association.to<Book> | null;
+        book_ID?: number | null;
+        customer?: __.Association.to<User> | null;
+        customer_ID?: number | null;
+      static actions: {
+      }
+  };
+}
+export class BookSale extends _._managedAspect(_._cuidAspect(_BookSaleAspect(__.Entity))) {}
+Object.defineProperty(BookSale, 'name', { value: 'sap.capire.bookshop.BookSales' })
+export class BookSales extends Array<BookSale> {}
+Object.defineProperty(BookSales, 'name', { value: 'sap.capire.bookshop.BookSales' })
+
 export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class User extends Base {
         ID?: number | null;

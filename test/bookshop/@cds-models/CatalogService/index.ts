@@ -212,6 +212,35 @@ Object.defineProperty(BookFormat, 'name', { value: 'CatalogService.BookFormats' 
 export class BookFormats extends Array<BookFormat> {}
 Object.defineProperty(BookFormats, 'name', { value: 'CatalogService.BookFormats' })
 
+export function _BookSaleAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class BookSale extends Base {
+        createdAt?: string | null;
+    /**
+    * Canonical user ID
+    */
+        createdBy?: _.User | null;
+        modifiedAt?: string | null;
+    /**
+    * Canonical user ID
+    */
+        modifiedBy?: _.User | null;
+        ID?: number;
+        saleDate?: string | null;
+        saleAmount?: number | null;
+        quantity?: number | null;
+        book?: __.Association.to<Book> | null;
+        book_ID?: number | null;
+        customer?: __.Association.to<_sap_capire_bookshop.User> | null;
+        customer_ID?: number | null;
+      static actions: {
+      }
+  };
+}
+export class BookSale extends _._managedAspect(_._cuidAspect(_BookSaleAspect(__.Entity))) {}
+Object.defineProperty(BookSale, 'name', { value: 'CatalogService.BookSales' })
+export class BookSales extends Array<BookSale> {}
+Object.defineProperty(BookSales, 'name', { value: 'CatalogService.BookSales' })
+
 export function _BookEventAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookEvent extends Base {
         createdAt?: string | null;

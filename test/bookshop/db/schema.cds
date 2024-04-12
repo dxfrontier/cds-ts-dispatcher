@@ -94,6 +94,17 @@ entity BookEvents : managed, cuid {
 
 }
 
+entity BookSales : managed, cuid {
+  key ID         : Integer;
+      saleDate   : Date; // Date of the sale
+      saleAmount : Decimal; // Amount of the sale
+      quantity   : Integer; // Quantity of books sold
+
+      // Associations
+      book       : Association to Books;
+      customer   : Association to Users;
+}
+
 
 // **************************************************************************************************
 

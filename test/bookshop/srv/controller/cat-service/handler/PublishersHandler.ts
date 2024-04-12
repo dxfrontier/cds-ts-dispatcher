@@ -16,7 +16,7 @@ import {
 import BookService from '../../../service/BookService';
 
 @EntityHandler(Publisher)
-export class PublishersHandler {
+class PublishersHandler {
   @Inject(SRV) private readonly srv: Service;
   @Inject(BookService) private readonly bookService: BookService;
 
@@ -29,3 +29,5 @@ export class PublishersHandler {
     req.reject(400, 'OnError');
   }
 }
+
+export default PublishersHandler;
