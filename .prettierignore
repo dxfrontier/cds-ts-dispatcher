@@ -1,4 +1,5 @@
 # Ignore artifacts
 test/e2e
+test/bookshop/@cds-models
 package.json
 dist
