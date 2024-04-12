@@ -4,8 +4,9 @@
   "features": {
     "ghcr.io/devcontainers-contrib/features/curl-apt-get:1": {}
   },
+  "runArgs": ["--name", "CDS-TS-Dispatcher"],
   "forwardPorts": [4004],
-  "postCreateCommand": "bash .devcontainer/scripts/install-dependencies.sh",
+  "postCreateCommand": "bash scripts/install-dependencies.sh",
   // Configure tool-specific properties.
   "customizations": {
     "vscode": {
