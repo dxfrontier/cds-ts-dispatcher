@@ -402,9 +402,7 @@ The `CDSDispatcher` constructor allows you to create an instance for dispatching
 
 `Method`
 
-- `initialize`: The `initialize` method of the `CDSDispatcher` class is used to initialize **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository).
-
-<!-- `CDSDispatcher` class will initialize all **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository). -->
+- `initialize`: The `initialize` method of the `CDSDispatcher` class is used to initialize **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository), [UnboundActions](#unboundactions)
 
 `Example`
 
@@ -461,7 +459,7 @@ export class BookHandler {
 ```
 
 > [!TIP]
-> After creation of `BookHandler` class, you can `import it` into the [CDSDispatcher](#cdsdispatcher).
+> After creation of `BookHandler` class, you can `import it` into the [CDSDispatcher](#CDSDispatcher).
 >
 > ```typescript
 > import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
@@ -624,12 +622,12 @@ export class UnboundActionsHandler {
 }
 ```
 
-`Imported it` in the CDSDispatcher
+`Imported it` in the [CDSDispatcher](#CDSDispatcher)
 
 ```typescript
 import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
 
-export = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
+export = new CDSDispatcher([ UnboundActionsHandler, ...])
 // or
 // use module.exports = new CDSDispatcher( ... )
 ```
@@ -788,6 +786,10 @@ export class CustomerHandler {
 
 The `@Req` decorator is utilized at the `parameter level` to annotate a parameter with the `Request` object, providing access to request-related information.
 
+`Return`
+
+- `Request`: An instance of `@sap/cds` - `Request`
+
 `Example`
 
 ```typescript
@@ -876,6 +878,10 @@ export class BookHandler {
 
 The `@Next` decorator is utilized at the `parameter level` to annotate a parameter with the CDS `Next` function, which is used to proceed to the next middleware in the chain.
 
+`Return`
+
+- `NextEvent`: The next event in chain to be called.
+
 `Example`
 
 ```typescript
@@ -908,6 +914,10 @@ export class BookHandler {
 
 The `@Error` decorator is utilized at the `parameter level` to annotate a parameter with the CDS `Error` and contains information regarding the failed `Request`.
 
+`Return`
+
+- `Error`: An instance of type `Error`.
+
 `Example`
 
 ```typescript
@@ -938,6 +948,10 @@ export class UnboundActionsHandler {
 The `@Jwt` decorator is utilized at the `parameter level` to annotate a parameter to retrieve `JWT` from the `Request` that is based on the node `req.http.req - IncomingMessage`.
 
 Fails if no authorization header is given or has the wrong format.
+
+`Return`
+
+- `string` | `undefined` : The retrieved `JWT token` or undefined if no token was found.
 
 `Example`
 
@@ -1010,7 +1024,7 @@ class BookHandler {
 ```
 
 > [!TIP]
-> Decorator `@IsPresent` works well with [@GetQuery()](#getqueryproperty).
+> Decorator [@IsPresent()](#ispresent) works well with [@GetQuery()](#getqueryproperty).
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1019,16 +1033,16 @@ class BookHandler {
 **@IsRole(role: string)**
 
 The `@IsRole` decorator is utilized at the `parameter level` to annotate a parameter, allowing the verification
-of the existence of specific role values in the request. It applies an `OR` logic between the roles, meaning it
-checks if at `least one` of the specified roles exists.
+of a user having assigned a given role. It applies an `OR` logic between the roles, meaning it
+checks if at `least one` of the specified roles is assigned.
 
 `Parameters`
 
-- `role (...string[])`: An array of role names to verify in `req.user.is(role)`.
+- `role (...string[])`: An array of role names to check if are assigned.
 
 `Return`
 
-- `boolean`: This decorator returns `true` if at least one of the specified roles exists, otherwise `false`.
+- `boolean`: This decorator returns `true` if at least one of the specified roles is assigned to the current request user, otherwise `false`.
 
 `Example`
 
@@ -1048,9 +1062,9 @@ class BookHandler {
     @Req() req: Request,
     @Results() results: MyEntity[],
 
-    @IsRole('role', 'anotherRole') roleExists: boolean,
+    @IsRole('role', 'anotherRole') roleAssigned: boolean,
   ) {
-    if (roleExists) {
+    if (roleAssigned) {
       // ...
     }
 
@@ -1058,6 +1072,10 @@ class BookHandler {
   }
 }
 ```
+
+[!TIP]
+
+> The role names correspond to the values of `@requires` and the `@restrict.grants.to` annotations in your `CDS` models.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1123,10 +1141,10 @@ The `@GetQuery` decorator is utilized at the `parameter level` to annotate a par
 
   <summary>SELECT</summary>
 
-  - @GetQuery(`'SELECT'`, `'columns'`) columns: `GetQueryType['columns']['FOR_SELECT']`
+  - @GetQuery(`'SELECT'`, `'columns'`) columns: `GetQueryType['columns']['forSelect']`
   - @GetQuery(`'SELECT'`, `'distinct'`) distinct: `GetQueryType['distinct']`
   - @GetQuery(`'SELECT'`, `'excluding'`) excluding: `GetQueryType['excluding']`
-  - @GetQuery(`'SELECT'`, `'excluding'`) from: `GetQueryType['from']['FOR_SELECT']`
+  - @GetQuery(`'SELECT'`, `'from'`) from: `GetQueryType['from']['forSelect']`
   - @GetQuery(`'SELECT'`, `'groupBy'`) groupBy: `GetQueryType['groupBy']`
   - @GetQuery(`'SELECT'`, `'having'`) having: `GetQueryType['having']`
   - @GetQuery(`'SELECT'`, `'limit'`) limit: `GetQueryType['limit']`
@@ -1144,7 +1162,7 @@ The `@GetQuery` decorator is utilized at the `parameter level` to annotate a par
   <summary>INSERT</summary>
 
   - @GetQuery(`'INSERT'`, `'as'`) as: `GetQueryType['as']`
-  - @GetQuery(`'INSERT'`, `'columns'`) columns: `GetQueryType['columns']['FOR_INSERT']`
+  - @GetQuery(`'INSERT'`, `'columns'`) columns: `GetQueryType['columns']['forInsert']`
   - @GetQuery(`'INSERT'`, `'entries'`) entries: `GetQueryType['entries']`
   - @GetQuery(`'INSERT'`, `'into'`) into: `GetQueryType['into']`
   - @GetQuery(`'INSERT'`, `'rows'`) rows: `GetQueryType['rows']`
@@ -1166,7 +1184,7 @@ The `@GetQuery` decorator is utilized at the `parameter level` to annotate a par
 
     <summary>UPSERT</summary>
 
-  - @GetQuery(`'UPSERT'`, `'columns'`) columns: `GetQueryType['columns']`
+  - @GetQuery(`'UPSERT'`, `'columns'`) columns: `GetQueryType['columns'][forUpsert]`
   - @GetQuery(`'UPSERT'`, `'entries'`) entries: `GetQueryType['entries']`
   - @GetQuery(`'UPSERT'`, `'into'`) into: `GetQueryType['into']`
   - @GetQuery(`'UPSERT'`, `'rows'`) rows: `GetQueryType['rows']`
@@ -1178,7 +1196,7 @@ The `@GetQuery` decorator is utilized at the `parameter level` to annotate a par
 
     <summary>DELETE</summary>
 
-  - @GetQuery(`'DELETE'`, `'from'`) from: `GetQueryType['from']`
+  - @GetQuery(`'DELETE'`, `'from'`) from: `GetQueryType['from'][forDelete]`
   - @GetQuery(`'DELETE'`, `'where'`) columns: `GetQueryType['where']`
 
     </details>
@@ -1204,7 +1222,7 @@ class BookHandler {
     // Check existence of columns
     @IsPresent('SELECT', 'columns') columnsPresent: boolean,
     // Get columns
-    @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['FOR_SELECT'],
+    @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['forDelete'],
 
     @GetQuery('SELECT', 'orderBy') distinct: GetQueryType['orderBy'],
     @GetQuery('SELECT', 'groupBy') groupBy: GetQueryType['groupBy'],
@@ -1290,11 +1308,14 @@ class BookHandler {
 
 **@SingleInstanceSwitch**
 
-The `@SingleInstanceSwitch()` decorator is applied at the `parameter level` that the variable assigned to the decorator will behave like a `switch` when the `REQ` is `entity set` when `false` and `single instance` when `true`, so you can manage different behavior.
+The `@SingleInstanceSwitch()` decorator is applied at the `parameter level`.
+
+It allows you to manage different behaviors based on whether the request is for a `single entity instance` or `an entity set`, the parameter assigned to the decorator will behave like a **`switch`**.
 
 `Return`
 
-- `boolean`: This decorator returns `true` if the `Request` is single instance, and `false` otherwise when is `entity set`.
+- `true` when the `Request` is `single instance`
+- `false` when the `Request` is `entity set`
 
 `Example 1`
 
