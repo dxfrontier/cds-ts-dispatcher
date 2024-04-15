@@ -1,4 +1,4 @@
-import { CDSDispatcher } from '../../../../../lib/core/CDSDispatcher';
+import { CDSDispatcher } from '../../../../../lib';
 import PromotionHandler from './handler/PromotionsHandler';
 import UserActivityLogHandler from './handler/UserActivityLogHandler';
 

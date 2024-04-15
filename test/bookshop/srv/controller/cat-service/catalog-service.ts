@@ -1,4 +1,4 @@
-import { Dispatcher } from '../../../../../lib';
+import { CDSDispatcher } from '../../../../../lib';
 import BookEventsHandler from './handler/BookEventsHandler';
 import BookFormatsHandler from './handler/BookFormatsHandler';
 import BookHandler from './handler/BookHandler';
@@ -10,7 +10,7 @@ import PublishersHandler from './handler/PublishersHandler';
 import ReviewHandler from './handler/ReviewHandler';
 import UnboundActionsHandler from './handler/UnboundActions';
 
-export = new Dispatcher([
+export = new CDSDispatcher([
   // Entities
   BookHandler,
   ReviewHandler,
@@ -24,4 +24,4 @@ export = new Dispatcher([
   BookEventsHandler,
   // Unbound actions
   UnboundActionsHandler,
-]);
+]).initialize();
