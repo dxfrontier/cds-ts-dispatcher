@@ -22,7 +22,7 @@ class CDSDispatcher {
   });
 
   /**
-   * Creates an instance of `CDS Dispatcher`.
+   * @description Creates an instance of `CDS Dispatcher`.
    * @param entities An array of entity classes to manage event handlers for.
    * @example
    * new CDSDispatcher([ Entity-1, Entity-2, Entity-n ]).initialize();
@@ -66,17 +66,17 @@ class CDSDispatcher {
     const [handler, entity] = handlerAndEntity;
     const callback = handler.callback;
 
-    if (!Array.isArray(results)) {
-      if (util.lodash.isNumber(results)) {
-        // private routine for this func
-        const _isDeleted = (data: unknown): boolean => data === 1;
-        const deleted = _isDeleted(results);
+    // private routine for this func
+    const _isDeleted = (data: unknown): boolean => data === 1;
 
-        // DELETE single request
+    if (!Array.isArray(results)) {
+      // DELETE single request
+      if (util.lodash.isNumber(results)) {
+        const deleted = _isDeleted(results);
         return await callback.call(entity, deleted, req);
       }
 
-      // READ, UPDATE single request
+      // CREATE, READ, UPDATE - single request
       return await callback.call(entity, results, req);
     }
 
@@ -209,7 +209,7 @@ class CDSDispatcher {
     }
   }
 
-  private constructMiddleware(entityInstance: Constructable): void {
+  private constructMiddlewares(entityInstance: Constructable): void {
     const ALL_EVENTS = '*';
     const entity = MetadataDispatcher.getEntity(entityInstance);
 
@@ -261,7 +261,7 @@ class CDSDispatcher {
     }
   }
 
-  private registerMiddlewares(entityInstance: Constructable): void {
+  private buildMiddlewareBy(entityInstance: Constructable): void {
     const middlewares = MetadataDispatcher.getMiddlewares(entityInstance);
 
     // Step out if no middlewares
@@ -269,13 +269,7 @@ class CDSDispatcher {
       return;
     }
 
-    this.constructMiddleware(entityInstance);
-  }
-
-  private buildMiddlewareBy(entityInstance: Constructable): void {
-    this.registerMiddlewares(entityInstance);
-
-    // This routine will sort the 'Before' events over '*'. The '*' will be firstly and after the named ones as events are triggered in order.
+    this.constructMiddlewares(entityInstance);
     middlewareUtil.sortBeforeEvents(this.srv);
   }
 
@@ -283,8 +277,6 @@ class CDSDispatcher {
     const handlers = MetadataDispatcher.getMetadataHandlers(entityInstance);
 
     if (handlers?.length > 0) {
-      // private routines for this func
-
       return {
         buildHandlers: () => {
           handlers.forEach((handler) => {
@@ -336,9 +328,9 @@ class CDSDispatcher {
   }
 
   // PUBLIC ROUTINES
+
   /**
-   * Initializes the entities within the `CDS Dispatcher`, registering their corresponding handlers.
-   *
+   * @description Initializes the entities within the `CDS Dispatcher`, registering their corresponding handlers.
    * @returns An instance of `ServiceImpl` representing the registered service implementation.
    */
   public initialize(): ServiceImpl {

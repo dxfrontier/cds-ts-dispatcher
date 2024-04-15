@@ -7,10 +7,11 @@ import type { CDSTyperEntity } from '../types/types';
 
 /**
  *
- * This decorator can be applied to handler classes that correspond to specific entities.
- * All 'handlers' in that class will have that corresponding entity as a base for execution of their handlers.
+ * @description This decorator can be applied to handler classes that correspond to specific entities.
  *
- * @param {CDSTyperEntity<T>} entity - The entity to associate with the handler class.
+ * `Note:` All 'handlers' in that class will have that corresponding entity as a base for execution of their handlers.
+ *
+ * @param entity - The entity to associate with the handler class. Must be a `CDS-Typer` class.
  */
 
 function EntityHandler<T, Target extends new (...args: never) => unknown>(entity: CDSTyperEntity<T>) {
@@ -24,7 +25,7 @@ function EntityHandler<T, Target extends new (...args: never) => unknown>(entity
 }
 
 /**
- * This decorator can be applied to classes containing repository logic.
+ * @description This decorator can be applied to classes containing repository logic.
  */
 
 function Repository<Target extends new (...args: never) => unknown>() {
@@ -34,7 +35,7 @@ function Repository<Target extends new (...args: never) => unknown>() {
 }
 
 /**
- * This decorator can be applied to classes containing business logic.
+ * @description This decorator can be applied to classes containing business logic.
  */
 
 function ServiceLogic<Target extends new (...args: never) => unknown>() {
@@ -44,7 +45,7 @@ function ServiceLogic<Target extends new (...args: never) => unknown>() {
 }
 
 /**
- * This decorator can be applied to classes containing Unbound actions.
+ * @description This decorator can be applied to classes containing `Unbound actions`.
  */
 
 function UnboundActions<Target extends new (...args: never) => unknown>() {
