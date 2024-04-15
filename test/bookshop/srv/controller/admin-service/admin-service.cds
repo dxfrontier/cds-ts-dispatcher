@@ -5,7 +5,6 @@ using {
   HelloResponse
 } from '../../../db/cds-types/types.cds';
 
-
 service AdminService {
   @odata.draft.enabled: true
   entity UserActivityLog as projection on Base.UserActivityLog;
@@ -13,6 +12,8 @@ service AdminService {
   @odata.draft.enabled: true
   entity Promotions      as projection on Base.Promotions;
 
+  @requires: 'authenticated-user'
   entity Users           as projection on Base.Users;
+
   action sendMail(request : HelloRequest) returns HelloResponse;
 }

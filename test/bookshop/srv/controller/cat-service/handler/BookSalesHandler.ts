@@ -3,6 +3,8 @@ import { BookSale } from '#cds-models/CatalogService';
 import {
   AfterRead,
   EntityHandler,
+  GetQuery,
+  GetQueryType,
   GetRequest,
   Inject,
   IsColumnSupplied,
@@ -35,12 +37,40 @@ class BookSalesHandler {
     @IsRole('role', 'anotherRole') roles: boolean,
     @IsRole('thirdRole') role: boolean,
 
-    // @GetRequest('locale') locale: Request['locale'],
-    // @Jwt() token: string | undefined,
+    @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['forDelete'],
+    @GetQuery('SELECT', 'orderBy') orderBy: GetQueryType['orderBy'],
+
+    @GetRequest('locale') locale: Request['locale'],
+
+    @SingleInstanceSwitch() isSingleInstance: boolean,
+
+    @Jwt() token: string | undefined,
   ) {
-    debugger;
-    if (roles === undefined && role === undefined) {
-      req.notify(`${roles && role}`);
+    if (isSingleInstance) {
+      req.notify('Single instance');
+      return;
+    } else {
+      req.notify('Entity set');
+    }
+
+    if (token) {
+      req.notify(token);
+    }
+
+    if (locale) {
+      req.notify('locale');
+    }
+
+    if (columns.length > 0) {
+      req.notify('columns');
+    }
+
+    if (orderBy && orderBy?.length > 0) {
+      req.notify('orderBy');
+    }
+
+    if (roles === false && role === false) {
+      req.notify('NO_USER_ROLE');
     }
 
     if (hasQuantity && hasSaleDate && hasFrom && hasOrderBy) {

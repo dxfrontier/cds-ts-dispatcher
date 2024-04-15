@@ -38,32 +38,7 @@ class BookHandler {
   @Inject(BookService) private readonly bookService: BookService;
 
   @AfterCreate()
-  private async afterCreate(
-    @Result() result: Book,
-    @Req() req: Request,
-    @IsPresent('INSERT', 'columns') hasColumns: boolean,
-    // @GetQuery('INSERT', 'as') as: GetQueryType['as'],
-    // @GetQuery('INSERT', 'columns') columns: GetQueryType['columns']['FOR_INSERT'],
-    // @GetQuery('INSERT', 'entries') entries: GetQueryType['entries'],
-    // @GetQuery('INSERT', 'into') into: GetQueryType['into'],
-    // @GetQuery('INSERT', 'rows') rows: GetQueryType['rows'],
-    // @GetQuery('INSERT', 'values') values: GetQueryType['values'],
-
-    ///
-
-    @GetQuery('UPDATE', 'data') data: GetQueryType['data'],
-    // @GetQuery('UPDATE', 'entity') entity: GetQueryType['entity'],
-    // @GetQuery('UPDATE', 'where') where: GetQueryType['where'],
-
-    // @GetQuery('UPSERT', 'columns') columns: GetQueryType['columns'],
-    // @GetQuery('UPSERT', 'entries') entries: GetQueryType['entries'],
-    // @GetQuery('UPSERT', 'into') into: GetQueryType['into'],
-    // @GetQuery('UPSERT', 'rows') rows: GetQueryType['rows'],
-    // @GetQuery('UPSERT', 'values') values: GetQueryType['values'],
-
-    @GetQuery('DELETE', 'from') from: GetQueryType['from'],
-    @GetQuery('DELETE', 'where') columns: GetQueryType['where'],
-  ) {
+  private async afterCreate(@Result() result: Book, @Req() req: Request) {
     this.bookService.validateData(result, req);
   }
 
@@ -75,7 +50,7 @@ class BookHandler {
 
   // *******************************************************
 
-  // @ScopedUserLogic(handleClass)
+  // @ScopedUserLogic('role', handleClass)
 
   // *******************************************************
 
