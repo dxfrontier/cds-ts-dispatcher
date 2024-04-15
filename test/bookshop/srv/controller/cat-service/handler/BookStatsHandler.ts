@@ -1,24 +1,26 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
+  AfterRead,
   EntityHandler,
   Inject,
+  Next,
   OnBoundAction,
   OnBoundFunction,
   OnCreate,
   OnDelete,
   OnRead,
   OnUpdate,
-  SRV,
+  Req,
+  Results,
   SingleInstanceCapable,
-  type ActionRequest,
-  type ActionReturn,
-  type TypedRequest,
-  type Service,
-  type Request,
+  SingleInstanceSwitch,
+  SRV,
 } from '../../../../../../lib';
-import BookStatsService from '../../../service/BookStatsService';
-import AuthorService from '../../../service/AuthorService';
 import { BookStat } from '../../../../@cds-models/CatalogService';
+import AuthorService from '../../../service/AuthorService';
+import BookStatsService from '../../../service/BookStatsService';
+
+import type { TypedRequest, Service, Request, ActionRequest, ActionReturn, NextEvent } from '../../../../../../lib';
 
 @EntityHandler(BookStat)
 class BookStatsHandler {
@@ -27,14 +29,17 @@ class BookStatsHandler {
   @Inject(AuthorService) private readonly authorService: AuthorService;
 
   @OnCreate()
-  public async onCreateMethod(req: TypedRequest<BookStat>, next: Function) {
+  public async create(@Req() req: TypedRequest<BookStat>, @Next() next: NextEvent) {
     req.notify(201, 'On Create executed');
     return next();
   }
 
   @OnRead()
-  @SingleInstanceCapable()
-  public async onReadMethod(req: TypedRequest<BookStat>, next: Function, isSingleInstance: boolean) {
+  public async read(
+    @Req() req: TypedRequest<BookStat>,
+    @Next() next: NextEvent,
+    @SingleInstanceSwitch() isSingleInstance: boolean,
+  ) {
     if (isSingleInstance) {
       return await this.bookStatsService.updatedViews(req);
     }
@@ -43,30 +48,30 @@ class BookStatsHandler {
   }
 
   @OnUpdate()
-  public async onUpdateMethod(req: TypedRequest<BookStat>, next: Function) {
+  public async update(@Req() req: TypedRequest<BookStat>, @Next() next: NextEvent) {
     req.notify(201, 'On update executed');
     return next();
   }
 
   @OnDelete()
-  public async onDeleteMethod(req: Request, _: Function) {
+  public async delete(@Req() req: Request, @Next() next: NextEvent) {
     req.notify('Item deleted');
   }
 
   // This action will be triggered on the 'BookStat' entity
   @OnBoundAction(BookStat.actions.GenerateReport)
-  public async onBoundActionMethod(
-    req: ActionRequest<typeof BookStat.actions.GenerateReport>,
-    _: Function,
+  public async generateReport(
+    @Req() req: ActionRequest<typeof BookStat.actions.GenerateReport>,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof BookStat.actions.GenerateReport> {
     return await this.bookStatsService.handleReport(req);
   }
 
   // This function will be triggered on the 'BookStat' entity
   @OnBoundFunction(BookStat.actions.NotifyAuthor)
-  public async onBoundFunctionMethod(
-    req: ActionRequest<typeof BookStat.actions.NotifyAuthor>,
-    _: Function,
+  public async notifyAuthor(
+    @Req() req: ActionRequest<typeof BookStat.actions.NotifyAuthor>,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof BookStat.actions.NotifyAuthor> {
     return await this.authorService.notifyAuthor(req);
   }

@@ -1,12 +1,16 @@
 import {
   ActionRequest,
   ActionReturn,
+  Error,
   FieldsFormatter,
   Inject,
+  Next,
+  NextEvent,
   OnAction,
   OnError,
   OnEvent,
   OnFunction,
+  Req,
   Request,
   Service,
   SRV,
@@ -34,9 +38,9 @@ class UnboundActionsHandler {
   @FieldsFormatter<ExposeFields<typeof changeBookProperties>>({ action: 'toLower' }, 'language')
   @FieldsFormatter<ExposeFields<typeof changeBookProperties>>({ action: 'ltrim' }, 'language')
   @Validate<ExposeFields<typeof changeBookProperties>>({ action: 'isIn', values: ['PDF', 'E-Kindle'] }, 'format')
-  public async onChangeBookFormatAction(
-    req: ActionRequest<typeof changeBookProperties>,
-    _: Function,
+  public async changeBookProperties(
+    @Req() req: ActionRequest<typeof changeBookProperties>,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof changeBookProperties> {
     return {
       language: req.data.language,
@@ -45,16 +49,19 @@ class UnboundActionsHandler {
   }
 
   @OnAction(submitOrder)
-  public async onActionMethod(req: ActionRequest<typeof submitOrder>, _: Function): ActionReturn<typeof submitOrder> {
+  public async submitOrder(
+    @Req() req: ActionRequest<typeof submitOrder>,
+    @Next() next: NextEvent,
+  ): ActionReturn<typeof submitOrder> {
     return {
       stock: req.data.quantity! + 1,
     };
   }
 
   @OnFunction(submitOrderFunction)
-  public async onFunctionMethod(
-    req: ActionRequest<typeof submitOrderFunction>,
-    next: Function,
+  public async submitOrderFunction(
+    @Req() req: ActionRequest<typeof submitOrderFunction>,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof submitOrderFunction> {
     return {
       stock: req.data.quantity! + 1,
@@ -62,12 +69,15 @@ class UnboundActionsHandler {
   }
 
   @OnEvent(OrderedBook)
-  public async onEvent(req: TypedRequest<OrderedBook>) {
+  public async orderedBook(req: TypedRequest<OrderedBook>) {
     //
+    if (req.event !== 'OrderedBook') {
+      req.reject(400, 'Not OrderedBook: check @OnEvent decorator');
+    }
   }
 
   @OnError()
-  public onError(err: Error, req: Request): void {
+  public error(@Error() err: Error, @Req() req: Request): void {
     if (req.entity === 'CatalogService.Publishers') {
       err.message = 'OnError';
     }

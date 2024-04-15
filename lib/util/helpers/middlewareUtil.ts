@@ -53,6 +53,9 @@ const middlewareUtil = {
     return req instanceof Error;
   },
 
+  /**
+   * This routine will sort the 'Before' events over '*'. The '*' will be firstly and after the named ones as events are triggered in order.
+   */
   sortBeforeEvents(service: any) {
     service._handlers.before.sort((a: { before: string }, b: { before: string }) => {
       if (a.before < b.before) {

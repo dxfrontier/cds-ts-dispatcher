@@ -5,10 +5,20 @@ import {
   AfterUpdate,
   BeforeRead,
   EntityHandler,
+  GetQuery,
+  GetQueryType,
+  GetRequest,
   Inject,
+  IsColumnSupplied,
+  IsPresent,
+  IsRole,
+  Jwt,
+  Req,
   Request,
+  Result,
+  Results,
   Service,
-  SingleInstanceCapable,
+  SingleInstanceSwitch,
   SRV,
   TypedRequest,
   Use,
@@ -28,26 +38,39 @@ class BookHandler {
   @Inject(BookService) private readonly bookService: BookService;
 
   @AfterCreate()
-  private async validateCurrencyCodes(result: Book, req: Request) {
+  private async afterCreate(@Result() result: Book, @Req() req: Request) {
     this.bookService.validateData(result, req);
   }
 
   @BeforeRead()
   @Use(MiddlewareMethodBeforeRead)
-  private async beforeReadEvent(req: TypedRequest<Book>) {
+  private async beforeRead(@Req() req: TypedRequest<Book>) {
     console.log('****************** Before read event');
   }
 
+  // *******************************************************
+
+  // @ScopedUserLogic('role', handleClass)
+
+  // *******************************************************
+
   @AfterRead()
-  // req.user.is('CERTAIN_ROLE')
-  // @ScopedUserLogic(handleClass)
-  @SingleInstanceCapable()
   @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2)
-  private async addDiscount(results: Book[], req: Request, isSingleInstance?: boolean) {
+  private async afterRead(
+    @Req() req: Request,
+    @Results() results: Book[],
+    @SingleInstanceSwitch() singleInstance: boolean,
+    @IsColumnSupplied<Book>('price') hasPrice: boolean,
+    @IsPresent('SELECT', 'columns') hasColumns: boolean,
+    @IsRole('role', 'anotherRole') role: boolean,
+    @GetRequest('locale') locale: Request['locale'],
+    @Jwt() token: string | undefined,
+  ) {
     await this.srv.emit('OrderedBook', { book: 'dada', quantity: 3, buyer: req.user.id });
 
-    if (isSingleInstance) {
+    if (singleInstance) {
       req.notify('Single instance');
+      return;
     } else {
       req.notify('Entity set');
     }
@@ -56,12 +79,12 @@ class BookHandler {
   }
 
   @AfterUpdate()
-  private async addDefaultDescription(result: Book, req: TypedRequest<Book>) {
+  private async afterUpdate(@Result() result: Book, @Req() req: TypedRequest<Book>) {
     void this.bookService.addDefaultTitleText(result, req);
   }
 
   @AfterDelete()
-  private async deleteItem(deleted: boolean, req: Request) {
+  private async afterDelete(@Result() deleted: boolean, @Req() req: Request) {
     req.notify(`Item deleted : ${deleted}`);
   }
 }

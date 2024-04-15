@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Container } from 'inversify';
 
 import cds from '@sap/cds';
@@ -9,21 +9,10 @@ import middlewareUtil from '../util/helpers/middlewareUtil';
 import util from '../util/util';
 import { MetadataDispatcher } from './MetadataDispatcher';
 
+import type { NonEmptyArray, Handler } from '../types/internalTypes';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 
-import type {
-  Handler,
-  HandlerBuilder,
-  NonEmptyArray,
-  Request,
-  ReturnErrorRequest,
-  ReturnRequest,
-  ReturnRequestAndNext,
-  ReturnResultsAndRequest,
-  Service,
-  ServiceCallback,
-  ServiceImpl,
-} from '../types/types';
+import type { Request, Service, ServiceImpl } from '../types/types';
 
 class CDSDispatcher {
   private srv: Service;
@@ -33,7 +22,7 @@ class CDSDispatcher {
   });
 
   /**
-   * Creates an instance of CDSDispatcher.
+   * @description Creates an instance of `CDS Dispatcher`.
    * @param entities An array of entity classes to manage event handlers for.
    * @example
    * new CDSDispatcher([ Entity-1, Entity-2, Entity-n ]).initialize();
@@ -46,15 +35,14 @@ class CDSDispatcher {
 
   private async executeBeforeCallback(handlerAndEntity: [Handler, Constructable], req: Request): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback as ReturnRequest;
-    const isSingleInstance = util.isRequestSingleInstance(handler, req);
+    const callback = handler.callback;
 
-    return await callback.call(entity, req, isSingleInstance);
+    return await callback.call(entity, req);
   }
 
   private executeOnErrorCallback(handlerAndEntity: [Handler, Constructable], err: Error, req: Request): unknown | void {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback as ReturnErrorRequest;
+    const callback = handler.callback;
 
     return callback.call(entity, err, req);
   }
@@ -65,10 +53,9 @@ class CDSDispatcher {
     next: Function,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback as ReturnRequestAndNext;
-    const isSingleInstance = util.isRequestSingleInstance(handler, req);
+    const callback = handler.callback;
 
-    return await callback.call(entity, req, next, isSingleInstance);
+    return await callback.call(entity, req, next);
   }
 
   private async executeAfterCallback(
@@ -77,27 +64,24 @@ class CDSDispatcher {
     results: unknown | unknown[] | number,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback as ReturnResultsAndRequest;
-    const isSingleInstance = util.isRequestSingleInstance(handler, req);
+    const callback = handler.callback;
+
+    // private routine for this func
+    const _isDeleted = (data: unknown): boolean => data === 1;
 
     if (!Array.isArray(results)) {
+      // DELETE single request
       if (util.lodash.isNumber(results)) {
-        // private routine for this func
-        const _isDeleted = (data: unknown): boolean => data === 1;
         const deleted = _isDeleted(results);
-
-        // DELETE single request
-        return await callback.call(entity, deleted, req, isSingleInstance);
+        return await callback.call(entity, deleted, req);
       }
 
-      // READ, UPDATE single request
-      return await callback.call(entity, results, req, isSingleInstance);
+      // CREATE, READ, UPDATE - single request
+      return await callback.call(entity, results, req);
     }
 
-    if (Array.isArray(results)) {
-      // READ entity set
-      return await callback.call(entity, results, req, isSingleInstance);
-    }
+    // READ entity set
+    return await callback.call(entity, results, req);
   }
 
   private getActiveEntityOrDraft(handler: Handler, entityInstance: Constructable): Constructable {
@@ -107,7 +91,6 @@ class CDSDispatcher {
     return entity;
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   private getHandlerProps(handler: Handler, entityInstance: Constructable) {
     const { event, actionName, eventName } = handler;
     const entity = this.getActiveEntityOrDraft(handler, entityInstance);
@@ -226,7 +209,7 @@ class CDSDispatcher {
     }
   }
 
-  private constructMiddleware(entityInstance: Constructable): void {
+  private constructMiddlewares(entityInstance: Constructable): void {
     const ALL_EVENTS = '*';
     const entity = MetadataDispatcher.getEntity(entityInstance);
 
@@ -278,7 +261,7 @@ class CDSDispatcher {
     }
   }
 
-  private registerMiddlewares(entityInstance: Constructable): void {
+  private buildMiddlewareBy(entityInstance: Constructable): void {
     const middlewares = MetadataDispatcher.getMiddlewares(entityInstance);
 
     // Step out if no middlewares
@@ -286,34 +269,23 @@ class CDSDispatcher {
       return;
     }
 
-    this.constructMiddleware(entityInstance);
-  }
-
-  private buildMiddlewareBy(entityInstance: Constructable): void {
-    this.registerMiddlewares(entityInstance);
-
-    // This routine will sort the 'Before' events over '*'. The '*' will be firstly and after the named ones as events are triggered in order.
+    this.constructMiddlewares(entityInstance);
     middlewareUtil.sortBeforeEvents(this.srv);
   }
 
-  private getHandlersBy(entityInstance: Constructable): HandlerBuilder | undefined {
+  private getHandlersBy(entityInstance: Constructable) {
     const handlers = MetadataDispatcher.getMetadataHandlers(entityInstance);
 
     if (handlers?.length > 0) {
-      // private routines for this func
-      const buildHandlers = (): void => {
-        handlers.forEach((handler) => {
-          this.buildHandlerBy([handler, entityInstance]);
-        });
-      };
-
-      const buildMiddlewares = (): void => {
-        this.buildMiddlewareBy(entityInstance);
-      };
-
       return {
-        buildHandlers,
-        buildMiddlewares,
+        buildHandlers: () => {
+          handlers.forEach((handler) => {
+            this.buildHandlerBy([handler, entityInstance]);
+          });
+        },
+        buildMiddlewares: () => {
+          this.buildMiddlewareBy(entityInstance);
+        },
       };
     }
 
@@ -348,18 +320,18 @@ class CDSDispatcher {
     this.registerHandlers();
   }
 
-  private buildServiceImplementation(): ServiceCallback {
-    return (srv: Service) => {
+  private buildServiceImplementation() {
+    return (srv: Service): void => {
       this.storeService(srv);
       this.buildEntityHandlers();
     };
   }
 
   // PUBLIC ROUTINES
+
   /**
-   * Initializes the entities within the CDSDispatcher, registering their corresponding handlers.
-   *
-   * @returns An instance of ServiceImpl representing the initialized service implementation.
+   * @description Initializes the entities within the `CDS Dispatcher`, registering their corresponding handlers.
+   * @returns An instance of `ServiceImpl` representing the registered service implementation.
    */
   public initialize(): ServiceImpl {
     return cds.service.impl(this.buildServiceImplementation());

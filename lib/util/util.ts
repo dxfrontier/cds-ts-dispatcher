@@ -2,10 +2,12 @@ import { StatusCodes } from 'http-status-codes';
 import lodash from 'lodash';
 import template from 'string-placeholder';
 
+import { Request as RequestClass } from '@sap/cds';
+
 import constants from '../constants/constants';
 
 import type { Validators } from '../types/validator';
-import type { Handler, Request, ValidatorField } from '../types/types';
+import type { NextEvent, Request, ValidatorField } from '../types/types';
 import type { Formatters } from '../types/formatter';
 
 const util = {
@@ -16,13 +18,21 @@ const util = {
    */
   lodash,
 
-  isRequestSingleInstance<T extends Request>(handler: Handler, request: T): boolean {
-    return ('params' in request && request.params.length > 0 && handler?.isSingleInstance) ?? false;
+  isNextEvent(arg: any): arg is NextEvent {
+    return typeof arg === 'function';
+  },
+
+  /**
+   * This method will clean the args for a clean re-indexation for the new decorators.
+   * If no decorators are found in the registry, this will be omitted.
+   */
+  cleanArgs(args: any[]): void {
+    args.length = 0;
   },
 
   isRequestType: (arg: any): arg is Request => {
-    if ('data' in arg && 'path' in arg && 'method' in arg) {
-      return arg;
+    if (arg instanceof RequestClass) {
+      return true;
     }
 
     return false;

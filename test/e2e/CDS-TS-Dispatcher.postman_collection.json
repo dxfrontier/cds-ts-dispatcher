@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "14e21f9c-391b-41f8-8800-16b25be854ef",
+		"_postman_id": "94d1e670-74b9-48eb-818c-a86b56190c85",
 		"name": "CDS-TS-Dispatcher",
 		"description": "`SAP CAP` `NodeJS-based project` using TypesScript decorators for rapid development.\n\nThe goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -11,1001 +11,1008 @@
 			"name": "Events",
 			"item": [
 				{
-					"name": "After",
+					"name": "Active entity",
 					"item": [
 						{
-							"name": "@AfterCreate",
+							"name": "After",
 							"item": [
 								{
-									"name": "Validate currency_code",
-									"event": [
+									"name": "@AfterCreate",
+									"item": [
 										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Currency code is missing\", function () {",
-													"    pm.response.to.have.status(400);",
-													"});",
-													"",
-													"pm.test(\"Status code is 400\", function () {",
-													"    pm.response.to.have.status(400);",
-													"});"
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"ID\": 542,\n    \"title\": \"Mysterious Journey\",\n    \"descr\": \"A thrilling adventure awaits in the mysterious journey of a lifetime.\",\n    \"author_ID\": 101,\n    \"genre_ID\": 11,\n    \"stock\": 53,\n    \"price\": 99.11,\n    \"currency_code\": \"\" // no currency then the validation should be triggered and 400 code error should be returned\n}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{booksEntity}}"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@AfterRead",
-							"item": [
-								{
-									"name": "Entity set : Validate title to contain 10 % discount",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Enity set : Title contains \\\"10 % discount!\\\"\", function () {",
-													"    const response = pm.response.json();",
-													"    response.value.forEach((item) => {",
-													"        pm.expect(item.title).to.include(\"10 % discount!\")",
-													"    })",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{booksEntity}}"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Single object : Validate title to contain 10 % discount",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Single item : title contains \\\"10 % discount!\\\"\", function () {",
-													"    const response = pm.response.json();",
-													"    console.log(response)",
-													"    const {title} = response;",
-													"    ",
-													"    pm.expect(title).to.include(\"10 % discount!\")",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=252)",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{booksEntity}}(ID=252)"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@AfterUpdate",
-							"item": [
-								{
-									"name": "Add to property \"descr\" the value \"No description\"",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Programatically updated the 'title' and should contain 'Dracula'\", function () {",
-													"    const title = pm.response.json().title;",
-													"    pm.expect(title).to.contain('Dracula')",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "PATCH",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"descr\": \"No description\"\n}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=201)",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{booksEntity}}(ID=201)"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@AfterDelete",
-							"item": [
-								{
-									"name": "Delete an item",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Delete an item returns text 'Item deleted : true'\", function () {",
-													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-													"",
-													"     headers.forEach((header) => {",
-													"        if(header.message === 'Item deleted : true') {",
-													"            pm.expect(header.message).to.contains('Item deleted : true')",
-													"        }",
-													"    })",
-													"});",
-													"",
-													"pm.test(\"Status code is 204\", function () {",
-													"    pm.response.to.have.status(204);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "DELETE",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=201)",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{booksEntity}}(ID=201)"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						}
-					],
-					"description": "The `After` phase is only started after the `On` phase is completed successfully. Handlers are therefore guaranteed to have access to the result of the event processing. This phase is useful for post-processing of the return value of the event or triggering side-effects. A handler in this phase can also still abort the event processing by throwing an exception. No further handlers of the `After` phase are called in this case."
-				},
-				{
-					"name": "Before",
-					"item": [
-						{
-							"name": "@BeforeCreate",
-							"item": [
-								{
-									"name": "POST Object should be validated",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Comment is below '10' chars\", function () {",
-													"    pm.response.to.have.status(400);",
-													"});",
-													"",
-													"pm.test(\"Status code is 400\", function () {",
-													"    pm.response.to.have.status(400);",
-													"});"
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"ID\": 23,\n    \"reviewer_ID\": 1,\n    \"book_ID\": 203,\n    \"rating\": 2,\n    \"comment\": \"Message must be larger than 10\"\n}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{reviewsEntity}}",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{reviewsEntity}}"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@BeforeRead",
-							"item": [
-								{
-									"name": "Entity set : Reading the Reviews gets status 400",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Contains text 'Before read executed'\", function () {",
-													"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-													"    pm.expect(response[0].message).to.contains('Before read executed')",
-													"    ",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{reviewsEntity}}",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{reviewsEntity}}"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Single item : Reading the Reviews gets status 400",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Contains text 'Before read executed'\", function () {",
-													"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-													"    pm.expect(response[0].message).to.contains('Before read executed')",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{reviewsEntity}}(ID=4)",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{reviewsEntity}}(ID=4)"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@BeforeUpdate",
-							"item": [
-								{
-									"name": "Update property \"comment\" with a new value",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Text message should contain 'Message must be larger than 10'\", function () {",
-													"    const message = pm.response.json().error.message",
-													"    pm.expect(message).to.contain('Message must be larger than 10')",
-													"});",
-													"",
-													"pm.test(\"Status code is 400\", function () {",
-													"    pm.response.to.have.status(400);",
-													"});"
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "PATCH",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"comment\": \"Must be largen than 10 chars\"\n}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{reviewsEntity}}(ID=6)",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{reviewsEntity}}(ID=6)"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@BeforeDelete",
-							"item": [
-								{
-									"name": "Delete an item",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Delete an item return text 'Item deleted'\", function () {",
-													"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-													"    pm.expect(response[0].message).to.contains('Item deleted')",
-													"});",
-													"",
-													"pm.test(\"Status code is 204\", function () {",
-													"    pm.response.to.have.status(204);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "DELETE",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{reviewsEntity}}(ID=4)",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{reviewsEntity}}(ID=4)"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						}
-					],
-					"description": "The `Before` phase is the first phase of the event processing. This phase is intended for filtering, validation, and other types of preprocessing of the incoming parameters of an event. There can be an arbitrary number of `Before` handlers per event.\n\nThe processing of the `Before` phase is completed when one of the following conditions applies:\n\n- All registered `Before` handlers were successfully called. Execution continues with the `On` phase.\n    \n- A handler [completes the event processing](https://cap.cloud.sap/docs/java/provisioning-api#eventcompletion) by setting a return value or setting the state of an event to completed. In this case, any remaining registered `Before` and `On` handlers are skipped and execution continues with the `After` phase.\n    \n- A handler throws an exception. In this case, event processing is terminated immediately."
-				},
-				{
-					"name": "On",
-					"item": [
-						{
-							"name": "@OnCreate",
-							"item": [
-								{
-									"name": "On create a new Book statistics",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Contains text 'On Create executed'\", function () {",
-													"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-													"    pm.expect(response[0].message).to.contains('On Create executed')",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"ID\": 3,\n    \"views\": 234,\n    \"averageRating\": 222.33,\n    \"book_ID\": 203\n}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{bookStatsEntity}}"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@OnRead",
-							"item": [
-								{
-									"name": "On read book statistics entity",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"1 item should have 'views : 444233'\", function () {",
-													"    const response = pm.response.json();",
-													"",
-													"    response.value.forEach((item) => {",
-													"        if(item.views === 444233) {",
-													"            pm.expect(item.views.toString()).to.contains(\"444233\");",
-													"        }",
-													"    })",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"protocolProfileBehavior": {
-										"disableBodyPruning": true
-									},
-									"request": {
-										"method": "GET",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{bookStatsEntity}}"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "On read book statistics single entity instance",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}?$filter=ID eq 1",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{bookStatsEntity}}"
-											],
-											"query": [
+											"name": "Validate currency_code",
+											"event": [
 												{
-													"key": "$filter",
-													"value": "ID eq 1"
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Currency code is missing\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"",
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
 												}
-											]
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"ID\": 542,\n    \"title\": \"Mysterious Journey\",\n    \"descr\": \"A thrilling adventure awaits in the mysterious journey of a lifetime.\",\n    \"author_ID\": 101,\n    \"genre_ID\": 11,\n    \"stock\": 53,\n    \"price\": 99.11,\n    \"currency_code\": \"\" // no currency then the validation should be triggered and 400 code error should be returned\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{booksEntity}}"
+													]
+												}
+											},
+											"response": []
 										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@OnUpdate",
-							"item": [
+									]
+								},
 								{
-									"name": "On update single entity",
-									"event": [
+									"name": "@AfterRead",
+									"item": [
 										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Text message should contain 'On update executed'\", function () {",
-													"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-													"",
-													"    pm.expect(response[0].message).to.contains('On update executed')",
-													"",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "PATCH",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"views\": 1000,\n    \"averageRating\": 53.333,\n    \"book_ID\": 203\n}",
-											"options": {
-												"raw": {
-													"language": "json"
+											"name": "Entity set : Validate title to contain 10 % discount",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Enity set : Title contains \\\"10 % discount!\\\"\", function () {",
+															"    const response = pm.response.json();",
+															"    response.value.forEach((item) => {",
+															"        pm.expect(item.title).to.include(\"10 % discount!\")",
+															"    })",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
 												}
-											}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{booksEntity}}"
+													]
+												}
+											},
+											"response": []
 										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=1)",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{bookStatsEntity}}(ID=1)"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@OnDelete",
-							"item": [
-								{
-									"name": "On delete a single entity",
-									"event": [
 										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Delete an item should return text 'item deleted'\", function () {",
-													"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-													"    pm.expect(response[0].message).to.contains('Item deleted')",
-													"",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "DELETE",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=2)",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{bookStatsEntity}}(ID=2)"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@OnAction",
-							"item": [
-								{
-									"name": "Execute submit order",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"book\": 1,\n    \"quantity\" : 3\n}",
-											"options": {
-												"raw": {
-													"language": "json"
+											"name": "Single object : Validate title to contain 10 % discount",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"// pm.test(\"Single item : title contains \\\"10 % discount!\\\"\", function () {",
+															"//     const response = pm.response.json();",
+															"//     console.log(response)",
+															"//     const {title} = response;",
+															"    ",
+															"//     pm.expect(title).to.include(\"10 % discount!\")",
+															"// });",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
 												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
-											"host": [
-												"{{baseUrl}}"
 											],
-											"path": [
-												"{{catalogService}}",
-												"submitOrder"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@OnFunction",
-							"item": [
-								{
-									"name": "On execute a function",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"submitOrder contains a stock = 7\", function () {",
-													"    const {stock} = pm.response.json();",
-													"    pm.expect(stock).to.eql(7);",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/submitOrderFunction(book=271,quantity=6)",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"submitOrderFunction(book=271,quantity=6)"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@OnEvent",
-							"item": [
-								{
-									"name": "On execute an action Copy",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"submitOrder contains a stock = 6\", function () {",
-													"    const {stock} = pm.response.json();",
-													"    pm.expect(stock).to.eql(6);",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"book\" : 271,\n    \"quantity\": 5\n}",
-											"options": {
-												"raw": {
-													"language": "json"
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=252)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{booksEntity}}(ID=252)"
+													]
 												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"submitOrder"
-											]
+											},
+											"response": []
 										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@OnError",
-							"item": [
+									]
+								},
 								{
-									"name": "Error pop-up",
-									"event": [
+									"name": "@AfterUpdate",
+									"item": [
 										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"This get entity should return 200 and message 'OnError'\", function () {",
-													"    const response = pm.response.json();",
-													"    pm.expect(response.error.message).to.eql('OnError')",
-													"});",
-													"",
-													"pm.test(\"Status code is 400\", function () {",
-													"    pm.response.to.have.status(400);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{publishersEntity}}",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{publishersEntity}}"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "@OnBoundAction",
-							"item": [
-								{
-									"name": "On execute a bound action to an entity",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Returned object should contain 'Jane Eyre', rating : 11 and stats : 4344\", function () {",
-													"    const response = pm.response.json();",
-													"",
-													"    pm.expect(response.book).to.equals(\"Jane Eyre\");",
-													"    pm.expect(response.rating).to.equals(11);",
-													"    pm.expect(response.stats).to.equals(444233);",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"ID\" : 271\n}",
-											"options": {
-												"raw": {
-													"language": "json"
+											"name": "Add to property \"descr\" the value \"No description\"",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Programatically updated the 'title' and should contain 'Dracula'\", function () {",
+															"    const title = pm.response.json().title;",
+															"    pm.expect(title).to.contain('Dracula')",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
 												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=2)/CatalogService.GenerateReport",
-											"host": [
-												"{{baseUrl}}"
 											],
-											"path": [
-												"{{catalogService}}",
-												"{{bookStatsEntity}}(ID=2)",
-												"CatalogService.GenerateReport"
-											]
+											"request": {
+												"method": "PATCH",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"descr\": \"No description\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=201)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{booksEntity}}(ID=201)"
+													]
+												}
+											},
+											"response": []
 										}
-									},
-									"response": []
+									]
+								},
+								{
+									"name": "@AfterDelete",
+									"item": [
+										{
+											"name": "Delete an item",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Delete an item returns text 'Item deleted : true'\", function () {",
+															"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"",
+															"     headers.forEach((header) => {",
+															"        if(header.message === 'Item deleted : true') {",
+															"            pm.expect(header.message).to.contains('Item deleted : true')",
+															"        }",
+															"    })",
+															"});",
+															"",
+															"pm.test(\"Status code is 204\", function () {",
+															"    pm.response.to.have.status(204);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=201)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{booksEntity}}(ID=201)"
+													]
+												}
+											},
+											"response": []
+										}
+									]
 								}
-							]
+							],
+							"description": "The `After` phase is only started after the `On` phase is completed successfully. Handlers are therefore guaranteed to have access to the result of the event processing. This phase is useful for post-processing of the return value of the event or triggering side-effects. A handler in this phase can also still abort the event processing by throwing an exception. No further handlers of the `After` phase are called in this case."
 						},
 						{
-							"name": "OnBoundFunction",
+							"name": "Before",
 							"item": [
 								{
-									"name": "On execute a bound function on an entity",
-									"event": [
+									"name": "@BeforeCreate",
+									"item": [
 										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Returned object should contain value : true\", function () {",
-													"    const response = pm.response.json();",
-													"",
-													"    pm.expect(response.value).to.equals(true);",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=1)/CatalogService.NotifyAuthor(ID=107)",
-											"host": [
-												"{{baseUrl}}"
+											"name": "POST Object should be validated",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Comment is below '10' chars\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"",
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
 											],
-											"path": [
-												"{{catalogService}}",
-												"{{bookStatsEntity}}(ID=1)",
-												"CatalogService.NotifyAuthor(ID=107)"
-											]
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"ID\": 23,\n    \"reviewer_ID\": 1,\n    \"book_ID\": 203,\n    \"rating\": 2,\n    \"comment\": \"Message must be larger than 10\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{reviewsEntity}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{reviewsEntity}}"
+													]
+												}
+											},
+											"response": []
 										}
-									},
-									"response": []
+									]
+								},
+								{
+									"name": "@BeforeRead",
+									"item": [
+										{
+											"name": "Entity set : Reading the Reviews gets status 400",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Contains text 'Before read executed'\", function () {",
+															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    pm.expect(response[0].message).to.contains('Before read executed')",
+															"    ",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{reviewsEntity}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{reviewsEntity}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Single item : Reading the Reviews gets status 400",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Contains text 'Before read executed'\", function () {",
+															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    pm.expect(response[0].message).to.contains('Before read executed')",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{reviewsEntity}}(ID=4)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{reviewsEntity}}(ID=4)"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@BeforeUpdate",
+									"item": [
+										{
+											"name": "Update property \"comment\" with a new value",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Text message should contain 'Message must be larger than 10'\", function () {",
+															"    const message = pm.response.json().error.message",
+															"    pm.expect(message).to.contain('Message must be larger than 10')",
+															"});",
+															"",
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "PATCH",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"comment\": \"Must be largen than 10 chars\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{reviewsEntity}}(ID=6)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{reviewsEntity}}(ID=6)"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@BeforeDelete",
+									"item": [
+										{
+											"name": "Delete an item",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Delete an item return text 'Item deleted'\", function () {",
+															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    pm.expect(response[0].message).to.contains('Item deleted')",
+															"});",
+															"",
+															"pm.test(\"Status code is 204\", function () {",
+															"    pm.response.to.have.status(204);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{reviewsEntity}}(ID=4)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{reviewsEntity}}(ID=4)"
+													]
+												}
+											},
+											"response": []
+										}
+									]
 								}
-							]
+							],
+							"description": "The `Before` phase is the first phase of the event processing. This phase is intended for filtering, validation, and other types of preprocessing of the incoming parameters of an event. There can be an arbitrary number of `Before` handlers per event.\n\nThe processing of the `Before` phase is completed when one of the following conditions applies:\n\n- All registered `Before` handlers were successfully called. Execution continues with the `On` phase.\n    \n- A handler [completes the event processing](https://cap.cloud.sap/docs/java/provisioning-api#eventcompletion) by setting a return value or setting the state of an event to completed. In this case, any remaining registered `Before` and `On` handlers are skipped and execution continues with the `After` phase.\n    \n- A handler throws an exception. In this case, event processing is terminated immediately."
+						},
+						{
+							"name": "On",
+							"item": [
+								{
+									"name": "@OnCreate",
+									"item": [
+										{
+											"name": "On create a new Book statistics",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Contains text 'On Create executed'\", function () {",
+															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    pm.expect(response[0].message).to.contains('On Create executed')",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"ID\": 3,\n    \"views\": 234,\n    \"averageRating\": 222.33,\n    \"book_ID\": 203\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{bookStatsEntity}}"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnRead",
+									"item": [
+										{
+											"name": "On read book statistics entity",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"1 item should have 'views : 444233'\", function () {",
+															"    const response = pm.response.json();",
+															"",
+															"    response.value.forEach((item) => {",
+															"        if(item.views === 444233) {",
+															"            pm.expect(item.views.toString()).to.contains(\"444233\");",
+															"        }",
+															"    })",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{bookStatsEntity}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "On read book statistics single entity instance",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}?$filter=ID eq 1",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{bookStatsEntity}}"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "ID eq 1"
+														}
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnUpdate",
+									"item": [
+										{
+											"name": "On update single entity",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Text message should contain 'On update executed'\", function () {",
+															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"",
+															"    pm.expect(response[0].message).to.contains('On update executed')",
+															"",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PATCH",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"views\": 1000,\n    \"averageRating\": 53.333,\n    \"book_ID\": 203\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=1)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{bookStatsEntity}}(ID=1)"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnDelete",
+									"item": [
+										{
+											"name": "On delete a single entity",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Delete an item should return text 'item deleted'\", function () {",
+															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    pm.expect(response[0].message).to.contains('Item deleted')",
+															"",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=2)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{bookStatsEntity}}(ID=2)"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnAction",
+									"item": [
+										{
+											"name": "Execute submit order",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"book\": 1,\n    \"quantity\" : 3\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"submitOrder"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnFunction",
+									"item": [
+										{
+											"name": "On execute a function",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"submitOrder contains a stock = 7\", function () {",
+															"    const {stock} = pm.response.json();",
+															"    pm.expect(stock).to.eql(7);",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/submitOrderFunction(book=271,quantity=6)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"submitOrderFunction(book=271,quantity=6)"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnEvent",
+									"item": [
+										{
+											"name": "On execute an action Copy",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"submitOrder contains a stock = 6\", function () {",
+															"    const {stock} = pm.response.json();",
+															"    pm.expect(stock).to.eql(6);",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"book\" : 271,\n    \"quantity\": 5\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"submitOrder"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnError",
+									"item": [
+										{
+											"name": "Error pop-up",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"This get entity should return 200 and message 'OnError'\", function () {",
+															"    const response = pm.response.json();",
+															"    pm.expect(response.error.message).to.eql('OnError')",
+															"});",
+															"",
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{publishersEntity}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{publishersEntity}}"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnBoundAction",
+									"item": [
+										{
+											"name": "On execute a bound action to an entity",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Returned object should contain 'Jane Eyre', rating : 11 and stats : 4344\", function () {",
+															"    const response = pm.response.json();",
+															"",
+															"    pm.expect(response.book).to.equals(\"Jane Eyre\");",
+															"    pm.expect(response.rating).to.equals(11);",
+															"    pm.expect(response.stats).to.equals(444233);",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"ID\" : 271\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=2)/CatalogService.GenerateReport",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{bookStatsEntity}}(ID=2)",
+														"CatalogService.GenerateReport"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "OnBoundFunction",
+									"item": [
+										{
+											"name": "On execute a bound function on an entity",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Returned object should contain value : true\", function () {",
+															"    const response = pm.response.json();",
+															"",
+															"    pm.expect(response.value).to.equals(true);",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}(ID=1)/CatalogService.NotifyAuthor(ID=107)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{bookStatsEntity}}(ID=1)",
+														"CatalogService.NotifyAuthor(ID=107)"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								}
+							],
+							"description": "The `On` phase is started after the `Before` phase, as long as no return value is yet provided and no exception occurred. It's meant to implement the core processing of the event. There can be an arbitrary number of `On` handlers per event, although as soon as the first `On` handler successfully completes the event processing, all remaining `On` handlers are skipped.\n\nThe `On` phase is completed when one of the following conditions applies:\n\n- A handler [completes the event processing](https://cap.cloud.sap/docs/java/provisioning-api#eventcompletion) by setting a result value or setting the state of an event to completed. In this case, any remaining registered `On` handlers are skipped and execution continues with the `After` phase.\n    \n- A handler throws an exception. In this case, event processing is terminated immediately.\n    \n\nIn case of synchronous events, if after the `On` phase, no handler completed the event processing, it's considered an error and the event processing is aborted with an exception. However when registering an `On` handler for an asynchronous event it is not recommended to complete the event processing, as other handlers might not get notified of the event anymore. In that case CAP ensures to auto-complete the event, once all `On` handlers have been executed."
 						}
-					],
-					"description": "The `On` phase is started after the `Before` phase, as long as no return value is yet provided and no exception occurred. It's meant to implement the core processing of the event. There can be an arbitrary number of `On` handlers per event, although as soon as the first `On` handler successfully completes the event processing, all remaining `On` handlers are skipped.\n\nThe `On` phase is completed when one of the following conditions applies:\n\n- A handler [completes the event processing](https://cap.cloud.sap/docs/java/provisioning-api#eventcompletion) by setting a result value or setting the state of an event to completed. In this case, any remaining registered `On` handlers are skipped and execution continues with the `After` phase.\n    \n- A handler throws an exception. In this case, event processing is terminated immediately.\n    \n\nIn case of synchronous events, if after the `On` phase, no handler completed the event processing, it's considered an error and the event processing is aborted with an exception. However when registering an `On` handler for an asynchronous event it is not recommended to complete the event processing, as other handlers might not get notified of the event anymore. In that case CAP ensures to auto-complete the event, once all `On` handlers have been executed."
+					]
 				},
 				{
-					"name": "Draft",
+					"name": "Draft entity",
 					"item": [
 						{
 							"name": "Before",
@@ -1645,36 +1652,141 @@
 					"description": "Lean draft is a new approach which makes it easier to differentiate between drafts and active instances in your code. This new architecture drastically reduces the complexity and enables more features like storing active instances in remote systems while keeping the corresponding drafts in the local persistence."
 				},
 				{
-					"name": "Integration",
+					"name": "Parameter",
 					"item": [
 						{
-							"name": "Pre-request POST helper",
+							"name": "@SingleInstanceSwitch",
+							"item": [
+								{
+									"name": "@SingleInstanceSwitch - Single instance",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Headers contains text 'Single instance'\", function () {",
+													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"",
+													"    headers.forEach((header) => {",
+													"        if(header.message === 'Single instance') {",
+													"            pm.expect(header.message).to.contains('Single instance')",
+													"        }",
+													"    })",
+													"});",
+													"",
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=252)",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{booksEntity}}(ID=252)"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "@SingleInstanceSwitch - Entity set",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Headers contains text 'Entity set'\", function () {",
+													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"",
+													"    headers.forEach((header) => {",
+													"        if(header.message === 'Entity set') {",
+													"            pm.expect(header.message).to.contains('Entity set')",
+													"        }",
+													"    })",
+													"});",
+													"",
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{booksEntity}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "@Req",
 							"event": [
 								{
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Returned object is created & headers contains text 'On new draft'\", function () {",
-											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-											"    pm.expect(headers[0].message).to.contains('On new draft')",
-											"",
-											"    const response = pm.response.json();",
-											"    const UUIDValue = response.ID",
-											"    ",
-											"    pm.environment.set(\"draftUUIDInstance\", UUIDValue);",
-											"});",
-											"",
-											"pm.test(\"Response contains IsActiveEntity: false\", function () {",
-											"    const jsonData = pm.response.json();",
-											"    pm.expect(jsonData.IsActiveEntity).to.eql(false);",
-											"});",
-											"",
-											"pm.test(\"Status code is 201\", function () {",
-											"    pm.response.to.have.status(201);",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{booksEntity}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@Result",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
 											"});",
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -1683,7 +1795,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\" : \"Empire strikes again, volume III\"\n}",
+									"raw": "{\n    \"ID\": 789,\n    \"title\": \"Lost in Wonderland\",\n    \"descr\": \"Embark on a magical journey through Wonderland, where nothing is quite as it seems.\",\n    \"currency_code\": \"USD\",\n    \"author_ID\": 101,\n    \"genre_ID\": 11,\n    \"price\": 29.99,\n    \"stock\": 87\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1691,20 +1803,20 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}",
+									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"{{catalogService}}",
-										"{{bookEventsEntity}}"
+										"{{booksEntity}}"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "@Draft + @AfterRead",
+							"name": "@Results",
 							"event": [
 								{
 									"listen": "test",
@@ -1712,9 +1824,15 @@
 										"exec": [
 											"pm.test(\"Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Results should have more than 1 item\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.value.length).greaterThan(1)",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -1722,57 +1840,367 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}",
+									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"{{catalogService}}",
-										"{{bookEventsEntity}}"
+										"{{booksEntity}}"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "@Draft + @SingleRequestCapable + @AfterRead",
+							"name": "@IsColumnSupplied",
 							"event": [
 								{
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Returned object should contain data\", function () {",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Headers sap-messages should contain message 'true'\", function () {",
+											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+											"",
+											"    headers.forEach((header) => {",
+											"        if(header.message === 'true') {",
+											"            pm.expect(header.message).to.contains('true')",
+											"        }",
+											"    })",
+											"});",
+											"",
+											"// Test for the existence of the saleDate and quantity properties in the response",
+											"pm.test(\"Response contains 'saleDate' and 'quantity' properties\", function () {",
+											"    const responseData = pm.response.json().value;",
+											"",
+											"    responseData.forEach((data) => {",
+											"        pm.expect(data).to.have.property('saleDate');",
+											"        pm.expect(data).to.have.property('quantity');",
+											"    });",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}?$filter=saleAmount gt 4&$select=saleDate,quantity",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookSalesEntity}}"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "saleAmount gt 4"
+										},
+										{
+											"key": "$select",
+											"value": "saleDate,quantity"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@IsPresent",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Headers sap-messages should contain message 'true'\", function () {",
+											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+											"",
+											"    headers.forEach((header) => {",
+											"        if(header.message === 'true') {",
+											"            pm.expect(header.message).to.contains('true')",
+											"        }",
+											"    })",
+											"});",
+											"",
+											"// Test for the existence of the saleDate and quantity properties in the response",
+											"pm.test(\"Response contains 'saleDate' and 'quantity' properties\", function () {",
+											"    const responseData = pm.response.json().value;",
+											"",
+											"    responseData.forEach((data) => {",
+											"        pm.expect(data).to.have.property('saleDate');",
+											"        pm.expect(data).to.have.property('quantity');",
+											"    });",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}?$filter=saleAmount gt 4&$select=saleDate,quantity",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookSalesEntity}}"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "saleAmount gt 4"
+										},
+										{
+											"key": "$select",
+											"value": "saleDate,quantity"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@IsRole",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Test to check if the response contains the sap-messages header with message NO_USER_ROLE",
+											"pm.test(\"sap-messages header contains message with NO_USER_ROLE\", function () {",
+											"    pm.expect(pm.response.headers.has('sap-messages')).to.be.true;",
+											"    var sapMessages = pm.response.headers.get('sap-messages');",
+											"    pm.expect(sapMessages).to.include('NO_USER_ROLE');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookSalesEntity}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@GetQueryProperty",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Test for status code 200",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Check for the presence of sap-messages header",
+											"pm.test(\"Valid sap-messages header is present\", function () {",
+											"    pm.expect(pm.response.headers.has('sap-messages')).to.be.true;",
+											"});",
+											"",
+											"// Check for the presence of orderBy header",
+											"pm.test(\"Valid orderBy header is present\", function () {",
+											"    var sapMessages = pm.response.headers.get('sap-messages');",
+											"    pm.expect(sapMessages).to.include('orderBy');",
+											"});",
+											"",
+											"// Check for the presence of columns header",
+											"pm.test(\"Valid columns header is present\", function () {",
+											"    var sapMessages = pm.response.headers.get('sap-messages');",
+											"    pm.expect(sapMessages).to.include('columns');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookSalesEntity}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@GetRequestProperty",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Check for the presence of locale header",
+											"pm.test(\"Valid locale header is present\", function () {",
+											"    var sapMessages = pm.response.headers.get('sap-messages');",
+											"    pm.expect(sapMessages).to.include('locale');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookSalesEntity}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@Jwt",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Check for the presence of jwt header ",
+											"pm.test(\"Jwt token 'testToken' is present in the header\", function () {",
+											"    var sapMessages = pm.response.headers.get('sap-messages');",
+											"    pm.expect(sapMessages).to.include('testToken');",
+											"})"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "testToken",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookSalesEntity}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@Jwt - destination",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Enity set : Title contains \\\"10 % discount!\\\"\", function () {",
 											"    const response = pm.response.json();",
-											"    console.log(response)",
-											"    pm.expect(response.name).to.contains('Empire')",
+											"    response.value.forEach((item) => {",
+											"        pm.expect(item.title).to.include(\"10 % discount!\")",
+											"    })",
 											"});",
 											"",
 											"pm.test(\"Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "dragolea",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"{{catalogService}}",
-										"{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)"
+										"{{booksEntity}}"
 									]
 								}
 							},
 							"response": []
 						}
-					],
-					"description": "Integration between multiple decorators"
+					]
 				},
 				{
 					"name": "Middleware",
@@ -1864,7 +2292,7 @@
 					]
 				},
 				{
-					"name": "Others",
+					"name": "Helpers",
 					"item": [
 						{
 							"name": "@FieldsFormatter",
@@ -2222,10 +2650,6 @@
 						{
 							"name": "@Validate",
 							"item": [
-								{
-									"name": "After",
-									"item": []
-								},
 								{
 									"name": "Before",
 									"item": [
@@ -2603,96 +3027,102 @@
 								}
 							],
 							"description": "_**@Validate**_ will be tested for all events `After`,`Before`, `On`"
-						},
-						{
-							"name": "@SingleInstanceCapable",
-							"item": [
-								{
-									"name": "@SingleInstanceCapable - Single instance",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Headers contains text 'Single instance'\", function () {",
-													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-													"",
-													"    headers.forEach((header) => {",
-													"        if(header.message === 'Single instance') {",
-													"            pm.expect(header.message).to.contains('Single instance')",
-													"        }",
-													"    })",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=252)",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{booksEntity}}(ID=252)"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "@SingleInstanceCapable - Entity set",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Headers contains text 'Entity set'\", function () {",
-													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
-													"",
-													"    headers.forEach((header) => {",
-													"        if(header.message === 'Entity set') {",
-													"            pm.expect(header.message).to.contains('Entity set')",
-													"        }",
-													"    })",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"{{catalogService}}",
-												"{{booksEntity}}"
-											]
-										}
-									},
-									"response": []
-								}
-							]
 						}
 					],
 					"description": "All other decorators which are not SAP standard."
+				},
+				{
+					"name": "Integration",
+					"item": [
+						{
+							"name": "Pre-request POST helper",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Returned object is created & headers contains text 'On new draft'\", function () {",
+											"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+											"    pm.expect(headers[0].message).to.contains('On new draft')",
+											"",
+											"    const response = pm.response.json();",
+											"    const UUIDValue = response.ID",
+											"    ",
+											"    pm.environment.set(\"draftUUIDInstance\", UUIDValue);",
+											"});",
+											"",
+											"pm.test(\"Response contains IsActiveEntity: false\", function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.IsActiveEntity).to.eql(false);",
+											"});",
+											"",
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\" : \"Empire strikes again, volume III\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookEventsEntity}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@Draft + @AfterRead",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookEventsEntity}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Integration between multiple decorators"
 				}
 			],
 			"description": "**Methods** **`.on`**,**`.before, .after`** refer to corresponding _phases_ during request processing:\n\n- **`.on`** handlers actually fulfill requests, e.g. by reading/writing data from/to databases\n- **`.before`** handlers run before the `.on` handlers, frequently for validating inbound data\n- **`.after`** handlers run after the `.on` handlers, frequently to enrich outbound data"

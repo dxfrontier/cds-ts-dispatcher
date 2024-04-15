@@ -1,5 +1,7 @@
 export * from './decorators/class';
 export * from './decorators/method';
+export * from './decorators/parameter';
+
 export * from './core/CDSDispatcher';
 
 export { SRV } from './constants/constants';

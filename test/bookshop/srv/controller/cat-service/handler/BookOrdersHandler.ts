@@ -1,15 +1,18 @@
 import { BookOrder } from '#cds-models/CatalogService';
+
 import {
   AfterCreate,
   AfterRead,
+  BeforeRead,
   EntityHandler,
   Inject,
+  Req,
   Request,
-  SRV,
+  Results,
   Service,
-  SingleInstanceCapable,
+  SingleInstanceSwitch,
+  SRV,
   Use,
-  BeforeRead,
 } from '../../../../../../lib';
 import { MiddlewareMethodAfterRead1 } from '../../../middleware/MiddlewareAfterRead1';
 import { MiddlewareMethodAfterRead2 } from '../../../middleware/MiddlewareAfterRead2';
@@ -20,23 +23,28 @@ import BookService from '../../../service/BookService';
 
 @EntityHandler(BookOrder)
 @Use(MiddlewareEntity1, MiddlewareEntity2)
-export class BookOrdersHandler {
+class BookOrdersHandler {
   @Inject(SRV) private readonly srv: Service;
   @Inject(BookService) private readonly bookService: BookService;
 
   @AfterCreate()
-  private async validateCurrencyCodes(result: BookOrder, req: Request) {
+  private async afterCreate(@Results() result: BookOrder, @Req() req: Request) {
     this.bookService.validateData(result, req);
   }
 
   @BeforeRead()
   @Use(MiddlewareMethodBeforeRead) // THIS IS OK
-  private async bla(req: Request) {
+  private async beforeRead(req: Request) {
     console.log('****************** Before read event');
   }
 
   @AfterRead()
-  @SingleInstanceCapable()
   @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2) // THIS IS OK
-  private async addDiscount(results: BookOrder[], req: Request, isSingleInstance: boolean) {}
+  private async afterRead(
+    @Results() results: BookOrder[],
+    @Req() req: Request,
+    @SingleInstanceSwitch() isSingleInstance: boolean,
+  ) {}
 }
+
+export default BookOrdersHandler;

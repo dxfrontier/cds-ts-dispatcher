@@ -18,7 +18,7 @@
 ![GitHub top language](https://img.shields.io/github/languages/top/dxfrontier/cds-ts-dispatcher?logo=git)
 ![GitHub Repo stars](https://img.shields.io/github/stars/dxfrontier/cds-ts-dispatcher?style=flat&logo=git)
 
-The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement **TS handlers** provided by the SAP CAP framework.
+The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement **Typescript handlers** provided by the SAP CAP framework.
 
 ## Table of Contents
 
@@ -27,73 +27,84 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 - [Installation](#installation)
   - [`Option 1 :` Install CDS-TS-Dispatcher - `New project`](#option-1--install-cds-ts-dispatcher---new-project)
   - [`Option 2 :` Install CDS-TS-Dispatcher - `Existing project`](#option-2--install-cds-ts-dispatcher---existing-project)
-  - [`Option 3 :` Install CDS-TS-Dispatcher - `.devcontainer`](#option-3--install-cds-ts-dispatcher---devcontainer)
+  - [`Option 3 :` Install CDS-TS-Dispatcher - ` Setup with development container`](#option-3--install-cds-ts-dispatcher----setup-with-development-container)
     - [Docker \& VSCode - `(local development)`](#docker--vscode---local-development)
     - [SAP Business Application Studio - `(BAS)`](#sap-business-application-studio---bas)
   - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
     - [Option 1 - `Recommended`](#option-1---recommended)
     - [Option 2](#option-2)
     - [`Important`](#important)
-- [Architecture](#architecture)
 - [Usage](#usage)
+  - [`Architecture`](#architecture)
   - [`CDSDispatcher`](#cdsdispatcher)
   - [`Decorators`](#decorators)
     - [`Class`](#class)
-      - [EntityHandler](#entityhandler)
-      - [ServiceLogic](#servicelogic)
-      - [Repository](#repository)
-        - [`[Optional]` - BaseRepository](#optional---baserepository)
-      - [UnboundActions](#unboundactions)
-      - [Use](#use)
+      - [@EntityHandler](#entityhandler)
+      - [@ServiceLogic](#servicelogic)
+      - [@Repository](#repository)
+        - [`[Optional]` - CDS-TS-Repository - BaseRepository](#optional---cds-ts-repository---baserepository)
+      - [@UnboundActions](#unboundactions)
+      - [@Use](#use)
     - [`Field`](#field)
-      - [Inject](#inject)
-      - [Inject SRV](#inject-srv)
-    - [`Method` - `active entity`](#method---active-entity)
+      - [@Inject](#inject)
+      - [@Inject(SRV)](#injectsrv)
+    - [`Parameter`](#parameter)
+      - [@Req](#req)
+      - [@Results / @Result](#results--result)
+      - [@Next](#next)
+      - [@Error](#error)
+      - [@Jwt](#jwt)
+      - [@IsPresent](#ispresent)
+      - [@IsRole](#isrole)
+      - [@IsColumnSupplied](#iscolumnsupplied)
+      - [@GetQuery](#getquery)
+      - [@GetRequest](#getrequest)
+      - [@SingleInstanceSwitch](#singleinstanceswitch)
+    - [`Method`-`active entity`](#method-active-entity)
       - [`Before`](#before)
-        - [BeforeCreate](#beforecreate)
-        - [BeforeRead](#beforeread)
-        - [BeforeUpdate](#beforeupdate)
-        - [BeforeDelete](#beforedelete)
+        - [@BeforeCreate](#beforecreate)
+        - [@BeforeRead](#beforeread)
+        - [@BeforeUpdate](#beforeupdate)
+        - [@BeforeDelete](#beforedelete)
       - [`After`](#after)
-        - [AfterCreate](#aftercreate)
-        - [AfterRead](#afterread)
-        - [AfterUpdate](#afterupdate)
-        - [AfterDelete](#afterdelete)
+        - [@AfterCreate](#aftercreate)
+        - [@AfterRead](#afterread)
+        - [@AfterUpdate](#afterupdate)
+        - [@AfterDelete](#afterdelete)
       - [`On`](#on)
-        - [OnCreate](#oncreate)
-        - [OnRead](#onread)
-        - [OnUpdate](#onupdate)
-        - [OnDelete](#ondelete)
-        - [OnAction](#onaction)
-        - [OnFunction](#onfunction)
-        - [OnEvent](#onevent)
-        - [OnError](#onerror)
-        - [OnBoundAction](#onboundaction)
-        - [OnBoundFunction](#onboundfunction)
-    - [`Method` - `draft entity`](#method---draft-entity)
+        - [@OnCreate](#oncreate)
+        - [@OnRead](#onread)
+        - [@OnUpdate](#onupdate)
+        - [@OnDelete](#ondelete)
+        - [@OnAction](#onaction)
+        - [@OnFunction](#onfunction)
+        - [@OnEvent](#onevent)
+        - [@OnError](#onerror)
+        - [@OnBoundAction](#onboundaction)
+        - [@OnBoundFunction](#onboundfunction)
+    - [`Method`-`draft entity`](#method-draft-entity)
       - [`Before`](#before-1)
-        - [BeforeNewDraft](#beforenewdraft)
-        - [BeforeCancelDraft](#beforecanceldraft)
-        - [BeforeEditDraft](#beforeeditdraft)
-        - [BeforeSaveDraft](#beforesavedraft)
+        - [@BeforeNewDraft](#beforenewdraft)
+        - [@BeforeCancelDraft](#beforecanceldraft)
+        - [@BeforeEditDraft](#beforeeditdraft)
+        - [@BeforeSaveDraft](#beforesavedraft)
       - [`After`](#after-1)
-        - [AfterNewDraft](#afternewdraft)
-        - [AfterCancelDraft](#aftercanceldraft)
-        - [AfterEditDraft](#aftereditdraft)
-        - [AfterSaveDraft](#aftersavedraft)
+        - [@AfterNewDraft](#afternewdraft)
+        - [@AfterCancelDraft](#aftercanceldraft)
+        - [@AfterEditDraft](#aftereditdraft)
+        - [@AfterSaveDraft](#aftersavedraft)
       - [`On`](#on-1)
-        - [OnNewDraft](#onnewdraft)
-        - [OnCancelDraft](#oncanceldraft)
-        - [OnEditDraft](#oneditdraft)
-        - [OnSaveDraft](#onsavedraft)
-      - [`Other` - draft decorators](#other---draft-decorators)
-    - [`Method` - `helpers`](#method---helpers)
-      - [SingleInstanceCapable](#singleinstancecapable)
-      - [Validate](#validate)
-      - [FieldsFormatter](#fieldsformatter)
-      - [Use](#use-1)
-- [`Deploy` to BTP using MTA](#deploy-to-btp-using-mta)
-- [`Best practices`, `tips`](#best-practices-tips)
+        - [@OnNewDraft](#onnewdraft)
+        - [@OnCancelDraft](#oncanceldraft)
+        - [@OnEditDraft](#oneditdraft)
+        - [@OnSaveDraft](#onsavedraft)
+      - [`Other draft decorators`](#other-draft-decorators)
+    - [`Method`-`helpers`](#method-helpers)
+      - [@Validate](#validate)
+      - [@FieldsFormatter](#fieldsformatter)
+      - [@Use](#use-1)
+- [`Deployment` to BTP using MTA](#deployment-to-btp-using-mta)
+- [`Best practices` \& `tips`](#best-practices--tips)
 - [`Examples`](#examples)
 - [Contributing](#contributing)
 - [License](#license)
@@ -126,7 +137,7 @@ cd new-sap-cap-project
 cds init
 ```
 
-1. Add the the following NPM packages :
+3. Add the the following NPM packages :
 
 ```bash
 npm install @dxfrontier/cds-ts-dispatcher @sap/cds express
@@ -239,7 +250,7 @@ It is recommended to use the following **tsconfig.json** properties:
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-### `Option 3 :` Install CDS-TS-Dispatcher - `.devcontainer`
+### `Option 3 :` Install CDS-TS-Dispatcher - ` Setup with development container`
 
 The `CDS-TS-Dispatcher dev container` repository contains the [CDS-TS-Dispatcher](https://github.com/dxfrontier/cds-ts-dispatcher) & [CDS-TS-Repository](https://github.com/dxfrontier/cds-ts-repository) and `all dependencies` needed to boot a new project :
 
@@ -363,7 +374,9 @@ For more info see official **[SAP CDS-Typer](https://cap.cloud.sap/docs/tools/cd
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-## Architecture
+## Usage
+
+### `Architecture`
 
 **We recommend adhering** to the **Controller-Service-Repository** design pattern using the following folder structure:
 
@@ -377,8 +390,6 @@ For more info see official **[SAP CDS-Typer](https://cap.cloud.sap/docs/tools/cd
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-## Usage
-
 ### `CDSDispatcher`
 
 **CDSDispatcher**(`entities` : `Constructable[]`)
@@ -391,9 +402,7 @@ The `CDSDispatcher` constructor allows you to create an instance for dispatching
 
 `Method`
 
-- `initialize`: The `initialize` method of the `CDSDispatcher` class is used to initialize **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository).
-
-<!-- `CDSDispatcher` class will initialize all **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository). -->
+- `initialize`: The `initialize` method of the `CDSDispatcher` class is used to initialize **[Entity handler](#entityhandler)(s)** and all of their dependencies : [Services](#servicelogic), [Repositories](#repository), [UnboundActions](#unboundactions)
 
 `Example`
 
@@ -425,7 +434,7 @@ export = new CDSDispatcher([
 
 #### `Class`
 
-##### EntityHandler
+##### @EntityHandler
 
 **@EntityHandler**(`entity`: CDSTyperEntity)
 
@@ -450,7 +459,7 @@ export class BookHandler {
 ```
 
 > [!TIP]
-> After creation of `BookHandler` class, you can `import it` into the [CDSDispatcher](#cdsdispatcher).
+> After creation of `BookHandler` class, you can `import it` into the [CDSDispatcher](#CDSDispatcher).
 >
 > ```typescript
 > import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
@@ -468,7 +477,7 @@ export class BookHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### ServiceLogic
+##### @ServiceLogic
 
 **@ServiceLogic()**
 
@@ -491,7 +500,7 @@ export class CustomerService {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### Repository
+##### @Repository
 
 **@Repository()**
 
@@ -510,7 +519,7 @@ export class CustomerRepository {
 }
 ```
 
-###### `[Optional]` - BaseRepository
+###### `[Optional]` - CDS-TS-Repository - BaseRepository
 
 The **[CDS-TS-Repository - BaseRepository](https://github.com/dxfrontier/cds-ts-repository)** was designed to reduce the boilerplate code required to implement data access layer for persistance entities.
 
@@ -554,7 +563,7 @@ Explore the capabilities it offers and enhance your data access layer with ease.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### UnboundActions
+##### @UnboundActions
 
 **@UnboundActions()**
 
@@ -570,10 +579,10 @@ The following decorators can be used inside of `@UnboundActions()` :
 `Example`
 
 ```typescript
-import { UnboundActions, OnAction, OnFunction, OnEvent } from '@dxfrontier/cds-ts-dispatcher';
+import { UnboundActions, OnAction, OnFunction, OnEvent, Req, Next, Error } from '@dxfrontier/cds-ts-dispatcher';
 import { MyAction, MyFunction, MyEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-import type { ActionRequest, ActionReturn, TypedRequest, Request } from '@dxfrontier/cds-ts-dispatcher';
+import type { ActionRequest, ActionReturn, TypedRequest, Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 @UnboundActions()
 export class UnboundActionsHandler {
@@ -583,39 +592,42 @@ export class UnboundActionsHandler {
 
   // Unbound action
   @OnAction(MyAction)
-  private async onActionMethod(req: ActionRequest<typeof MyAction>, next: Function): ActionReturn<typeof MyAction> {
+  private async onActionMethod(
+    @Req() req: ActionRequest<typeof MyAction>,
+    @Next() next: NextEvent,
+  ): ActionReturn<typeof MyAction> {
     // ...
   }
 
   // Unbound Function
   @OnFunction(MyFunction)
   private async onFunctionMethod(
-    req: ActionRequest<typeof MyFunction>,
-    next: Function,
+    @Req() req: ActionRequest<typeof MyFunction>,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof MyFunction> {
     // ...
   }
 
   // Unbound event
   @OnEvent(MyEvent)
-  private async onEventMethod(req: TypedRequest<MyEvent>) {
+  private async onEventMethod(@Req() req: TypedRequest<MyEvent>) {
     // ...
   }
 
   // Unbound error
   @OnError()
-  private onErrorMethod(err: Error, req: Request) {
+  private onErrorMethod(@Error() err: Error, @Req() req: Request) {
     // ...
   }
 }
 ```
 
-`Imported it` in the CDSDispatcher
+`Imported it` in the [CDSDispatcher](#CDSDispatcher)
 
 ```typescript
 import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
 
-export = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
+export = new CDSDispatcher([ UnboundActionsHandler, ...])
 // or
 // use module.exports = new CDSDispatcher( ... )
 ```
@@ -625,13 +637,13 @@ export = new CDSDispatcher([UnboundActionsHandler, ...]).initialize();
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### Use
+##### @Use
 
 **@Use**(`...Middleware[]`)
 
 The `@Use` decorator simplifies the integration of middlewares into your classes.
 
-When `@Use` decorator applied at the `class-level` this decorator inject middlewares into the class and gain access to the `req: Request` and `next: Next` middleware across all events `(@AfterRead, @OnRead ...)` within that class.
+When `@Use` decorator applied at the `class-level` this decorator inject middlewares into the class and gain access to the `req: Request` and `next: NextMiddleware` middleware across all events `(@AfterRead, @OnRead ...)` within that class.
 
 Middleware decorators can perform the following tasks:
 
@@ -648,10 +660,10 @@ Middleware decorators can perform the following tasks:
 `Example:` middleware implementation
 
 ```typescript
-import type { MiddlewareImpl, Next, Request } from '@dxfrontier/cds-ts-dispatcher';
+import type { MiddlewareImpl, NextMiddleware, Request } from '@dxfrontier/cds-ts-dispatcher';
 
 export class MiddlewareClass implements MiddlewareImpl {
-  public async use(req: Request, next: Next) {
+  public async use(req: Request, next: NextMiddleware) {
     console.log('Middleware use method called.');
 
     await next(); // call next middleware
@@ -663,10 +675,11 @@ export class MiddlewareClass implements MiddlewareImpl {
 
 ```typescript
 import { EntityHandler, Use, Inject, SRV } from '@dxfrontier/cds-ts-dispatcher';
-import type { Service } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 import { Middleware1, Middleware2, MiddlewareN } from 'YOUR_MIDDLEWARE_LOCATION';
+
+import type { Service } from '@dxfrontier/cds-ts-dispatcher';
 
 @EntityHandler(MyEntity)
 @Use(Middleware1, Middleware2, MiddlewareN)
@@ -695,7 +708,7 @@ export class CustomerHandler {
 
 #### `Field`
 
-##### Inject
+##### @Inject
 
 **@Inject**(`serviceIdentifier: ServiceIdentifierOrFunc<unknown>`)
 
@@ -732,7 +745,7 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### Inject SRV
+##### @Inject(SRV)
 
 **@Inject**(SRV) `private srv: Service`
 
@@ -742,9 +755,10 @@ This specialized `@Inject` can be used as a `constant` in `@ServiceLogic`, `@Rep
 
 ```typescript
 import { EntityHandler, Inject, SRV } from '@dxfrontier/cds-ts-dispatcher';
-import type { Service } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Service } from '@dxfrontier/cds-ts-dispatcher';
 
 @EntityHandler(MyEntity)
 // OR @ServiceLogic()
@@ -764,11 +778,607 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Method` - `active entity`
+#### `Parameter`
+
+##### @Req
+
+**@Req()**
+
+The `@Req` decorator is utilized at the `parameter level` to annotate a parameter with the `Request` object, providing access to request-related information.
+
+`Return`
+
+- `Request`: An instance of `@sap/cds` - `Request`
+
+`Example`
+
+```typescript
+import { EntityHandler, Req, Results } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+export class BookHandler {
+  // ...
+  constructor() {}
+  // ... all events like @AfterRead, @BeforeRead ...
+
+  @AfterRead()
+  private async aMethod(@Req() req: Request, @Results() results: MyEntity[]) {
+    // ... req...
+  }
+}
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Results / @Result
+
+**@Results()** / **@Result**
+
+The `@Results` decorator is utilized at the `parameter level` to annotate a parameter with the request `Results`.
+
+`Example`
+
+```typescript
+import { EntityHandler, Req, Results } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+export class BookHandler {
+  // ...
+  constructor() {}
+  // ... all events like @AfterRead, @BeforeRead ...
+
+  @AfterRead()
+  private async aMethod(@Req() req: Request, @Results() results: MyEntity[]) {
+    // ...
+  }
+}
+```
+
+> [!TIP]
+> When using [After](#after), [Before](#before), [On](#on) events such as `Create`, `Update` or `Delete`, it's recommended to use the `@Result` decorator for single object result and `@Results` for arrays of objects.
+>
+> ```ts
+> @AfterCreate()
+> @AfterUpdate()
+> private async aMethod(
+>   @Result() result: Book, // <== @Result() decorator used to annotate it's a an object and not an array
+>   @Req() req: Request,
+> ) {
+>   // ...
+> }
+>
+> @AfterRead()
+> private async aMethod(
+>   @Results() result: Book[], // <== @Results() decorator used to annotate as array of objects
+>   @Req() req: Request,
+> ) {
+>   // ...
+> }
+>
+> @AfterDelete()
+> private async aMethod(
+> @Result() deleted: boolean, // <== @Result() decorator used to annotate as a boolean
+> @Req() req: Request,
+> ) {
+>   // ...
+> }
+> ```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Next
+
+**@Next()**
+
+The `@Next` decorator is utilized at the `parameter level` to annotate a parameter with the CDS `Next` function, which is used to proceed to the next middleware in the chain.
+
+`Return`
+
+- `NextEvent`: The next event in chain to be called.
+
+`Example`
+
+```typescript
+import { EntityHandler, Req, Results } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+export class BookHandler {
+  // ...
+  constructor() {}
+  // ... all events like @AfterRead, @BeforeRead, @OnCreate ...
+
+  @OnCreate()
+  public async onCreate(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
+    return next();
+  }
+}
+```
+
+> [!TIP]
+> Decorator `@Next` can be applied to all [On](#on), [On - draft](#on-1) event decorators.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Error
+
+**@Error()**
+
+The `@Error` decorator is utilized at the `parameter level` to annotate a parameter with the CDS `Error` and contains information regarding the failed `Request`.
+
+`Return`
+
+- `Error`: An instance of type `Error`.
+
+`Example`
+
+```typescript
+import { UnboundActions, Req, Error } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@UnboundActions()
+export class UnboundActionsHandler {
+  // ...
+  constructor() {}
+
+  @OnError()
+  public onError(@Error() err: Error, @Req() req: Request): void {
+    // ...
+  }
+}
+```
+
+> [!TIP]
+> Decorator `@Error` can be applied to [@OnError()](#onerror) decorator which resides inside of the [@UnboundActions()](#unboundactions).
+
+##### @Jwt
+
+**@Jwt()**
+
+The `@Jwt` decorator is utilized at the `parameter level` to annotate a parameter to retrieve `JWT` from the `Request` that is based on the node `req.http.req - IncomingMessage`.
+
+Fails if no authorization header is given or has the wrong format.
+
+`Return`
+
+- `string` | `undefined` : The retrieved `JWT token` or undefined if no token was found.
+
+`Example`
+
+```typescript
+import { EntityHandler, Req, Results, Jwt } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+export class BookHandler {
+  // ...
+  constructor() {}
+  // ... all events like @AfterRead, @BeforeRead ...
+
+  @AfterRead()
+  private async aMethod(@Req() req: Request, @Results() results: MyEntity[], @Jwt(): string | undefined) {
+    // ... req...
+  }
+}
+```
+
+> [!TIP]
+> Expected format is `Bearer <TOKEN>`.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @IsPresent
+
+**@IsPresent\<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsByKey\<Key>)**
+
+The `@IsPresent` decorator is utilized at the `parameter level` to annotate a parameter for allowing verification of the existence of a specific `property` value.
+
+`Parameters`
+
+- `key (string)`: Specifies the type of query operation. Accepted values are `INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`.
+- `property (string)`: Specifies the property based on the `key`.
+
+`Return`
+
+- `boolean`: This decorator returns `true` if `property` `value` is filled, `false` otherwise
+
+`Example`
+
+```typescript
+import { EntityHandler, Req, Results, IsPresent } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+class BookHandler {
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  private async aMethod(
+    @Req() req: Request,
+    @Results() results: MyEntity[],
+
+    @IsPresent('SELECT', 'columns') columnsPresent: boolean,
+  ) {
+    if (columnsPresent) {
+      // ...
+    }
+
+    // ...
+  }
+}
+```
+
+> [!TIP]
+> Decorator [@IsPresent()](#ispresent) works well with [@GetQuery()](#getqueryproperty).
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @IsRole
+
+**@IsRole(role: string)**
+
+The `@IsRole` decorator is utilized at the `parameter level` to annotate a parameter, allowing the verification
+of a user having assigned a given role. It applies an `OR` logic between the roles, meaning it
+checks if at `least one` of the specified roles is assigned.
+
+`Parameters`
+
+- `role (...string[])`: An array of role names to check if are assigned.
+
+`Return`
+
+- `boolean`: This decorator returns `true` if at least one of the specified roles is assigned to the current request user, otherwise `false`.
+
+`Example`
+
+```typescript
+import { EntityHandler, Req, Results, IsPresent, IsRole } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+class BookHandler {
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  private async aMethod(
+    @Req() req: Request,
+    @Results() results: MyEntity[],
+
+    @IsRole('role', 'anotherRole') roleAssigned: boolean,
+  ) {
+    if (roleAssigned) {
+      // ...
+    }
+
+    // ...
+  }
+}
+```
+
+[!TIP]
+
+> The role names correspond to the values of `@requires` and the `@restrict.grants.to` annotations in your `CDS` models.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @IsColumnSupplied
+
+**@IsColumnSupplied\<T\>(field : keyof T)**
+
+The `@IsColumnSupplied` decorator is utilized at the `parameter level` to annotate a parameter, verifying the existance of a column in the `SELECT`, `INSERT` or `UPSERT` query types.
+
+`Parameters`
+
+- `column (string)`: A string representing the name of the column to be verified.
+
+`Return` :
+
+- `boolean`: This decorator returns `true` if `column` was found, `false` otherwise
+
+`Example`
+
+```typescript
+import { EntityHandler, Req, Results, IsPresent } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+class BookHandler {
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  private async aMethod(
+    @Req() req: Request,
+    @Results() results: MyEntity[],
+
+    @IsColumnSupplied<MyEntity>('price') priceSupplied: boolean,
+  ) {
+    if (priceSupplied) {
+      // ...
+    }
+
+    // ...
+  }
+}
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @GetQuery
+
+**@GetQuery\<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsByKey\<Key>)**
+
+The `@GetQuery` decorator is utilized at the `parameter level` to annotate a parameter allowing retrieval of the specified `property` value.
+
+`Parameters`
+
+- `key (string)`: Specifies the type of query operation. Accepted values are `INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`.
+- `property (string)`: Specifies the property based on the `key`.
+
+`Return` Type: Varies based on the specified property :
+
+- <details>
+
+  <summary>SELECT</summary>
+
+  - @GetQuery(`'SELECT'`, `'columns'`) columns: `GetQueryType['columns']['forSelect']`
+  - @GetQuery(`'SELECT'`, `'distinct'`) distinct: `GetQueryType['distinct']`
+  - @GetQuery(`'SELECT'`, `'excluding'`) excluding: `GetQueryType['excluding']`
+  - @GetQuery(`'SELECT'`, `'from'`) from: `GetQueryType['from']['forSelect']`
+  - @GetQuery(`'SELECT'`, `'groupBy'`) groupBy: `GetQueryType['groupBy']`
+  - @GetQuery(`'SELECT'`, `'having'`) having: `GetQueryType['having']`
+  - @GetQuery(`'SELECT'`, `'limit'`) limit: `GetQueryType['limit']`
+  - @GetQuery(`'SELECT'`, `'limit.rows'`) limitRows: `GetQueryType['limit']['rows']`
+  - @GetQuery(`'SELECT'`, `'limit.offset'`) limitOffset: `GetQueryType['limit']['offset']`
+  - @GetQuery(`'SELECT'`, `'mixin'`) mixin: `GetQueryType['mixin']`
+  - @GetQuery(`'SELECT'`, `'one'`) one: `GetQueryType['one']`
+  - @GetQuery(`'SELECT'`, `'orderBy'`) orderBy: `GetQueryType['orderBy']`
+  - @GetQuery(`'SELECT'`, `'where'`) where: `GetQueryType['where']`
+
+  </details>
+
+- <details>
+
+  <summary>INSERT</summary>
+
+  - @GetQuery(`'INSERT'`, `'as'`) as: `GetQueryType['as']`
+  - @GetQuery(`'INSERT'`, `'columns'`) columns: `GetQueryType['columns']['forInsert']`
+  - @GetQuery(`'INSERT'`, `'entries'`) entries: `GetQueryType['entries']`
+  - @GetQuery(`'INSERT'`, `'into'`) into: `GetQueryType['into']`
+  - @GetQuery(`'INSERT'`, `'rows'`) rows: `GetQueryType['rows']`
+  - @GetQuery(`'INSERT'`, `'values'`) values: `GetQueryType['values']`
+
+  </details>
+
+- <details>
+
+    <summary>UPDATE</summary>
+
+  - @GetQuery(`'UPDATE'`, `'data'`) data: `GetQueryType['data']`
+  - @GetQuery(`'UPDATE'`, `'entity'`) entity: `GetQueryType['entity']`
+  - @GetQuery(`'UPDATE'`, `'where'`) where: `GetQueryType['where']`
+
+  </details>
+
+- <details>
+
+    <summary>UPSERT</summary>
+
+  - @GetQuery(`'UPSERT'`, `'columns'`) columns: `GetQueryType['columns'][forUpsert]`
+  - @GetQuery(`'UPSERT'`, `'entries'`) entries: `GetQueryType['entries']`
+  - @GetQuery(`'UPSERT'`, `'into'`) into: `GetQueryType['into']`
+  - @GetQuery(`'UPSERT'`, `'rows'`) rows: `GetQueryType['rows']`
+  - @GetQuery(`'UPSERT'`, `'values'`) values: `GetQueryType['values']`
+
+  </details>
+
+- <details>
+
+    <summary>DELETE</summary>
+
+  - @GetQuery(`'DELETE'`, `'from'`) from: `GetQueryType['from'][forDelete]`
+  - @GetQuery(`'DELETE'`, `'where'`) columns: `GetQueryType['where']`
+
+    </details>
+
+`Example`
+
+```typescript
+import { EntityHandler, Req, Results, IsPresent, GetQuery } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Request, GetQueryType } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+class BookHandler {
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  private async aMethod(
+    @Req() req: Request,
+    @Results() results: MyEntity[],
+
+    // Check existence of columns
+    @IsPresent('SELECT', 'columns') columnsPresent: boolean,
+    // Get columns
+    @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['forDelete'],
+
+    @GetQuery('SELECT', 'orderBy') distinct: GetQueryType['orderBy'],
+    @GetQuery('SELECT', 'groupBy') groupBy: GetQueryType['groupBy'],
+  ) {
+    if (columnsPresent) {
+      // do something with columns values
+    }
+
+    // ...
+  }
+}
+```
+
+> [!TIP]
+> Decorator `@GetQuery` works well with [@IsPresent()](#ispresent).
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @GetRequest
+
+**@GetRequest(property : keyof Request)**
+
+The `@GetRequest` decorator is utilized at the `parameter level` to annotate a parameter, allowing retrieval of the specified property value from the `Request` object.
+
+`Parameters`
+
+- `property (string)`: Specifies the property to retrieve from the `Request` object.
+
+`Return` Type: Varies based on the specified property :
+
+- **@GetRequest**(`'entity'`) entity: `Request['entity']`,
+- **@GetRequest**(`'event'`) event: `Request['event']`,
+- **@GetRequest**(`'features'`) features: `Request['features']`,
+- **@GetRequest**(`'headers'`) headers: `Request['headers']`,
+- **@GetRequest**(`'http'`) http: `Request['http']`,
+- **@GetRequest**(`'id'`) id: `Request['id']`,
+- **@GetRequest**(`'locale'`) locale: `Request['locale']`,
+- **@GetRequest**(`'method'`) method: `Request['method']`,
+- **@GetRequest**(`'params'`) params: `Request['params']`,
+- **@GetRequest**(`'query'`) query: `Request['query']`,
+- **@GetRequest**(`'subject'`) subject: `Request['subject']`,
+- **@GetRequest**(`'target'`) target: `Request['target']`,
+- **@GetRequest**(`'tenant'`) tenant: `Request['tenant']`,
+- **@GetRequest**(`'timestamp'`) timestamp: `Request['timestamp']`,
+- **@GetRequest**(`'user'`) user: `Request['user']`,
+
+> [!TIP]
+> Type `Request` can be import from :
+>
+> ```ts
+> import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+> ```
+
+`Example`
+
+```typescript
+import { EntityHandler, Results, GetRequest } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { GetTypeLocale, GetTypeMethod, Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+class BookHandler {
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  private async aMethod(
+    // @Req() req: Request, we assume we don't need the hole Request object and we need only 'locale' and 'method'
+    @Results() results: MyEntity[],
+
+    @GetRequest('locale') locale: Request['locale'],
+    @GetRequest('method') method: Request['method'],
+  ) {
+    // do something with 'locale' and 'method' ...
+  }
+}
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @SingleInstanceSwitch
+
+**@SingleInstanceSwitch**
+
+The `@SingleInstanceSwitch()` decorator is applied at the `parameter level`.
+
+It allows you to manage different behaviors based on whether the request is for a `single entity instance` or `an entity set`, the parameter assigned to the decorator will behave like a **`switch`**.
+
+`Return`
+
+- `true` when the `Request` is `single instance`
+- `false` when the `Request` is `entity set`
+
+`Example 1`
+
+Single request : http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
+
+```typescript
+import { AfterRead, SingleInstanceCapable } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterRead()
+private async singeInstanceMethodAndEntitySet(@Results() results : MyEntity[], @Req() req: TypedRequest<MyEntity>, @SingleInstanceSwitch() isSingleInstance: boolean) {
+  if(isSingleInstance) {
+    // This will be executed only when single instance is called : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
+    return this.customerService.handleSingleInstance(req)
+  }
+
+  // nothing to entity set
+}
+```
+
+`Example 2`
+
+Entity request : http://localhost:4004/odata/v4/main/`MyEntity`
+
+```typescript
+import { AfterRead, SingleInstanceCapable } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterRead()
+private async singeInstanceMethodAndEntitySet(@Results() results : MyEntity[], @Req() req: TypedRequest<MyEntity>, @SingleInstanceSwitch() isSingleInstance: boolean) {
+  if(isSingleInstance) {
+    // This will be executed only when single instance is called : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
+    // ...
+  }
+
+  // ... this will be executed when entity set is called : http://localhost:4004/odata/v4/main/MyEntity
+  results[0] = {
+    name : 'new value'
+  }
+}
+```
+
+> [!TIP]
+> Decorator `@SingleInstanceSwitch` can be used together with the following decorator events:
+>
+> - [@AfterRead()](#afterread)
+> - [@BeforeRead()](#beforeread)
+> - [@OnRead()](#onread)
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### `Method`-`active entity`
 
 ##### `Before`
 
-Use `@BeforeCreate(), @BeforeRead(), @BeforeUpdate(), @BeforeDelete()` to register handlers to run before `.on` handlers, frequently used for `validating user input.`
+Use [@BeforeCreate()](#beforecreate), [@BeforeRead()](#beforeread), [@BeforeUpdate()](#beforeupdate), [@BeforeDelete()](#beforedelete) to register handlers to run before `.on` handlers, frequently used for `validating user input.`
 
 The handlers receive one argument:
 
@@ -786,7 +1396,7 @@ See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/c
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### BeforeCreate
+###### @BeforeCreate
 
 **@BeforeCreate**()
 
@@ -801,7 +1411,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeCreate()
-private async beforeCreateMethod(req: TypedRequest<MyEntity>) {
+private async beforeCreateMethod(@Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -819,7 +1429,7 @@ this.before('CREATE', MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### BeforeRead
+###### @BeforeRead
 
 **@BeforeRead**()
 
@@ -834,7 +1444,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeRead()
-private async beforeReadMethod(req: TypedRequest<MyEntity>) {
+private async beforeReadMethod(@Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -852,7 +1462,7 @@ this.before('READ', MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### BeforeUpdate
+###### @BeforeUpdate
 
 **@BeforeUpdate**()
 
@@ -867,7 +1477,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeUpdate()
-private async beforeUpdateMethod(req: TypedRequest<MyEntity>) {
+private async beforeUpdateMethod(@Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -885,7 +1495,7 @@ this.before('UPDATE', MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### BeforeDelete
+###### @BeforeDelete
 
 **@BeforeDelete**()
 
@@ -900,7 +1510,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeDelete()
-private async beforeDeleteMethod(req: TypedRequest<MyEntity>) {
+private async beforeDeleteMethod(@Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -920,28 +1530,26 @@ this.before('DELETE', MyEntity, async (req) => {
 
 ##### `After`
 
-Use `@AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.`
+Use [@AfterCreate()](#aftercreate), [@AfterRead()](#afterread), [@AfterUpdate()](#afterupdate), [@AfterDelete()](#afterdelete) register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.`
 
 The handlers receive two arguments:
 
 - `results` (for `@AfterRead`): An array of type `MyEntity[]`.
 - `result` (for `@AfterUpdate` and `@AfterCreate`): An object of type `MyEntity`.
 - `deleted` (for `@AfterDelete`): A `boolean` indicating whether the entity was deleted.
-- `req`: An object of type `TypedRequest`.
-
-See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
+- `req`: An object of type `TypedRequest` or `Request`.
 
 > [!TIP]
-> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use ?>
+> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use :
 >
-> - @AfterCreateDraft()
-> - @AfterReadDraft()
-> - @AfterUpdateDraft()
-> - @AfterDeleteDraft()
+> - `@AfterCreateDraft()`
+> - `@AfterReadDraft()`
+> - `@AfterUpdateDraft()`
+> - `@AfterDeleteDraft()`
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### AfterCreate
+###### @AfterCreate
 
 **@AfterCreate**()
 
@@ -956,7 +1564,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterCreate()
-private async afterCreateMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterCreateMethod(@Result() @Result() result: MyEntity, @Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -974,7 +1582,7 @@ this.after('CREATE', MyEntity, async (result, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### AfterRead
+###### @AfterRead
 
 **@AfterRead**()
 
@@ -989,7 +1597,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterRead()
-private async afterReadMethod(results: MyEntity[], req: TypedRequest<MyEntity>) {
+private async afterReadMethod(@Results() results: MyEntity[], @Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1007,7 +1615,7 @@ this.after('READ', MyEntity, async (results, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### AfterUpdate
+###### @AfterUpdate
 
 **@AfterUpdate**()
 
@@ -1022,7 +1630,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterUpdate()
-private async afterUpdateMethod(result: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterUpdateMethod(@Result() result: MyEntity, @Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1040,7 +1648,7 @@ this.after('UPDATE', MyEntity, async (result, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### AfterDelete
+###### @AfterDelete
 
 **@AfterDelete**()
 
@@ -1055,7 +1663,7 @@ import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterDelete()
-private async afterDeleteMethod(deleted: boolean, req: Request) {
+private async afterDeleteMethod(@Result() deleted: boolean, @Req() req: Request) {
   // ...
 }
 ```
@@ -1075,28 +1683,26 @@ this.after('DELETE', MyEntity, async (deleted, req) => {
 
 ##### `On`
 
-Use `@OnCreate(), @OnRead(), @OnUpdate(), @OnDelete(), OnAction(), @OnFunction(), @OnBoundAction(), @OnBoundFunction()` handlers to fulfill requests, e.g. by reading/writing data from/to databases handlers.
+Use [@OnCreate()](#oncreate), [@OnRead()](#onread), [@OnUpdate()](#onupdate), [@OnDelete()](#ondelete), [OnAction()](#onaction), [@OnFunction()](#onfunction), [@OnBoundAction()](#onboundaction), [@OnBoundFunction()](#onboundfunction) handlers to fulfill requests, e.g. by reading/writing data from/to databases handlers.
 
 The handlers receive two arguments:
 
 - `req` of type `TypedRequest`
-- `next` of type `Function`
-
-See also the official SAP JS **[CDS-On](https://cap.cloud.sap/docs/node.js/core-services#srv-on-request) event**
+- `next` of type `NextEvent`
 
 > [!TIP]
-> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use >
+> If `@odata.draft.enabled: true` to manage event handlers for draft version you can use :
 >
-> - @OnCreateDraft()
-> - @OnReadDraft()
-> - @OnUpdateDraft()
-> - @OnDeleteDraft()
-> - @OnBoundActionDraft()
-> - @OnBoundFunctionDraft()
+> - `@OnCreateDraft()`
+> - `@OnReadDraft()`
+> - `@OnUpdateDraft()`
+> - `@OnDeleteDraft()`
+> - `@OnBoundActionDraft()`
+> - `@OnBoundFunctionDraft()`
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnCreate
+###### @OnCreate
 
 **@OnCreate**()
 
@@ -1105,13 +1711,13 @@ It is important to note that decorator `@OnCreate()` will be triggered based on 
 `Example`
 
 ```typescript
-import { OnCreate } from "@dxfrontier/cds-ts-dispatcher";
-import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+import { OnCreate, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnCreate()
-private async onCreateMethod(req: TypedRequest<MyEntity>, next: Function) {
+private async onCreateMethod(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
   // ...
 
   return next();
@@ -1131,7 +1737,7 @@ this.on('CREATE', MyEntity, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnRead
+###### @OnRead
 
 **@OnRead**()
 
@@ -1140,13 +1746,13 @@ It is important to note that decorator `@OnRead()` will be triggered based on th
 `Example`
 
 ```typescript
-import { OnRead } from "@dxfrontier/cds-ts-dispatcher";
-import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+import { OnRead, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnRead()
-private async onReadMethod(req: TypedRequest<MyEntity>, next: Function) {
+private async onReadMethod(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
   // ...
 
   return next();
@@ -1166,7 +1772,7 @@ this.on('READ', MyEntity, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnUpdate
+###### @OnUpdate
 
 **@OnUpdate**()
 
@@ -1176,13 +1782,13 @@ It is important to note that decorator `@OnUpdate()` will be triggered based on 
 
 ```typescript
 
-import { OnUpdate } from "@dxfrontier/cds-ts-dispatcher";
-import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+import { OnUpdate, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnUpdate()
-private async onUpdateMethod(req: TypedRequest<MyEntity>, next: Function) {
+private async onUpdateMethod(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
   // ...
 
   return next();
@@ -1202,7 +1808,7 @@ this.on('UPDATE', MyEntity, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnDelete
+###### @OnDelete
 
 **@OnDelete**()
 
@@ -1211,13 +1817,13 @@ It is important to note that decorator `@OnDelete()` will be triggered based on 
 `Example`
 
 ```typescript
-import { OnDelete } from "@dxfrontier/cds-ts-dispatcher";
-import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+import { OnDelete, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnDelete()
-private async onDeleteMethod(req: TypedRequest<MyEntity>, next: Function) {
+private async onDeleteMethod(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
   // ...
 
   return next();
@@ -1237,7 +1843,7 @@ this.on('DELETE', MyEntity, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnAction
+###### @OnAction
 
 **@OnAction**(`name` : CdsAction)
 
@@ -1249,13 +1855,13 @@ this.on('DELETE', MyEntity, async (req, next) => {
 
 ```typescript
 
-import { OnAction } from "@dxfrontier/cds-ts-dispatcher";
-import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+import { OnAction, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { ActionRequest, ActionReturn, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { AnAction } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnAction(AnAction)
-private async onActionMethod(req: ActionRequest<typeof AnAction>, next: Function): ActionReturn<typeof AnAction> {
+private async onActionMethod(@Req() req: ActionRequest<typeof AnAction>, @Next() next: NextEvent): ActionReturn<typeof AnAction> {
   // ...
 }
 ```
@@ -1276,7 +1882,7 @@ this.on(AnAction, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnFunction
+###### @OnFunction
 
 **@OnFunction**(`name` : CdsFunction)
 
@@ -1287,13 +1893,13 @@ this.on(AnAction, async (req, next) => {
 `Example`
 
 ```typescript
-import { OnFunction } from "@dxfrontier/cds-ts-dispatcher";
-import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+import { OnFunction, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { ActionRequest, ActionReturn, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { AFunction } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnFunction(AFunction)
-private async onFunctionMethod(req: ActionRequest<typeof AFunction>, next: Function): ActionReturn<typeof AFunction> {
+private async onFunctionMethod(@Req() req: ActionRequest<typeof AFunction>, @Next() next: NextEvent): ActionReturn<typeof AFunction> {
   // ...
 }
 ```
@@ -1314,7 +1920,7 @@ this.on(AFunction, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnEvent
+###### @OnEvent
 
 **@OnEvent**(`name` : CdsEvent)
 
@@ -1358,7 +1964,7 @@ this.on('AEvent', async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnError
+###### @OnError
 
 **@OnError**()
 
@@ -1369,11 +1975,11 @@ Error handlers are invoked whenever an error occurs during event processing of a
 `Example`
 
 ```typescript
-import { OnError } from "@dxfrontier/cds-ts-dispatcher";
+import { OnError, Error, Req } from "@dxfrontier/cds-ts-dispatcher";
 import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 @OnError()
-private onError(err: Error, req: Request) { // sync func
+private onError(@Error() err: Error, @Req() req: Request) { // sync func
   err.message = 'New message'
   // ...
 }
@@ -1395,11 +2001,11 @@ this.on('error', (err, req) => {
 > OnError callback are expected to be a **`sync`** function, i.e., **`not async`**, not returning `Promises`.
 
 > [!TIP]
-> More info can be found at <https://cap.cloud.sap/docs/node.js/core-services#srv-on-error>
+> More info can be found at [SAP CAP Error](https://cap.cloud.sap/docs/node.js/core-services#srv-on-error)
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnBoundAction
+###### @OnBoundAction
 
 **@OnBoundAction**(`name` : CdsAction)
 
@@ -1412,13 +2018,13 @@ It is important to note that decorator `@OnBoundAction()` will be triggered base
 `Example`
 
 ```typescript
-import { OnBoundAction } from "@dxfrontier/cds-ts-dispatcher";
-import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+import { OnBoundAction, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { ActionRequest, ActionReturn, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnBoundAction(MyEntity.actions.AnAction)
-private async onActionMethod(req: ActionRequest<typeof MyEntity.actions.AnAction>, next: Function): ActionReturn<typeof MyEntity.actions.AnAction> {
+private async onActionMethod(@Req() req: ActionRequest<typeof MyEntity.actions.AnAction>, @Next() next: NextEvent): ActionReturn<typeof MyEntity.actions.AnAction> {
   // ...
 }
 ```
@@ -1436,7 +2042,7 @@ this.on(MyEntity.actions.AnAction, MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnBoundFunction
+###### @OnBoundFunction
 
 **@OnBoundFunction**(`name` : CdsFunction)
 
@@ -1449,13 +2055,13 @@ It is important to note that decorator `@OnBoundFunction()` will be triggered ba
 `Example`
 
 ```typescript
-import { OnBoundFunction } from "@dxfrontier/cds-ts-dispatcher";
-import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+import { OnBoundFunction, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { ActionRequest, ActionReturn, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnBoundFunction(MyEntity.actions.AFunction)
-private async onFunctionMethod(req: ActionRequest<typeof MyEntity.actions.AFunction>, next: Function): ActionReturn<typeof MyEntity.actions.AFunction> {
+private async onFunctionMethod(@Req() req: ActionRequest<typeof MyEntity.actions.AFunction>, @Next() next: NextEvent): ActionReturn<typeof MyEntity.actions.AFunction> {
   // ...
 }
 ```
@@ -1473,19 +2079,17 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Method` - `draft entity`
+#### `Method`-`draft entity`
 
 ##### `Before`
 
-Use `@BeforeNewDraft(), @BeforeCancelDraft(), @BeforeEditDraft(), @BeforeSaveDraft(), @BeforeCreateDraft(), @BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()` to register handlers to run before `.on` handlers, frequently used for `validating user input.`
+Use `@BeforeNewDraft(), @BeforeCancelDraft(), @BeforeEditDraft(), @BeforeSaveDraft(), @BeforeCreateDraft(), @BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()` to register handlers to run before`.on`handlers, frequently used for `validating user input.`
 
 The handlers receive one argument:
 
 - `req` of type `TypedRequest`
 
-See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/core-services#srv-before-request) event**
-
-###### BeforeNewDraft
+###### @BeforeNewDraft
 
 **@BeforeNewDraft**()
 
@@ -1502,7 +2106,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeNewDraft()
-private async beforeCreateDraftMethod(req: TypedRequest<MyEntity>) {
+private async beforeCreateDraftMethod(@Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1520,7 +2124,7 @@ this.before('NEW', MyEntity.drafts, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### BeforeCancelDraft
+###### @BeforeCancelDraft
 
 **@BeforeCancelDraft**()
 
@@ -1537,7 +2141,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeCancelDraft()
-private async beforeCancelDraftMethod(req: TypedRequest<MyEntity>) {
+private async beforeCancelDraftMethod(@Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1555,7 +2159,7 @@ this.before('CANCEL', MyEntity.drafts, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### BeforeEditDraft
+###### @BeforeEditDraft
 
 **@BeforeEditDraft**()
 
@@ -1572,7 +2176,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeEditDraft()
-private async beforeEditDraftMethod(req: TypedRequest<MyEntity>) {
+private async beforeEditDraftMethod(@Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1590,7 +2194,7 @@ this.before('EDIT', MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### BeforeSaveDraft
+###### @BeforeSaveDraft
 
 **@BeforeSaveDraft**()
 
@@ -1607,7 +2211,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @BeforeSaveDraft()
-private async beforeSaveDraftMethod(req: TypedRequest<MyEntity>) {
+private async beforeSaveDraftMethod(@Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1634,12 +2238,9 @@ The results from the preceding `.on` handler, with the following types:
 - `results` (of type `MyEntity[]`) for `@AfterRead`
 - `result` (of type `MyEntity`) for `@AfterUpdate` and `@AfterCreate`
 - `deleted` (of type `boolean`) for `@AfterDelete`
-
 - `req` of type `TypedRequest`
 
-See also the official SAP JS **[CDS-After](https://cap.cloud.sap/docs/node.js/core-services#srv-after-request) event**
-
-###### AfterNewDraft
+###### @AfterNewDraft
 
 **@AfterNewDraft**()
 
@@ -1656,7 +2257,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterNewDraft()
-private async afterNewDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterNewDraftMethod(@Result() result: MyEntity, @Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1674,7 +2275,7 @@ this.after('NEW', MyEntity.drafts, async (results, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### AfterCancelDraft
+###### @AfterCancelDraft
 
 **@AfterCancelDraft**()
 
@@ -1691,7 +2292,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterCancelDraft()
-private async afterCancelDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterCancelDraftMethod(@Result() result: MyEntity, @Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1709,7 +2310,7 @@ this.after('CANCEL', MyEntity.drafts, async (results, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### AfterEditDraft
+###### @AfterEditDraft
 
 **@AfterEditDraft**()
 
@@ -1726,7 +2327,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterEditDraft()
-private async afterEditDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterEditDraftMethod(@Result() result: MyEntity, @Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1744,7 +2345,7 @@ this.after('EDIT', MyEntity, async (results, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### AfterSaveDraft
+###### @AfterSaveDraft
 
 **@AfterSaveDraft**()
 
@@ -1761,7 +2362,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterSaveDraft()
-private async afterSaveDraftMethod(results: MyEntity, req: TypedRequest<MyEntity>) {
+private async afterSaveDraftMethod(@Result() result: MyEntity, @Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1781,16 +2382,16 @@ this.after('SAVE', MyEntity, async (results, req) => {
 
 ##### `On`
 
-Use `@OnNewDraft(), @OnCancelDraft(), @OnCancelDraft(), @OnSaveDraft(), @OnReadDraft(), @OnUpdateDraft(), @OnCreateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft()` handlers to support for both, active and draft entities.
+Use [@OnNewDraft()](#onnewdraft), [@OnCancelDraft()](#oncanceldraft), [@OnSaveDraft()](#onsavedraft), [@OnEditDraft()](#oneditdraft), @OnReadDraft(), @OnUpdateDraft(), @OnCreateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft() handlers to support for both, active and draft entities.
 
 The handlers receive two arguments:
 
 - `req` of type `TypedRequest`
-- `next` of type `Function`
+- `next` of type `NextEvent`
 
 See Official SAP **[Fiori-draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)**
 
-###### OnNewDraft
+###### @OnNewDraft
 
 **@OnNewDraft()**
 
@@ -1801,13 +2402,13 @@ It is important to note that decorator `@OnNewDraft()` will be triggered based o
 `Example`
 
 ```typescript
-import { OnNewDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+import { OnNewDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnNewDraft()
-private async onNewDraft(req: TypedRequest<MyEntity>, next: Function) {
+private async onNewDraft(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
   // ...
 }
 ```
@@ -1825,7 +2426,7 @@ this.on('NEW', MyEntity.drafts, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnCancelDraft
+###### @OnCancelDraft
 
 **@OnCancelDraft()**
 
@@ -1836,13 +2437,13 @@ It is important to note that decorator `@OnCancelDraft()` will be triggered base
 `Example`
 
 ```typescript
-import { OnCancelDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+import { OnCancelDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnCancelDraft()
-private async onCancelDraft(req: TypedRequest<MyEntity>, next: Function) {
+private async onCancelDraft(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
   // ...
 }
 ```
@@ -1860,7 +2461,7 @@ this.on('CANCEL', MyEntity.drafts, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnEditDraft
+###### @OnEditDraft
 
 **@OnEditDraft()**
 
@@ -1871,13 +2472,13 @@ It is important to note that decorator `@OnEditDraft()` will be triggered based 
 `Example`
 
 ```typescript
-import { OnEditDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+import { OnEditDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnEditDraft()
-private async onEditDraft(req: TypedRequest<MyEntity>, next: Function) {
+private async onEditDraft(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
   // ...
 }
 ```
@@ -1895,7 +2496,7 @@ this.on('EDIT', MyEntity, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### OnSaveDraft
+###### @OnSaveDraft
 
 **@OnSaveDraft()**
 
@@ -1907,13 +2508,13 @@ It is important to note that decorator `@OnSaveDraft()` will be triggered based 
 
 ```typescript
 
-import { OnSaveDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+import { OnSaveDraft, Req, Next  } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnSaveDraft()
-private async onSaveDraft(req: TypedRequest<MyEntity>, next: Function) {
+private async onSaveDraft(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
   // ...
 }
 ```
@@ -1931,7 +2532,7 @@ this.on('SAVE', MyEntity, async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### `Other` - draft decorators
+##### `Other draft decorators`
 
 All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
 
@@ -1940,72 +2541,9 @@ All active entity [On](#on), [Before](#before), [After](#after) events have also
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Method` - `helpers`
+#### `Method`-`helpers`
 
-##### SingleInstanceCapable
-
-**@SingleInstanceCapable()**
-
-The `@SingleInstanceCapable()` decorator is applied at the method level to indicate that all decorators used in conjunction with this decorator will handle both single instance and entity set requests, this behaves like a **switch** when the REQUEST is entity set and single instance, so you can manage different behavior.
-
-`@SingleInstanceCapable` can be used together with the following decorator actions :
-
-- [@AfterRead()](#afterread)
-- [@BeforeRead()](#beforeread)
-- [@OnRead()](#onread)
-
-`Example 1` : Handling single instance request
-
-- Example single request : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
-
-```typescript
-import { AfterRead, SingleInstanceCapable } from "@dxfrontier/cds-ts-dispatcher";
-import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterRead()
-@SingleInstanceCapable()
-private async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
-  if(isSingleInstance) {
-    // This will be executed only when single instance read is performed
-    // isSingleInstance flag will be `true`
-    return this.customerService.handleSingleInstance(req)
-  }
-}
-```
-
-`Example 2` : Differing behavior for single instance and entity set requests
-
-- Single request example : http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
-- Entity set request example : http://localhost:4004/odata/v4/main/`MyEntity`
-
-```typescript
-import { AfterRead, BeforeRead, SingleInstanceCapable } from "@dxfrontier/cds-ts-dispatcher";
-import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterRead()
-@SingleInstanceCapable()
-@BeforeRead()
-private async singeInstanceMethodAndEntitySet(results : MyEntity[], req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
-  if(isSingleInstance) {
-    // This method will be executed for 'AfterRead` single instance
-    return this.customerService.handleSingleInstance(req)
-  }
-
-  // This method will be executed for `BeforeRead` both cases : single instance & entity set
-  return this.customerService.handleEntitySet(req)
-}
-```
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-##### Validate
+##### @Validate
 
 **@Validate\<T\>({ action, options? }, ...fields: Array\<keyof T>)**
 
@@ -2107,8 +2645,10 @@ import {
   BeforeUpdate,
   OnCreate,
   OnUpdate,
+  Req,
+  Next,
 } from '@dxfrontier/cds-ts-dispatcher';
-import type { TypedRequest, Service } from '@dxfrontier/cds-ts-dispatcher';
+import type { TypedRequest, Service, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
@@ -2122,27 +2662,27 @@ export class CustomerHandler {
   @BeforeCreate()
   @Validate<MyEntity>({ action: 'isLowercase' }, 'comment')
   @Validate<MyEntity>({ action: 'endsWith', target: 'N' }, 'description')
-  private async beforeCreate(req: TypedRequest<MyEntity>) {
+  private async beforeCreate(@Req() req: TypedRequest<MyEntity>) {
     // ...
   }
 
   @BeforeUpdate()
   @Validate<MyEntity>({ action: 'startsWith', target: 'COMMENT:' }, 'comment')
   @Validate<MyEntity>({ action: 'isAlphanumeric' }, 'description')
-  private async beforeUpdate(req: TypedRequest<MyEntity>) {
+  private async beforeUpdate(@Req() req: TypedRequest<MyEntity>) {
     // ...
   }
 
   @OnCreate()
   @Validate<MyEntity>({ action: 'isAlphanumeric' }, 'book_ID')
-  private async onCreate(req: TypedRequest<MyEntity>, next: Function) {
+  private async onCreate(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
     // ...
     return next();
   }
 
   @OnUpdate()
   @Validate<MyEntity>({ action: 'isLength', options: { min: 5 } }, 'comment')
-  private async onUpdate(req: TypedRequest<MyEntity>, next: Function) {
+  private async onUpdate(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
     // ...
     return next();
   }
@@ -2154,8 +2694,8 @@ export class CustomerHandler {
 `Example 2`: `@Validate` is used inside of `@UnboundActions`
 
 ```ts
-import { UnboundActions, OnAction, OnFunction, OnEvent, Validate } from '@dxfrontier/cds-ts-dispatcher';
-import type { ExposeFields, TypedRequest, ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+import { UnboundActions, OnAction, OnFunction, OnEvent, Validate, Next, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { ExposeFields, TypedRequest, ActionRequest, ActionReturn, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { SomeAction, SomeFunction, OrderedBook } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
@@ -2163,22 +2703,25 @@ import { SomeAction, SomeFunction, OrderedBook } from 'YOUR_CDS_TYPER_ENTITIES_L
 class UnboundActionsHandler {
   @OnAction(SomeAction)
   @Validate<ExposeFields<typeof SomeAction>>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
-  private async onActionMethod(req: ActionRequest<typeof SomeAction>, _: Function): ActionReturn<typeof SomeAction> {
+  private async onActionMethod(
+    @Req() req: ActionRequest<typeof SomeAction>,
+    @Next() _: NextEvent,
+  ): ActionReturn<typeof SomeAction> {
     // ...
   }
 
   @OnFunction(SomeFunction)
   @Validate<ExposeFields<typeof SomeFunction>>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
   private async onFunctionMethod(
-    req: ActionRequest<typeof SomeFunction>,
-    next: Function,
+    @Req() req: ActionRequest<typeof SomeFunction>,
+    @Next() next: NextEvent,
   ): ActionReturn<typeof SomeFunction> {
     // ...
   }
 
   @OnEvent(OrderedBook)
   @Validate<OrderedBook>({ action: 'isIn', values: [1, 2] }, 'book', 'quantity')
-  private async onEvent(req: TypedRequest<OrderedBook>) {
+  private async onEvent(@Req() req: TypedRequest<OrderedBook>) {
     // ...
   }
 }
@@ -2196,7 +2739,7 @@ class UnboundActionsHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### FieldsFormatter
+##### @FieldsFormatter
 
 **@FieldsFormatter\<T\>({ action, options? }, ...fields: Array\<keyof T>)**
 
@@ -2266,8 +2809,10 @@ import {
   OnCreate,
   OnUpdate,
   FieldsFormatter,
+  Req,
+  Next,
 } from '@dxfrontier/cds-ts-dispatcher';
-import type { Service, TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+import type { Service, TypedRequest, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
@@ -2280,13 +2825,13 @@ export class CustomerHandler {
 
   @BeforeCreate()
   @FieldsFormatter<MyEntity>({ action: 'blacklist', charsToRemove: 'le' }, 'format')
-  private async beforeCreate(req: TypedRequest<MyEntity>) {
+  private async beforeCreate(@Req() req: TypedRequest<MyEntity>) {
     // ...
   }
 
   @BeforeUpdate()
   @FieldsFormatter<MyEntity>({ action: 'truncate', options: { length: 7 } }, 'format')
-  private async beforeUpdate(req: TypedRequest<MyEntity>) {
+  private async beforeUpdate(@Req() req: TypedRequest<MyEntity>) {
     // ...
   }
 
@@ -2304,20 +2849,20 @@ export class CustomerHandler {
     },
     'format',
   )
-  private async afterRead(results: MyEntity[], req: TypedRequest<MyEntity>) {
+  private async afterRead(@Results() results: MyEntity[], @Req() req: TypedRequest<MyEntity>) {
     // ...
   }
 
   @OnCreate()
   @FieldsFormatter<MyEntity>({ action: 'ltrim' }, 'language')
-  private async onCreate(req: TypedRequest<MyEntity>, next: Function) {
+  private async onCreate(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
     // ...
     return next();
   }
 
   @OnUpdate()
   @FieldsFormatter<MyEntity>({ action: 'trim' }, 'format')
-  private async onUpdate(req: TypedRequest<MyEntity>, next: Function) {
+  private async onUpdate(@Req() req: TypedRequest<MyEntity>, @Next() next: NextEvent) {
     // ...
     return next();
   }
@@ -2332,8 +2877,16 @@ export class CustomerHandler {
 `Example 2` : using `@FieldsFormatter` decorator inside the [@UnboundActions](#unboundactions)
 
 ```ts
-import { UnboundActions, OnAction, OnFunction, OnEvent, FieldsFormatter } from '@dxfrontier/cds-ts-dispatcher';
-import type { ActionRequest, ActionReturn, ExposeFields } from '@dxfrontier/cds-ts-dispatcher';
+import {
+  UnboundActions,
+  OnAction,
+  OnFunction,
+  OnEvent,
+  FieldsFormatter,
+  Req,
+  Next,
+} from '@dxfrontier/cds-ts-dispatcher';
+import type { ActionRequest, ActionReturn, ExposeFields, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
@@ -2341,21 +2894,27 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 class UnboundActionsHandler {
   @OnAction(AnAction)
   @FieldsFormatter<ExposeFields<typeof AnAction>>({ action: 'toLower' }, 'descr', 'bookName')
-  private async onActionMethod(req: ActionRequest<typeof AnAction>, _: Function): ActionReturn<typeof AnAction> {
+  private async onActionMethod(
+    @Req() req: ActionRequest<typeof AnAction>,
+    @Next() _: NextEvent,
+  ): ActionReturn<typeof AnAction> {
     // ...
     return next();
   }
 
   @OnFunction(AFunction)
   @FieldsFormatter<ExposeFields<typeof AFunction>>({ action: 'toUpper' }, 'lastName')
-  private async onFunctionMethod(req: ActionRequest<typeof AFunction>, next: Function): ActionReturn<typeof AFunction> {
+  private async onFunctionMethod(
+    @Req() req: ActionRequest<typeof AFunction>,
+    @Next() next: NextEvent,
+  ): ActionReturn<typeof AFunction> {
     // ...
     return next();
   }
 
   @OnEvent(AnEvent)
   @FieldsFormatter<AnEvent>({ action: 'upperFirst' }, 'name')
-  private async onEvent(req: TypedRequest<AnEvent>) {
+  private async onEvent(@Req() req: TypedRequest<AnEvent>) {
     // ...
   }
 }
@@ -2373,7 +2932,7 @@ class UnboundActionsHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### Use
+##### @Use
 
 **@Use**(`...Middleware[]`)
 
@@ -2394,10 +2953,10 @@ Middleware decorators can perform the following tasks:
 `Example:` middleware implementation
 
 ```typescript
-import type { MiddlewareImpl, Next, Request } from '@dxfrontier/cds-ts-dispatcher';
+import type { MiddlewareImpl, NextMiddleware, Request } from '@dxfrontier/cds-ts-dispatcher';
 
 export class MiddlewareClass implements MiddlewareImpl {
-  public async use(req: Request, next: Next) {
+  public async use(req: Request, next: NextMiddleware) {
     console.log('Middleware use method called.');
 
     await next();
@@ -2423,7 +2982,7 @@ export class CustomerHandler {
 
   @AfterRead()
   @Use(MiddlewareClass)
-  private async addDiscount(results: MyEntity[], req: Request) {
+  private async aMethod(@Results() results: MyEntity[], @Req() req: Request) {
     // ...
   }
 
@@ -2444,7 +3003,7 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-## `Deploy` to BTP using MTA
+## `Deployment` to BTP using MTA
 
 <!-- 1. Install [**MTA Build tool**](https://cap.cloud.sap/docs/get-started/) globally:
 
@@ -2504,7 +3063,7 @@ mbt build
 
 7. Deploy your `mtar` to BTP
 
-## `Best practices`, `tips`
+## `Best practices` & `tips`
 
 <details>
 
@@ -2516,10 +3075,9 @@ Yes, you can stack multiple decorators, if the decorators have the same typed pa
 
 ```ts
 @AfterRead()
-@SingleInstanceCapable()
 @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2)
 @FieldsFormatter<MyEntity>({ action: 'blacklist', charsToRemove: 'Mysterious' }, 'title')
-private async aMethod(results: MyEntity[], req: Request, isSingleInstance?: boolean) {
+private async aMethod(@Results() results: MyEntity[], @Req() req: Request) {
   // ...
 }
 ```
@@ -2531,8 +3089,7 @@ private async aMethod(results: MyEntity[], req: Request, isSingleInstance?: bool
 @BeforeCreate()
 @BeforeUpdate()
 @BeforeDelete()
-@SingleInstanceCapable()
-private async addDiscount(req: TypedRequest<MyEntity>, isSingleInstance: boolean) {
+private async aMethod(@Req() req: TypedRequest<MyEntity>) {
   // ..
 }
 ```
@@ -2586,7 +3143,7 @@ export const customFormatter: Formatters<BookFormat> = {
 ```ts
 @AfterRead()
 @FieldsFormatter<MyEntity>(customFormatter, 'format') // import it here
-private async afterRead(results: MyEntity[], req: TypedRequest<MyEntity>) {
+private async afterRead(@Results() results: MyEntity[], @Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```

@@ -9,18 +9,20 @@ service CatalogService {
   entity BookOrders          as projection on Base.BookOrders;
   entity BookRecommendations as projection on Base.BookRecommendations;
   entity BookFormats         as projection on Base.BookFormats;
+  entity BookSales           as projection on Base.BookSales;
 
   @odata.draft.enabled: true
   entity BookEvents          as projection on Base.BookEvents;
 
-  entity BookStats           as projection on Base.BookStats actions { // Bound action / function
-                                  action   GenerateReport(ID : Books:ID) returns {
-                                    book : Books:title;
-                                    stats : BookStats:views;
-                                    rating : BookStats:averageRating
-                                  };
-                                  function NotifyAuthor(ID : Authors:ID) returns Boolean;
-                                };
+  entity BookStats           as projection on Base.BookStats
+    actions { // Bound action / function
+      action   GenerateReport(ID : Books:ID) returns {
+        book : Books:title;
+        stats : BookStats:views;
+        rating : BookStats:averageRating
+      };
+      function NotifyAuthor(ID : Authors:ID) returns Boolean;
+    };
 
   // Unbound action
   action   changeBookProperties(format : BookFormats:format, language : BookFormats:language) returns {

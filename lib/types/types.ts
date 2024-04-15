@@ -1,81 +1,124 @@
-import type { Request, Service } from '@sap/cds';
+import type { Request, Service, CdsFunction, column_expr } from '@sap/cds';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { ServiceImpl, TypedRequest } from '@sap/cds/apis/services';
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { HandlerType } from './enum';
 
-/**
- * Use this type to annotate the 'next' parameter of the Middleware use method
- */
-export type Next = () => Promise<unknown>;
-
-export type NonEmptyArray<T> = [T, ...T[]];
-
-export type MiddlewareImpl = {
-  use: (req: Request, next: Next) => Promise<unknown>;
-};
-
-export type CdsFunction = {
-  (...args: any[]): any;
-  __parameters: object;
-  __returns: unknown;
-};
+// **************************************************************************************************************************
+// Common types
+// **************************************************************************************************************************
 
 export type CdsEvent = object;
-
 export type CDSTyperEntity<T> = Constructable<T>;
-
-export type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION';
-export type CRUD_EVENTS =
-  | 'READ'
-  | 'CREATE'
-  | 'UPDATE'
-  | 'DELETE'
-  | 'ACTION'
-  | 'FUNC'
-  | 'BOUND_ACTION'
-  | 'BOUND_FUNC'
-  | 'EVENT'
-  | 'ERROR';
-
-export type ServiceCallback = (srv: Service) => void;
-
-export type ReturnRequest = (req: Request, ...args: any[]) => Promise<any>;
-export type ReturnResultsAndRequest = (results: any | any[] | boolean, req: Request, ...args: any[]) => Promise<any>;
-export type ReturnRequestAndNext = (req: Request, next: Function, ...args: any[]) => Promise<any>;
-export type ReturnSingleInstanceCapable = (isSingleInstance: boolean) => Promise<any>;
-export type ReturnErrorRequest = (err: Error, req: Request) => any | void;
-
 export type RequestType = (...args: any[]) => Promise<any>;
+
+export type ERROR_EVENT = 'ERROR';
+export type ON_EVENT = 'EVENT';
+export type ACTION_EVENTS = 'ACTION' | 'BOUND_ACTION';
+export type FUNCTION_EVENTS = 'FUNC' | 'BOUND_FUNC';
+export type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE';
+export type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION';
+export type EVENTS = CRUD_EVENTS | ACTION_EVENTS | FUNCTION_EVENTS | ERROR_EVENT | ON_EVENT | DRAFT_EVENTS;
+
+export type ValidatorField = string | number | undefined | null | boolean;
+
+// **************************************************************************************************************************
+// @Use decorator types
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @Use decorator types
+// **************************************************************************************************************************
+
 /**
- * Use this type to have the '@sap/cds - Request' typed.
+ * Use `NextMiddleware` type to annotate the `next` parameter of the implementation of the middleware.
+ *
+ * @example
+ * export class Middleware implements MiddlewareImpl {
+ *    public async use(req: TypedRequest<MyEntity>, next: NextMiddleware) {
+ *      await next();
+ *    }
+ * }
+ */
+export type NextMiddleware = () => Promise<unknown>;
+
+/**
+ * Use `NextEvent` type to annotate the `next` parameter of the implementation of the `ON` events.
+ * @example "@Next() next: NextEvent"
+ */
+export type NextEvent = (req?: Request) => void;
+
+export type MiddlewareImpl = {
+  use: (req: Request, next: NextMiddleware) => Promise<unknown>;
+};
+
+// **************************************************************************************************************************
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @OnAction, @OnBoundAction, @OnFunction, @OnBoundFunction types
+// **************************************************************************************************************************
+
+/**
+ * Use `ActionRequest` type to have the `Request` of `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
  */
 export type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['__parameters'] };
 
 /**
- * Use this type to have the 'return' of the action typed.
+ * Use `ActionReturn` type to have the `return` of the `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
  */
 export type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void | Error>;
 
-export type HandlerBuilder = {
-  buildHandlers: () => void;
-  buildMiddlewares: () => void;
-};
+// **************************************************************************************************************************
+// **************************************************************************************************************************
 
-export type Handler = {
-  event: CRUD_EVENTS | DRAFT_EVENTS;
-  handlerType: HandlerType;
-  callback: ReturnRequest | ReturnRequestAndNext | ReturnResultsAndRequest;
-  actionName?: CdsFunction;
-  eventName?: string;
-  isDraft?: boolean;
-  isSingleInstance?: boolean;
-};
+// **************************************************************************************************************************
+// @GetQuery() decorator types
+// **************************************************************************************************************************
 
-export type ValidatorField = string | number | undefined | null | boolean;
+export class GetQueryType {
+  columns: {
+    forDelete: column_expr[];
+    forInsert: string[];
+    forUpsert: string[];
+  };
+
+  distinct: SELECT<any>['SELECT']['distinct'];
+  excluding: SELECT<any>['SELECT']['excluding'];
+  from: {
+    forSelect: SELECT<any>['SELECT']['from'];
+    forDelete: DELETE<any>['DELETE']['from'];
+  };
+
+  groupBy: SELECT<any>['SELECT']['groupBy'];
+  having: SELECT<any>['SELECT']['having'];
+  limit: {
+    rows: {
+      val: number;
+    };
+    offset: {
+      val: number;
+    };
+  };
+
+  mixin: SELECT<any>['SELECT']['mixin'];
+  one: SELECT<any>['SELECT']['one'];
+  orderBy: SELECT<any>['SELECT']['orderBy'];
+  where: SELECT<any>['SELECT']['where'];
+
+  as: INSERT<any>['INSERT']['as'];
+  entries: INSERT<any>['INSERT']['entries'];
+  rows: INSERT<any>['INSERT']['rows'];
+  values: INSERT<any>['INSERT']['values'];
+  into: INSERT<any>['INSERT']['into'];
+
+  data: UPDATE<any>['UPDATE']['data'];
+  entity: UPDATE<any>['UPDATE']['entity'];
+}
+// **************************************************************************************************************************
+// **************************************************************************************************************************
 
 export {
   // Standard exports
+  type CdsFunction,
   type TypedRequest,
   type Request,
   type Service,

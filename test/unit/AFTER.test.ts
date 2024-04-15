@@ -35,7 +35,6 @@ describe('BEFORE - Active entity', () => {
         expect(foundEvent.event).toBe(event);
         expect(foundEvent.handlerType).toBe(HandlerType.After);
         expect(foundEvent.isDraft).toBe(false);
-        expect(foundEvent.isSingleInstance).toBeUndefined();
       });
     });
   }
