@@ -1,4 +1,4 @@
-import type { Request, Service, CdsFunction, column_expr, predicate, source, ref, name } from '@sap/cds';
+import type { Request, Service, CdsFunction, column_expr } from '@sap/cds';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { ServiceImpl, TypedRequest } from '@sap/cds/apis/services';
 
@@ -33,7 +33,7 @@ export type ValidatorField = string | number | undefined | null | boolean;
  *
  * @example
  * export class Middleware implements MiddlewareImpl {
- *    public async use(req: TypedRequest<MyEntity>, next: NextMiddleware) { // <= NextMiddleware type used
+ *    public async use(req: TypedRequest<MyEntity>, next: NextMiddleware) {
  *      await next();
  *    }
  * }
@@ -41,7 +41,7 @@ export type ValidatorField = string | number | undefined | null | boolean;
 export type NextMiddleware = () => Promise<unknown>;
 
 /**
- * Use `NextEvent` type to annotate the `next` parameter of the implementation the `ON` events.
+ * Use `NextEvent` type to annotate the `next` parameter of the implementation of the `ON` events.
  * @example "@Next() next: NextEvent"
  */
 export type NextEvent = (req?: Request) => void;
@@ -76,20 +76,20 @@ export type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void 
 
 export class GetQueryType {
   columns: {
-    FOR_SELECT: column_expr[];
-    FOR_INSERT: string[];
-    FOR_UPSERT: string[];
+    forDelete: column_expr[];
+    forInsert: string[];
+    forUpsert: string[];
   };
 
-  where: predicate;
   distinct: SELECT<any>['SELECT']['distinct'];
   excluding: SELECT<any>['SELECT']['excluding'];
   from: {
-    FOR_SELECT: source;
-    FOR_DELETE: ref | name;
+    forSelect: SELECT<any>['SELECT']['from'];
+    forDelete: DELETE<any>['DELETE']['from'];
   };
 
-  one: SELECT<any>['SELECT']['one'];
+  groupBy: SELECT<any>['SELECT']['groupBy'];
+  having: SELECT<any>['SELECT']['having'];
   limit: {
     rows: {
       val: number;
@@ -100,9 +100,9 @@ export class GetQueryType {
   };
 
   mixin: SELECT<any>['SELECT']['mixin'];
-  groupBy: SELECT<any>['SELECT']['groupBy'];
-  having: SELECT<any>['SELECT']['having'];
+  one: SELECT<any>['SELECT']['one'];
   orderBy: SELECT<any>['SELECT']['orderBy'];
+  where: SELECT<any>['SELECT']['where'];
 
   as: INSERT<any>['INSERT']['as'];
   entries: INSERT<any>['INSERT']['entries'];
