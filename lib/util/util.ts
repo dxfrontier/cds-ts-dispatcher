@@ -51,8 +51,8 @@ const util = {
 
   /**
    * Use this method if you want to find the SAP CAP `Request` object
-   * @param {any[]} args
-   * @returns {Request}
+   * @param  args
+   * @returns Request
    */
   findRequest(args: any[]): Request {
     const foundRequest = args.filter((arg) => {
