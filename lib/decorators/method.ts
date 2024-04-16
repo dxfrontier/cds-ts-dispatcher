@@ -39,23 +39,6 @@ function ExecutionAllowedForRole(...roles: string[]) {
 }
 
 /**
-  TODO:
- */
-// or RoleGuard, RoleBasedLogic, RoleConditionalLogic, ConditionalLogicForRole, RoleSpecificLogic
-
-export function RoleSpecificLogic(role: string, customLogic: Constructable) {
-  return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
-    const originalMethod = descriptor.value!;
-
-    descriptor.value = async function (...args: any[]) {
-      // execute the logic only when role is found in the user role, otherwise do not executed
-      // then if the role is found and logicReplacement is there, then do not execute the logic added to the callback and execute the logic of the logicReplacement
-      return await originalMethod.apply(this, args);
-    };
-  };
-}
-
-/**
  * @description Use `@FieldsFormatter` decorator to `enhance / format` the fields.
  * @param formatter The formatter method to apply.
  * @param fields An array of fields to apply the formatter method on.
