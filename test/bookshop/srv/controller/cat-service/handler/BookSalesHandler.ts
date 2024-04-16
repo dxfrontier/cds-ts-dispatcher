@@ -21,7 +21,6 @@ import {
   SRV,
 } from '../../../../../../lib';
 import BookSalesService from '../../../service/BookSalesService';
-import { ScoopedUserLogic } from '../../../user/ScoopedUserLogic';
 
 @EntityHandler(BookSale)
 class BookSalesHandler {
