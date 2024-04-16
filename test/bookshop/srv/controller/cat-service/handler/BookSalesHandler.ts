@@ -3,6 +3,8 @@ import { BookSale } from '#cds-models/CatalogService';
 import {
   AfterRead,
   EntityHandler,
+  ExecutionAllowedForRoles,
+  FieldsFormatter,
   GetQuery,
   GetQueryType,
   GetRequest,
@@ -18,24 +20,42 @@ import {
   SingleInstanceSwitch,
   SRV,
 } from '../../../../../../lib';
+import BookSalesService from '../../../service/BookSalesService';
 
 @EntityHandler(BookSale)
 class BookSalesHandler {
   @Inject(SRV) private readonly srv: Service;
+  @Inject(BookSalesService) private readonly bookSalesService: BookSalesService;
+
+  // *******************************************************
+
+  /* TODO: execute an event only when role is found in the req.user
+   1. 
+   Overloads:
+   1. @ScopedUserLogic('role', handleClass) => Execute some logic, like some other events (@AfterRead ... etc)
+   2. @ScopedUserLogic('role') => execute logic only (event + decorators) for and ONLY for the user defined in the @ScopedUserLogic
+   *********************************************************
+   2. new decorator @JwtFromDestination(destination?: string), which should look in a destination and get the JWT token from that designation ... 
+      currently we support only @Jwt from the current Request 
+
+  */
+  // *******************************************************
 
   @AfterRead()
+  @ExecutionAllowedForRoles('Manager', 'User', 'CEO')
+  // @RoleSpecificLogic('Manager', ScoopedUserLogic)
   private async afterRead(
-    @Req() req: Request,
-    @Results() results: BookSale[],
-
     @IsColumnSupplied<BookSale>('quantity') hasQuantity: boolean,
     @IsColumnSupplied<BookSale>('saleDate') hasSaleDate: boolean,
+
+    @Req() req: Request,
+    @Results() results: BookSale[],
 
     @IsPresent('SELECT', 'from') hasFrom: boolean,
     @IsPresent('SELECT', 'orderBy') hasOrderBy: boolean,
 
-    @IsRole('role', 'anotherRole') roles: boolean,
-    @IsRole('thirdRole') role: boolean,
+    @IsRole('Manager', 'User') roles: boolean,
+    @IsRole('CEO') role: boolean,
 
     @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['forDelete'],
     @GetQuery('SELECT', 'orderBy') orderBy: GetQueryType['orderBy'],
@@ -44,8 +64,12 @@ class BookSalesHandler {
 
     @SingleInstanceSwitch() isSingleInstance: boolean,
 
-    @Jwt() token: string | undefined,
+    // @Jwt() token: string | undefined,
   ) {
+    if (roles) {
+      req.notify('Manager');
+    }
+
     if (isSingleInstance) {
       req.notify('Single instance');
       return;
@@ -53,9 +77,9 @@ class BookSalesHandler {
       req.notify('Entity set');
     }
 
-    if (token) {
-      req.notify(token);
-    }
+    // if (token) {
+    //   req.notify(token);
+    // }
 
     if (locale) {
       req.notify('locale');

@@ -26,10 +26,6 @@
 													"listen": "test",
 													"script": {
 														"exec": [
-															"pm.test(\"Currency code is missing\", function () {",
-															"    pm.response.to.have.status(400);",
-															"});",
-															"",
 															"pm.test(\"Status code is 400\", function () {",
 															"    pm.response.to.have.status(400);",
 															"});"
@@ -93,6 +89,9 @@
 												}
 											],
 											"request": {
+												"auth": {
+													"type": "noauth"
+												},
 												"method": "GET",
 												"header": [],
 												"url": {
@@ -1664,6 +1663,10 @@
 											"listen": "test",
 											"script": {
 												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
 													"pm.test(\"Headers contains text 'Single instance'\", function () {",
 													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
 													"",
@@ -1672,27 +1675,39 @@
 													"            pm.expect(header.message).to.contains('Single instance')",
 													"        }",
 													"    })",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
 													"});"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
 									"request": {
+										"auth": {
+											"type": "basic",
+											"basic": [
+												{
+													"key": "password",
+													"value": "{{manager}}",
+													"type": "string"
+												},
+												{
+													"key": "username",
+													"value": "{{manager}}",
+													"type": "string"
+												}
+											]
+										},
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=252)",
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}(ID=1)",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"{{catalogService}}",
-												"{{booksEntity}}(ID=252)"
+												"{{bookSalesEntity}}(ID=1)"
 											]
 										}
 									},
@@ -1705,6 +1720,10 @@
 											"listen": "test",
 											"script": {
 												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
 													"pm.test(\"Headers contains text 'Entity set'\", function () {",
 													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
 													"",
@@ -1713,27 +1732,39 @@
 													"            pm.expect(header.message).to.contains('Entity set')",
 													"        }",
 													"    })",
-													"});",
-													"",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
 													"});"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
 									"request": {
+										"auth": {
+											"type": "basic",
+											"basic": [
+												{
+													"key": "password",
+													"value": "{{user}}",
+													"type": "string"
+												},
+												{
+													"key": "username",
+													"value": "{{user}}",
+													"type": "string"
+												}
+											]
+										},
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"{{catalogService}}",
-												"{{booksEntity}}"
+												"{{bookSalesEntity}}"
 											]
 										}
 									},
@@ -1758,16 +1789,31 @@
 								}
 							],
 							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "{{user}}",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{user}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"{{catalogService}}",
-										"{{booksEntity}}"
+										"{{bookSalesEntity}}"
 									]
 								}
 							},
@@ -1791,11 +1837,26 @@
 								}
 							],
 							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "{{user}}",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{user}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"ID\": 789,\n    \"title\": \"Lost in Wonderland\",\n    \"descr\": \"Embark on a magical journey through Wonderland, where nothing is quite as it seems.\",\n    \"currency_code\": \"USD\",\n    \"author_ID\": 101,\n    \"genre_ID\": 11,\n    \"price\": 29.99,\n    \"stock\": 87\n}",
+									"raw": "{\n    \"ID\": 3,\n    \"saleDate\": \"2024-03-06\",\n    \"saleAmount\": 6,\n    \"quantity\": 55,\n    \"book_ID\": 251,\n    \"customer_ID\": 3\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1803,13 +1864,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"{{catalogService}}",
-										"{{booksEntity}}"
+										"{{bookSalesEntity}}"
 									]
 								}
 							},
@@ -1837,16 +1898,31 @@
 								}
 							],
 							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "{{user}}",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{user}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"{{catalogService}}",
-										"{{booksEntity}}"
+										"{{bookSalesEntity}}"
 									]
 								}
 							},
@@ -1889,6 +1965,21 @@
 								}
 							],
 							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "{{user}}",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{user}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -1951,6 +2042,21 @@
 								}
 							],
 							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "{{user}}",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{user}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -1987,11 +2093,15 @@
 											"    pm.response.to.have.status(200);",
 											"});",
 											"",
-											"// Test to check if the response contains the sap-messages header with message NO_USER_ROLE",
-											"pm.test(\"sap-messages header contains message with NO_USER_ROLE\", function () {",
-											"    pm.expect(pm.response.headers.has('sap-messages')).to.be.true;",
-											"    var sapMessages = pm.response.headers.get('sap-messages');",
-											"    pm.expect(sapMessages).to.include('NO_USER_ROLE');",
+											"// Test to loop over sap-messages array and check the message property",
+											"pm.test(\"Each sap-message contains the word 'Manager' in the message property\", function () {",
+											"    pm.response.json().value.forEach(function(sale) {",
+											"        if (sale.hasOwnProperty('sap-messages')) {",
+											"            sale['sap-messages'].forEach(function(message) {",
+											"                pm.expect(message.message).to.include('Manager');",
+											"            });",
+											"        }",
+											"    });",
 											"});"
 										],
 										"type": "text/javascript",
@@ -2000,6 +2110,21 @@
 								}
 							],
 							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "{{manager}}",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{manager}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -2050,6 +2175,21 @@
 								}
 							],
 							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "{{user}}",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{user}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -2088,50 +2228,17 @@
 								}
 							],
 							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookSalesEntity}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "@Jwt",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"// Check for the presence of jwt header ",
-											"pm.test(\"Jwt token 'testToken' is present in the header\", function () {",
-											"    var sapMessages = pm.response.headers.get('sap-messages');",
-											"    pm.expect(sapMessages).to.include('testToken');",
-											"})"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
 								"auth": {
-									"type": "bearer",
-									"bearer": [
+									"type": "basic",
+									"basic": [
 										{
-											"key": "token",
-											"value": "testToken",
+											"key": "password",
+											"value": "{{user}}",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{user}}",
 											"type": "string"
 										}
 									]
@@ -2146,55 +2253,6 @@
 									"path": [
 										"{{catalogService}}",
 										"{{bookSalesEntity}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "@Jwt - destination",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Enity set : Title contains \\\"10 % discount!\\\"\", function () {",
-											"    const response = pm.response.json();",
-											"    response.value.forEach((item) => {",
-											"        pm.expect(item.title).to.include(\"10 % discount!\")",
-											"    })",
-											"});",
-											"",
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "dragolea",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"{{catalogService}}",
-										"{{booksEntity}}"
 									]
 								}
 							},
@@ -3027,6 +3085,69 @@
 								}
 							],
 							"description": "_**@Validate**_ will be tested for all events `After`,`Before`, `On`"
+						},
+						{
+							"name": "@ExecutionAllowedForRoles",
+							"item": [
+								{
+									"name": "@ExecutionAllowedForRoles - Manager",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"// Test to loop over sap-messages array and check the message property",
+													"pm.test(\"Each sap-message contains the word 'Manager' in the message property\", function () {",
+													"    pm.response.json().value.forEach(function(sale) {",
+													"        if (sale.hasOwnProperty('sap-messages')) {",
+													"            sale['sap-messages'].forEach(function(message) {",
+													"                pm.expect(message.message).to.include('Manager');",
+													"            });",
+													"        }",
+													"    });",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "basic",
+											"basic": [
+												{
+													"key": "password",
+													"value": "{{manager}}",
+													"type": "string"
+												},
+												{
+													"key": "username",
+													"value": "{{manager}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{bookSalesEntity}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
 						}
 					],
 					"description": "All other decorators which are not SAP standard."
