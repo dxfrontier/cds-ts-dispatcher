@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
   AfterRead,
   AfterReadDraft,
@@ -14,38 +13,39 @@ import {
   Request,
   Results,
   Service,
-  SingleInstanceCapable,
   SingleInstanceSwitch,
   SRV,
   Use,
 } from '../../../../../../lib';
 import { BookEvent } from '../../../../@cds-models/CatalogService';
+import BookEventsService from '../../../service/BookEventsService';
 
 @EntityHandler(BookEvent)
 class BookEventsHandler {
   @Inject(SRV) private readonly srv: Service;
+  @Inject(BookEventsService) private readonly bookEventsService: BookEventsService;
 
   @OnNewDraft()
   public async newDraft(@Req() req: Request, @Next() next: NextEvent) {
-    req.notify('On new draft');
+    this.bookEventsService.showNewDraftMessage(req);
     return next();
   }
 
   @OnCancelDraft()
   public async cancel(@Req() req: Request, @Next() next: NextEvent) {
-    req.notify('On cancel draft');
+    this.bookEventsService.showCancelDraftMessage(req);
     return next();
   }
 
   @OnEditDraft()
   public async edit(@Req() req: Request, @Next() next: NextEvent) {
-    req.notify('On edit draft');
+    this.bookEventsService.showEditDraftMessage(req);
     return next();
   }
 
   @OnSaveDraft()
   public async save(@Req() req: Request, @Next() next: NextEvent) {
-    req.notify('On save draft');
+    this.bookEventsService.showSaveDraftMessage(req);
     return next();
   }
 
@@ -56,16 +56,7 @@ class BookEventsHandler {
     @Req() req: Request,
     @SingleInstanceSwitch() isSingleInstance: boolean,
   ) {
-    // handle single instance
-    if (Array.isArray(results) && results.length === 0) {
-      return;
-    }
-
-    if (isSingleInstance) {
-      req.notify('Single instance');
-    }
-
-    // handle entity set
+    this.bookEventsService.handleSingleInstance(req, results, isSingleInstance);
   }
 }
 

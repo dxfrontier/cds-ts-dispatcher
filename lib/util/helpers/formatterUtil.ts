@@ -3,36 +3,26 @@ import validator from 'validator';
 
 import util from '../util';
 
+import type { ExtendedRequestWithResults } from '../../types/internalTypes';
 import type { Custom, Formatters } from '../../types/formatter';
 import type { Request } from '../../types/types';
 
 const formatterUtil = {
   getResults<T>(args: any[]): T | T[] | undefined {
-    const filtered = args.filter((arg): boolean => {
-      // Exclude elements that are boolean and not objects
-      if (typeof arg === 'boolean') {
-        return false;
+    const req = util.findRequest(args) as ExtendedRequestWithResults;
+
+    // The 'results / result' property
+    for (const arg of args) {
+      if (!util.lodash.isUndefined(req.results)) {
+        const argResults = Array.isArray(req.results) ? arg : arg[0];
+
+        if (argResults === req.results) {
+          return arg;
+        }
       }
-
-      if (typeof arg === 'function') {
-        return false;
-      }
-
-      // Exclude elements that are of type Request
-      if (util.isRequestType(arg)) {
-        return false;
-      }
-
-      // Include all other elements
-      return true;
-    });
-
-    // The 'results' property
-    if (Array.isArray(filtered[0])) {
-      return filtered[0];
     }
 
-    return filtered[0];
+    return undefined;
   },
 
   applyFormatter<T = any>(formatter: Exclude<Formatters<T>, Custom<T>>, value: any) {

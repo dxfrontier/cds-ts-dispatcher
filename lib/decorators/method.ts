@@ -4,6 +4,7 @@ import { MetadataDispatcher } from '../core/MetadataDispatcher';
 import { HandlerType } from '../types/enum';
 import formatterUtil from '../util/helpers/formatterUtil';
 import middlewareUtil from '../util/helpers/middlewareUtil';
+import parameterUtil from '../util/helpers/parameterUtil';
 import validatorUtil from '../util/helpers/validatorUtil';
 import util from '../util/util';
 
@@ -12,6 +13,61 @@ import type { CdsEvent, CdsFunction, EVENTS, MiddlewareImpl, Request, RequestTyp
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
+
+/**
+  // TODO:
+ */
+
+// export function JwtDestination(destination: string) {
+//   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+//     const originalMethod = descriptor.value!;
+
+//     descriptor.value = async function (...args: any[]) {
+//       // ...
+//       return await originalMethod.apply(this, args);
+//     };
+//   };
+// }
+
+/**
+ * @description Use `@ExecutionAllowedForRoles` decorator to enforce role-based access control ensuring that only `Users` with specific role are authorized to execute the `event` (`AfterRead`, `AfterCreate`, ...) and the custom logic inside of the event.
+ * @param ...roles[] An array of roles that are permitted to execute the event logic.
+ * @example
+ * "@ExecutionAllowedForRoles('Manager', 'CEO')"
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#ExecutionAllowedForRoles | CDS-TS-Dispatcher - @ExecutionAllowedForRoles}
+ */
+
+function ExecutionAllowedForRoles(...roles: string[]) {
+  return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+    const originalMethod = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      const found = parameterUtil.findExecutionAllowedRoles(args, roles);
+
+      if (!found) {
+        return;
+      }
+
+      return await originalMethod.apply(this, args);
+    };
+  };
+}
+
+/**
+  TODO:
+ */
+// or RoleGuard, RoleBasedLogic, RoleConditionalLogic, ConditionalLogicForRole, RoleSpecificLogic
+// function RoleSpecificLogic(role: string, customLogic: Constructable) {
+//   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+//     const originalMethod = descriptor.value!;
+
+//     descriptor.value = async function (...args: any[]) {
+//       // execute the logic only when role is found in the user role, otherwise do not executed
+//       // then if the role is found and logicReplacement is there, then do not execute the logic added to the callback and execute the logic of the logicReplacement
+//       return await originalMethod.apply(this, args);
+//     };
+//   };
+// }
 
 /**
  * @description Use `@FieldsFormatter` decorator to `enhance / format` the fields.
@@ -660,6 +716,8 @@ const AfterSaveDraft = buildAfter({ event: 'SAVE', handlerType: HandlerType.Afte
 export {
   // Standalone events
   Use,
+  // RoleSpecificLogic,
+  ExecutionAllowedForRoles,
   SingleInstanceCapable,
   Validate,
   FieldsFormatter,

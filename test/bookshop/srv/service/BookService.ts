@@ -1,20 +1,33 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import {
-  Inject,
-  type Request,
-  SRV,
-  Service,
-  ServiceLogic,
-  type ActionRequest,
-  type TypedRequest,
-} from '../../../../lib';
-import type { Book, submitOrder } from '../../@cds-models/CatalogService';
+import { ActionRequest, Inject, Request, Service, ServiceLogic, SRV, TypedRequest } from '../../../../lib';
 import BookRepository from '../repository/BookRepository';
 
+import type { Book, submitOrder } from '../../@cds-models/CatalogService';
 @ServiceLogic()
 class BookService {
   @Inject(SRV) private readonly srv: Service;
   @Inject(BookRepository) private readonly bookRepository: BookRepository;
+
+  public notifyItemDeleted(req: Request, deleted: boolean) {
+    req.notify(`Item deleted : ${deleted}`);
+  }
+
+  public async emitOrderedBookData(req: Request) {
+    await this.srv.emit('OrderedBook', { book: 'dada', quantity: 3, buyer: req.user.id });
+  }
+
+  public showConsoleLog() {
+    console.log('****************** Before read event');
+  }
+
+  public notifySingleInstance(req: Request, singleInstance: boolean) {
+    if (singleInstance) {
+      req.notify('Single instance');
+      return;
+    } else {
+      req.notify('Entity set');
+    }
+  }
 
   public enrichTitle(results: Book[]) {
     results.map((book) => (book.title += ` -- 10 % discount!`));

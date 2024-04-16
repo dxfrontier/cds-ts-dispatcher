@@ -102,6 +102,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
     - [`Method`-`helpers`](#method-helpers)
       - [@Validate](#validate)
       - [@FieldsFormatter](#fieldsformatter)
+      - [@ExecutionAllowedForRoles](#executionallowedforroles)
       - [@Use](#use-1)
 - [`Deployment` to BTP using MTA](#deployment-to-btp-using-mta)
 - [`Best practices` \& `tips`](#best-practices--tips)
@@ -115,7 +116,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 Install [**@sap/cds-dk**](https://cap.cloud.sap/docs/get-started/) globally:
 
 ```bash
-npm i -g @sap/cds-dk
+npm install -g @sap/cds-dk typescript
 ```
 
 ## Installation
@@ -137,20 +138,27 @@ cd new-sap-cap-project
 cds init
 ```
 
-3. Add the the following NPM packages :
+3. Add [CDS-Typer](#generate-cds-typed-entities) to your npm package.json:
 
 ```bash
-npm install @dxfrontier/cds-ts-dispatcher @sap/cds express
-npm install --save-dev @types/node @cap-js/sqlite ts-node typescript
+cds add typer
+npm install
 ```
 
-4. Add a **tsconfig.json** :
+4. Add the the following NPM packages :
+
+```bash
+npm install @dxfrontier/cds-ts-dispatcher
+npm install --save-dev @types/node
+```
+
+5. Add a **tsconfig.json** :
 
 ```bash
 tsc --init
 ```
 
-5. It is recommended to use the following **tsconfig.json** properties:
+6. It is recommended to use the following **tsconfig.json** properties:
 
 ```json
 {
@@ -182,7 +190,7 @@ tsc --init
 }
 ```
 
-6. Run the `CDS-TS` server
+7. Run the `CDS-TS` server
 
 ```bash
 cds-ts watch
@@ -841,7 +849,7 @@ export class BookHandler {
 ```
 
 > [!TIP]
-> When using [After](#after), [Before](#before), [On](#on) events such as `Create`, `Update` or `Delete`, it's recommended to use the `@Result` decorator for single object result and `@Results` for arrays of objects.
+> When using [@AfterCreate()](#aftercreate), [@AfterUpdate()](#afterupdate) and [@AfterDelete()](#afterdelete) it's recommended to use the `@Result` decorator for single object result and `@Results` for arrays of objects.
 >
 > ```ts
 > @AfterCreate()
@@ -1221,10 +1229,11 @@ class BookHandler {
 
     // Check existence of columns
     @IsPresent('SELECT', 'columns') columnsPresent: boolean,
-    // Get columns
-    @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['forDelete'],
 
-    @GetQuery('SELECT', 'orderBy') distinct: GetQueryType['orderBy'],
+    // Get columns
+    @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['forSelect'],
+
+    @GetQuery('SELECT', 'orderBy') orderBy: GetQueryType['orderBy'],
     @GetQuery('SELECT', 'groupBy') groupBy: GetQueryType['groupBy'],
   ) {
     if (columnsPresent) {
@@ -2929,6 +2938,31 @@ class UnboundActionsHandler {
 > - [@OnBoundFunction()](#onboundfunction)
 >
 > you must use the `ExposeFields type` inside of the `@FieldsFormatter` decorator.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @ExecutionAllowedForRoles
+
+**@ExecutionAllowedForRoles(...roles: string[])**
+
+The `@ExecutionAllowedForRoles` is used as a `method level` and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
+
+`Parameters`
+
+- `...roles: string[]`: Specifies the roles that are permitted to execute the event logic.
+
+`Example 1`
+
+```typescript
+@AfterRead()
+@ExecutionAllowedForRoles('Manager', 'User', 'CEO')
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: BookSale[],
+) {
+  // Method implementation
+}
+```
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

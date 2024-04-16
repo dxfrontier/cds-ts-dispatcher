@@ -15,6 +15,14 @@ const parameterUtil = {
     });
   },
 
+  findExecutionAllowedRoles(args: any[], roles: string[]): boolean {
+    const req = util.findRequest(args);
+
+    return roles.some((role: string): boolean => {
+      return req.user.is(role);
+    });
+  },
+
   applyIsColumnSupplied(req: Request, args: any[], metadata: MetadataFields[]): void {
     metadata.forEach((parameter) => {
       if (parameter.type === 'CHECK_COLUMN_VALUE') {

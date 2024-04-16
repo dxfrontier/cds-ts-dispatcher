@@ -70,7 +70,6 @@ class UnboundActionsHandler {
 
   @OnEvent(OrderedBook)
   public async orderedBook(req: TypedRequest<OrderedBook>) {
-    //
     if (req.event !== 'OrderedBook') {
       req.reject(400, 'Not OrderedBook: check @OnEvent decorator');
     }

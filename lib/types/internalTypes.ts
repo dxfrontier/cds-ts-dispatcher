@@ -10,6 +10,10 @@ import type { CdsFunction, EVENTS, RequestType, Request, NextEvent } from './typ
 // Common types
 // **************************************************************************************************************************
 
+export type ExtendedRequestWithResults = Request & {
+  results: any;
+};
+
 export type TemporaryArgs = {
   req: Request;
   next: NextEvent;

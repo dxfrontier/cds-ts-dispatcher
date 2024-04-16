@@ -5,14 +5,11 @@ import {
   AfterUpdate,
   BeforeRead,
   EntityHandler,
-  GetQuery,
-  GetQueryType,
   GetRequest,
   Inject,
   IsColumnSupplied,
   IsPresent,
   IsRole,
-  Jwt,
   Req,
   Request,
   Result,
@@ -45,14 +42,8 @@ class BookHandler {
   @BeforeRead()
   @Use(MiddlewareMethodBeforeRead)
   private async beforeRead(@Req() req: TypedRequest<Book>) {
-    console.log('****************** Before read event');
+    this.bookService.showConsoleLog();
   }
-
-  // *******************************************************
-
-  // @ScopedUserLogic('role', handleClass)
-
-  // *******************************************************
 
   @AfterRead()
   @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2)
@@ -62,19 +53,11 @@ class BookHandler {
     @SingleInstanceSwitch() singleInstance: boolean,
     @IsColumnSupplied<Book>('price') hasPrice: boolean,
     @IsPresent('SELECT', 'columns') hasColumns: boolean,
-    @IsRole('role', 'anotherRole') role: boolean,
+    @IsRole('Developer', 'AnotherRole') role: boolean,
     @GetRequest('locale') locale: Request['locale'],
-    @Jwt() token: string | undefined,
   ) {
-    await this.srv.emit('OrderedBook', { book: 'dada', quantity: 3, buyer: req.user.id });
-
-    if (singleInstance) {
-      req.notify('Single instance');
-      return;
-    } else {
-      req.notify('Entity set');
-    }
-
+    this.bookService.emitOrderedBookData(req);
+    this.bookService.notifySingleInstance(req, singleInstance);
     this.bookService.enrichTitle(results);
   }
 
@@ -85,7 +68,7 @@ class BookHandler {
 
   @AfterDelete()
   private async afterDelete(@Result() deleted: boolean, @Req() req: Request) {
-    req.notify(`Item deleted : ${deleted}`);
+    this.bookService.notifyItemDeleted(req, deleted);
   }
 }
 
