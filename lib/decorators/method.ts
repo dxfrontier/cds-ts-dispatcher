@@ -30,14 +30,14 @@ import type { Formatters } from '../types/formatter';
 // }
 
 /**
- * @description Use `@ExecutionAllowedForRoles` decorator to enforce role-based access control ensuring that only `Users` with specific role are authorized to execute the `event` (`AfterRead`, `AfterCreate`, ...) and the custom logic inside of the event.
+ * @description Use `@ExecutionAllowedForRole` decorator to enforce role-based access control ensuring that only `Users` with specific role are authorized to execute the `event` (`AfterRead`, `AfterCreate`, ...) and the custom logic inside of the event.
  * @param ...roles[] An array of roles that are permitted to execute the event logic.
  * @example
- * "@ExecutionAllowedForRoles('Manager', 'CEO')"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#ExecutionAllowedForRoles | CDS-TS-Dispatcher - @ExecutionAllowedForRoles}
+ * "@ExecutionAllowedForRole('Manager', 'CEO')"
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#ExecutionAllowedForRole | CDS-TS-Dispatcher - @ExecutionAllowedForRole}
  */
 
-function ExecutionAllowedForRoles(...roles: string[]) {
+function ExecutionAllowedForRole(...roles: string[]) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
     const originalMethod = descriptor.value!;
 
@@ -717,7 +717,7 @@ export {
   // Standalone events
   Use,
   // RoleSpecificLogic,
-  ExecutionAllowedForRoles,
+  ExecutionAllowedForRole,
   SingleInstanceCapable,
   Validate,
   FieldsFormatter,

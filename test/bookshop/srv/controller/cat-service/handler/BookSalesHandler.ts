@@ -3,7 +3,7 @@ import { BookSale } from '#cds-models/CatalogService';
 import {
   AfterRead,
   EntityHandler,
-  ExecutionAllowedForRoles,
+  ExecutionAllowedForRole,
   FieldsFormatter,
   GetQuery,
   GetQueryType,
@@ -42,7 +42,7 @@ class BookSalesHandler {
   // *******************************************************
 
   @AfterRead()
-  @ExecutionAllowedForRoles('Manager', 'User', 'CEO')
+  @ExecutionAllowedForRole('Manager', 'User', 'CEO')
   // @RoleSpecificLogic('Manager', ScoopedUserLogic)
   private async afterRead(
     @IsColumnSupplied<BookSale>('quantity') hasQuantity: boolean,
