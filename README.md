@@ -102,7 +102,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
     - [`Method`-`helpers`](#method-helpers)
       - [@Validate](#validate)
       - [@FieldsFormatter](#fieldsformatter)
-      - [@ExecutionAllowedForRole](#executionallowedforroles)
+      - [@ExecutionAllowedForRole](#executionallowedforrole)
       - [@Use](#use-1)
 - [`Deployment` to BTP using MTA](#deployment-to-btp-using-mta)
 - [`Best practices` \& `tips`](#best-practices--tips)
