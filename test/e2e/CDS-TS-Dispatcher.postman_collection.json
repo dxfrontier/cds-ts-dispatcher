@@ -3087,10 +3087,10 @@
 							"description": "_**@Validate**_ will be tested for all events `After`,`Before`, `On`"
 						},
 						{
-							"name": "@ExecutionAllowedForRoles",
+							"name": "@ExecutionAllowedForRole",
 							"item": [
 								{
-									"name": "@ExecutionAllowedForRoles - Manager",
+									"name": "@ExecutionAllowedForRole - Manager",
 									"event": [
 										{
 											"listen": "test",

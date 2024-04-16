@@ -102,7 +102,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
     - [`Method`-`helpers`](#method-helpers)
       - [@Validate](#validate)
       - [@FieldsFormatter](#fieldsformatter)
-      - [@ExecutionAllowedForRoles](#executionallowedforroles)
+      - [@ExecutionAllowedForRole](#executionallowedforroles)
       - [@Use](#use-1)
 - [`Deployment` to BTP using MTA](#deployment-to-btp-using-mta)
 - [`Best practices` \& `tips`](#best-practices--tips)
@@ -2941,11 +2941,11 @@ class UnboundActionsHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### @ExecutionAllowedForRoles
+##### @ExecutionAllowedForRole
 
-**@ExecutionAllowedForRoles(...roles: string[])**
+**@ExecutionAllowedForRole(...roles: string[])**
 
-The `@ExecutionAllowedForRoles` is used as a `method level` and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
+The `@ExecutionAllowedForRole` is used as a `method level` and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
 
 `Parameters`
 
@@ -2955,7 +2955,7 @@ The `@ExecutionAllowedForRoles` is used as a `method level` and was designed to 
 
 ```typescript
 @AfterRead()
-@ExecutionAllowedForRoles('Manager', 'User', 'CEO')
+@ExecutionAllowedForRole('Manager', 'User', 'CEO')
 private async afterRead(
   @Req() req: Request,
   @Results() results: BookSale[],
