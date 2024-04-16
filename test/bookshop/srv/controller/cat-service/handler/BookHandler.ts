@@ -56,14 +56,12 @@ class BookHandler {
     @IsRole('Developer', 'AnotherRole') role: boolean,
     @GetRequest('locale') locale: Request['locale'],
   ) {
-    this.bookService.emitOrderedBookData(req);
-    this.bookService.notifySingleInstance(req, singleInstance);
-    this.bookService.enrichTitle(results);
+    this.bookService.manageAfterReadMethods([req, results, singleInstance]);
   }
 
   @AfterUpdate()
   private async afterUpdate(@Result() result: Book, @Req() req: TypedRequest<Book>) {
-    void this.bookService.addDefaultTitleText(result, req);
+    this.bookService.addDefaultTitleText(result, req);
   }
 
   @AfterDelete()

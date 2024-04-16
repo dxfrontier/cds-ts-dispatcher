@@ -15,21 +15,6 @@ import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
 
 /**
-  // TODO:
- */
-
-// export function JwtDestination(destination: string) {
-//   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
-//     const originalMethod = descriptor.value!;
-
-//     descriptor.value = async function (...args: any[]) {
-//       // ...
-//       return await originalMethod.apply(this, args);
-//     };
-//   };
-// }
-
-/**
  * @description Use `@ExecutionAllowedForRole` decorator to enforce role-based access control ensuring that only `Users` with specific role are authorized to execute the `event` (`AfterRead`, `AfterCreate`, ...) and the custom logic inside of the event.
  * @param ...roles[] An array of roles that are permitted to execute the event logic.
  * @example
@@ -57,17 +42,18 @@ function ExecutionAllowedForRole(...roles: string[]) {
   TODO:
  */
 // or RoleGuard, RoleBasedLogic, RoleConditionalLogic, ConditionalLogicForRole, RoleSpecificLogic
-// function RoleSpecificLogic(role: string, customLogic: Constructable) {
-//   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
-//     const originalMethod = descriptor.value!;
 
-//     descriptor.value = async function (...args: any[]) {
-//       // execute the logic only when role is found in the user role, otherwise do not executed
-//       // then if the role is found and logicReplacement is there, then do not execute the logic added to the callback and execute the logic of the logicReplacement
-//       return await originalMethod.apply(this, args);
-//     };
-//   };
-// }
+export function RoleSpecificLogic(role: string, customLogic: Constructable) {
+  return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+    const originalMethod = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      // execute the logic only when role is found in the user role, otherwise do not executed
+      // then if the role is found and logicReplacement is there, then do not execute the logic added to the callback and execute the logic of the logicReplacement
+      return await originalMethod.apply(this, args);
+    };
+  };
+}
 
 /**
  * @description Use `@FieldsFormatter` decorator to `enhance / format` the fields.

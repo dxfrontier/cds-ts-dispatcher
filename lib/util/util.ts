@@ -55,18 +55,7 @@ const util = {
    * @returns Request
    */
   findRequest(args: any[]): Request {
-    const foundRequest = args.filter((arg) => {
-      // Include elements that are objectLike and Request
-      if (util.lodash.isObjectLike(arg) && util.isRequestType(arg)) {
-        return true;
-      }
-
-      // Exclude all other elements
-      return false;
-    });
-
-    // The 'request' property
-    return foundRequest[0];
+    return args.find((arg) => util.lodash.isObjectLike(arg) && util.isRequestType(arg));
   },
 
   /**
