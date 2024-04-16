@@ -16,7 +16,6 @@ import {
   Req,
   Request,
   Results,
-  RoleSpecificLogic,
   Service,
   SingleInstanceSwitch,
   SRV,
@@ -31,7 +30,6 @@ class BookSalesHandler {
 
   @AfterRead()
   @ExecutionAllowedForRole('Manager', 'User', 'CEO')
-  @RoleSpecificLogic('Manager', ScoopedUserLogic)
   private async afterRead(
     @IsColumnSupplied<BookSale>('quantity') hasQuantity: boolean,
     @IsColumnSupplied<BookSale>('saleDate') hasSaleDate: boolean,
