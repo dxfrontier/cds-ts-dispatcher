@@ -15,7 +15,6 @@ import {
   Service,
   SingleInstanceSwitch,
   SRV,
-  Use,
 } from '../../../../../../lib';
 import { BookEvent } from '../../../../@cds-models/CatalogService';
 import BookEventsService from '../../../service/BookEventsService';

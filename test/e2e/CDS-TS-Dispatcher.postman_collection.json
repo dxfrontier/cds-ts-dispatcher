@@ -114,16 +114,12 @@
 													"listen": "test",
 													"script": {
 														"exec": [
-															"// pm.test(\"Single item : title contains \\\"10 % discount!\\\"\", function () {",
-															"//     const response = pm.response.json();",
-															"//     console.log(response)",
-															"//     const {title} = response;",
-															"    ",
-															"//     pm.expect(title).to.include(\"10 % discount!\")",
-															"// });",
-															"",
 															"pm.test(\"Status code is 200\", function () {",
 															"    pm.response.to.have.status(200);",
+															"});",
+															"",
+															"pm.test(\"Response is a single object and not an array\", function () {",
+															"    pm.expect(pm.response.json()).to.be.an('object').and.not.an('array');",
 															"});"
 														],
 														"type": "text/javascript",
@@ -159,14 +155,21 @@
 													"listen": "test",
 													"script": {
 														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															"",
 															"pm.test(\"Programatically updated the 'title' and should contain 'Dracula'\", function () {",
 															"    const title = pm.response.json().title;",
 															"    pm.expect(title).to.contain('Dracula')",
 															"});",
 															"",
-															"pm.test(\"Status code is 200\", function () {",
-															"    pm.response.to.have.status(200);",
-															"});"
+															"pm.test(\"The 'descr' property should contain 'No description'\", function () {",
+															"    const descr = pm.response.json().descr;",
+															"    pm.expect(descr).to.equal('No description');",
+															"});",
+															"",
+															""
 														],
 														"type": "text/javascript",
 														"packages": {}
@@ -210,6 +213,10 @@
 													"listen": "test",
 													"script": {
 														"exec": [
+															"pm.test(\"Status code is 204\", function () {",
+															"    pm.response.to.have.status(204);",
+															"});",
+															"",
 															"pm.test(\"Delete an item returns text 'Item deleted : true'\", function () {",
 															"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
 															"",
@@ -218,13 +225,10 @@
 															"            pm.expect(header.message).to.contains('Item deleted : true')",
 															"        }",
 															"    })",
-															"});",
-															"",
-															"pm.test(\"Status code is 204\", function () {",
-															"    pm.response.to.have.status(204);",
 															"});"
 														],
-														"type": "text/javascript"
+														"type": "text/javascript",
+														"packages": {}
 													}
 												}
 											],
@@ -262,12 +266,16 @@
 													"listen": "test",
 													"script": {
 														"exec": [
-															"pm.test(\"Comment is below '10' chars\", function () {",
+															"pm.test(\"Status code is 400\", function () {",
 															"    pm.response.to.have.status(400);",
 															"});",
 															"",
-															"pm.test(\"Status code is 400\", function () {",
-															"    pm.response.to.have.status(400);",
+															"pm.test(\"Response body has error with code, message, and numericSeverity properties\", function () {",
+															"    var responseBody = pm.response.json();",
+															"    pm.expect(responseBody).to.have.property('error');",
+															"    pm.expect(responseBody.error).to.have.property('code', '400');",
+															"    pm.expect(responseBody.error).to.have.property('message').that.is.a('string').and.to.have.length.greaterThan(10);",
+															"    pm.expect(responseBody.error).to.have.property('@Common.numericSeverity', 4);",
 															"});"
 														],
 														"type": "text/javascript",
@@ -312,17 +320,21 @@
 													"listen": "test",
 													"script": {
 														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															"",
 															"pm.test(\"Contains text 'Before read executed'\", function () {",
 															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
 															"    pm.expect(response[0].message).to.contains('Before read executed')",
-															"    ",
 															"});",
 															"",
-															"pm.test(\"Status code is 200\", function () {",
-															"    pm.response.to.have.status(200);",
+															"pm.test(\"Body response is an array\", function () {",
+															"    pm.expect(pm.response.json()).to.be.an('object').that.has.property('value').that.is.an('array');",
 															"});"
 														],
-														"type": "text/javascript"
+														"type": "text/javascript",
+														"packages": {}
 													}
 												}
 											],
@@ -349,16 +361,21 @@
 													"listen": "test",
 													"script": {
 														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															"",
 															"pm.test(\"Contains text 'Before read executed'\", function () {",
 															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
 															"    pm.expect(response[0].message).to.contains('Before read executed')",
 															"});",
 															"",
-															"pm.test(\"Status code is 200\", function () {",
-															"    pm.response.to.have.status(200);",
+															"pm.test(\"Response body is an object and not an array\", function () {",
+															"    pm.expect(pm.response.json()).to.be.an('object').and.not.an('array');",
 															"});"
 														],
-														"type": "text/javascript"
+														"type": "text/javascript",
+														"packages": {}
 													}
 												}
 											],
@@ -390,13 +407,13 @@
 													"listen": "test",
 													"script": {
 														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"",
 															"pm.test(\"Text message should contain 'Message must be larger than 10'\", function () {",
 															"    const message = pm.response.json().error.message",
 															"    pm.expect(message).to.contain('Message must be larger than 10')",
-															"});",
-															"",
-															"pm.test(\"Status code is 400\", function () {",
-															"    pm.response.to.have.status(400);",
 															"});"
 														],
 														"type": "text/javascript",
@@ -441,16 +458,17 @@
 													"listen": "test",
 													"script": {
 														"exec": [
+															"pm.test(\"Status code is 204\", function () {",
+															"    pm.response.to.have.status(204);",
+															"});",
+															"",
 															"pm.test(\"Delete an item return text 'Item deleted'\", function () {",
 															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
 															"    pm.expect(response[0].message).to.contains('Item deleted')",
-															"});",
-															"",
-															"pm.test(\"Status code is 204\", function () {",
-															"    pm.response.to.have.status(204);",
 															"});"
 														],
-														"type": "text/javascript"
+														"type": "text/javascript",
+														"packages": {}
 													}
 												}
 											],
@@ -497,16 +515,37 @@
 													"listen": "test",
 													"script": {
 														"exec": [
-															"pm.test(\"Contains text 'On Create executed'\", function () {",
-															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
-															"    pm.expect(response[0].message).to.contains('On Create executed')",
+															"pm.test(\"Status code is 201\", function () {",
+															"    pm.expect(pm.response.code).to.equal(201);",
 															"});",
 															"",
-															"pm.test(\"Status code is 200\", function () {",
-															"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"pm.test(\"Contains text 'On Create executed'\", function () {",
+															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
+															"    pm.expect(response[0].message).to.contains('On Create executed');",
+															"});",
+															"",
+															"pm.test(\"Response body is a single object and not an array\", function () {",
+															"    const responseBody = pm.response.json();",
+															"    pm.expect(responseBody).to.be.an('object').and.not.to.be.an('array');",
+															"});",
+															"",
+															"pm.test(\"Verify the specific content of the response body \", function () {",
+															"    const expectedResponse = {",
+															"        \"@odata.context\": \"$metadata#BookStats/$entity\",",
+															"        \"ID\": 3,",
+															"        \"views\": 234,",
+															"        \"averageRating\": 222.33,",
+															"        \"book_ID\": 203",
+															"    };",
+															"    const responseBody = pm.response.json();",
+															"    Object.keys(expectedResponse).forEach(key => {",
+															"        pm.expect(responseBody).to.have.property(key);",
+															"        pm.expect(responseBody[key]).to.eql(expectedResponse[key]);",
+															"    });",
 															"});"
 														],
-														"type": "text/javascript"
+														"type": "text/javascript",
+														"packages": {}
 													}
 												}
 											],
@@ -547,6 +586,10 @@
 													"listen": "test",
 													"script": {
 														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															"",
 															"pm.test(\"1 item should have 'views : 444233'\", function () {",
 															"    const response = pm.response.json();",
 															"",
@@ -557,9 +600,7 @@
 															"    })",
 															"});",
 															"",
-															"pm.test(\"Status code is 200\", function () {",
-															"    pm.response.to.have.status(200);",
-															"});"
+															""
 														],
 														"type": "text/javascript",
 														"packages": {}
@@ -601,13 +642,12 @@
 													"listen": "test",
 													"script": {
 														"exec": [
-															"",
-															"",
 															"pm.test(\"Status code is 200\", function () {",
 															"    pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
 															"});"
 														],
-														"type": "text/javascript"
+														"type": "text/javascript",
+														"packages": {}
 													}
 												}
 											],
@@ -645,6 +685,10 @@
 													"listen": "test",
 													"script": {
 														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"});",
+															"",
 															"pm.test(\"Text message should contain 'On update executed'\", function () {",
 															"    const response = JSON.parse(pm.response.headers.get('sap-messages'));",
 															"",
@@ -652,11 +696,10 @@
 															"",
 															"});",
 															"",
-															"pm.test(\"Status code is 200\", function () {",
-															"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
-															"});"
+															""
 														],
-														"type": "text/javascript"
+														"type": "text/javascript",
+														"packages": {}
 													}
 												}
 											],
@@ -2372,58 +2415,17 @@
 																	"    pm.response.to.have.status(200);",
 																	"});",
 																	"",
-																	"pm.test(\"Some items from 'response' should be 'toLowerCase' - 'customFormatter'\", function () {",
+																	"pm.test(\"First item in the response array has format 'e-kindle'\", function () {",
 																	"    const response = pm.response.json();",
-																	"",
-																	"    response.value.forEach((item) => {",
-																	"        // Check only some of them",
-																	"        if(item.format === item.format.toLowerCase()) {",
-																	"            pm.expect(item.format).to.eql(item.format.toLowerCase());",
-																	"        }",
-																	"    })",
-																	"});"
-																],
-																"type": "text/javascript",
-																"packages": {}
-															}
-														}
-													],
-													"request": {
-														"method": "GET",
-														"header": [],
-														"url": {
-															"raw": "{{baseUrl}}/{{catalogService}}/{{bookFormatsEntity}}",
-															"host": [
-																"{{baseUrl}}"
-															],
-															"path": [
-																"{{catalogService}}",
-																"{{bookFormatsEntity}}"
-															]
-														}
-													},
-													"response": []
-												},
-												{
-													"name": "Format fields with results",
-													"event": [
-														{
-															"listen": "test",
-															"script": {
-																"exec": [
-																	"pm.test(\"Status code is 200\", function () {",
-																	"    pm.response.to.have.status(200);",
+																	"    const firstItem = response.value[0];",
+																	"    pm.expect(firstItem.format).to.eql('e-kindle');",
 																	"});",
 																	"",
-																	"pm.test(\"Some items from 'response' should be 'toUpperCase'\", function () {",
+																	"pm.test(\"Rest of the items in the response array are in uppercase\", function () {",
 																	"    const response = pm.response.json();",
-																	"",
-																	"    response.value.forEach((item) => {",
-																	"        // Check only some of them",
-																	"        if(item.format === item.format.toUpperCase()) {",
-																	"            pm.expect(item.format).to.eql(item.format.toUpperCase());",
-																	"        }",
-																	"    })",
+																	"    response.value.slice(1).forEach((item) => {",
+																	"        pm.expect(item.format).to.eql(item.format.toUpperCase());",
+																	"    });",
 																	"});"
 																],
 																"type": "text/javascript",
@@ -2520,11 +2522,10 @@
 																	"    pm.response.to.have.status(200);",
 																	"});",
 																	"",
-																	"pm.test(\"Response should contain property 'format' with value 'epub'\", function () {",
-																	"    const response = pm.response.json();",
-																	"    pm.expect(response.format).to.eql('epub...');",
-																	"});",
-																	""
+																	"pm.test(\"Response body object contains property 'format' with value 'epub'\", function () {",
+																	"    var response = pm.response.json();",
+																	"    pm.expect(response).to.have.property('format', 'epub...');",
+																	"});"
 																],
 																"type": "text/javascript",
 																"packages": {}
@@ -2568,6 +2569,20 @@
 											"item": [
 												{
 													"name": "Format field 'format'  with 'trim' method when update an item",
+													"event": [
+														{
+															"listen": "test",
+															"script": {
+																"exec": [
+																	"pm.test(\"Status code is 200\", function () {",
+																	"    pm.response.to.have.status(200);",
+																	"});"
+																],
+																"type": "text/javascript",
+																"packages": {}
+															}
+														}
+													],
 													"request": {
 														"method": "PATCH",
 														"header": [],
@@ -3087,10 +3102,10 @@
 							"description": "_**@Validate**_ will be tested for all events `After`,`Before`, `On`"
 						},
 						{
-							"name": "@ExecutionAllowedForRole",
+							"name": "@ExecutionAllowedForRoles",
 							"item": [
 								{
-									"name": "@ExecutionAllowedForRole - Manager",
+									"name": "@ExecutionAllowedForRoles - Manager",
 									"event": [
 										{
 											"listen": "test",

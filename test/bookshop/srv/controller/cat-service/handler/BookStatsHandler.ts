@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
   AfterRead,
   EntityHandler,
@@ -12,7 +11,6 @@ import {
   OnUpdate,
   Req,
   Results,
-  SingleInstanceCapable,
   SingleInstanceSwitch,
   SRV,
 } from '../../../../../../lib';
@@ -30,7 +28,7 @@ class BookStatsHandler {
 
   @OnCreate()
   public async create(@Req() req: TypedRequest<BookStat>, @Next() next: NextEvent) {
-    req.notify(201, 'On Create executed');
+    this.bookStatsService.notifyCreated(req);
     return next();
   }
 
@@ -49,13 +47,13 @@ class BookStatsHandler {
 
   @OnUpdate()
   public async update(@Req() req: TypedRequest<BookStat>, @Next() next: NextEvent) {
-    req.notify(201, 'On update executed');
+    this.bookStatsService.notifyUpdated(req);
     return next();
   }
 
   @OnDelete()
   public async delete(@Req() req: Request, @Next() next: NextEvent) {
-    req.notify('Item deleted');
+    this.bookStatsService.notifyDeleted(req);
   }
 
   // This action will be triggered on the 'BookStat' entity

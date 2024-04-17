@@ -8,7 +8,6 @@ import {
   Req,
   Request,
   Service,
-  SingleInstanceCapable,
   SingleInstanceSwitch,
   SRV,
   TypedRequest,
@@ -28,7 +27,7 @@ class ReviewHandler {
 
   @BeforeRead()
   private async beforeRead(@Req() req: TypedRequest<Review>, @SingleInstanceSwitch() isSingleInstance: boolean) {
-    req.notify(400, 'Before read executed');
+    this.reviewService.notifyRead(req);
   }
 
   @BeforeUpdate()
@@ -38,7 +37,7 @@ class ReviewHandler {
 
   @BeforeDelete()
   private async beforeDelete(@Req() req: Request) {
-    req.notify(204, 'Item deleted');
+    this.reviewService.notifyDelete(req);
   }
 }
 
