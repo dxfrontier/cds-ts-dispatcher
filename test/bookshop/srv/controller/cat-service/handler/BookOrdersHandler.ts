@@ -30,13 +30,13 @@ class BookOrdersHandler {
   @Inject(BookOrdersService) private readonly bookOrdersService: BookOrdersService;
 
   @AfterCreate()
-  private async afterCreate(@Results() result: BookOrder, @Req() req: Request) {
+  private async afterCreate(@Results() result: BookOrder, @Req() req: Request): Promise<void> {
     this.bookService.validateData(result, req);
   }
 
   @BeforeRead()
   @Use(MiddlewareMethodBeforeRead) // THIS IS OK
-  private async beforeRead(req: Request) {
+  private async beforeRead(req: Request): Promise<void> {
     this.bookOrdersService.showBeforeReadNotify();
   }
 
@@ -46,7 +46,7 @@ class BookOrdersHandler {
     @Results() results: BookOrder[],
     @Req() req: Request,
     @SingleInstanceSwitch() isSingleInstance: boolean,
-  ) {
+  ): Promise<void> {
     // Method implementation
   }
 }

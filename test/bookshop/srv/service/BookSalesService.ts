@@ -19,7 +19,7 @@ class BookSalesService {
     hasSaleDate: boolean;
     hasFrom: boolean;
     hasOrderBy: boolean;
-  }) {
+  }): void {
     if (args.hasRoles) {
       args.req.notify('Manager');
     }
@@ -41,7 +41,7 @@ class BookSalesService {
     if (args.orderBy && args.orderBy?.length > 0) {
       args.req.notify('orderBy');
     }
-    if (args.hasRoles === false && args.hasRoles === false) {
+    if (!args.hasRoles && !args.hasRoles) {
       args.req.notify('NO_USER_ROLE');
     }
     if (args.hasQuantity && args.hasSaleDate && args.hasFrom && args.hasOrderBy) {

@@ -1,6 +1,6 @@
-import { Inject, ServiceLogic, SRV } from '../../../../lib';
+import { Inject, Service, ServiceLogic, SRV } from '../../../../lib';
 
-import type { Service, TypedRequest, Request } from '../../../../lib';
+import type { TypedRequest, Request } from '../../../../lib';
 
 import type { Review } from '../../@cds-models/CatalogService';
 
@@ -14,11 +14,11 @@ class ReviewService {
     }
   }
 
-  public notifyDelete(req: Request) {
+  public notifyDelete(req: Request): void {
     req.notify(204, 'Item deleted');
   }
 
-  public notifyRead(req: Request) {
+  public notifyRead(req: Request): void {
     req.notify(400, 'Before read executed');
   }
 }

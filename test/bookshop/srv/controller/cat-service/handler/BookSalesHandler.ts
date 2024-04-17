@@ -5,7 +5,6 @@ import {
   EntityHandler,
   ExecutionAllowedForRole,
   GetQuery,
-  GetQueryType,
   GetRequest,
   Inject,
   IsColumnSupplied,
@@ -20,6 +19,8 @@ import {
   SRV,
 } from '../../../../../../lib';
 import BookSalesService from '../../../service/BookSalesService';
+
+import type { GetQueryType } from '../../../../../../lib';
 
 @EntityHandler(BookSale)
 class BookSalesHandler {
@@ -49,7 +50,7 @@ class BookSalesHandler {
     @SingleInstanceSwitch() isSingleInstance: boolean,
 
     @Jwt() token: string | undefined,
-  ) {
+  ): Promise<void> {
     this.bookSalesService.showAfterReadNotifies({
       req,
       hasRoles,

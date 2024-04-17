@@ -1,6 +1,6 @@
-import { BookFormat } from '#cds-models/CatalogService';
+import { type BookFormat } from '#cds-models/CatalogService';
 
-import { Formatters } from '../../../../lib';
+import { type Formatters } from '../../../../lib';
 
 export const customFormatter: Formatters<BookFormat> = {
   action: 'customFormatter',

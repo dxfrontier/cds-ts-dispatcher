@@ -1,11 +1,11 @@
-import { Book } from '#cds-models/CatalogService';
+import type { Book } from '#cds-models/CatalogService';
 
-import { TypedRequest } from '@sap/cds';
+import type { TypedRequest } from '@sap/cds';
 
-import { MiddlewareImpl, NextMiddleware } from '../../../../lib/types/types';
+import type { MiddlewareImpl, NextMiddleware } from '../../../../lib/types/types';
 
 export class MiddlewareMethodBeforeRead implements MiddlewareImpl {
-  public async use(req: TypedRequest<Book>, next: NextMiddleware) {
+  public async use(req: TypedRequest<Book>, next: NextMiddleware): Promise<void> {
     console.log('Middleware 1: @BeforeRead');
     await next();
   }

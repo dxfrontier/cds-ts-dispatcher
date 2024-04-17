@@ -35,13 +35,13 @@ class BookHandler {
   @Inject(BookService) private readonly bookService: BookService;
 
   @AfterCreate()
-  private async afterCreate(@Result() result: Book, @Req() req: Request) {
+  private async afterCreate(@Result() result: Book, @Req() req: Request): Promise<void> {
     this.bookService.validateData(result, req);
   }
 
   @BeforeRead()
   @Use(MiddlewareMethodBeforeRead)
-  private async beforeRead(@Req() req: TypedRequest<Book>) {
+  private async beforeRead(@Req() req: TypedRequest<Book>): Promise<void> {
     this.bookService.showConsoleLog();
   }
 
@@ -55,17 +55,17 @@ class BookHandler {
     @IsPresent('SELECT', 'columns') hasColumns: boolean,
     @IsRole('Developer', 'AnotherRole') role: boolean,
     @GetRequest('locale') locale: Request['locale'],
-  ) {
-    this.bookService.manageAfterReadMethods({ req, results, singleInstance });
+  ): Promise<void> {
+    await this.bookService.manageAfterReadMethods({ req, results, singleInstance });
   }
 
   @AfterUpdate()
-  private async afterUpdate(@Result() result: Book, @Req() req: TypedRequest<Book>) {
-    this.bookService.addDefaultTitleText(result, req);
+  private async afterUpdate(@Result() result: Book, @Req() req: TypedRequest<Book>): Promise<void> {
+    await this.bookService.addDefaultTitleText(result, req);
   }
 
   @AfterDelete()
-  private async afterDelete(@Result() deleted: boolean, @Req() req: Request) {
+  private async afterDelete(@Result() deleted: boolean, @Req() req: Request): Promise<void> {
     this.bookService.notifyItemDeleted(req, deleted);
   }
 }

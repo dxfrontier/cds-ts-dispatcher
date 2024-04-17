@@ -19,7 +19,6 @@ import {
   Use,
   Validate,
 } from '../../../../../../lib';
-import { ExposeFields } from '../../../../../../lib/types/validator';
 import {
   changeBookProperties,
   OrderedBook,
@@ -28,6 +27,8 @@ import {
 } from '../../../../@cds-models/CatalogService';
 import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
+
+import type { ExposeFields } from '../../../../../../lib/types/validator';
 
 @UnboundActions()
 @Use(MiddlewareEntity1, MiddlewareEntity2)
@@ -69,6 +70,7 @@ class UnboundActionsHandler {
   }
 
   @OnEvent(OrderedBook)
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public async orderedBook(req: TypedRequest<OrderedBook>) {
     if (req.event !== 'OrderedBook') {
       req.reject(400, 'Not OrderedBook: check @OnEvent decorator');

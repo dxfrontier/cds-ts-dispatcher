@@ -44,7 +44,7 @@ export type NextMiddleware = () => Promise<unknown>;
  * Use `NextEvent` type to annotate the `next` parameter of the implementation of the `ON` events.
  * @example "@Next() next: NextEvent"
  */
-export type NextEvent = (req?: Request) => void;
+export type NextEvent = (req?: Request) => Function;
 
 export type MiddlewareImpl = {
   use: (req: Request, next: NextMiddleware) => Promise<unknown>;

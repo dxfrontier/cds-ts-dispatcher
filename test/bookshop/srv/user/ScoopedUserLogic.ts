@@ -1,5 +1,5 @@
-export class ScoopedUserLogic {
-  constructor() {}
+// export class ScoopedUserLogic {
+//   constructor() {}
 
-  use() {}
-}
+//   use() {}
+// }
