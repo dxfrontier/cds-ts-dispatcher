@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Publisher } from '#cds-models/CatalogService';
 
 import {
@@ -9,7 +8,6 @@ import {
   Request,
   Results,
   Service,
-  SingleInstanceCapable,
   SingleInstanceSwitch,
   SRV,
 } from '../../../../../../lib';

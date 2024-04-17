@@ -4,7 +4,6 @@ import {
   AfterRead,
   EntityHandler,
   ExecutionAllowedForRole,
-  FieldsFormatter,
   GetQuery,
   GetQueryType,
   GetRequest,
@@ -39,10 +38,10 @@ class BookSalesHandler {
     @IsPresent('SELECT', 'from') hasFrom: boolean,
     @IsPresent('SELECT', 'orderBy') hasOrderBy: boolean,
 
-    @IsRole('Manager', 'User') roles: boolean,
-    @IsRole('CEO') role: boolean,
+    @IsRole('Manager', 'User') hasRoles: boolean,
+    @IsRole('CEO') isRole: boolean,
 
-    @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['forDelete'],
+    @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['forSelect'],
     @GetQuery('SELECT', 'orderBy') orderBy: GetQueryType['orderBy'],
 
     @GetRequest('locale') locale: Request['locale'],
@@ -51,40 +50,20 @@ class BookSalesHandler {
 
     @Jwt() token: string | undefined,
   ) {
-    if (roles) {
-      req.notify('Manager');
-    }
-
-    if (isSingleInstance) {
-      req.notify('Single instance');
-      return;
-    } else {
-      req.notify('Entity set');
-    }
-
-    if (token) {
-      req.notify(token);
-    }
-
-    if (locale) {
-      req.notify('locale');
-    }
-
-    if (columns.length > 0) {
-      req.notify('columns');
-    }
-
-    if (orderBy && orderBy?.length > 0) {
-      req.notify('orderBy');
-    }
-
-    if (roles === false && role === false) {
-      req.notify('NO_USER_ROLE');
-    }
-
-    if (hasQuantity && hasSaleDate && hasFrom && hasOrderBy) {
-      req.notify(`${hasQuantity && hasSaleDate && hasFrom && hasOrderBy}`);
-    } else req.notify(`${hasQuantity && hasSaleDate}`);
+    this.bookSalesService.showAfterReadNotifies({
+      req,
+      hasRoles,
+      isRole,
+      isSingleInstance,
+      token,
+      locale,
+      columns,
+      orderBy,
+      hasQuantity,
+      hasSaleDate,
+      hasFrom,
+      hasOrderBy,
+    });
   }
 }
 

@@ -8,10 +8,10 @@ class BookService {
   @Inject(SRV) private readonly srv: Service;
   @Inject(BookRepository) private readonly bookRepository: BookRepository;
 
-  public manageAfterReadMethods([req, results, singleInstance]: [Request, Book[], boolean]) {
-    this.emitOrderedBookData(req);
-    this.notifySingleInstance(req, singleInstance);
-    this.enrichTitle(results);
+  public manageAfterReadMethods(args: { req: Request; results: Book[]; singleInstance: boolean }) {
+    this.emitOrderedBookData(args.req);
+    this.notifySingleInstance(args.req, args.singleInstance);
+    this.enrichTitle(args.results);
   }
 
   public notifyItemDeleted(req: Request, deleted: boolean) {

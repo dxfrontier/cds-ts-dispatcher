@@ -56,7 +56,7 @@ class BookHandler {
     @IsRole('Developer', 'AnotherRole') role: boolean,
     @GetRequest('locale') locale: Request['locale'],
   ) {
-    this.bookService.manageAfterReadMethods([req, results, singleInstance]);
+    this.bookService.manageAfterReadMethods({ req, results, singleInstance });
   }
 
   @AfterUpdate()

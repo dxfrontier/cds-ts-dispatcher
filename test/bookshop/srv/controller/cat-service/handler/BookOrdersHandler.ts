@@ -19,6 +19,7 @@ import { MiddlewareMethodAfterRead2 } from '../../../middleware/MiddlewareAfterR
 import { MiddlewareMethodBeforeRead } from '../../../middleware/MiddlewareBeforeRead';
 import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
+import BookOrdersService from '../../../service/BookOrdersService';
 import BookService from '../../../service/BookService';
 
 @EntityHandler(BookOrder)
@@ -26,6 +27,7 @@ import BookService from '../../../service/BookService';
 class BookOrdersHandler {
   @Inject(SRV) private readonly srv: Service;
   @Inject(BookService) private readonly bookService: BookService;
+  @Inject(BookOrdersService) private readonly bookOrdersService: BookOrdersService;
 
   @AfterCreate()
   private async afterCreate(@Results() result: BookOrder, @Req() req: Request) {
@@ -35,7 +37,7 @@ class BookOrdersHandler {
   @BeforeRead()
   @Use(MiddlewareMethodBeforeRead) // THIS IS OK
   private async beforeRead(req: Request) {
-    console.log('****************** Before read event');
+    this.bookOrdersService.showBeforeReadNotify();
   }
 
   @AfterRead()
@@ -44,7 +46,9 @@ class BookOrdersHandler {
     @Results() results: BookOrder[],
     @Req() req: Request,
     @SingleInstanceSwitch() isSingleInstance: boolean,
-  ) {}
+  ) {
+    // Method implementation
+  }
 }
 
 export default BookOrdersHandler;

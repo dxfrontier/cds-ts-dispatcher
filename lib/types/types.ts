@@ -76,7 +76,7 @@ export type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void 
 
 export class GetQueryType {
   columns: {
-    forDelete: column_expr[];
+    forSelect: column_expr[];
     forInsert: string[];
     forUpsert: string[];
   };
