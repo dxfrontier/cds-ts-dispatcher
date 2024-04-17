@@ -1,6 +1,6 @@
 {
   "name": "@dxfrontier/cds-ts-dispatcher",
-  "version": "2.0.6",
+  "version": "2.0.8",
   "description": "The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement TS handlers provided by the SAP CAP framework.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -62,8 +62,8 @@
   },
   "homepage": "https://github.com/dxfrontier/cds-ts-dispatcher#readme",
   "dependencies": {
-    "@sap-cloud-sdk/connectivity": "^3.13.0",
-    "@sap/cds": "^7.8.0",
+    "@sap-cloud-sdk/connectivity": "^3.14.0",
+    "@sap/cds": "^7.8.1",
     "http-status-codes": "^2.3.0",
     "inversify": "^6.0.2",
     "lodash": "^4.17.21",
@@ -74,8 +74,8 @@
   "devDependencies": {
     "@cap-js/cds-typer": "0.19.0",
     "@cap-js/sqlite": "^1.6.0",
-    "@dxfrontier/cds-ts-repository": "^1.0.14",
-    "@swc/core": "^1.4.13",
+    "@dxfrontier/cds-ts-repository": "^1.0.15",
+    "@swc/core": "^1.4.15",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.17.0",
     "@types/string-placeholder": "^1.0.3",
@@ -97,7 +97,7 @@
     "start-server-and-test": "^2.0.3",
     "ts-jest": "^29.1.2",
     "tsup": "^8.0.2",
-    "typescript": "^5.4.4"
+    "typescript": "^5.4.5"
   },
   "lint-staged": {
     "**/*.{ts, tsx}": [
