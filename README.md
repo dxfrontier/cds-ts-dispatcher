@@ -491,8 +491,6 @@ export class BookHandler {
 
 The `@ServiceLogic` decorator is utilized at the `class-level` to annotate a `class` as a specialized class containing only business logic.
 
-When applying `ServiceLogic` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`
-
 `Example`
 
 ```typescript
@@ -506,6 +504,9 @@ export class CustomerService {
 }
 ```
 
+> [!TIP]
+> When applying `@ServiceLogic()` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`.
+
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### @Repository
@@ -513,8 +514,6 @@ export class CustomerService {
 **@Repository()**
 
 The `@Repository` decorator is utilized as a `class-level` annotation that designates a particular `class` as a specialized `Repository`.
-
-When applying `Repository` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`
 
 ```typescript
 import { Repository } from '@dxfrontier/cds-ts-dispatcher';
@@ -526,6 +525,9 @@ export class CustomerRepository {
   // ...
 }
 ```
+
+> [!TIP]
+> When applying `@Repository()` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`.
 
 ###### `[Optional]` - CDS-TS-Repository - BaseRepository
 
@@ -707,7 +709,7 @@ export class CustomerHandler {
 > 3. If you need to apply middleware to `method` you can have a look over method specific [@Use](#use-1) decorator .
 
 > [!WARNING]
-> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
+> If `req.reject()` is used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
@@ -757,7 +759,14 @@ export class CustomerHandler {
 
 **@Inject**(SRV) `private srv: Service`
 
-This specialized `@Inject` can be used as a `constant` in `@ServiceLogic`, `@Repository`, `@EntityHandler` and `@UnboundActions` classes, it can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
+This specialized `@Inject` can be used as a `constant` in :
+
+- [@EntityHandler()](#entityhandler)
+- [@ServiceLogic()](#servicelogic)
+- [@Repository()](#repository)
+- [@UnboundActions()](#unboundactions)
+
+It can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
 
 `Example`
 
@@ -792,7 +801,7 @@ export class CustomerHandler {
 
 **@Req()**
 
-The `@Req` decorator is utilized at the `parameter level` to annotate a parameter with the `Request` object, providing access to request-related information.
+The `@Req` decorator is utilized at the `parameter level` to annotate a parameter with the `Request` object, providing access to request-related information of the current event.
 
 `Return`
 
@@ -826,6 +835,10 @@ export class BookHandler {
 **@Results()** / **@Result**
 
 The `@Results` decorator is utilized at the `parameter level` to annotate a parameter with the request `Results`.
+
+`Return`
+
+- `Array / object`: Contains the OData Request `Body`.
 
 `Example`
 
@@ -884,7 +897,7 @@ export class BookHandler {
 
 **@Next()**
 
-The `@Next` decorator is utilized at the `parameter level` to annotate a parameter with the CDS `Next` function, which is used to proceed to the next middleware in the chain.
+The `@Next` decorator is utilized at the `parameter level` to annotate a parameter with the `Next` function, which is used to proceed to the next event in the chain of execution.
 
 `Return`
 
@@ -920,7 +933,7 @@ export class BookHandler {
 
 **@Error()**
 
-The `@Error` decorator is utilized at the `parameter level` to annotate a parameter with the CDS `Error` and contains information regarding the failed `Request`.
+The `@Error` decorator is utilized at the `parameter level` to annotate a parameter with the `Error` and contains information regarding the failed `Request`.
 
 `Return`
 
@@ -953,7 +966,7 @@ export class UnboundActionsHandler {
 
 **@Jwt()**
 
-The `@Jwt` decorator is utilized at the `parameter level` to annotate a parameter to retrieve `JWT` from the `Request` that is based on the node `req.http.req - IncomingMessage`.
+The `@Jwt` decorator is utilized at the `parameter level`. It will retrieve the to retrieve `JWT` from the `Request` that is based on the node `req.http.req - IncomingMessage`.
 
 Fails if no authorization header is given or has the wrong format.
 
@@ -982,7 +995,7 @@ export class BookHandler {
 }
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > Expected format is `Bearer <TOKEN>`.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
@@ -991,7 +1004,7 @@ export class BookHandler {
 
 **@IsPresent\<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsByKey\<Key>)**
 
-The `@IsPresent` decorator is utilized at the `parameter level` to annotate a parameter for allowing verification of the existence of a specific `property` value.
+The `@IsPresent` decorator is utilized at the `parameter level`. It allows you to verify the existence of a specified Query `property` values.
 
 `Parameters`
 
@@ -1032,16 +1045,18 @@ class BookHandler {
 ```
 
 > [!TIP]
-> Decorator [@IsPresent()](#ispresent) works well with [@GetQuery()](#getqueryproperty).
+> Decorator [@IsPresent()](#ispresent) works well with [@GetQuery()](#getquery).
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### @IsRole
 
-**@IsRole(role: string)**
+**@IsRole(...roles: string[])**
 
-The `@IsRole` decorator is utilized at the `parameter level` to annotate a parameter, allowing the verification
-of a user having assigned a given role. It applies an `OR` logic between the roles, meaning it
+The `@IsRole` decorator is utilized at the `parameter level`. It allows you to verify
+if the `User` has assigned a given role.
+
+It applies an `OR` logic on the specified roles, meaning it
 checks if at `least one` of the specified roles is assigned.
 
 `Parameters`
@@ -1081,8 +1096,7 @@ class BookHandler {
 }
 ```
 
-[!TIP]
-
+> [!TIP]
 > The role names correspond to the values of `@requires` and the `@restrict.grants.to` annotations in your `CDS` models.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
@@ -1091,7 +1105,7 @@ class BookHandler {
 
 **@IsColumnSupplied\<T\>(field : keyof T)**
 
-The `@IsColumnSupplied` decorator is utilized at the `parameter level` to annotate a parameter, verifying the existance of a column in the `SELECT`, `INSERT` or `UPSERT` query types.
+The `@IsColumnSupplied<T>()` decorator is utilized at the `parameter level`. It allows your to verify the existence of a column in the `SELECT`, `INSERT` or `UPSERT` Query.
 
 `Parameters`
 
@@ -1136,14 +1150,14 @@ class BookHandler {
 
 **@GetQuery\<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsByKey\<Key>)**
 
-The `@GetQuery` decorator is utilized at the `parameter level` to annotate a parameter allowing retrieval of the specified `property` value.
+The `@GetQuery` decorator is utilized at the `parameter level`. It allows you to retrieve Query `property` values.
 
 `Parameters`
 
 - `key (string)`: Specifies the type of query operation. Accepted values are `INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`.
 - `property (string)`: Specifies the property based on the `key`.
 
-`Return` Type: Varies based on the specified property :
+`Return`: Varies based on the specified property :
 
 - <details>
 
@@ -1238,6 +1252,7 @@ class BookHandler {
   ) {
     if (columnsPresent) {
       // do something with columns values
+      // columns.forEach(...)
     }
 
     // ...
@@ -1246,7 +1261,7 @@ class BookHandler {
 ```
 
 > [!TIP]
-> Decorator `@GetQuery` works well with [@IsPresent()](#ispresent).
+> Decorator [@GetQuery()](#getquery) can be used to get the Query property and [@IsPresent()](#ispresent) can check if the Query property is empty or not.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1254,13 +1269,13 @@ class BookHandler {
 
 **@GetRequest(property : keyof Request)**
 
-The `@GetRequest` decorator is utilized at the `parameter level` to annotate a parameter, allowing retrieval of the specified property value from the `Request` object.
+The `@GetRequest` decorator is utilized at the `parameter level`. It allows you tu retrieve the specified `property` value from the `Request` object.
 
 `Parameters`
 
 - `property (string)`: Specifies the property to retrieve from the `Request` object.
 
-`Return` Type: Varies based on the specified property :
+`Return`: Varies based on the specified property :
 
 - **@GetRequest**(`'entity'`) entity: `Request['entity']`,
 - **@GetRequest**(`'event'`) event: `Request['event']`,
@@ -1277,13 +1292,6 @@ The `@GetRequest` decorator is utilized at the `parameter level` to annotate a p
 - **@GetRequest**(`'tenant'`) tenant: `Request['tenant']`,
 - **@GetRequest**(`'timestamp'`) timestamp: `Request['timestamp']`,
 - **@GetRequest**(`'user'`) user: `Request['user']`,
-
-> [!TIP]
-> Type `Request` can be import from :
->
-> ```ts
-> import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-> ```
 
 `Example`
 
@@ -1310,6 +1318,13 @@ class BookHandler {
   }
 }
 ```
+
+> [!TIP]
+> Type `Request` can be import from :
+>
+> ```ts
+> import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+> ```
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1409,8 +1424,6 @@ See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/c
 
 **@BeforeCreate**()
 
-It is important to note that decorator `@BeforeCreate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
-
 `Example`
 
 ```typescript
@@ -1433,6 +1446,9 @@ this.before('CREATE', MyEntity, async (req) => {
 });
 ```
 
+> [!IMPORTANT]
+> It is important to note that the decorator `@BeforeCreate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -1441,8 +1457,6 @@ this.before('CREATE', MyEntity, async (req) => {
 ###### @BeforeRead
 
 **@BeforeRead**()
-
-It is important to note that decorator `@BeforeRead()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1466,6 +1480,9 @@ this.before('READ', MyEntity, async (req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@BeforeRead()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -1474,8 +1491,6 @@ this.before('READ', MyEntity, async (req) => {
 ###### @BeforeUpdate
 
 **@BeforeUpdate**()
-
-It is important to note that decorator `@BeforeUpdate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1499,6 +1514,9 @@ this.before('UPDATE', MyEntity, async (req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@BeforeUpdate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -1507,8 +1525,6 @@ this.before('UPDATE', MyEntity, async (req) => {
 ###### @BeforeDelete
 
 **@BeforeDelete**()
-
-It is important to note that decorator `@BeforeDelete()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1532,6 +1548,9 @@ this.before('DELETE', MyEntity, async (req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@BeforeDelete()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -1543,10 +1562,11 @@ Use [@AfterCreate()](#aftercreate), [@AfterRead()](#afterread), [@AfterUpdate()]
 
 The handlers receive two arguments:
 
-- `results` (for `@AfterRead`): An array of type `MyEntity[]`.
-- `result` (for `@AfterUpdate` and `@AfterCreate`): An object of type `MyEntity`.
-- `deleted` (for `@AfterDelete`): A `boolean` indicating whether the entity was deleted.
-- `req`: An object of type `TypedRequest` or `Request`.
+| Parameters     | Decorator                         | Description                                                                |
+| -------------- | --------------------------------- | -------------------------------------------------------------------------- |
+| `results, req` | `@AfterRead`                      | An array of type `MyEntity[]` and the `Request`.                           |
+| `result, req`  | `@AfterUpdate`<br> `@AfterCreate` | An object of type `MyEntity` and the `Request`.                            |
+| `deleted, req` | `@AfterDelete`                    | A `boolean` indicating whether the instance was deleted and the `Request`. |
 
 > [!TIP]
 > If `@odata.draft.enabled: true` to manage event handlers for draft version you can use :
@@ -1561,8 +1581,6 @@ The handlers receive two arguments:
 ###### @AfterCreate
 
 **@AfterCreate**()
-
-It is important to note that decorator `@AfterCreate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1586,6 +1604,9 @@ this.after('CREATE', MyEntity, async (result, req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@AfterCreate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -1596,8 +1617,6 @@ this.after('CREATE', MyEntity, async (result, req) => {
 **@AfterRead**()
 
 `Example`
-
-It is important to note that decorator `@AfterRead()` will be triggered based on the [EntityHandler](#entityhandler) `argument` `MyEntity`
 
 ```typescript
 import { AfterRead } from "@dxfrontier/cds-ts-dispatcher";
@@ -1619,6 +1638,9 @@ this.after('READ', MyEntity, async (results, req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@AfterRead()` will be triggered based on the [EntityHandler](#entityhandler) `argument` `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -1627,8 +1649,6 @@ this.after('READ', MyEntity, async (results, req) => {
 ###### @AfterUpdate
 
 **@AfterUpdate**()
-
-It is important to note that decorator `@AfterUpdate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1652,6 +1672,9 @@ this.after('UPDATE', MyEntity, async (result, req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@AfterUpdate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -1660,8 +1683,6 @@ this.after('UPDATE', MyEntity, async (result, req) => {
 ###### @AfterDelete
 
 **@AfterDelete**()
-
-It is important to note that decorator `@AfterDelete()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1684,6 +1705,9 @@ this.after('DELETE', MyEntity, async (deleted, req) => {
   // ...
 });
 ```
+
+> [!IMPORTANT]
+> Decorator `@AfterDelete()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -1715,8 +1739,6 @@ The handlers receive two arguments:
 
 **@OnCreate**()
 
-It is important to note that decorator `@OnCreate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
-
 `Example`
 
 ```typescript
@@ -1741,6 +1763,9 @@ this.on('CREATE', MyEntity, async (req, next) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@OnCreate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -1749,8 +1774,6 @@ this.on('CREATE', MyEntity, async (req, next) => {
 ###### @OnRead
 
 **@OnRead**()
-
-It is important to note that decorator `@OnRead()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1776,6 +1799,9 @@ this.on('READ', MyEntity, async (req, next) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@OnRead()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -1784,8 +1810,6 @@ this.on('READ', MyEntity, async (req, next) => {
 ###### @OnUpdate
 
 **@OnUpdate**()
-
-It is important to note that decorator `@OnUpdate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1812,6 +1836,9 @@ this.on('UPDATE', MyEntity, async (req, next) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@OnUpdate()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -1820,8 +1847,6 @@ this.on('UPDATE', MyEntity, async (req, next) => {
 ###### @OnDelete
 
 **@OnDelete**()
-
-It is important to note that decorator `@OnDelete()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -1846,6 +1871,9 @@ this.on('DELETE', MyEntity, async (req, next) => {
   // ...
 });
 ```
+
+> [!IMPORTANT]
+> Decorator `@OnDelete()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -1887,7 +1915,7 @@ this.on(AnAction, async (req, next) => {
 > AnAction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 > [!IMPORTANT]  
-> Decorator `@OnAction` should be used inside [@UnboundActions](#unboundactions) class.
+> Decorator `@OnAction` should be used inside [@UnboundActions()](#unboundactions) class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1925,7 +1953,7 @@ this.on(AFunction, async (req) => {
 > AFunction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 > [!IMPORTANT]  
-> Decorator `@OnFunction` should be used inside [@UnboundActions](#unboundactions) class.
+> Decorator `@OnFunction` should be used inside [@UnboundAction()](#unboundactions) class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -2018,8 +2046,6 @@ this.on('error', (err, req) => {
 
 **@OnBoundAction**(`name` : CdsAction)
 
-It is important to note that decorator `@OnBoundAction()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
-
 `Parameters`
 
 - `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`.
@@ -2046,6 +2072,9 @@ this.on(MyEntity.actions.AnAction, MyEntity, async (req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@OnBoundAction()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2054,8 +2083,6 @@ this.on(MyEntity.actions.AnAction, MyEntity, async (req) => {
 ###### @OnBoundFunction
 
 **@OnBoundFunction**(`name` : CdsFunction)
-
-It is important to note that decorator `@OnBoundFunction()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Parameters`
 
@@ -2083,6 +2110,9 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@OnBoundFunction()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2103,8 +2133,6 @@ The handlers receive one argument:
 **@BeforeNewDraft**()
 
 Use this decorator when you want to validate inputs before a new draft is created.
-
-It is important to note that decorator `@BeforeNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2128,6 +2156,9 @@ this.before('NEW', MyEntity.drafts, async (req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@BeforeNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2138,8 +2169,6 @@ this.before('NEW', MyEntity.drafts, async (req) => {
 **@BeforeCancelDraft**()
 
 Use this decorator when you want to validate inputs before a draft is discarded.
-
-It is important to note that decorator `@BeforeCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2163,6 +2192,9 @@ this.before('CANCEL', MyEntity.drafts, async (req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@BeforeCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2173,8 +2205,6 @@ this.before('CANCEL', MyEntity.drafts, async (req) => {
 **@BeforeEditDraft**()
 
 Use this decorator when you want to validate inputs when a new draft is created from an active instance.
-
-It is important to note that decorator `@BeforeEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2198,6 +2228,9 @@ this.before('EDIT', MyEntity, async (req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@BeforeEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2208,8 +2241,6 @@ this.before('EDIT', MyEntity, async (req) => {
 **@BeforeSaveDraft**()
 
 Use this decorator when you want to validate inputs when active entity is changed.
-
-It is important to note that decorator `@BeforeSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2233,6 +2264,9 @@ this.before('SAVE', MyEntity, async (req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@BeforeSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2244,18 +2278,19 @@ Use `@AfterNewDraft(), @AfterCancelDraft(), @AfterEditDraft(), @AfterSaveDraft()
 
 The results from the preceding `.on` handler, with the following types:
 
-- `results` (of type `MyEntity[]`) for `@AfterRead`
-- `result` (of type `MyEntity`) for `@AfterUpdate` and `@AfterCreate`
-- `deleted` (of type `boolean`) for `@AfterDelete`
-- `req` of type `TypedRequest`
+| Parameters     | Decorator                         | Description                                                                |
+| -------------- | --------------------------------- | -------------------------------------------------------------------------- |
+| `results, req` | `@AfterRead`                      | An array of type `MyEntity[]` and the `Request`.                           |
+|                |                                   |                                                                            |
+| `result, req`  | `@AfterUpdate`<br> `@AfterCreate` | An object of type `MyEntity` and the `Request`.                            |
+|                |                                   |                                                                            |
+| `deleted, req` | `@AfterDelete`                    | A `boolean` indicating whether the instance was deleted and the `Request`. |
 
 ###### @AfterNewDraft
 
 **@AfterNewDraft**()
 
 Use this decorator when you want to enhance outbound data when a new draft is created.
-
-It is important to note that decorator `@AfterNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2279,6 +2314,9 @@ this.after('NEW', MyEntity.drafts, async (results, req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@AfterNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2289,8 +2327,6 @@ this.after('NEW', MyEntity.drafts, async (results, req) => {
 **@AfterCancelDraft**()
 
 Use this decorator when you want to enhance outbound data when a draft is discarded.
-
-It is important to note that decorator `@AfterCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2314,6 +2350,9 @@ this.after('CANCEL', MyEntity.drafts, async (results, req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@AfterCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2324,8 +2363,6 @@ this.after('CANCEL', MyEntity.drafts, async (results, req) => {
 **@AfterEditDraft**()
 
 Use this decorator when you want to enhance outbound data when a new draft is created from an active instance.
-
-It is important to note that decorator `@AfterEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2349,6 +2386,9 @@ this.after('EDIT', MyEntity, async (results, req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@AfterEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2359,8 +2399,6 @@ this.after('EDIT', MyEntity, async (results, req) => {
 **@AfterSaveDraft**()
 
 Use this decorator when you want to enhance outbound data when the active entity is changed.
-
-It is important to note that decorator `@AfterSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2384,6 +2422,9 @@ this.after('SAVE', MyEntity, async (results, req) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@AfterSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2405,8 +2446,6 @@ See Official SAP **[Fiori-draft](https://cap.cloud.sap/docs/node.js/fiori#draft-
 **@OnNewDraft()**
 
 This decorator will be triggered when `a new draft is created`.
-
-It is important to note that decorator `@OnNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2430,6 +2469,9 @@ this.on('NEW', MyEntity.drafts, async (req, next) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@OnNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2440,8 +2482,6 @@ this.on('NEW', MyEntity.drafts, async (req, next) => {
 **@OnCancelDraft()**
 
 This decorator will be triggered when `a draft is cancelled`.
-
-It is important to note that decorator `@OnCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2465,6 +2505,9 @@ this.on('CANCEL', MyEntity.drafts, async (req, next) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@OnCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2475,8 +2518,6 @@ this.on('CANCEL', MyEntity.drafts, async (req, next) => {
 **@OnEditDraft()**
 
 This decorator will be triggered when `a new draft is created from an active instance`
-
-It is important to note that decorator `@OnEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2500,6 +2541,9 @@ this.on('EDIT', MyEntity, async (req, next) => {
 });
 ```
 
+> [!IMPORTANT]
+> Decorator `@OnEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
@@ -2510,8 +2554,6 @@ this.on('EDIT', MyEntity, async (req, next) => {
 **@OnSaveDraft()**
 
 This decorator will be triggered when `the active entity is changed`
-
-It is important to note that decorator `@OnSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`
 
 `Example`
 
@@ -2535,6 +2577,9 @@ this.on('SAVE', MyEntity, async (req, next) => {
   // ...
 });
 ```
+
+> [!IMPORTANT]
+> Decorator `@OnSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -2945,13 +2990,13 @@ class UnboundActionsHandler {
 
 **@ExecutionAllowedForRole(...roles: string[])**
 
-The `@ExecutionAllowedForRole` is used as a `method level` and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
+The `@ExecutionAllowedForRole` is used as a `method level` decorator and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
 
 `Parameters`
 
 - `...roles: string[]`: Specifies the roles that are permitted to execute the event logic.
 
-`Example 1`
+`Example`
 
 ```typescript
 @AfterRead()
@@ -2961,6 +3006,7 @@ private async afterRead(
   @Results() results: BookSale[],
 ) {
   // Method implementation
+  // Code will be executed only in case of User ( Manager, User and CEO )
 }
 ```
 
@@ -3182,8 +3228,7 @@ private async afterRead(@Results() results: MyEntity[], @Req() req: TypedRequest
 }
 ```
 
-[!TIP]
-
+> [!TIP]
 > To get all the Formatters typing you can import the `Formatters\<T>` type where `T` is the entity of your `CDS` provided by [CDS-Typer](#generate-cds-typed-entities)
 
 </details>
