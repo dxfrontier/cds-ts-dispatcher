@@ -1,8 +1,12 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-confusing-void-expression */
 import {
-  AfterRead,
+  ActionRequest,
+  ActionReturn,
   EntityHandler,
   Inject,
   Next,
+  NextEvent,
   OnBoundAction,
   OnBoundFunction,
   OnCreate,
@@ -10,15 +14,15 @@ import {
   OnRead,
   OnUpdate,
   Req,
-  Results,
+  Request,
+  Service,
   SingleInstanceSwitch,
   SRV,
+  TypedRequest,
 } from '../../../../../../lib';
 import { BookStat } from '../../../../@cds-models/CatalogService';
 import AuthorService from '../../../service/AuthorService';
 import BookStatsService from '../../../service/BookStatsService';
-
-import type { TypedRequest, Service, Request, ActionRequest, ActionReturn, NextEvent } from '../../../../../../lib';
 
 @EntityHandler(BookStat)
 class BookStatsHandler {

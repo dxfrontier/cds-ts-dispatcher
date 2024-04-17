@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { ActionRequest, Inject, Request, Service, ServiceLogic, SRV, TypedRequest } from '../../../../lib';
+import { Inject, Service, ServiceLogic, SRV } from '../../../../lib';
 import BookRepository from '../repository/BookRepository';
 
+import type { ActionRequest, Request, TypedRequest } from '../../../../lib';
+
 import type { Book, submitOrder } from '../../@cds-models/CatalogService';
+
 @ServiceLogic()
 class BookService {
   @Inject(SRV) private readonly srv: Service;
   @Inject(BookRepository) private readonly bookRepository: BookRepository;
 
-  public manageAfterReadMethods(args: { req: Request; results: Book[]; singleInstance: boolean }) {
-    this.emitOrderedBookData(args.req);
+  public async manageAfterReadMethods(args: { req: Request; results: Book[]; singleInstance: boolean }) {
+    await this.emitOrderedBookData(args.req);
     this.notifySingleInstance(args.req, args.singleInstance);
     this.enrichTitle(args.results);
   }
@@ -29,7 +32,6 @@ class BookService {
   public notifySingleInstance(req: Request, singleInstance: boolean) {
     if (singleInstance) {
       req.notify('Single instance');
-      return;
     } else {
       req.notify('Entity set');
     }

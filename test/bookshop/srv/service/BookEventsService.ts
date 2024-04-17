@@ -1,28 +1,29 @@
-import { BookEvent } from '#cds-models/CatalogService';
+import { Inject, Service, ServiceLogic, SRV } from '../../../../lib';
 
-import { Inject, Request, Service, ServiceLogic, SRV } from '../../../../lib';
+import type { Request } from '../../../../lib';
+import type { BookEvent } from '#cds-models/CatalogService';
 
 @ServiceLogic()
 class BookEventsService {
   @Inject(SRV) private readonly srv: Service;
 
-  public async showNewDraftMessage(req: Request) {
+  public showNewDraftMessage(req: Request): void {
     req.notify('On new draft');
   }
 
-  public async showCancelDraftMessage(req: Request) {
+  public showCancelDraftMessage(req: Request): void {
     req.notify('On cancel draft');
   }
 
-  public async showEditDraftMessage(req: Request) {
+  public showEditDraftMessage(req: Request): void {
     req.notify('On edit draft');
   }
 
-  public async showSaveDraftMessage(req: Request) {
+  public showSaveDraftMessage(req: Request): void {
     req.notify('On save draft');
   }
 
-  public async handleSingleInstance(req: Request, results: BookEvent[], isSingleInstance: boolean) {
+  public handleSingleInstance(req: Request, results: BookEvent[], isSingleInstance: boolean): void {
     if (isSingleInstance) {
       req.notify('Single instance');
     }

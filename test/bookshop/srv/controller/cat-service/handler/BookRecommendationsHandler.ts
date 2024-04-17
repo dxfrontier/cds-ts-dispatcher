@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-confusing-void-expression */
 import {
   BeforeCreate,
   BeforeUpdate,
@@ -35,13 +37,13 @@ class BookRecommendationsHandler {
 
   @OnCreate()
   @Validate<BookRecommendation>({ action: 'isAlphanumeric' }, 'book_ID')
-  public async create(@Req() req: TypedRequest<BookRecommendation>, @Next() next: NextEvent) {
+  public async create(@Req() req: TypedRequest<BookRecommendation>, @Next() next: NextEvent): Promise<Function> {
     return next();
   }
 
   @OnUpdate()
   @Validate<BookRecommendation>({ action: 'isLength', options: { min: 5 } }, 'comment')
-  public async update(@Req() req: TypedRequest<BookRecommendation>, @Next() next: NextEvent) {
+  public async update(@Req() req: TypedRequest<BookRecommendation>, @Next() next: NextEvent): Promise<Function> {
     return next();
   }
 }

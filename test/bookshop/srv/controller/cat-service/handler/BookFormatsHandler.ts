@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-confusing-void-expression */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
   AfterRead,
   BeforeCreate,
@@ -24,13 +26,13 @@ class BookFormatsHandler {
 
   @BeforeCreate()
   @FieldsFormatter<BookFormat>({ action: 'blacklist', charsToRemove: 'le' }, 'format')
-  public async beforeCreate(@Req() req: TypedRequest<BookFormat>) {
+  public async beforeCreate(@Req() req: TypedRequest<BookFormat>): Promise<void> {
     // ...
   }
 
   @BeforeUpdate()
   @FieldsFormatter<BookFormat>({ action: 'truncate', options: { length: 7 } }, 'format')
-  public async beforeUpdate(@Req() req: TypedRequest<BookFormat>) {
+  public async beforeUpdate(@Req() req: TypedRequest<BookFormat>): Promise<void> {
     // ...
   }
 

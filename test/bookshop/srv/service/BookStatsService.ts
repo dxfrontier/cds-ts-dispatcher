@@ -1,8 +1,9 @@
-import { Inject, ServiceLogic, SRV } from '../../../../lib';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { Inject, Service, ServiceLogic, SRV } from '../../../../lib';
 import BookRepository from '../repository/BookRepository';
 import BookStatsRepository from '../repository/BookStatsRepository';
 
-import type { ActionRequest, Request, Service, TypedRequest } from '../../../../lib';
+import type { ActionRequest, Request, TypedRequest } from '../../../../lib';
 import type { BookStat } from '../../@cds-models/CatalogService';
 
 @ServiceLogic()
@@ -11,15 +12,15 @@ class BookStatsService {
   @Inject(BookStatsRepository) private readonly bookStatsRepository: BookStatsRepository;
   @Inject(BookRepository) private readonly bookRepository: BookRepository;
 
-  public async notifyDeleted(req: Request) {
+  public notifyDeleted(req: Request): void {
     req.notify('Item deleted');
   }
 
-  public async notifyUpdated(req: Request) {
+  public notifyUpdated(req: Request): void {
     req.notify(201, 'On update executed');
   }
 
-  public async notifyCreated(req: Request) {
+  public notifyCreated(req: Request): void {
     req.notify(201, 'On Create executed');
   }
 

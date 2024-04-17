@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-confusing-void-expression */
 import {
   AfterRead,
   AfterReadDraft,
@@ -54,7 +56,7 @@ class BookEventsHandler {
     @Results() results: BookEvent[],
     @Req() req: Request,
     @SingleInstanceSwitch() isSingleInstance: boolean,
-  ) {
+  ): Promise<void> {
     this.bookEventsService.handleSingleInstance(req, results, isSingleInstance);
   }
 }
