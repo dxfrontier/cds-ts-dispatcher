@@ -27,9 +27,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 - [Installation](#installation)
   - [`Option 1 :` Install CDS-TS-Dispatcher - `New project`](#option-1--install-cds-ts-dispatcher---new-project)
   - [`Option 2 :` Install CDS-TS-Dispatcher - `Existing project`](#option-2--install-cds-ts-dispatcher---existing-project)
-  - [`Option 3 :` Install CDS-TS-Dispatcher - ` Setup with development container`](#option-3--install-cds-ts-dispatcher----setup-with-development-container)
-    - [Docker \& VSCode - `(local development)`](#docker--vscode---local-development)
-    - [SAP Business Application Studio - `(BAS)`](#sap-business-application-studio---bas)
+  - [`Option 3 :` Install CDS-TS-Dispatcher - `.devcontainer on VSCode & Docker`](#option-3--install-cds-ts-dispatcher---devcontainer-on-vscode--docker)
   - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
     - [Option 1 - `Recommended`](#option-1---recommended)
     - [Option 2](#option-2)
@@ -116,7 +114,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
 Install [**@sap/cds-dk**](https://cap.cloud.sap/docs/get-started/) globally:
 
 ```bash
-npm install -g @sap/cds-dk typescript
+npm install -g @sap/cds-dk typescript ts-node
 ```
 
 ## Installation
@@ -258,7 +256,7 @@ It is recommended to use the following **tsconfig.json** properties:
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-### `Option 3 :` Install CDS-TS-Dispatcher - ` Setup with development container`
+### `Option 3 :` Install CDS-TS-Dispatcher - `.devcontainer on VSCode & Docker`
 
 The `CDS-TS-Dispatcher dev container` repository contains the [CDS-TS-Dispatcher](https://github.com/dxfrontier/cds-ts-dispatcher) & [CDS-TS-Repository](https://github.com/dxfrontier/cds-ts-repository) and `all dependencies` needed to boot a new project :
 
@@ -282,7 +280,7 @@ The `CDS-TS-Dispatcher dev container` repository contains the [CDS-TS-Dispatcher
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### Docker & VSCode - `(local development)`
+`Steps`
 
 1. Install [**Docker desktop**](https://www.docker.com/products/docker-desktop/)
 2. Clone [CDS-TS-Dispatcher devcontainer](https://github.com/dxfrontier/cds-ts-dispatcher-dev-container.git) using below command :
@@ -313,27 +311,6 @@ git push -u origin main
    1. Type - `Rebuild and Reopen in Container` - This step will start creating the container project and start the Node server.
 
 8. Start development as usual.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-#### SAP Business Application Studio - `(BAS)`
-
-1. Clone `CDS-TS-Dispatcher container` using below command :
-
-```bash
-git clone https://github.com/dxfrontier/cds-ts-dispatcher-dev-container
-```
-
-2. Change GIT remote origin to your origin
-
-```bash
-git remote remove origin
-git remote add origin https://github.com/user/YOUR_GIT_REPOSITORY.git
-git branch -M main
-git push -u origin main
-```
-
-3. Start development as usual.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
