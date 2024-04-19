@@ -425,6 +425,8 @@ export = new CDSDispatcher([
 
 The `@EntityHandler` decorator is utilized at the `class-level` to annotate a class with the specific `entity` that will be used in all handlers.
 
+When `@EntityHandler` decorator applied to a class all events [Before](#before), [After](#after), [On](#on) will be triggered based on the argument `entity`.
+
 `Parameters`
 
 - `entity (CDSTyperEntity)`: A specialized class generated using the [CDS-Typer](#generate-cds-typed-entities).
@@ -490,7 +492,7 @@ export class CustomerService {
 
 **@Repository()**
 
-The `@Repository` decorator is utilized as a `class-level` annotation that designates a particular `class` as a specialized `Repository`.
+The `@Repository` decorator is utilized as a `class-level` annotation that designates a particular `class` as a specialized `Repository`, this class should contain only [CDS-QL](https://cap.cloud.sap/docs/node.js/cds-ql) code.
 
 ```typescript
 import { Repository } from '@dxfrontier/cds-ts-dispatcher';
@@ -554,14 +556,14 @@ Explore the capabilities it offers and enhance your data access layer with ease.
 
 **@UnboundActions()**
 
-The `@UnboundActions` decorator is utilized at the `class-level` to annotate a `class` as a specialized class which will be used only for Unbound actions.
+The `@UnboundActions` decorator is utilized at the `class-level` to annotate a `class` as a specialized class which will be used only for **_Unbound actions._**
 
 The following decorators can be used inside of `@UnboundActions()` :
 
-- [@OnAction](#onaction)
-- [@OnFunction](#onfunction)
-- [@OnEvent](#onevent)
-- [@OnError](#onerror)
+- [@OnAction()](#onaction)
+- [@OnFunction()](#onfunction)
+- [@OnEvent()](#onevent)
+- [@OnError()](#onerror)
 
 `Example`
 
@@ -683,7 +685,7 @@ export class CustomerHandler {
 >
 > 1. Think of it _(middleware)_ like as a reusable class, enhancing the functionality of all events within the class.
 > 2. Middlewares when applied with `@Use` are executed before the normal events.
-> 3. If you need to apply middleware to `method` you can have a look over method specific [@Use](#use-1) decorator .
+> 3. If you need to apply middleware to a `method` you should use the method specific [@Use](#use-1) decorator .
 
 > [!WARNING]
 > If `req.reject()` is used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
@@ -840,33 +842,36 @@ export class BookHandler {
 
 > [!TIP]
 > When using [@AfterCreate()](#aftercreate), [@AfterUpdate()](#afterupdate) and [@AfterDelete()](#afterdelete) it's recommended to use the `@Result` decorator for single object result and `@Results` for arrays of objects.
->
-> ```ts
-> @AfterCreate()
-> @AfterUpdate()
-> private async aMethod(
->   @Result() result: Book, // <== @Result() decorator used to annotate it's a an object and not an array
->   @Req() req: Request,
-> ) {
->   // ...
-> }
->
-> @AfterRead()
-> private async aMethod(
->   @Results() result: Book[], // <== @Results() decorator used to annotate as array of objects
->   @Req() req: Request,
-> ) {
->   // ...
-> }
->
-> @AfterDelete()
-> private async aMethod(
-> @Result() deleted: boolean, // <== @Result() decorator used to annotate as a boolean
-> @Req() req: Request,
-> ) {
->   // ...
-> }
-> ```
+
+```ts
+@AfterCreate()
+@AfterUpdate()
+private async aMethod(
+   @Result() result: Book, // <== @Result() decorator used to annotate it's a an object and not an array
+   @Req() req: Request,
+ ) {
+   // ...
+ }
+
+@AfterRead()
+private async aMethod(
+  @Results() result: Book[], // <== @Results() decorator used to annotate as array of objects
+  @Req() req: Request,
+) {
+  // ...
+}
+
+@AfterDelete()
+private async aMethod(
+@Result() deleted: boolean, // <== @Result() decorator used to annotate as a boolean
+@Req() req: Request,
+) {
+  // ...
+}
+```
+
+> [!TIP]
+> Decorators `@Results()` and `@Result()` can be applied to all [After](#after) events.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
