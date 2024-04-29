@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-
     /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -25,7 +24,7 @@
     "rootDir": "./",
     "baseUrl": ".",
 
-    "outDir": "./gen/srv",
+    "outDir": "./gen/srv"
   },
   "include": ["./srv"]
 }
