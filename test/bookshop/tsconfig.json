@@ -21,6 +21,9 @@
 
     "lib": ["es2022"],
 
+    "rootDir": "./",
+    "baseUrl": ".",
+
     "outDir": "./gen/srv"
   },
   "include": ["./srv"]

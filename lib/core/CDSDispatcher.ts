@@ -3,15 +3,14 @@ import { Container } from 'inversify';
 
 import cds from '@sap/cds';
 
-import constants, { SRV } from '../constants/constants';
+import { SRV } from '../constants/constants';
 import { HandlerType } from '../types/enum';
-import middlewareUtil from '../util/helpers/middlewareUtil';
+import { MiddlewareEntityRegistry } from '../util/middleware/MiddlewareEntityRegistry';
 import util from '../util/util';
 import { MetadataDispatcher } from './MetadataDispatcher';
 
-import type { NonEmptyArray, Handler } from '../types/internalTypes';
+import type { NonEmptyArray, BaseHandler } from '../types/internalTypes';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
-
 import type { Request, Service, ServiceImpl } from '../types/types';
 
 class CDSDispatcher {
@@ -33,142 +32,242 @@ class CDSDispatcher {
     this.srv = srv;
   }
 
-  private async executeBeforeCallback(handlerAndEntity: [Handler, Constructable], req: Request): Promise<unknown> {
+  private async executeBeforeCallback(handlerAndEntity: [BaseHandler, Constructable], req: Request): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback;
-
-    return await callback.call(entity, req);
+    return await handler.callback.call(entity, req);
   }
 
-  private executeOnErrorCallback(handlerAndEntity: [Handler, Constructable], err: Error, req: Request): unknown | void {
+  private executeOnErrorCallback(
+    handlerAndEntity: [BaseHandler, Constructable],
+    err: Error,
+    req: Request,
+  ): unknown | void {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback;
-
-    return callback.call(entity, err, req);
+    return handler.callback.call(entity, err, req);
   }
 
   private async executeOnCallback(
-    handlerAndEntity: [Handler, Constructable],
+    handlerAndEntity: [BaseHandler, Constructable],
     req: Request,
     next: Function,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback;
-
-    return await callback.call(entity, req, next);
+    return await handler.callback.call(entity, req, next);
   }
 
   private async executeAfterCallback(
-    handlerAndEntity: [Handler, Constructable],
+    handlerAndEntity: [BaseHandler, Constructable],
     req: Request,
     results: unknown | unknown[] | number,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
-    const callback = handler.callback;
 
-    // private routine for this func
-    const _isDeleted = (data: unknown): boolean => data === 1;
-
+    // DELETE single request
     if (!Array.isArray(results)) {
-      // DELETE single request
-      if (util.lodash.isNumber(results)) {
-        const deleted = _isDeleted(results);
-        return await callback.call(entity, deleted, req);
-      }
+      // private routine for this func
+      const _isDeleted = (result: unknown): boolean => result === 1;
 
-      // CREATE, READ, UPDATE - single request
-      return await callback.call(entity, results, req);
+      if (util.lodash.isNumber(results)) {
+        results = _isDeleted(results);
+      }
     }
 
-    // READ entity set
-    return await callback.call(entity, results, req);
+    // READ entity set, CREATE, READ, UPDATE - single request, DELETE - single request
+    return await handler.callback.call(entity, results, req);
   }
 
-  private getActiveEntityOrDraft(handler: Handler, entityInstance: Constructable): Constructable {
+  private getActiveEntityOrDraft(handler: BaseHandler, entityInstance: Constructable): Constructable {
     const { isDraft } = handler;
-    const entityConstructable = MetadataDispatcher.getEntity(entityInstance);
-    const entity = isDraft === true ? entityConstructable.drafts : entityConstructable;
-    return entity;
+    const entity = MetadataDispatcher.getEntity(entityInstance);
+
+    return isDraft ? entity.drafts : entity;
   }
 
-  private getHandlerProps(handler: Handler, entityInstance: Constructable) {
-    const { event, actionName, eventName } = handler;
+  private getHandlerProps(handler: BaseHandler, entityInstance: Constructable) {
     const entity = this.getActiveEntityOrDraft(handler, entityInstance);
+    const { event } = handler;
 
-    // private routine for this func
-    const _formatEventName = (): string => {
-      const lastDotIndex = eventName!.lastIndexOf('.');
-      const subtractedEventName = eventName!.substring(lastDotIndex + 1);
+    const defaultProps = { event, entity };
 
-      return subtractedEventName;
+    // PUBLIC routines for this func
+    const getDefault = () => ({ ...defaultProps });
+
+    const getAction = () => {
+      const _getDefaultAction = () => {
+        if (handler.type === 'ACTION_FUNCTION') {
+          return handler.actionName;
+        }
+      };
+
+      const _getPrependAction = () => {
+        if (handler.type === 'PREPEND' && ['ACTION', 'FUNC', 'BOUND_ACTION', 'BOUND_FUNC'].includes(handler.event)) {
+          return handler.options;
+        }
+      };
+
+      return { actionName: _getDefaultAction() ?? _getPrependAction()?.actionName };
     };
 
-    return {
-      entity,
-      event,
-      actionName,
-      getEventName: _formatEventName,
+    const getEvent = () => {
+      // PRIVATE routine for this func
+      const _constructEventName = () => {
+        const _getDefaultEvent = () => {
+          if (handler.type === 'EVENT') {
+            return handler.eventName;
+          }
+        };
+
+        const _getPrependEvent = () => {
+          if (handler.type === 'PREPEND' && handler.event === 'EVENT') {
+            return handler.options.eventName;
+          }
+        };
+
+        const eventName: string | undefined = _getDefaultEvent() ?? _getPrependEvent();
+
+        if (!util.lodash.isUndefined(eventName)) {
+          return util.subtractLastDotString(eventName);
+        }
+      };
+
+      return { eventName: _constructEventName() };
     };
+
+    // Get all properties for 'OnAction', 'OnBoundAction', 'OnFunction', 'OnBoundFunction'
+    const getPrepend = () => {
+      const eventKind = handler.type === 'PREPEND' ? handler.eventKind : undefined;
+
+      return { eventKind };
+    };
+
+    return { getDefault, getAction, getEvent, getPrepend };
   }
 
-  private registerAfterHandler(handlerAndEntity: [Handler, Constructable]): void {
-    const { event, entity } = this.getHandlerProps(...handlerAndEntity);
+  /**
+   * Registration of all `AFTER, AFTER, ON` events, for `PREPEND` only
+   * @private
+   */
+  private registerPrependHandler(handlerAndEntity: [BaseHandler, Constructable]) {
+    const getProps = this.getHandlerProps(...handlerAndEntity);
+    const { eventKind } = getProps.getPrepend();
+
+    void this.srv.prepend(() => {
+      switch (eventKind) {
+        case 'BEFORE':
+          this.registerBeforeHandler(handlerAndEntity);
+          break;
+
+        case 'AFTER':
+          this.registerAfterHandler(handlerAndEntity);
+          break;
+
+        case 'AFTER_SINGLE':
+          this.registerAfterSingleInstanceHandler(handlerAndEntity);
+          break;
+
+        case 'ON':
+          this.registerOnHandler(handlerAndEntity);
+          break;
+
+        default:
+          util.throwErrorMessage(`Unexpected eventKind: ${eventKind}`);
+      }
+    });
+  }
+
+  /**
+   * Registration of `AFTER - SingleInstance` event `@AfterReadSingleInstance`,
+   * @private
+   */
+  private registerAfterSingleInstanceHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
+    const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
+
+    this.srv.after(event, entity, async (data, req) => {
+      const singleInstance = req.params && req.params.length > 0;
+
+      if (singleInstance) {
+        return await this.executeAfterCallback(handlerAndEntity, req, util.getArrayFirstItem(data));
+      }
+    });
+  }
+
+  /**
+   * Registration of all `AFTER` events, like : `@AfterRead`, `@AfterUpdate`, ...
+   * @private
+   */
+  private registerAfterHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
+    const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
 
     this.srv.after(event, entity, async (data, req) => {
       return await this.executeAfterCallback(handlerAndEntity, req, data);
     });
   }
 
-  private registerBeforeHandler(handlerAndEntity: [Handler, Constructable]): void {
-    const { event, entity } = this.getHandlerProps(...handlerAndEntity);
+  /**
+   * Registration of all `BEFORE` events, like : `@BeforeRead`, `@BeforeUpdate`, ...
+   * @private
+   */
+  private registerBeforeHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
+    const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
 
     this.srv.before(event, entity, async (req) => {
       return await this.executeBeforeCallback(handlerAndEntity, req);
     });
   }
 
-  private registerOnHandler(handlerAndEntity: [Handler, Constructable]): void {
-    const { event, actionName, getEventName, entity } = this.getHandlerProps(...handlerAndEntity);
+  /**
+   * Registration of all `ON` events, like : `@OnRead`, `@OnUpdate`, `@OnBoundAction`, ...
+   * @private
+   */
+  private registerOnHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
+    const getProps = this.getHandlerProps(...handlerAndEntity);
 
-    if (event === 'ACTION' || event === 'FUNC') {
-      this.srv.on(actionName!, async (req, next) => {
-        return await this.executeOnCallback(handlerAndEntity, req, next);
-      });
+    const { event, entity } = getProps.getDefault();
 
-      return;
+    switch (event) {
+      case 'ACTION':
+      case 'FUNC': {
+        const actionName = getProps.getAction().actionName!;
+
+        this.srv.on(actionName, async (req, next) => {
+          return await this.executeOnCallback(handlerAndEntity, req, next);
+        });
+        break;
+      }
+      case 'BOUND_ACTION':
+      case 'BOUND_FUNC': {
+        const actionName = getProps.getAction().actionName!;
+
+        this.srv.on(actionName, entity.name, async (req, next) => {
+          return await this.executeOnCallback(handlerAndEntity, req, next);
+        });
+        break;
+      }
+      case 'EVENT': {
+        const eventName = getProps.getEvent().eventName!;
+
+        this.srv.on(eventName, async (req, next) => {
+          return await this.executeOnCallback(handlerAndEntity, req, next);
+        });
+
+        break;
+      }
+
+      case 'ERROR':
+        this.srv.on('error', (err, req) => {
+          return this.executeOnErrorCallback(handlerAndEntity, err, req);
+        });
+        break;
+
+      // CRUD_EVENTS[NEW, CANCEL, CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
+      default:
+        this.srv.on(event, entity, async (req, next) => {
+          return await this.executeOnCallback(handlerAndEntity, req, next);
+        });
     }
-
-    if (event === 'BOUND_ACTION' || event === 'BOUND_FUNC') {
-      this.srv.on(actionName!, entity.name, async (req, next) => {
-        return await this.executeOnCallback(handlerAndEntity, req, next);
-      });
-
-      return;
-    }
-
-    if (event === 'EVENT') {
-      this.srv.on(getEventName(), async (req, next) => {
-        return await this.executeOnCallback(handlerAndEntity, req, next);
-      });
-
-      return;
-    }
-
-    if (event === 'ERROR') {
-      this.srv.on('error', (err, req) => {
-        return this.executeOnErrorCallback(handlerAndEntity, err, req);
-      });
-
-      return;
-    }
-
-    // CRUD_EVENTS[NEW, CANCEL, CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
-    this.srv.on(event, entity, async (req, next) => {
-      return await this.executeOnCallback(handlerAndEntity, req, next);
-    });
   }
 
-  private buildHandlerBy(handlerAndEntity: [Handler, Constructable]): void {
+  private buildHandlerBy(handlerAndEntity: [BaseHandler, Constructable]) {
     const [handler] = handlerAndEntity;
 
     switch (handler.handlerType) {
@@ -180,97 +279,28 @@ class CDSDispatcher {
         this.registerAfterHandler(handlerAndEntity);
         break;
 
+      case HandlerType.AfterSingleInstance: {
+        this.registerAfterSingleInstanceHandler(handlerAndEntity);
+        break;
+      }
+
       case HandlerType.On:
         this.registerOnHandler(handlerAndEntity);
         break;
 
-      default:
-        util.throwErrorMessage(constants.MESSAGES.NO_HANDLERS_MESSAGE);
-    }
-  }
-
-  private async executeMiddlewareChain(req: Request, entityInstance: Constructable, index: number = 0): Promise<void> {
-    const middlewares = MetadataDispatcher.getMiddlewares(entityInstance);
-
-    // stop the chain if req.reject was used
-    if (middlewareUtil.isRejectUsed(req)) {
-      return;
-    }
-
-    if (index < middlewares.length) {
-      const CurrentMiddleware = middlewares[index];
-      const currentMiddlewareInstance = new CurrentMiddleware();
-
-      const next = async (): Promise<void> => {
-        await this.executeMiddlewareChain(req, entityInstance, index + 1);
-      };
-
-      await currentMiddlewareInstance.use(req, next);
-    }
-  }
-
-  private constructMiddlewares(entityInstance: Constructable): void {
-    const ALL_EVENTS = '*';
-    const entity = MetadataDispatcher.getEntity(entityInstance);
-
-    // Active entity
-    if (entity?.name && entity?.drafts === null) {
-      this.srv.before(ALL_EVENTS, entity.name, async (req: Request) => {
-        await this.executeMiddlewareChain(req, entityInstance);
-      });
-
-      return;
-    }
-
-    // Draft entity
-    if (entity?.drafts) {
-      this.srv.before(ALL_EVENTS, entity.drafts, async (req: Request) => {
-        await this.executeMiddlewareChain(req, entityInstance);
-      });
-
-      return;
-    }
-
-    // @UnboundActions() events
-    if (entity === undefined) {
-      const handlers = MetadataDispatcher.getMetadataHandlers(entityInstance);
-
-      handlers.forEach((handler) => {
-        if (handler.event === 'ACTION' || handler.event === 'FUNC') {
-          this.srv.before(handler.actionName!.toString(), async (req: Request) => {
-            await this.executeMiddlewareChain(req, entityInstance);
-          });
-
-          return;
-        }
-
-        if (handler.event === 'EVENT') {
-          this.srv.before(handler.eventName!, async (req: Request) => {
-            await this.executeMiddlewareChain(req, entityInstance);
-          });
-
-          return;
-        }
-
-        if (handler.event === 'ERROR') {
-          this.srv.before('error', async (req: Request) => {
-            await this.executeMiddlewareChain(req, entityInstance);
-          });
-        }
-      });
+      case HandlerType.Prepend: {
+        this.registerPrependHandler(handlerAndEntity);
+        break;
+      }
     }
   }
 
   private buildMiddlewareBy(entityInstance: Constructable): void {
-    const middlewares = MetadataDispatcher.getMiddlewares(entityInstance);
+    const middlewareRegistry = new MiddlewareEntityRegistry(entityInstance, this.srv);
 
-    // Step out if no middlewares
-    if (!middlewares) {
-      return;
+    if (middlewareRegistry.hasEntityMiddlewaresAttached()) {
+      middlewareRegistry.buildMiddlewares();
     }
-
-    this.constructMiddlewares(entityInstance);
-    middlewareUtil.sortBeforeEvents(this.srv);
   }
 
   private getHandlersBy(entityInstance: Constructable) {
@@ -283,6 +313,7 @@ class CDSDispatcher {
             this.buildHandlerBy([handler, entityInstance]);
           });
         },
+
         buildMiddlewares: () => {
           this.buildMiddlewareBy(entityInstance);
         },
@@ -292,7 +323,7 @@ class CDSDispatcher {
     return undefined;
   }
 
-  private readonly registerSrvConstant = (): void => {
+  private readonly registerSrvAsConstant = (): void => {
     if (!this.container.isBound(SRV)) {
       this.container.bind<Service>(SRV).toConstantValue(this.srv);
     }
@@ -315,15 +346,11 @@ class CDSDispatcher {
     });
   }
 
-  private buildEntityHandlers(): void {
-    this.registerSrvConstant();
-    this.registerHandlers();
-  }
-
   private buildServiceImplementation() {
     return (srv: Service): void => {
       this.storeService(srv);
-      this.buildEntityHandlers();
+      this.registerSrvAsConstant();
+      this.registerHandlers();
     };
   }
 

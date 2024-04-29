@@ -1,16 +1,15 @@
 /* eslint-disable prefer-const */
 import 'reflect-metadata';
 
-import { EventContext, Request } from '@sap/cds';
-
+// import { EventContext, Request } from '@sap/cds';
 import constants from '../constants/constants';
-import parameterUtil from '../util/helpers/parameterUtil';
+import parameterUtil from '../util/parameter/parameterUtil';
 import util from '../util/util';
 
 import type { MetadataFields, MetadataInputs, TemporaryArgs } from '../types/internalTypes';
 
 export class ArgumentMethodProcessor {
-  private readonly temporaryArgs: TemporaryArgs = Object.create({});
+  private temporaryArgs: TemporaryArgs = Object.create({});
 
   constructor(
     private readonly target: object,
@@ -27,40 +26,7 @@ export class ArgumentMethodProcessor {
    * @private
    */
   private onLoadReorderArgsByType(): void {
-    this.args.forEach((arg) => {
-      switch (true) {
-        case arg instanceof Request:
-          this.temporaryArgs.req = arg;
-          break;
-
-        case arg instanceof Error:
-          this.temporaryArgs.error = arg;
-          break;
-
-        case arg instanceof EventContext:
-          this.temporaryArgs.event = arg;
-          break;
-
-        case arg instanceof Array:
-          this.temporaryArgs.results = arg;
-          break;
-
-        case util.isNextEvent(arg):
-          this.temporaryArgs.next = arg;
-          break;
-
-        case util.lodash.isBoolean(arg):
-          this.temporaryArgs.results = arg;
-          break;
-
-        case !util.lodash.isArray(arg) && util.lodash.isObject(arg):
-          this.temporaryArgs.results = arg;
-          break;
-
-        default:
-          util.throwErrorMessage('Option not handled in ArgumentMethodProcessor.ts');
-      }
-    });
+    this.temporaryArgs = parameterUtil.extractArguments(this.args);
   }
 
   private getMetadata(metadataKey: keyof typeof constants.DECORATOR.PARAMETER): MetadataFields[] | undefined {
@@ -164,8 +130,7 @@ export class ArgumentMethodProcessor {
     this.getAttachedDecorators().forEach((metadataKey) => {
       switch (metadataKey) {
         /**
-         * @Req(), @Error(), @Next(), @Results(), @Result(), @Jwt, @SingleInstanceSwitch are single decorators
-         * This means that decorators can be added only once per callback.
+         * @Req(), @Res(), @Error(), @Next(), @Results(), @Result(), @Jwt, @SingleInstanceSwitch can be present only once per callback
          */
         case 'ERROR':
         case 'NEXT':
@@ -173,6 +138,14 @@ export class ArgumentMethodProcessor {
         case 'REQ': {
           let key = util.lodash.lowerCase(metadataKey) as 'req' | 'results' | 'next' | 'error';
           this.applySingleDecoratorByKey({ metadataKey, data: this.temporaryArgs[key] });
+          break;
+        }
+
+        case 'RES': {
+          this.applySingleDecoratorByKey({
+            metadataKey,
+            data: parameterUtil.retrieveResponse(this.temporaryArgs.req),
+          });
           break;
         }
 
@@ -191,8 +164,7 @@ export class ArgumentMethodProcessor {
           break;
 
         /**
-         * @IsColumnSupplied, @IsRole, @GetRequest, @GetQuery, @IsPresent,  are multiple decorators.
-         * This means that the decorators can be added multiple times per callback.
+         * @IsColumnSupplied, @IsRole, @GetRequest, @GetQuery, @IsPresent, can be present multiple times per callback.
          */
         case 'GET_QUERY':
         case 'IS_PRESENT':

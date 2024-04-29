@@ -782,9 +782,16 @@
 													"listen": "test",
 													"script": {
 														"exec": [
+															"// Test to check if the response headers contain Content-Language header with the value 'DE_de'",
+															"pm.test(\"Response headers contain Content-Language header with the value 'DE_de'\", function () {",
+															"    pm.expect(pm.response.headers.get('Content-Language')).to.equal('DE_de');",
+															"});",
+															"",
 															"pm.test(\"Status code is 200\", function () {",
 															"    pm.response.to.have.status(200);",
-															"});"
+															"});",
+															"",
+															""
 														],
 														"type": "text/javascript",
 														"packages": {}
@@ -863,17 +870,12 @@
 									"name": "@OnEvent",
 									"item": [
 										{
-											"name": "On execute an action Copy",
+											"name": "OnEvent should not return an error",
 											"event": [
 												{
 													"listen": "test",
 													"script": {
 														"exec": [
-															"pm.test(\"submitOrder contains a stock = 6\", function () {",
-															"    const {stock} = pm.response.json();",
-															"    pm.expect(stock).to.eql(6);",
-															"});",
-															"",
 															"pm.test(\"Status code is 200\", function () {",
 															"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
 															"});"
@@ -884,25 +886,16 @@
 												}
 											],
 											"request": {
-												"method": "POST",
+												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"book\" : 271,\n    \"quantity\": 5\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
-												},
 												"url": {
-													"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
+													"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
 													"host": [
 														"{{baseUrl}}"
 													],
 													"path": [
 														"{{catalogService}}",
-														"submitOrder"
+														"{{booksEntity}}"
 													]
 												}
 											},
@@ -1863,49 +1856,10 @@
 							"response": []
 						},
 						{
-							"name": "@Result",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Successful POST request\", function () {",
-											"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
-											"});",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
+							"name": "@Res - TODO",
 							"request": {
-								"auth": {
-									"type": "basic",
-									"basic": [
-										{
-											"key": "password",
-											"value": "{{user}}",
-											"type": "string"
-										},
-										{
-											"key": "username",
-											"value": "{{user}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
+								"method": "GET",
 								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"ID\": 3,\n    \"saleDate\": \"2024-03-06\",\n    \"saleAmount\": 6,\n    \"quantity\": 55,\n    \"book_ID\": 251,\n    \"customer_ID\": 3\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
 								"url": {
 									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
 									"host": [
@@ -1958,6 +1912,63 @@
 								},
 								"method": "GET",
 								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookSalesEntity}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@Result",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "{{user}}",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{user}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ID\": 3,\n    \"saleDate\": \"2024-03-06\",\n    \"saleAmount\": 6,\n    \"quantity\": 55,\n    \"book_ID\": 251,\n    \"customer_ID\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
 									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
 									"host": [
@@ -3105,7 +3116,7 @@
 							"name": "@ExecutionAllowedForRoles",
 							"item": [
 								{
-									"name": "@ExecutionAllowedForRoles - Manager",
+									"name": "Allow Manager to execute the method",
 									"event": [
 										{
 											"listen": "test",
@@ -3163,6 +3174,343 @@
 									"response": []
 								}
 							]
+						},
+						{
+							"name": "@AfterReadSingleInstance",
+							"item": [
+								{
+									"name": "Entity set : singleInstance logic not executed",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"// Test to check if the response headers contain Content-Language header with the value 'DE_de'",
+													"pm.test(\"Response headers contain Content-Language header with the value 'DE_de'\", function () {",
+													"    pm.expect(pm.response.headers.get('Content-Language')).to.equal('DE_de');",
+													"});",
+													"",
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{booksEntity}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Single object : Validate title to contain 10 % discount",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"pm.test(\"Response is a single object and not an array\", function () {",
+													"    pm.expect(pm.response.json()).to.be.an('object').and.not.an('array');",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=252)",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{booksEntity}}(ID=252)"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "@AfterReadSingleInstanceDraft",
+							"item": [
+								{
+									"name": "Pre-request: Create draft",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Returned object is created & headers contains text 'After new draft executed'\", function () {",
+													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"    pm.expect(headers[0].message).to.contains('After new draft executed')",
+													"",
+													"    const response = pm.response.json();",
+													"    const UUIDValue = response.ID",
+													"    ",
+													"    pm.environment.set(\"draftUUIDInstance\", UUIDValue);",
+													"});",
+													"",
+													"pm.test(\"Response contains IsActiveEntity: false\", function () {",
+													"    const jsonData = pm.response.json();",
+													"    pm.expect(jsonData.IsActiveEntity).to.eql(false);",
+													"});",
+													"",
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"name\": \"Summer Spectacular Sale\",\n  \"description\": \"Enjoy fantastic discounts on a wide range of books this summer!\",\n  \"startDate\": \"2023-06-10\",\n  \"endDate\": \"2023-08-20\",\n  \"discount\": 0.3\n}\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{adminService}}/{{promotionsEntity}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{adminService}}",
+												"{{promotionsEntity}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "After read draft single instance, the header should contain Content-Language: 'DE_de'",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"// Test to check if the response headers contain Content-Language header with the value 'DE_de'",
+													"pm.test(\"Response headers contain Content-Language header with the value 'DE_de'\", function () {",
+													"    pm.expect(pm.response.headers.get('Content-Language')).to.equal('DE_de');",
+													"});",
+													"",
+													"// Test to verify the response field 'description' contains 'A new description'",
+													"pm.test(\"Description field contains 'A new description'\", function () {",
+													"    var responseData = pm.response.json();",
+													"    pm.expect(responseData.description).to.include('A new description');",
+													"});",
+													"",
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"description\": \"A new description\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{adminService}}/{{promotionsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{adminService}}",
+												"{{promotionsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "@Prepend",
+							"item": [
+								{
+									"name": "@AfterRead",
+									"item": [
+										{
+											"name": "The response header should contain language 'DE_de'",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															"",
+															"// Test to check if the response headers contain Accept-Language header with the value 'DE_de'",
+															"pm.test(\"Response headers contain Accept-Language header with the value 'DE_de'\", function () {",
+															"    pm.expect(pm.response.headers.get('Accept-Language')).to.equal('DE_de');",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}(ID=252)",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{booksEntity}}(ID=252)"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnAction",
+									"item": [
+										{
+											"name": "Execute submit order",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"// Test to check if the response headers contain Content-Language header with the value 'DE_de'",
+															"pm.test(\"Response headers contain Content-Language header with the value 'en'\", function () {",
+															"    pm.expect(pm.response.headers.get('Content-Language')).to.equal('DE_de');",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"book\": 1,\n    \"quantity\" : 3\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/submitOrder",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"submitOrder"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnEvent",
+									"item": [
+										{
+											"name": "OnEvent should not return an error and have header language DE_de",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"// Test to check if the response headers contain Content-Language header with the value 'DE_de'",
+															"pm.test(\"Response headers contain Content-Language header with the value 'en'\", function () {",
+															"    pm.expect(pm.response.headers.get('Content-Language')).to.equal('DE_de');",
+															"});",
+															"",
+															"pm.test(\"Status code is 200\", function () {",
+															"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"});",
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{booksEntity}}"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								}
+							]
 						}
 					],
 					"description": "All other decorators which are not SAP standard."
@@ -3213,37 +3561,6 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"{{catalogService}}",
-										"{{bookEventsEntity}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "@Draft + @AfterRead",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}",
 									"host": [

@@ -2,10 +2,13 @@ import {
   AfterDeleteDraft,
   AfterEditDraft,
   AfterNewDraft,
+  AfterReadDraftSingleInstance,
   AfterSaveDraft,
   EntityHandler,
   Inject,
   Req,
+  RequestResponse,
+  Res,
   Result,
   Service,
   SRV,
@@ -16,6 +19,15 @@ import { Promotion } from '../../../../@cds-models/AdminService';
 @EntityHandler(Promotion)
 class PromotionHandler {
   @Inject(SRV) private readonly srv: Service;
+
+  @AfterReadDraftSingleInstance()
+  public async afterReadSingleDraft(
+    @Req() req: TypedRequest<Promotion>,
+    @Res() res: RequestResponse,
+    @Result() result: Promotion,
+  ): Promise<void> {
+    res.setHeader('Content-Language', 'DE_de');
+  }
 
   @AfterNewDraft()
   public async afterNewDraft(@Result() result: Promotion, @Req() req: TypedRequest<Promotion>): Promise<void> {

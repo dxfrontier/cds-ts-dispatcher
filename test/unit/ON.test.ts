@@ -67,7 +67,7 @@ describe('ON', () => {
         expect(foundEvent.handlerType).toBe(HandlerType.On);
         expect(foundEvent.isDraft).toBe(false);
 
-        if (foundEvent.event === 'EVENT') {
+        if (foundEvent.event === 'EVENT' && foundEvent.type === 'EVENT') {
           expect(foundEvent.eventName).toStrictEqual(OrderedBook);
         }
 
@@ -77,7 +77,9 @@ describe('ON', () => {
           foundEvent.event === 'BOUND_ACTION' ||
           foundEvent.event === 'BOUND_FUNC'
         ) {
-          expect(foundEvent.actionName).toStrictEqual(submitOrder);
+          if (foundEvent.type === 'ACTION_FUNCTION') {
+            expect(foundEvent.actionName).toStrictEqual(submitOrder);
+          }
         }
       });
     });

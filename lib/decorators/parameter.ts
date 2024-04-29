@@ -72,9 +72,9 @@ function Results(): ParameterDecorator {
 
 /**
  * @description Annotates a parameter of a method with the `result`.
- * `Note:` This can be used on the `create`, `update`, `delete` when the result contains only an object `(create, update)` or boolean `(delete)`
+ * `NOTE`: This can be used on the `create`, `update`, `delete` when the result contains only an object `(create, update)` or boolean `(delete)`
  *
- * If the `results` is an `array` use `@Results` decorator.
+ * NOTE If the `results` is an `array` use `@Results` decorator.
  *
  * @example
  * "@Result() result: MyEntity"
@@ -109,6 +109,22 @@ function Req(): ParameterDecorator {
 }
 
 /**
+ * @description Annotates a parameter of a method with the `Req.res (Response)` object.
+ * @example "@Res() response: ServerResponse"
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#res | CDS-TS-Dispatcher - @Res}
+ */
+function Res(): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'RES',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'INDEX_DECORATOR', parameterIndex },
+    });
+  };
+}
+
+/**
  * @description Annotates a parameter of a method to `get` the `request.query[INSERT, SELECT, UPDATE, UPSERT, DELETE][property]` properties.
  * @param key The key indicating the type of query operation (`INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`).
  * @param property The specific property to get within the `request.query[key][property]`.
@@ -129,7 +145,7 @@ function GetQuery<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsB
 /**
  * @description Annotates a parameter of a method to `get` the `Request` properties.
  *
- * This is a convenient decorator to get only some properties of the `Request` object, to get all properties use `@Req()` decorator.
+ * `NOTE:` This is a convenient decorator to get only some properties of the `Request` object, to get all properties use `@Req()` decorator.
  *
  * @param  property The `Request` property to get.
  * @example "@GetRequest('locale') locale: string"
@@ -152,7 +168,7 @@ function GetRequest(property: CustomRequest): ParameterDecorator {
  * @param field The name of the `column` to verify in the `request.query[INSERT, SELECT, UPSERT].columns`.
  * @example "@IsColumnSupplied('name') isPresent: boolean"
  * @returns boolean
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#isColumnSupplied | CDS-TS-Dispatcher - @IsColumnSupplied}
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#iscolumnsupplied | CDS-TS-Dispatcher - @IsColumnSupplied}
  */
 function IsColumnSupplied<Key>(field: keyof Key): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -168,7 +184,8 @@ function IsColumnSupplied<Key>(field: keyof Key): ParameterDecorator {
 /**
  *
  * @description Annotates a parameter of a method to `check` the `existence` of specific role values in the request.
- * It applies an `OR` logic between the roles, meaning it checks if at least one of the specified roles exists.
+ *
+ * `NOTE`: `IsRole` applies a logical `OR` between the roles, meaning it checks if at least one of the specified roles exists.
  * @param roles An array of role names to verify in `req.user.is(role)`.
  * @example "@IsRole('name', 'anotherRole') roles: boolean"
  * @returns boolean
@@ -187,8 +204,8 @@ function IsRole(...roles: string[]): ParameterDecorator {
 
 /**
  * @description Annotates a parameter of a method to `check` existence of `request.query[INSERT, SELECT, UPDATE, UPSERT, DELETE][property]` various properties.
- * @param {string} key The key indicating the type of query operation (`INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`).
- * @param {string} property The specific property to check within the `request.query[key][property]`.
+ * @param key The key indicating the type of query operation (`INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`).
+ * @param property The specific property to check within the `request.query[key][property]`.
  * @example "@IsPresent('SELECT', 'columns') hasColumns: boolean"
  * @returns boolean
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#ispresent | CDS-TS-Dispatcher - @IsPresent}
@@ -227,6 +244,7 @@ export {
   Result,
   Results,
   Req,
+  Res,
   GetQuery,
   GetRequest,
   IsColumnSupplied,

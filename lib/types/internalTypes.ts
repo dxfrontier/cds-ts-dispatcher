@@ -1,10 +1,24 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
-import { EventContext, Query } from '@sap/cds';
+import { Query } from '@sap/cds';
 
 import constants from '../constants/constants';
 import { HandlerType } from './enum';
 
-import type { CdsFunction, EVENTS, RequestType, Request, NextEvent } from './types';
+import type {
+  CdsFunction,
+  RequestType,
+  Request,
+  NextEvent,
+  ON_EVENT,
+  ACTION_EVENTS,
+  FUNCTION_EVENTS,
+  CRUD_EVENTS,
+  ERROR_EVENT,
+  DRAFT_EVENTS,
+  EVENTS,
+  CdsEvent,
+  RequestResponse,
+} from './types';
 
 // **************************************************************************************************************************
 // Common types
@@ -16,22 +30,91 @@ export type ExtendedRequestWithResults = Request & {
 
 export type TemporaryArgs = {
   req: Request;
+  res: RequestResponse;
   next: NextEvent;
-  event: EventContext;
   error: Error;
   results: unknown | unknown[];
 };
 
 export type NonEmptyArray<T> = [T, ...T[]];
 
-export type Handler = {
+// **************************************************************************************************************************
+// @AfterRead, @AfterCreate, @BeforeCreate, @BeforeUpdate, @OnRead, etc decorator types
+// **************************************************************************************************************************
+
+export type EventKind = 'BEFORE' | 'AFTER' | 'AFTER_SINGLE' | 'ON';
+
+export type PrependHandler = {
+  type: 'PREPEND';
   event: EVENTS;
+  options: {
+    actionName?: CdsFunction;
+    eventName?: string;
+  };
+};
+
+export type OnHandler = {
+  type: 'ACTION_FUNCTION';
+  event: ACTION_EVENTS | FUNCTION_EVENTS;
+  actionName: CdsFunction;
+};
+
+export type EventHandler = {
+  type: 'EVENT';
+  event: ON_EVENT;
+  eventName: string;
+};
+
+export type DefaultHandlers = {
+  type: 'DEFAULT';
+  event: CRUD_EVENTS | DRAFT_EVENTS | ERROR_EVENT;
+};
+
+export type BaseHandler = {
   handlerType: HandlerType;
   callback: RequestType;
-  actionName?: CdsFunction;
-  eventName?: string;
-  isDraft?: boolean;
+  eventKind: EventKind;
+  isDraft: boolean;
+} & (DefaultHandlers | OnHandler | EventHandler | PrependHandler);
+
+// **************************************************************************************************************************
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @Prepend decorator types
+// **************************************************************************************************************************
+
+export type PrependEvent = {
+  eventDecorator: 'OnEvent';
+  eventName: CdsEvent;
 };
+
+export type PrependAction = {
+  eventDecorator: 'OnAction' | 'OnFunction' | 'OnBoundAction' | 'OnBoundFunction';
+  actionName: CdsFunction;
+};
+
+export type PrependDecorators = {
+  eventDecorator:
+    | 'AfterCreate'
+    | 'AfterRead'
+    | 'AfterReadSingleInstance'
+    | 'AfterUpdate'
+    | 'AfterDelete'
+    | 'BeforeCreate'
+    | 'BeforeRead'
+    | 'BeforeUpdate'
+    | 'BeforeDelete'
+    | 'OnCreate'
+    | 'OnRead'
+    | 'OnUpdate'
+    | 'OnDelete'
+    | 'OnError';
+};
+
+export type PrependBase = {} & (PrependAction | PrependDecorators | PrependEvent);
+
+export type MapPrepend = { event: EVENTS; eventKind: EventKind; actionName?: CdsFunction; eventName?: CdsEvent };
 
 // **************************************************************************************************************************
 // **************************************************************************************************************************
@@ -128,6 +211,7 @@ export type MetadataInputs = {
 };
 
 type ExcludedRequestMethods = 'reject' | 'notify' | 'reply' | 'warn' | 'error';
+
 export type CustomRequest = Exclude<keyof Request, ExcludedRequestMethods>;
 
 // **************************************************************************************************************************

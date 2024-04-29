@@ -1,4 +1,4 @@
-<h2> CDS-TS Dispatcher </h2>
+<h2> CDS-TS-Dispatcher </h2>
 
 ![SAP](https://img.shields.io/badge/SAP-0FAAFF?style=for-the-badge&logo=sap&logoColor=white)
 ![ts-node](https://img.shields.io/badge/ts--node-3178C6?style=for-the-badge&logo=ts-node&logoColor=white)
@@ -18,7 +18,7 @@
 ![GitHub top language](https://img.shields.io/github/languages/top/dxfrontier/cds-ts-dispatcher?logo=git)
 ![GitHub Repo stars](https://img.shields.io/github/stars/dxfrontier/cds-ts-dispatcher?style=flat&logo=git)
 
-The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement **Typescript handlers** provided by the SAP CAP framework.
+The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate code required to implement **Typescript handlers** provided by the SAP CAP framework.
 
 ## Table of Contents
 
@@ -48,6 +48,7 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
       - [@Inject(SRV)](#injectsrv)
     - [`Parameter`](#parameter)
       - [@Req](#req)
+      - [@Res](#res)
       - [@Results / @Result](#results--result)
       - [@Next](#next)
       - [@Error](#error)
@@ -98,6 +99,8 @@ The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code re
         - [@OnSaveDraft](#onsavedraft)
       - [`Other draft decorators`](#other-draft-decorators)
     - [`Method`-`helpers`](#method-helpers)
+      - [@AfterReadSingleInstance](#afterreadsingleinstance)
+      - [@Prepend](#prepend)
       - [@Validate](#validate)
       - [@FieldsFormatter](#fieldsformatter)
       - [@ExecutionAllowedForRole](#executionallowedforrole)
@@ -745,7 +748,7 @@ This specialized `@Inject` can be used as a `constant` in :
 - [@Repository()](#repository)
 - [@UnboundActions()](#unboundactions)
 
-It can be accessed trough `this.srv` and contains the `CDS srv` for further enhancements.
+It can be accessed trough `this.srv` and contains the `CDS.ApplicationService` for further enhancements.
 
 `Example`
 
@@ -806,6 +809,43 @@ export class BookHandler {
   }
 }
 ```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Res
+
+**@Res()**
+
+The `@Res` decorator is utilized at the `parameter level` to annotate a parameter with the `Request.http.res - (Response)` object, providing access to response-related information of the current event and it can be used to enhance the `Response`.
+
+`Return`
+
+- `RequestResponse`: An instance of `RequestResponse` providing you response-related information.
+
+`Example`
+
+```typescript
+import { EntityHandler, Req, Results } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Request, RequestResponse } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+export class BookHandler {
+  // ...
+  constructor() {}
+  // ... all events like @AfterRead, @BeforeRead ...
+
+  @AfterRead()
+  private async aMethod(@Req() req: Request, @Res() response: RequestResponse, @Results() results: MyEntity[]) {
+    // Example: we assume we want to add a new header language on the response
+    // We use => res.setHeader('Accept-Language', 'DE_de');
+  }
+}
+```
+
+> [!TIP]
+> Decorator `@Res` can be used in all [After](#after), [Before](#before) and [On](#on) events.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1555,6 +1595,7 @@ The handlers receive two arguments:
 >
 > - `@AfterCreateDraft()`
 > - `@AfterReadDraft()`
+> - `@AfterReadDraftSingleInstance()`
 > - `@AfterUpdateDraft()`
 > - `@AfterDeleteDraft()`
 
@@ -1601,7 +1642,7 @@ this.after('CREATE', MyEntity, async (result, req) => {
 `Example`
 
 ```typescript
-import { AfterRead } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterRead, Results, Req } from "@dxfrontier/cds-ts-dispatcher";
 import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
@@ -1633,6 +1674,8 @@ this.after('READ', MyEntity, async (results, req) => {
 **@AfterUpdate**()
 
 `Example`
+
+Single request : http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
 
 ```typescript
 import { AfterUpdate } from "@dxfrontier/cds-ts-dispatcher";
@@ -1954,13 +1997,13 @@ This decorator is particularly useful in conjunction with the [Emit method](http
 `Example`
 
 ```typescript
-import { OnEvent } from "@dxfrontier/cds-ts-dispatcher";
+import { OnEvent, Req } from "@dxfrontier/cds-ts-dispatcher";
 import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 
 import { AEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnEvent(AEvent)
-private async onEventMethod(req: TypedRequest<AEvent>) {
+private async onEventMethod(@Req() req: TypedRequest<AEvent>) {
   // ...
 }
 ```
@@ -2579,6 +2622,136 @@ All active entity [On](#on), [Before](#before), [After](#after) events have also
 
 #### `Method`-`helpers`
 
+##### @AfterReadSingleInstance
+
+**@AfterReadSingleInstance**()
+
+The `@AfterReadSingleInstance` decorator is utilized as a method-level and it can be used when you want to execute custom logic for single instance request.
+
+If you want to execute logic for both cases (single instance and entity set) then you should use the [@AfterRead()](#afterread), and you can apply the parameter [@SingleInstanceSwitch()](#singleinstanceswitch) decorator to switch between entity set and single instance.
+
+`Example`
+
+Single request : http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
+
+```typescript
+import { AfterReadSingleInstance, Result, Req } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterReadSingleInstance()
+private async afterReadSingleInstance(@Result() result: MyEntity, @Req() req: TypedRequest<MyEntity>) {
+  // This will be executed only when single instance is called : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
+  // ...
+}
+```
+
+> [!IMPORTANT]
+> Decorator [@AfterReadSingleInstance()](#afterreadsingleinstance) will be triggered based on the [EntityHandler](#entityhandler) `argument` `MyEntity`.
+
+> [!CAUTION]
+> If [@AfterReadSingleInstance()](#afterreadsingleinstance) is used all together with [@AfterRead()](#afterread), the event `GET (Read), PATCH (Update)` will trigger both decorators, this applies only when both decorators are used in the same [@EntityHandler()](#entityhandler).
+>
+> The vice-versa doesn't apply, this means that if you trigger the entity set request the [@AfterReadSingleInstance()](#afterreadsingleinstance) will not be triggered.
+>
+> Example `GET`: http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
+>
+> ```ts
+> // use this
+> @AfterReadSingleInstance()
+> private async afterReadSingleInstance(
+>   @Req() req: Request,
+>   @Result() result: MyEntity
+> ): Promise<void> {
+>   // The `GET` will trigger the single instance request
+> }
+>
+> // or this
+> @AfterRead()
+> private async afterRead(
+>   @Req() req: Request,
+>   @Results() results: MyEntity[],
+>   @SingleInstanceSwitch() singleInstance: boolean
+> ): Promise<void> {
+>   // The `GET` will trigger for both cases (single instance & entity instance), but you can use the `singleInstance` flag to verify if it's single or entity set.
+> }
+> ```
+
+> [!TIP]
+> If `@odata.draft.enabled: true` and you need to read the draft then you should use `@AfterReadDraftSingleInstance()` decorator.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Prepend
+
+**@Prepend({ eventDecorator : string })**
+
+The `@Prepend` decorator is utilized as a `method-level` decorator to register an event handler to run before existing ones like [@BeforeCreate()](#beforecreate) [@AfterCreate()](#aftercreate) [@OnAction()](#onaction) ..., etc.
+
+`Parameters`
+
+- `eventDecorator (string)` : The eventDecorator can be one of the following :
+  - `'BeforeCreate'`, `'BeforeRead'`, `'BeforeUpdate'`, `'BeforeDelete'`, `'AfterCreate'`, `'AfterRead'` `'AfterReadSingleInstance'`, `'AfterUpdate'`, `'AfterDelete'`, `'OnCreate'`, `'OnRead'`, `'OnUpdate'`, `'OnDelete'`, `'OnError'`, `'OnAction'`, `'OnFunction'`, `'OnBoundAction'`, `'OnBoundFunction'`, `'OnEvent'`.
+- `actionName: (CDSFunction)` : Action name, applicable only for `OnAction`, `OnBoundAction`, `OnFunction`, `OnBoundFunction`.
+- `eventName: (CDSEvent)` : Event name, applicable only for `OnEvent`.
+
+`Example 1`
+
+```typescript
+import { Prepend, AfterRead, Req, Results } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@Prepend({ eventDecorator: 'AfterRead' })
+public async prepend(@Req() req: Request): Promise<void> {
+  req.locale = 'DE_de';
+}
+
+@AfterRead()
+private async afterRead(MyEntity
+  @Req() req: Request,
+  @Results() results: MyEntity[],
+) {
+
+  // req.locale will have the value 'DE_de' ...
+  // ...
+}
+```
+
+`Example 2`
+
+```typescript
+import { Prepend, OnEvent, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@Prepend({ eventDecorator: 'OnEvent', eventName: MyEvent })
+public async prepend(@Req() req: TypedRequest<MyEvent>) {
+  req.locale = 'DE_de';
+}
+
+@OnEvent(MyEvent)
+public async handleMyEvent(@Req() req: TypedRequest<MyEvent>) {
+  // req.locale will have the value 'DE_de' ...
+  // ...
+}
+```
+
+> [!TIP]
+> The `@Prepend` decorator can be used for example :
+>
+> - When you want to prepare various things `before` reaching the actual event.
+> - Making transformation on `Request`, `Result`, ... `before` reaching the actual event.
+> - ...
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ##### @Validate
 
 **@Validate\<T\>({ action, options? }, ...fields: Array\<keyof T>)**
@@ -2605,7 +2778,7 @@ The `@Validate` decorator can be used when you want to `validate` the `Request`.
 
 - `action`: Choose from a list of predefined `Validators`.
 - `options?`: _[Optional]_ Additional options for customizing the validation process.
-- `...Fields[]`: Specify the fields of your entity that require validation.
+- `...fields`: Specify the fields of your entity that require validation.
 
 `Returns`
 
@@ -2805,7 +2978,7 @@ The `@FieldsFormatter` decorator can be used on the following decorators :
 
 - `action`: Choose from a list of predefined `Formatters`.
 - `options?`: [Optional] Additional options for customizing the formatter process.
-- `...Fields[]`: Specify the fields of your entity that require formatting.
+- `...fields`: Specify the fields of your entity that require formatting.
 
 `Formatters`
 
@@ -2973,6 +3146,8 @@ class UnboundActionsHandler {
 **@ExecutionAllowedForRole(...roles: string[])**
 
 The `@ExecutionAllowedForRole` is used as a `method level` decorator and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
+
+It applies an `OR` logic on the specified **_roles_**, meaning it checks if at `least one` of the specified roles is assigned to the current request, then the execution will be allowed.
 
 `Parameters`
 

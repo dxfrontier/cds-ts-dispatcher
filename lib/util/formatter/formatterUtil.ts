@@ -8,7 +8,7 @@ import type { Custom, Formatters } from '../../types/formatter';
 import type { Request } from '../../types/types';
 
 const formatterUtil = {
-  getResults<T>(args: any[]): T | T[] | undefined {
+  findResults<T>(args: any[]): T | T[] | undefined {
     const req = util.findRequest(args) as ExtendedRequestWithResults;
 
     // The 'results / result' property

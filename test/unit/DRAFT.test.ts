@@ -17,11 +17,10 @@ import {
 import { MetadataDispatcher } from '../../lib/core/MetadataDispatcher';
 import { EntityHandler } from '../../lib/index';
 import { HandlerType } from '../../lib/types/enum';
+import { BaseHandler } from '../../lib/types/internalTypes';
 import { BookEvent } from '../bookshop/@cds-models/CatalogService';
 
-import type { Handler } from '../../lib/types/internalTypes';
 import type { CRUD_EVENTS, DRAFT_EVENTS, TypedRequest, Request } from '../../lib/types/types';
-
 @EntityHandler(BookEvent)
 class BookEventsHandler {
   @OnNewDraft()
@@ -69,7 +68,7 @@ describe('DRAFT', () => {
     describe(`@${eventName}`, () => {
       test(`It should RETURN : all defined properties for this @${eventName} decorator`, () => {
         const foundEvent = decoratorProps.filter(
-          (item: Handler) => item.event === event && item.handlerType === handlerType,
+          (item: BaseHandler) => item.event === event && item.handlerType === handlerType,
         )[0];
 
         expect(foundEvent.callback).toBeDefined();

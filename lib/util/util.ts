@@ -6,10 +6,14 @@ import { Request as RequestClass } from '@sap/cds';
 
 import constants from '../constants/constants';
 
-import type { Validators } from '../types/validator';
 import type { NextEvent, Request, ValidatorField } from '../types/types';
+import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
 
+/**
+ * This util contains common methods for reusable purpose.
+ * Methods doesn't contain business logic.
+ */
 const util = {
   /**
    * Single point of lodash.
@@ -17,6 +21,20 @@ const util = {
    * util.lodash.replace or util.lodash.startsWith ...
    */
   lodash,
+
+  getArrayFirstItem(data: any): object {
+    return Array.isArray(data) && !util.lodash.isEmpty(data) ? data[0] : {};
+  },
+
+  /**
+   * This method takes as an a string as an argument like 'i.am.somebody' and returns 'somebody'
+   * @param str - Input string
+   * @returns string - The last dot string
+   */
+  subtractLastDotString(str: string) {
+    const lastDotIndex = str.lastIndexOf('.');
+    return str.substring(lastDotIndex + 1);
+  },
 
   isNextEvent(arg: any): arg is NextEvent {
     return typeof arg === 'function';
@@ -31,19 +49,14 @@ const util = {
   },
 
   isRequestType: (arg: any): arg is Request => {
-    if (arg instanceof RequestClass) {
-      return true;
-    }
-
-    return false;
+    return arg instanceof RequestClass;
   },
 
   /**
    * Use this method when you want to build a message with placeholders
    *
-   * @param {string} message The message to build with placeholders, the placeholders must match the message, Example : 'A message with `{name}` and `{lastName}`', this should be mentioned in the placeholders param.
-   * @param {Record<string, any>} placeholders Placeholders, example : {name : 'name', lastName : 'last_name' }
-   * @returns {string}
+   * @param message The message to build with placeholders, the placeholders must match the message, Example : 'A message with `{name}` and `{lastName}`', this should be mentioned in the placeholders param.
+   * @param placeholders Placeholders, example : {name : 'name', lastName : 'last_name' }
    */
   buildMessage(message: string, placeholders: Record<string, any>): string {
     return template(message, placeholders);
@@ -71,9 +84,8 @@ const util = {
   /**
    * Use this method when you want to raise a reject error from the SAP CAP Request, this bad request uses '400' error code.
    *
-   * @param {Request} req - SAP CAP Request object
-   * @param {string} message - The message to be raised
-   * @returns {void}
+   * @param req - SAP CAP Request object
+   * @param message - The message to be raised
    */
   raiseBadRequestMessage(req: Request, message: string): void {
     req.reject(StatusCodes.BAD_REQUEST, message);
