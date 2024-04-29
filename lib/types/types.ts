@@ -1,6 +1,7 @@
 import type { Request, Service, CdsFunction, column_expr } from '@sap/cds';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { ServiceImpl, TypedRequest } from '@sap/cds/apis/services';
+import type { ServerResponse } from 'http';
 
 // **************************************************************************************************************************
 // Common types
@@ -15,10 +16,18 @@ export type ON_EVENT = 'EVENT';
 export type ACTION_EVENTS = 'ACTION' | 'BOUND_ACTION';
 export type FUNCTION_EVENTS = 'FUNC' | 'BOUND_FUNC';
 export type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE';
-export type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'ACTION';
+export type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE';
+
 export type EVENTS = CRUD_EVENTS | ACTION_EVENTS | FUNCTION_EVENTS | ERROR_EVENT | ON_EVENT | DRAFT_EVENTS;
 
 export type ValidatorField = string | number | undefined | null | boolean;
+
+// Standard export
+
+/**
+ * @description This object is created internally by an HTTP server, not by the user. Contains various methods and properties related to the `response` object.
+ */
+type RequestResponse = ServerResponse;
 
 // **************************************************************************************************************************
 // @Use decorator types
@@ -29,7 +38,7 @@ export type ValidatorField = string | number | undefined | null | boolean;
 // **************************************************************************************************************************
 
 /**
- * Use `NextMiddleware` type to annotate the `next` parameter of the implementation of the middleware.
+ * @description Use `NextMiddleware` type to annotate the `next` parameter of the implementation of the middleware.
  *
  * @example
  * export class Middleware implements MiddlewareImpl {
@@ -41,7 +50,7 @@ export type ValidatorField = string | number | undefined | null | boolean;
 export type NextMiddleware = () => Promise<unknown>;
 
 /**
- * Use `NextEvent` type to annotate the `next` parameter of the implementation of the `ON` events.
+ * @description Use `NextEvent` type to annotate the `next` parameter of the implementation of the `ON` events.
  * @example "@Next() next: NextEvent"
  */
 export type NextEvent = (req?: Request) => Function;
@@ -58,12 +67,12 @@ export type MiddlewareImpl = {
 // **************************************************************************************************************************
 
 /**
- * Use `ActionRequest` type to have the `Request` of `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
+ * @description Use `ActionRequest` type to have the `Request` of `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
  */
 export type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['__parameters'] };
 
 /**
- * Use `ActionReturn` type to have the `return` of the `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
+ * @description Use `ActionReturn` type to have the `return` of the `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
  */
 export type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void | Error>;
 
@@ -113,14 +122,16 @@ export class GetQueryType {
   data: UPDATE<any>['UPDATE']['data'];
   entity: UPDATE<any>['UPDATE']['entity'];
 }
+
 // **************************************************************************************************************************
 // **************************************************************************************************************************
 
 export {
   // Standard exports
+  Request,
+  Service,
+  type RequestResponse,
   type CdsFunction,
   type TypedRequest,
-  type Request,
-  type Service,
   type ServiceImpl,
 };

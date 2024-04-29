@@ -4,7 +4,7 @@ import constants from '../constants/constants';
 
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { MiddlewareImpl } from '../types/types';
-import type { Handler } from '../types/internalTypes';
+import type { BaseHandler } from '../types/internalTypes';
 
 export class MetadataDispatcher {
   constructor(
@@ -32,7 +32,7 @@ export class MetadataDispatcher {
     return Reflect.getMetadata(constants.DECORATOR.MIDDLEWARE_NAME, entity.constructor);
   }
 
-  public static getMetadataHandlers(entity: Constructable): Handler[] {
+  public static getMetadataHandlers(entity: Constructable): BaseHandler[] {
     return Reflect.getMetadata(constants.DECORATOR.METHOD_ACCUMULATOR_NAME, entity);
   }
 
@@ -46,7 +46,7 @@ export class MetadataDispatcher {
     Reflect.defineMetadata(constants.DECORATOR.ENTITY_HANDLER_NAME, entity, this.target);
   }
 
-  public addMethodMetadata(props: Handler): void {
+  public addMethodMetadata(props: BaseHandler): void {
     const accumulator = this.getOrCreateAccumulator();
 
     accumulator.push(props);

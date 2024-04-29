@@ -2,17 +2,74 @@ import constants from '../constants/constants';
 import { ArgumentMethodProcessor } from '../core/ArgumentMethodProcessor';
 import { MetadataDispatcher } from '../core/MetadataDispatcher';
 import { HandlerType } from '../types/enum';
-import formatterUtil from '../util/helpers/formatterUtil';
-import middlewareUtil from '../util/helpers/middlewareUtil';
-import parameterUtil from '../util/helpers/parameterUtil';
-import validatorUtil from '../util/helpers/validatorUtil';
+import decoratorsUtil from '../util/decorators/decoratorsUtil';
+import formatterUtil from '../util/formatter/formatterUtil';
+import middlewareUtil from '../util/middleware/middlewareUtil';
+import parameterUtil from '../util/parameter/parameterUtil';
 import util from '../util/util';
+import validatorUtil from '../util/validation/validatorUtil';
 
-import type { CdsEvent, CdsFunction, EVENTS, MiddlewareImpl, Request, RequestType } from '../types/types';
+import type {
+  ACTION_EVENTS,
+  CRUD_EVENTS,
+  CdsEvent,
+  CdsFunction,
+  DRAFT_EVENTS,
+  ERROR_EVENT,
+  FUNCTION_EVENTS,
+  MiddlewareImpl,
+  Request,
+  RequestType,
+} from '../types/types';
 
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
+import type { PrependBase } from '../types/internalTypes';
+
+/**
+ * @description Use `@Prepend` decorator to register an event handler to run before existing ones.
+ * @param options - The options object.
+ * @param options.eventDecorator - The event decorator name, example `BeforeCreate`, `AfterCreate`, `BeforeDelete`, etc.
+ * @param [options.actionName] - `[Optional]` This option will appear when `eventDecorator` is `OnAction`, `OnFunction`, `OnBoundAction`, `OnBoundFunction`.
+ * @param [options.eventName] - `[Optional]` This option will appear when `eventDecorator` is `OnEvent`.
+ *
+ * @example
+ * "@Prepend({ eventDecoratorName: 'BeforeRead' })"
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#prepend | CDS-TS-Dispatcher - @Prepend}
+ */
+function Prepend(options: PrependBase) {
+  return function (target: object, propertyName: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+    const method = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+      return await method.apply(this, args);
+    };
+
+    // ********************************************************************************************************************************
+    // Registration of events during start-up : @AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete()
+    // Note: descriptor.value will contain the logic for @Req(), @Res(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
+    // ********************************************************************************************************************************
+
+    const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+    const { event, eventKind, actionName, eventName } = decoratorsUtil.mapPrependEvent(options);
+
+    metadataDispatcher.addMethodMetadata({
+      type: 'PREPEND',
+      event,
+      eventKind,
+      options: {
+        actionName,
+        eventName: eventName as unknown as string,
+      },
+      handlerType: HandlerType.Prepend,
+      callback: descriptor.value,
+      isDraft: false,
+    });
+  };
+}
 
 /**
  * @description Use `@ExecutionAllowedForRole` decorator to enforce role-based access control ensuring that only `Users` with specific role are authorized to execute the `event` (`AfterRead`, `AfterCreate`, ...) and the custom logic inside of the event.
@@ -52,7 +109,7 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: Array<keyof T>)
     const originalMethod = descriptor.value!;
 
     descriptor.value = async function (...args: any[]) {
-      const results = formatterUtil.getResults<T>(args);
+      const results = formatterUtil.findResults<T>(args);
       const req = util.findRequest(args);
 
       const isAfterEventManyResults = util.lodash.isArray(results);
@@ -144,8 +201,8 @@ function SingleInstanceCapable<Target extends Object>() {
 }
 
 /**
- * @description Use decorator `@Use` to associate a method or a class with a specified middleware classes.
- * @param ...MiddlewareClasses[] - The middleware classes to be applied.
+ * @description Use the `@Use` decorator to associate a method or a class with a specified middleware classes, mainly used to `verify`, `enhance`, `validate` various request related-information.
+ * @param MiddlewareClasses - The middleware classes to be applied.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#use | CDS-TS-Dispatcher - @Use}
  */
 function Use<Middleware extends Constructable<MiddlewareImpl>>(...MiddlewareClasses: Middleware[]) {
@@ -167,7 +224,11 @@ function Use<Middleware extends Constructable<MiddlewareImpl>>(...MiddlewareClas
   };
 }
 
-function buildAfter(options: { event: EVENTS; handlerType: HandlerType; isDraft: boolean }) {
+function buildAfter(options: {
+  event: CRUD_EVENTS | DRAFT_EVENTS | ERROR_EVENT;
+  handlerType: HandlerType;
+  isDraft: boolean;
+}) {
   return function <Target extends Object>() {
     return function (
       target: Target,
@@ -183,13 +244,15 @@ function buildAfter(options: { event: EVENTS; handlerType: HandlerType; isDraft:
 
       // ********************************************************************************************************************************
       // Registration of events during start-up : @AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete()
-      // Note: descriptor.value will contain the logic for @Req(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
+      // Note: descriptor.value will contain the logic for @Req(), @Res(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
       // ********************************************************************************************************************************
 
       const { event, handlerType, isDraft } = options;
       const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
+        type: 'DEFAULT',
+        eventKind: 'AFTER',
         event,
         handlerType,
         callback: descriptor.value,
@@ -202,7 +265,11 @@ function buildAfter(options: { event: EVENTS; handlerType: HandlerType; isDraft:
   };
 }
 
-function buildBefore(options: { event: EVENTS; handlerType: HandlerType; isDraft: boolean }) {
+function buildBefore(options: {
+  event: CRUD_EVENTS | DRAFT_EVENTS | ERROR_EVENT;
+  handlerType: HandlerType;
+  isDraft: boolean;
+}) {
   return function <Target extends Object>() {
     return function (
       target: Target,
@@ -218,13 +285,15 @@ function buildBefore(options: { event: EVENTS; handlerType: HandlerType; isDraft
 
       // ********************************************************************************************************************************
       // Registration of events during start-up : @BeforeCreate(), @BeforeRead(), @beforeUpdate(), @BeforeDelete()
-      // Note: descriptor.value will contain the logic for @Req(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
+      // Note: descriptor.value will contain the logic for @Req(), @Res(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
       // ********************************************************************************************************************************
 
       const { event, handlerType, isDraft } = options;
       const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
+        type: 'DEFAULT',
+        eventKind: 'BEFORE',
         event,
         handlerType,
         callback: descriptor.value,
@@ -237,7 +306,11 @@ function buildBefore(options: { event: EVENTS; handlerType: HandlerType; isDraft
   };
 }
 
-function buildOnAction(options: { event: EVENTS; handlerType: HandlerType; isDraft: boolean }) {
+function buildOnAction(options: {
+  event: ACTION_EVENTS | FUNCTION_EVENTS;
+  handlerType: HandlerType;
+  isDraft: boolean;
+}) {
   return function <Target extends Object>(name: CdsFunction) {
     return function (
       target: Target,
@@ -253,13 +326,15 @@ function buildOnAction(options: { event: EVENTS; handlerType: HandlerType; isDra
 
       // ********************************************************************************************************************************
       // Registration of events during start-up : @OnAction(), @OnFunction(), @OnBoundAction(), @OnBoundFunction() + draft versions
-      // Note: descriptor.value will contain the logic for @Req(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
+      // Note: descriptor.value will contain the logic for @Req(), @Res(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
       // ********************************************************************************************************************************
 
       const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
       const { event, handlerType, isDraft } = options;
 
       metadataDispatcher.addMethodMetadata({
+        type: 'ACTION_FUNCTION',
+        eventKind: 'ON',
         event,
         handlerType,
         callback: descriptor.value,
@@ -273,7 +348,7 @@ function buildOnAction(options: { event: EVENTS; handlerType: HandlerType; isDra
   };
 }
 
-function buildOnEvent(options: { event: EVENTS; handlerType: HandlerType; isDraft: boolean }) {
+function buildOnEvent(options: { handlerType: HandlerType; isDraft: boolean }) {
   return function <Target extends Object>(name: CdsEvent) {
     return function (
       target: Target,
@@ -289,14 +364,16 @@ function buildOnEvent(options: { event: EVENTS; handlerType: HandlerType; isDraf
 
       // ********************************************************************************************************************************
       // Registration of events during start-up : @OnEvent
-      // Note: descriptor.value will contain the logic for @Req(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
+      // Note: descriptor.value will contain the logic for @Req(), @Res(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
       // ********************************************************************************************************************************
 
       const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
-      const { event, handlerType, isDraft } = options;
+      const { handlerType, isDraft } = options;
 
       metadataDispatcher.addMethodMetadata({
-        event,
+        type: 'EVENT',
+        eventKind: 'ON',
+        event: 'EVENT',
         handlerType,
         callback: descriptor.value,
         eventName: name as unknown as string,
@@ -309,7 +386,7 @@ function buildOnEvent(options: { event: EVENTS; handlerType: HandlerType; isDraf
   };
 }
 
-function buildOnError(options: { event: EVENTS; handlerType: HandlerType; isDraft: boolean }) {
+function buildOnError(options: { handlerType: HandlerType; isDraft: boolean }) {
   return function <Target extends Object>() {
     return function (target: Target, propertyName: string | symbol, descriptor: TypedPropertyDescriptor<any>): void {
       const method = descriptor.value!;
@@ -325,10 +402,12 @@ function buildOnError(options: { event: EVENTS; handlerType: HandlerType; isDraf
       // ********************************************************************************************************************************
 
       const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
-      const { event, handlerType, isDraft } = options;
+      const { handlerType, isDraft } = options;
 
       metadataDispatcher.addMethodMetadata({
-        event,
+        type: 'DEFAULT',
+        eventKind: 'ON',
+        event: 'ERROR',
         handlerType,
         callback: descriptor.value,
         isDraft,
@@ -340,7 +419,11 @@ function buildOnError(options: { event: EVENTS; handlerType: HandlerType; isDraf
   };
 }
 
-function buildOnCRUD<Target extends Object>(options: { event: EVENTS; handlerType: HandlerType; isDraft: boolean }) {
+function buildOnCRUD<Target extends Object>(options: {
+  event: CRUD_EVENTS | DRAFT_EVENTS;
+  handlerType: HandlerType;
+  isDraft: boolean;
+}) {
   return function () {
     return function (
       target: Target,
@@ -363,6 +446,8 @@ function buildOnCRUD<Target extends Object>(options: { event: EVENTS; handlerTyp
       const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
 
       metadataDispatcher.addMethodMetadata({
+        type: 'DEFAULT',
+        eventKind: 'ON',
         event,
         handlerType,
         callback: descriptor.value,
@@ -464,6 +549,26 @@ const AfterRead = buildAfter({ event: 'READ', handlerType: HandlerType.After, is
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterread | CDS-TS-Dispatcher - @AfterReadDraft}
  */
 const AfterReadDraft = buildAfter({ event: 'READ', handlerType: HandlerType.After, isDraft: true });
+
+/**
+ * @description Use `@AfterReadSingleInstance` decorator to execute custom logic after creating a new single instance resource.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadsingleinstance | CDS-TS-Dispatcher - @AfterReadSingleInstance}
+ */
+const AfterReadSingleInstance = buildAfter({
+  event: 'READ',
+  handlerType: HandlerType.AfterSingleInstance,
+  isDraft: false,
+});
+
+/**
+ * @description Use `@AfterReadDraftSingleInstance` decorator to execute custom logic after creating a new DRAFT single instance resource.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadsingleinstance | CDS-TS-Dispatcher - @AfterReadSingleInstance}
+ */
+export const AfterReadDraftSingleInstance = buildAfter({
+  event: 'READ',
+  handlerType: HandlerType.AfterSingleInstance,
+  isDraft: true,
+});
 
 /**
  * @description Use `@AfterUpdate` decorator to execute custom logic after performing an update operation.
@@ -590,13 +695,13 @@ const OnFunction = buildOnAction({ event: 'FUNC', handlerType: HandlerType.On, i
  * @description Use `@OnEvent` decorator to execute custom logic when a custom event is triggered.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onevent | CDS-TS-Dispatcher - @OnEvent}
  */
-const OnEvent = buildOnEvent({ event: 'EVENT', handlerType: HandlerType.On, isDraft: false });
+const OnEvent = buildOnEvent({ handlerType: HandlerType.On, isDraft: false });
 
 /**
  * @description Use `@OnError` decorator to execute custom logic when an error occurs.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onerror | CDS-TS-Dispatcher - @OnError}
  */
-const OnError = buildOnError({ event: 'ERROR', handlerType: HandlerType.On, isDraft: false });
+const OnError = buildOnError({ handlerType: HandlerType.On, isDraft: false });
 
 /**
  * @description Use `@OnEditDraft` decorator to execute custom logic when a new draft is created from an active instance.
@@ -685,7 +790,9 @@ const AfterSaveDraft = buildAfter({ event: 'SAVE', handlerType: HandlerType.Afte
 export {
   // Standalone events
   Use,
+  AfterReadSingleInstance,
   // RoleSpecificLogic,
+  Prepend,
   ExecutionAllowedForRole,
   SingleInstanceCapable,
   Validate,

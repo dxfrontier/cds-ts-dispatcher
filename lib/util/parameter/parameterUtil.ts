@@ -1,9 +1,10 @@
 import { retrieveJwt } from '@sap-cloud-sdk/connectivity';
+import { EventContext, Request as RequestClass } from '@sap/cds';
 
 import util from '../util';
 
-import type { MetadataFields } from '../../types/internalTypes';
-import type { IncomingMessage } from 'http';
+import type { MetadataFields, TemporaryArgs } from '../../types/internalTypes';
+import type { IncomingMessage, ServerResponse } from 'http';
 import type { Request } from '../../types/types';
 
 const parameterUtil = {
@@ -174,6 +175,57 @@ const parameterUtil = {
 
   retrieveJwt(req: Request): string | undefined {
     return retrieveJwt(req.http?.req as IncomingMessage);
+  },
+
+  retrieveResponse(req: Request) {
+    return req.http?.res as ServerResponse;
+  },
+
+  findResults(arg: any): any[] | boolean | object | undefined {
+    if (Array.isArray(arg)) {
+      return arg;
+    }
+
+    if (util.lodash.isBoolean(arg)) {
+      return arg;
+    }
+
+    if (!util.lodash.isArray(arg) && util.lodash.isObjectLike(arg)) {
+      return arg;
+    }
+  },
+
+  extractArguments(args: any[]): TemporaryArgs {
+    const temporaryArgs: TemporaryArgs = Object.create({});
+
+    args.forEach((arg) => {
+      switch (true) {
+        case arg instanceof RequestClass:
+          temporaryArgs.req = arg;
+          break;
+
+        case arg instanceof Error:
+          temporaryArgs.error = arg;
+          break;
+
+        case arg instanceof EventContext:
+          temporaryArgs.req = arg as Request;
+          break;
+
+        case util.isNextEvent(arg):
+          temporaryArgs.next = arg;
+          break;
+
+        case !util.lodash.isUndefined(this.findResults(arg)):
+          temporaryArgs.results = arg;
+          break;
+
+        default:
+          util.throwErrorMessage('Option not handled for extractArgument method!');
+      }
+    });
+
+    return temporaryArgs;
   },
 };
 
