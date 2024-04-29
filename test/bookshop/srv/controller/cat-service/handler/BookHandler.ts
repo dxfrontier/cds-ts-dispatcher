@@ -2,6 +2,7 @@ import {
   AfterCreate,
   AfterDelete,
   AfterRead,
+  AfterReadSingleInstance,
   AfterUpdate,
   BeforeRead,
   EntityHandler,
@@ -10,8 +11,11 @@ import {
   IsColumnSupplied,
   IsPresent,
   IsRole,
+  Prepend,
   Req,
   Request,
+  RequestResponse,
+  Res,
   Result,
   Results,
   Service,
@@ -34,6 +38,11 @@ class BookHandler {
   @Inject(SRV) private readonly srv: Service;
   @Inject(BookService) private readonly bookService: BookService;
 
+  @Prepend({ eventDecorator: 'AfterReadSingleInstance' })
+  public async prepend(@Req() req: Request): Promise<void> {
+    req.locale = 'DE_de';
+  }
+
   @AfterCreate()
   private async afterCreate(@Result() result: Book, @Req() req: Request): Promise<void> {
     this.bookService.validateData(result, req);
@@ -45,10 +54,25 @@ class BookHandler {
     this.bookService.showConsoleLog();
   }
 
+  @AfterReadSingleInstance()
+  private async afterReadSingleInstance(
+    @Req() req: Request,
+    @Res() res: RequestResponse,
+    @Result() result: Book,
+    @GetRequest('locale') locale: Request['locale'],
+  ): Promise<void> {
+    // + res is any ?!?!?!? ? ha ? wtf SAP
+
+    // req.http?.res.setHeader('Accept-Language', locale);
+
+    res.setHeader('Accept-Language', locale);
+  }
+
   @AfterRead()
   @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2)
   private async afterRead(
     @Req() req: Request,
+    @Res() res: RequestResponse,
     @Results() results: Book[],
     @SingleInstanceSwitch() singleInstance: boolean,
     @IsColumnSupplied<Book>('price') hasPrice: boolean,

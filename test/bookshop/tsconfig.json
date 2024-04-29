@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+
     /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -21,7 +22,10 @@
 
     "lib": ["es2022"],
 
-    "outDir": "./gen/srv"
+    "rootDir": "./",
+    "baseUrl": ".",
+
+    "outDir": "./gen/srv",
   },
   "include": ["./srv"]
 }

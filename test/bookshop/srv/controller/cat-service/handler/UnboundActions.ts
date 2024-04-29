@@ -3,6 +3,7 @@ import {
   ActionReturn,
   Error,
   FieldsFormatter,
+  GetRequest,
   Inject,
   Next,
   NextEvent,
@@ -10,8 +11,11 @@ import {
   OnError,
   OnEvent,
   OnFunction,
+  Prepend,
   Req,
   Request,
+  RequestResponse,
+  Res,
   Service,
   SRV,
   TypedRequest,
@@ -49,11 +53,29 @@ class UnboundActionsHandler {
     };
   }
 
+  @Prepend({ eventDecorator: 'OnAction', actionName: submitOrder })
+  public async prependAction(
+    @Req() req: ActionRequest<typeof submitOrder>,
+    @Next() next: NextEvent,
+  ): Promise<Function> {
+    req.locale = 'DE_de';
+    return next();
+  }
+
+  @Prepend({ eventDecorator: 'OnEvent', eventName: OrderedBook })
+  public async prependEvent(@Req() req: TypedRequest<OrderedBook>): Promise<void> {
+    req.locale = 'DE_de';
+  }
+
   @OnAction(submitOrder)
   public async submitOrder(
     @Req() req: ActionRequest<typeof submitOrder>,
+    @Res() res: RequestResponse,
+    @GetRequest('locale') locale: Request['locale'],
     @Next() next: NextEvent,
   ): ActionReturn<typeof submitOrder> {
+    res.setHeader('Content-Language', locale);
+
     return {
       stock: req.data.quantity! + 1,
     };
@@ -70,8 +92,8 @@ class UnboundActionsHandler {
   }
 
   @OnEvent(OrderedBook)
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  public async orderedBook(req: TypedRequest<OrderedBook>) {
+  public async orderedBook(@Req() req: TypedRequest<OrderedBook>, @Res() res: RequestResponse): Promise<void> {
+    res.setHeader('Content-Language', 'DE_de');
     if (req.event !== 'OrderedBook') {
       req.reject(400, 'Not OrderedBook: check @OnEvent decorator');
     }
