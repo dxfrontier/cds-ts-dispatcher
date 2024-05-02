@@ -26,26 +26,24 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
         stats_ID?: number | null;
         bookFormats?: __.Association.to.many<BookFormats>;
         bookRecomanddations?: __.Association.to.many<BookRecommendations>;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Book extends _._managedAspect(_BookAspect(__.Entity)) {}
 Object.defineProperty(Book, 'name', { value: 'sap.capire.bookshop.Books' })
-export class Books extends Array<Book> {}
+export class Books extends Array<Book> {$count?: number}
 Object.defineProperty(Books, 'name', { value: 'sap.capire.bookshop.Books' })
 
 export function _PublisherAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Publisher extends Base {
         ID?: number;
         name?: string | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Publisher extends _._managedAspect(_PublisherAspect(__.Entity)) {}
 Object.defineProperty(Publisher, 'name', { value: 'sap.capire.bookshop.Publishers' })
-export class Publishers extends Array<Publisher> {}
+export class Publishers extends Array<Publisher> {$count?: number}
 Object.defineProperty(Publishers, 'name', { value: 'sap.capire.bookshop.Publishers' })
 
 export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -55,31 +53,29 @@ export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Ba
         averageRating?: number | null;
         book?: __.Association.to<Book> | null;
         book_ID?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookStat extends _._managedAspect(_BookStatAspect(__.Entity)) {}
 Object.defineProperty(BookStat, 'name', { value: 'sap.capire.bookshop.BookStats' })
-export class BookStats extends Array<BookStat> {}
+export class BookStats extends Array<BookStat> {$count?: number}
 Object.defineProperty(BookStats, 'name', { value: 'sap.capire.bookshop.BookStats' })
 
 export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Author extends Base {
         ID?: number | null;
         name?: string | null;
-        dateOfBirth?: string | null;
-        dateOfDeath?: string | null;
+        dateOfBirth?: __.CdsDate | null;
+        dateOfDeath?: __.CdsDate | null;
         placeOfBirth?: string | null;
         placeOfDeath?: string | null;
         books?: __.Association.to.many<Books>;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Author extends _._managedAspect(_AuthorAspect(__.Entity)) {}
 Object.defineProperty(Author, 'name', { value: 'sap.capire.bookshop.Authors' })
-export class Authors extends Array<Author> {}
+export class Authors extends Array<Author> {$count?: number}
 Object.defineProperty(Authors, 'name', { value: 'sap.capire.bookshop.Authors' })
 
 export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -88,13 +84,12 @@ export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base:
         parent?: __.Association.to<Genre> | null;
         parent_ID?: number | null;
         children?: __.Composition.of.many<Genres>;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Genre extends _sap_common._CodeListAspect(_GenreAspect(__.Entity)) {}
 Object.defineProperty(Genre, 'name', { value: 'sap.capire.bookshop.Genres' })
-export class Genres extends Array<Genre> {}
+export class Genres extends Array<Genre> {$count?: number}
 Object.defineProperty(Genres, 'name', { value: 'sap.capire.bookshop.Genres' })
 
 export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -106,45 +101,43 @@ export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base
         reviewer_ID?: number | null;
         rating?: number | null;
         comment?: string | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Review extends _._managedAspect(_ReviewAspect(__.Entity)) {}
 Object.defineProperty(Review, 'name', { value: 'sap.capire.bookshop.Reviews' })
-export class Reviews extends Array<Review> {}
+export class Reviews extends Array<Review> {$count?: number}
 Object.defineProperty(Reviews, 'name', { value: 'sap.capire.bookshop.Reviews' })
 
 export function _BookEventAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookEvent extends Base {
         name?: string | null;
         types?: _.BookTypes | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookEvent extends _._managedAspect(_._cuidAspect(_BookEventAspect(__.Entity))) {static drafts: typeof BookEvent}
 Object.defineProperty(BookEvent, 'name', { value: 'sap.capire.bookshop.BookEvents' })
-export class BookEvents extends Array<BookEvent> {static drafts: typeof BookEvent}
+export class BookEvents extends Array<BookEvent> {static drafts: typeof BookEvent
+$count?: number}
 Object.defineProperty(BookEvents, 'name', { value: 'sap.capire.bookshop.BookEvents' })
 
 export function _BookSaleAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookSale extends Base {
         ID?: number;
-        saleDate?: string | null;
+        saleDate?: __.CdsDate | null;
         saleAmount?: number | null;
         quantity?: number | null;
         book?: __.Association.to<Book> | null;
         book_ID?: number | null;
         customer?: __.Association.to<User> | null;
         customer_ID?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookSale extends _._managedAspect(_._cuidAspect(_BookSaleAspect(__.Entity))) {}
 Object.defineProperty(BookSale, 'name', { value: 'sap.capire.bookshop.BookSales' })
-export class BookSales extends Array<BookSale> {}
+export class BookSales extends Array<BookSale> {$count?: number}
 Object.defineProperty(BookSales, 'name', { value: 'sap.capire.bookshop.BookSales' })
 
 export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -154,26 +147,25 @@ export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: 
         email?: string | null;
         role?: _.Roles | null;
         reviews?: __.Association.to.many<Reviews>;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class User extends _._managedAspect(_UserAspect(__.Entity)) {}
 Object.defineProperty(User, 'name', { value: 'sap.capire.bookshop.Users' })
-export class Users extends Array<User> {}
+export class Users extends Array<User> {$count?: number}
 Object.defineProperty(Users, 'name', { value: 'sap.capire.bookshop.Users' })
 
 export function _UserActivityLogAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class UserActivityLog extends Base {
         ID?: number;
         actionType?: string | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class UserActivityLog extends _._managedAspect(_UserActivityLogAspect(__.Entity)) {static drafts: typeof UserActivityLog}
 Object.defineProperty(UserActivityLog, 'name', { value: 'sap.capire.bookshop.UserActivityLog' })
-export class UserActivityLog_ extends Array<UserActivityLog> {static drafts: typeof UserActivityLog}
+export class UserActivityLog_ extends Array<UserActivityLog> {static drafts: typeof UserActivityLog
+$count?: number}
 Object.defineProperty(UserActivityLog_, 'name', { value: 'sap.capire.bookshop.UserActivityLog' })
 
 export function _PromotionAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -181,35 +173,34 @@ export function _PromotionAspect<TBase extends new (...args: any[]) => object>(B
         ID?: number;
         name?: string | null;
         description?: string | null;
-        startDate?: string | null;
-        endDate?: string | null;
+        startDate?: __.CdsDate | null;
+        endDate?: __.CdsDate | null;
         discount?: number | null;
         books?: __.Association.to.many<Books>;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Promotion extends _PromotionAspect(__.Entity) {static drafts: typeof Promotion}
 Object.defineProperty(Promotion, 'name', { value: 'sap.capire.bookshop.Promotions' })
-export class Promotions extends Array<Promotion> {static drafts: typeof Promotion}
+export class Promotions extends Array<Promotion> {static drafts: typeof Promotion
+$count?: number}
 Object.defineProperty(Promotions, 'name', { value: 'sap.capire.bookshop.Promotions' })
 
 export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookOrder extends Base {
         ID?: number;
         orderNumber?: string | null;
-        orderDate?: string | null;
+        orderDate?: __.CdsDate | null;
         totalAmount?: number | null;
         status?: string | null;
         customer?: __.Association.to<User> | null;
         customer_ID?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookOrder extends _._managedAspect(_BookOrderAspect(__.Entity)) {}
 Object.defineProperty(BookOrder, 'name', { value: 'sap.capire.bookshop.BookOrders' })
-export class BookOrders extends Array<BookOrder> {}
+export class BookOrders extends Array<BookOrder> {$count?: number}
 Object.defineProperty(BookOrders, 'name', { value: 'sap.capire.bookshop.BookOrders' })
 
 export function _BookRecommendationAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -222,13 +213,12 @@ export function _BookRecommendationAspect<TBase extends new (...args: any[]) => 
         book_ID?: number | null;
         recommended?: __.Association.to<Book> | null;
         recommended_ID?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookRecommendation extends _._managedAspect(_BookRecommendationAspect(__.Entity)) {}
 Object.defineProperty(BookRecommendation, 'name', { value: 'sap.capire.bookshop.BookRecommendations' })
-export class BookRecommendations extends Array<BookRecommendation> {}
+export class BookRecommendations extends Array<BookRecommendation> {$count?: number}
 Object.defineProperty(BookRecommendations, 'name', { value: 'sap.capire.bookshop.BookRecommendations' })
 
 export function _BookFormatAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -238,14 +228,13 @@ export function _BookFormatAspect<TBase extends new (...args: any[]) => object>(
         price?: number | null;
         pages?: number | null;
         language?: string | null;
-        publicationDate?: string | null;
+        publicationDate?: __.CdsDate | null;
         book?: __.Association.to<Book> | null;
         book_ID?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookFormat extends _._managedAspect(_BookFormatAspect(__.Entity)) {}
 Object.defineProperty(BookFormat, 'name', { value: 'sap.capire.bookshop.BookFormats' })
-export class BookFormats extends Array<BookFormat> {}
+export class BookFormats extends Array<BookFormat> {$count?: number}
 Object.defineProperty(BookFormats, 'name', { value: 'sap.capire.bookshop.BookFormats' })

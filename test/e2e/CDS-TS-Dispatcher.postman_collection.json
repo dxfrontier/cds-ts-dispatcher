@@ -3511,6 +3511,115 @@
 									]
 								}
 							]
+						},
+						{
+							"name": "@PrependDraft",
+							"item": [
+								{
+									"name": "Pre-request: Create draft",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Returned object is created & headers contains text 'After new draft executed'\", function () {",
+													"    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+													"    pm.expect(headers[0].message).to.contains('After new draft executed')",
+													"",
+													"    const response = pm.response.json();",
+													"    const UUIDValue = response.ID",
+													"    ",
+													"    pm.environment.set(\"draftUUIDInstance\", UUIDValue);",
+													"});",
+													"",
+													"pm.test(\"Response contains IsActiveEntity: false\", function () {",
+													"    const jsonData = pm.response.json();",
+													"    pm.expect(jsonData.IsActiveEntity).to.eql(false);",
+													"});",
+													"",
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"name\": \"Back to School Promotion\",\n  \"description\": \"Gear up for the new school year with amazing discounts on textbooks and school supplies!\",\n  \"startDate\": \"2023-08-15\",\n  \"endDate\": \"2023-09-15\",\n  \"discount\": 0.2\n}\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{adminService}}/{{promotionsEntity}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{adminService}}",
+												"{{promotionsEntity}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "After read draft single instance, the header should contain Content-Language: 'DE_de' Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"// Test to check if the response headers contain Content-Language header with the value 'DE_de'",
+													"pm.test(\"Response headers contain Content-Language header with the value 'DE_de'\", function () {",
+													"    pm.expect(pm.response.headers.get('Content-Language')).to.equal('DE_de');",
+													"});",
+													"",
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"description\": \"A new description\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/{{adminService}}/{{promotionsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{adminService}}",
+												"{{promotionsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)"
+											]
+										}
+									},
+									"response": []
+								}
+							]
 						}
 					],
 					"description": "All other decorators which are not SAP standard."
