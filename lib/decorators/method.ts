@@ -25,7 +25,48 @@ import type {
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
-import type { PrependBase } from '../types/internalTypes';
+import type { PrependBase, PrependBaseDraft } from '../types/internalTypes';
+
+/**
+ * @description Use `@PrependDraft` decorator to register an event handler to run before existing ones.
+ * @param options - The options object.
+ * @param options.eventDecorator - The event decorator name, example `BeforeCreate`, `AfterCreate`, `BeforeDelete`, etc.
+ * @param [options.actionName] - `[Optional]` This option will appear when `eventDecorator` is `OnBoundActionDraft`, `OnBoundFunctionDraft`.
+ * @example
+ * "@PrependDraft({ eventDecoratorName: 'BeforeReadDraft' })"
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#prepend | CDS-TS-Dispatcher - @Prepend}
+ */
+function PrependDraft(options: PrependBaseDraft) {
+  return function (target: object, propertyName: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+    const method = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+      return await method.apply(this, args);
+    };
+
+    // ********************************************************************************************************************************
+    // Registration of events during start-up : @AfterCreate(), @AfterRead(), @AfterUpdate(), @AfterDelete()
+    // Note: descriptor.value will contain the logic for @Req(), @Res(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
+    // ********************************************************************************************************************************
+
+    const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+    const { event, eventKind, actionName } = decoratorsUtil.mapPrependDraftEvent(options);
+
+    metadataDispatcher.addMethodMetadata({
+      type: 'PREPEND',
+      event,
+      eventKind,
+      options: {
+        actionName,
+      },
+      handlerType: HandlerType.Prepend,
+      callback: descriptor.value,
+      isDraft: true,
+    });
+  };
+}
 
 /**
  * @description Use `@Prepend` decorator to register an event handler to run before existing ones.
@@ -564,7 +605,7 @@ const AfterReadSingleInstance = buildAfter({
  * @description Use `@AfterReadDraftSingleInstance` decorator to execute custom logic after creating a new DRAFT single instance resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadsingleinstance | CDS-TS-Dispatcher - @AfterReadSingleInstance}
  */
-export const AfterReadDraftSingleInstance = buildAfter({
+const AfterReadDraftSingleInstance = buildAfter({
   event: 'READ',
   handlerType: HandlerType.AfterSingleInstance,
   isDraft: true,
@@ -791,8 +832,9 @@ export {
   // Standalone events
   Use,
   AfterReadSingleInstance,
-  // RoleSpecificLogic,
+  AfterReadDraftSingleInstance,
   Prepend,
+  PrependDraft,
   ExecutionAllowedForRole,
   SingleInstanceCapable,
   Validate,
