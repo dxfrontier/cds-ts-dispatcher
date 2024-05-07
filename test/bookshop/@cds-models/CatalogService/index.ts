@@ -6,12 +6,12 @@ import * as _sap_common from './../sap/common';
 export default { name: 'CatalogService' }
 export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Book extends Base {
-        createdAt?: string | null;
+        createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         createdBy?: _.User | null;
-        modifiedAt?: string | null;
+        modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
@@ -38,51 +38,49 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
         stats_ID?: number | null;
         bookFormats?: __.Association.to.many<BookFormats>;
         bookRecomanddations?: __.Association.to.many<BookRecommendations>;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Book extends _._managedAspect(_BookAspect(__.Entity)) {}
 Object.defineProperty(Book, 'name', { value: 'CatalogService.Books' })
-export class Books extends Array<Book> {}
+export class Books extends Array<Book> {$count?: number}
 Object.defineProperty(Books, 'name', { value: 'CatalogService.Books' })
 
 export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Author extends Base {
-        createdAt?: string | null;
+        createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         createdBy?: _.User | null;
-        modifiedAt?: string | null;
+        modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         modifiedBy?: _.User | null;
         ID?: number;
         name?: string | null;
-        dateOfBirth?: string | null;
-        dateOfDeath?: string | null;
+        dateOfBirth?: __.CdsDate | null;
+        dateOfDeath?: __.CdsDate | null;
         placeOfBirth?: string | null;
         placeOfDeath?: string | null;
         books?: __.Association.to.many<Books>;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Author extends _._managedAspect(_AuthorAspect(__.Entity)) {}
 Object.defineProperty(Author, 'name', { value: 'CatalogService.Authors' })
-export class Authors extends Array<Author> {}
+export class Authors extends Array<Author> {$count?: number}
 Object.defineProperty(Authors, 'name', { value: 'CatalogService.Authors' })
 
 export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Review extends Base {
-        createdAt?: string | null;
+        createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         createdBy?: _.User | null;
-        modifiedAt?: string | null;
+        modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
@@ -94,74 +92,71 @@ export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base
         reviewer_ID?: number | null;
         rating?: number | null;
         comment?: string | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Review extends _._managedAspect(_ReviewAspect(__.Entity)) {}
 Object.defineProperty(Review, 'name', { value: 'CatalogService.Reviews' })
-export class Reviews extends Array<Review> {}
+export class Reviews extends Array<Review> {$count?: number}
 Object.defineProperty(Reviews, 'name', { value: 'CatalogService.Reviews' })
 
 export function _PublisherAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Publisher extends Base {
-        createdAt?: string | null;
+        createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         createdBy?: _.User | null;
-        modifiedAt?: string | null;
+        modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         modifiedBy?: _.User | null;
         ID?: number;
         name?: string | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Publisher extends _._managedAspect(_PublisherAspect(__.Entity)) {}
 Object.defineProperty(Publisher, 'name', { value: 'CatalogService.Publishers' })
-export class Publishers extends Array<Publisher> {}
+export class Publishers extends Array<Publisher> {$count?: number}
 Object.defineProperty(Publishers, 'name', { value: 'CatalogService.Publishers' })
 
 export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookOrder extends Base {
-        createdAt?: string | null;
+        createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         createdBy?: _.User | null;
-        modifiedAt?: string | null;
+        modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         modifiedBy?: _.User | null;
         ID?: number;
         orderNumber?: string | null;
-        orderDate?: string | null;
+        orderDate?: __.CdsDate | null;
         totalAmount?: number | null;
         status?: string | null;
         customer?: __.Association.to<_sap_capire_bookshop.User> | null;
         customer_ID?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookOrder extends _._managedAspect(_BookOrderAspect(__.Entity)) {}
 Object.defineProperty(BookOrder, 'name', { value: 'CatalogService.BookOrders' })
-export class BookOrders extends Array<BookOrder> {}
+export class BookOrders extends Array<BookOrder> {$count?: number}
 Object.defineProperty(BookOrders, 'name', { value: 'CatalogService.BookOrders' })
 
 export function _BookRecommendationAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookRecommendation extends Base {
-        createdAt?: string | null;
+        createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         createdBy?: _.User | null;
-        modifiedAt?: string | null;
+        modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
@@ -174,23 +169,22 @@ export function _BookRecommendationAspect<TBase extends new (...args: any[]) => 
         book_ID?: number | null;
         recommended?: __.Association.to<Book> | null;
         recommended_ID?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookRecommendation extends _._managedAspect(_BookRecommendationAspect(__.Entity)) {}
 Object.defineProperty(BookRecommendation, 'name', { value: 'CatalogService.BookRecommendations' })
-export class BookRecommendations extends Array<BookRecommendation> {}
+export class BookRecommendations extends Array<BookRecommendation> {$count?: number}
 Object.defineProperty(BookRecommendations, 'name', { value: 'CatalogService.BookRecommendations' })
 
 export function _BookFormatAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookFormat extends Base {
-        createdAt?: string | null;
+        createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         createdBy?: _.User | null;
-        modifiedAt?: string | null;
+        modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
@@ -200,55 +194,53 @@ export function _BookFormatAspect<TBase extends new (...args: any[]) => object>(
         price?: number | null;
         pages?: number | null;
         language?: string | null;
-        publicationDate?: string | null;
+        publicationDate?: __.CdsDate | null;
         book?: __.Association.to<Book> | null;
         book_ID?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookFormat extends _._managedAspect(_BookFormatAspect(__.Entity)) {}
 Object.defineProperty(BookFormat, 'name', { value: 'CatalogService.BookFormats' })
-export class BookFormats extends Array<BookFormat> {}
+export class BookFormats extends Array<BookFormat> {$count?: number}
 Object.defineProperty(BookFormats, 'name', { value: 'CatalogService.BookFormats' })
 
 export function _BookSaleAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookSale extends Base {
-        createdAt?: string | null;
+        createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         createdBy?: _.User | null;
-        modifiedAt?: string | null;
+        modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         modifiedBy?: _.User | null;
         ID?: number;
-        saleDate?: string | null;
+        saleDate?: __.CdsDate | null;
         saleAmount?: number | null;
         quantity?: number | null;
         book?: __.Association.to<Book> | null;
         book_ID?: number | null;
         customer?: __.Association.to<_sap_capire_bookshop.User> | null;
         customer_ID?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookSale extends _._managedAspect(_._cuidAspect(_BookSaleAspect(__.Entity))) {}
 Object.defineProperty(BookSale, 'name', { value: 'CatalogService.BookSales' })
-export class BookSales extends Array<BookSale> {}
+export class BookSales extends Array<BookSale> {$count?: number}
 Object.defineProperty(BookSales, 'name', { value: 'CatalogService.BookSales' })
 
 export function _BookEventAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookEvent extends Base {
-        createdAt?: string | null;
+        createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         createdBy?: _.User | null;
-        modifiedAt?: string | null;
+        modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
@@ -256,23 +248,23 @@ export function _BookEventAspect<TBase extends new (...args: any[]) => object>(B
         ID?: string;
         name?: string | null;
         types?: _.BookTypes | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class BookEvent extends _._managedAspect(_._cuidAspect(_BookEventAspect(__.Entity))) {static drafts: typeof BookEvent}
 Object.defineProperty(BookEvent, 'name', { value: 'CatalogService.BookEvents' })
-export class BookEvents extends Array<BookEvent> {static drafts: typeof BookEvent}
+export class BookEvents extends Array<BookEvent> {static drafts: typeof BookEvent
+$count?: number}
 Object.defineProperty(BookEvents, 'name', { value: 'CatalogService.BookEvents' })
 
 export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookStat extends Base {
-        createdAt?: string | null;
+        createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
         createdBy?: _.User | null;
-        modifiedAt?: string | null;
+        modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
@@ -282,7 +274,7 @@ export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Ba
         averageRating?: number | null;
         book?: __.Association.to<Book> | null;
         book_ID?: number | null;
-      static actions: {
+      static readonly actions: {
         GenerateReport: { (ID: __.DeepRequired<Book>['ID']):       {
                 book?: __.DeepRequired<Book>['title'] | null;
                 stats?: __.DeepRequired<BookStat>['views'] | null;
@@ -291,14 +283,14 @@ export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Ba
                 book?: __.DeepRequired<Book>['title'] | null;
                 stats?: __.DeepRequired<BookStat>['views'] | null;
                 rating?: __.DeepRequired<BookStat>['averageRating'] | null;
-      } }
-        NotifyAuthor: { (ID: __.DeepRequired<Author>['ID']): boolean, __parameters: {ID: __.DeepRequired<Author>['ID']}, __returns: boolean }
+      }, kind: 'action'}
+        NotifyAuthor: { (ID: __.DeepRequired<Author>['ID']): boolean, __parameters: {ID: __.DeepRequired<Author>['ID']}, __returns: boolean, kind: 'function'}
       }
   };
 }
 export class BookStat extends _._managedAspect(_BookStatAspect(__.Entity)) {}
 Object.defineProperty(BookStat, 'name', { value: 'CatalogService.BookStats' })
-export class BookStats extends Array<BookStat> {}
+export class BookStats extends Array<BookStat> {$count?: number}
 Object.defineProperty(BookStats, 'name', { value: 'CatalogService.BookStats' })
 
 /**
@@ -311,13 +303,12 @@ export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Ba
         code?: string | null;
         symbol?: string | null;
         minorUnit?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Currency extends _sap_common._CodeListAspect(_CurrencyAspect(__.Entity)) {}
 Object.defineProperty(Currency, 'name', { value: 'sap.common.Currencies' })
-export class Currencies extends Array<Currency> {}
+export class Currencies extends Array<Currency> {$count?: number}
 Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
 
 export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -326,13 +317,12 @@ export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base:
         parent?: __.Association.to<_sap_capire_bookshop.Genre> | null;
         parent_ID?: number | null;
         children?: __.Composition.of.many<_sap_capire_bookshop.Genres>;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Genre extends _sap_common._CodeListAspect(_GenreAspect(__.Entity)) {}
 Object.defineProperty(Genre, 'name', { value: 'sap.capire.bookshop.Genres' })
-export class Genres extends Array<Genre> {}
+export class Genres extends Array<Genre> {$count?: number}
 Object.defineProperty(Genres, 'name', { value: 'sap.capire.bookshop.Genres' })
 
 // event
@@ -341,23 +331,20 @@ export class OrderedBook {
     quantity: number | null;
     buyer: string | null;
 }
-// function
-export declare const changeBookProperties: { (format: __.DeepRequired<BookFormat>['format'] | null, language: __.DeepRequired<BookFormat>['language'] | null): {
-    language?: string | null;
-    format?: __.DeepRequired<BookFormat>['format'] | null;
-} | null, __parameters: {format: __.DeepRequired<BookFormat>['format'] | null, language: __.DeepRequired<BookFormat>['language'] | null}, __returns: {
-    language?: string | null;
-    format?: __.DeepRequired<BookFormat>['format'] | null;
-} | null };
-// function
-export declare const submitOrder: { (book: __.DeepRequired<Book>['ID'] | null, quantity: number | null): {
-    stock?: number | null;
-} | null, __parameters: {book: __.DeepRequired<Book>['ID'] | null, quantity: number | null}, __returns: {
-    stock?: number | null;
-} | null };
-// action
-export declare const submitOrderFunction: { (book: __.DeepRequired<Book>['ID'] | null, quantity: number | null): {
-    stock?: number | null;
-} | null, __parameters: {book: __.DeepRequired<Book>['ID'] | null, quantity: number | null}, __returns: {
-    stock?: number | null;
-} | null };
+export declare const changeBookProperties: { (format: __.DeepRequired<BookFormat>['format'] | null, language: __.DeepRequired<BookFormat>['language'] | null):  {
+  language?: string | null,
+  format?: __.DeepRequired<BookFormat>['format'] | null,
+} | null | null, __parameters: {format: __.DeepRequired<BookFormat>['format'] | null, language: __.DeepRequired<BookFormat>['language'] | null}, __returns:  {
+  language?: string | null,
+  format?: __.DeepRequired<BookFormat>['format'] | null,
+} | null | null, kind: 'action'};
+export declare const submitOrder: { (book: __.DeepRequired<Book>['ID'] | null, quantity: number | null):  {
+  stock?: number | null,
+} | null | null, __parameters: {book: __.DeepRequired<Book>['ID'] | null, quantity: number | null}, __returns:  {
+  stock?: number | null,
+} | null | null, kind: 'action'};
+export declare const submitOrderFunction: { (book: __.DeepRequired<Book>['ID'] | null, quantity: number | null):  {
+  stock?: number | null,
+} | null | null, __parameters: {book: __.DeepRequired<Book>['ID'] | null, quantity: number | null}, __returns:  {
+  stock?: number | null,
+} | null | null, kind: 'function'};

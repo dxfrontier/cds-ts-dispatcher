@@ -6,8 +6,7 @@ export function _CodeListAspect<TBase extends new (...args: any[]) => object>(Ba
   return class CodeList extends Base {
         name?: string | null;
         descr?: string | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class CodeList extends _CodeListAspect(__.Entity) {}
@@ -18,8 +17,7 @@ export function _TextsAspectAspect<TBase extends new (...args: any[]) => object>
     * Type for a language code
     */
         locale?: Locale;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class TextsAspect extends _TextsAspectAspect(__.Entity) {}
@@ -34,13 +32,12 @@ export function _LanguageAspect<TBase extends new (...args: any[]) => object>(Ba
     * Type for a language code
     */
         code?: Locale;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Language extends _CodeListAspect(_LanguageAspect(__.Entity)) {}
 Object.defineProperty(Language, 'name', { value: 'sap.common.Languages' })
-export class Languages extends Array<Language> {}
+export class Languages extends Array<Language> {$count?: number}
 Object.defineProperty(Languages, 'name', { value: 'sap.common.Languages' })
 
 /**
@@ -51,13 +48,12 @@ Object.defineProperty(Languages, 'name', { value: 'sap.common.Languages' })
 export function _CountryAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Country extends Base {
         code?: string;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Country extends _CodeListAspect(_CountryAspect(__.Entity)) {}
 Object.defineProperty(Country, 'name', { value: 'sap.common.Countries' })
-export class Countries extends Array<Country> {}
+export class Countries extends Array<Country> {$count?: number}
 Object.defineProperty(Countries, 'name', { value: 'sap.common.Countries' })
 
 /**
@@ -70,13 +66,12 @@ export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Ba
         code?: string | null;
         symbol?: string | null;
         minorUnit?: number | null;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Currency extends _CodeListAspect(_CurrencyAspect(__.Entity)) {}
 Object.defineProperty(Currency, 'name', { value: 'sap.common.Currencies' })
-export class Currencies extends Array<Currency> {}
+export class Currencies extends Array<Currency> {$count?: number}
 Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
 
 /**
@@ -87,11 +82,10 @@ Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
 export function _TimezoneAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Timezone extends Base {
         code?: string;
-      static actions: {
-      }
+      static readonly actions: Record<never, never>
   };
 }
 export class Timezone extends _CodeListAspect(_TimezoneAspect(__.Entity)) {}
 Object.defineProperty(Timezone, 'name', { value: 'sap.common.Timezones' })
-export class Timezones extends Array<Timezone> {}
+export class Timezones extends Array<Timezone> {$count?: number}
 Object.defineProperty(Timezones, 'name', { value: 'sap.common.Timezones' })

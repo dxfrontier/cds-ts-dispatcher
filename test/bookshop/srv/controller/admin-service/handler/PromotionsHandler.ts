@@ -6,6 +6,7 @@ import {
   AfterSaveDraft,
   EntityHandler,
   Inject,
+  PrependDraft,
   Req,
   RequestResponse,
   Res,
@@ -19,6 +20,11 @@ import { Promotion } from '../../../../@cds-models/AdminService';
 @EntityHandler(Promotion)
 class PromotionHandler {
   @Inject(SRV) private readonly srv: Service;
+
+  @PrependDraft({ eventDecorator: 'AfterReadDraftSingleInstance' })
+  public async prepend(@Req() req: Request, @Res() res: RequestResponse, @Result() result: Promotion): Promise<void> {
+    res.setHeader('Accept-Language', 'DE_de');
+  }
 
   @AfterReadDraftSingleInstance()
   public async afterReadSingleDraft(

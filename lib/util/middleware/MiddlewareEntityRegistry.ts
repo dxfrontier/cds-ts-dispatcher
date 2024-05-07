@@ -3,11 +3,11 @@ import { MetadataDispatcher } from '../../core/MetadataDispatcher';
 import util from '../util';
 import middlewareUtil from './middlewareUtil';
 
+import type { ServiceBeforeHandlers } from '../../types/internalTypes';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { Service } from '@sap/cds';
 
 import type { Request } from '../../types/types';
-
 /**
  * @description This class registers the middleware classes for `@Use` decorator.
  */
@@ -26,7 +26,6 @@ export class MiddlewareEntityRegistry {
 
   private getActiveEntityOrDraftEntity(): any {
     const entity = MetadataDispatcher.getEntity(this.entityInstance);
-
     return entity?.drafts ? entity.drafts : entity?.name;
   }
 
@@ -76,32 +75,35 @@ export class MiddlewareEntityRegistry {
    * This routine will sort the 'Before' events over '*'. The '*' will be firstly and after the named ones as events are triggered in order.
    */
   private sortBeforeEvents(): void {
-    (this.srv as any)._handlers.before.sort((a: { before: string }, b: { before: string }) => {
-      if (a.before < b.before) {
-        return -1;
-      }
+    (this.srv as unknown as ServiceBeforeHandlers)._handlers.before.sort(
+      (a: { before: string }, b: { before: string }) => {
+        if (a.before < b.before) {
+          return -1;
+        }
 
-      if (a.before > b.before) {
-        return 1;
-      }
+        if (a.before > b.before) {
+          return 1;
+        }
 
-      return 0;
-    });
+        return 0;
+      },
+    );
   }
 
   // PUBLIC routines
 
   public buildMiddlewares(): void {
     const entity = this.getActiveEntityOrDraftEntity();
-    const isUnboundActions = util.lodash.isUndefined(entity);
 
     // All decorators except actions
-    if (entity) {
+    const hasActiveHandlers = !util.lodash.isEmpty(entity);
+    if (hasActiveHandlers) {
       this.registerBeforeHandlers();
     }
 
     // All actions
-    if (isUnboundActions) {
+    const hasUnboundActions = util.lodash.isUndefined(entity);
+    if (hasUnboundActions) {
       this.registerOnActions();
     }
 

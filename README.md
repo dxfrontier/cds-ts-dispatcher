@@ -2616,7 +2616,7 @@ this.on('SAVE', MyEntity, async (req, next) => {
 All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
 
 > [!NOTE]
-> Except the `@OnAction(), @OnFunction(), @OnEvent(), @OnError()` as this are bound to the service and not to an entity.
+> Except the [@OnAction()](#onaction), [@OnFunction()](#onfunction), [@OnEvent()](#onevent), [@OnError()](#onerror) as these actions are bound to the service and not to an entity.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -2749,6 +2749,9 @@ public async handleMyEvent(@Req() req: TypedRequest<MyEvent>) {
 > - When you want to prepare various things `before` reaching the actual event.
 > - Making transformation on `Request`, `Result`, ... `before` reaching the actual event.
 > - ...
+
+> [!TIP]
+> If `@odata.draft.enabled: true` and you need to read the draft then you should use `@PrependDraft()` decorator.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -2944,7 +2947,7 @@ class UnboundActionsHandler {
 > - [@OnFunction](#onfunction)
 > - [@OnBoundFunction](#onboundfunction)
 >
-> you must use the `ExposeFields type` inside of the `@Validate` decorator.
+> you must use the `ExposeFields` type inside of the `@Validate` decorator.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

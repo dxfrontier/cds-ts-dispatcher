@@ -24,6 +24,12 @@ import type {
 // Common types
 // **************************************************************************************************************************
 
+export type ServiceBeforeHandlers = {
+  _handlers: {
+    before: any[];
+  };
+};
+
 export type ExtendedRequestWithResults = Request & {
   results: any;
 };
@@ -113,6 +119,30 @@ export type PrependDecorators = {
 };
 
 export type PrependBase = {} & (PrependAction | PrependDecorators | PrependEvent);
+
+export type PrependDraftDecorators = {
+  eventDecorator:
+    | 'AfterCreateDraft'
+    | 'AfterReadDraft'
+    | 'AfterReadDraftSingleInstance'
+    | 'AfterUpdateDraft'
+    | 'AfterDeleteDraft'
+    | 'BeforeCreateDraft'
+    | 'BeforeReadDraft'
+    | 'BeforeUpdateDraft'
+    | 'BeforeDeleteDraft'
+    | 'OnCreateDraft'
+    | 'OnReadDraft'
+    | 'OnUpdateDraft'
+    | 'OnDeleteDraft';
+};
+
+export type PrependDraftAction = {
+  eventDecorator: 'OnBoundActionDraft' | 'OnBoundFunctionDraft';
+  actionName: CdsFunction;
+};
+
+export type PrependBaseDraft = {} & (PrependDraftAction | PrependDraftDecorators);
 
 export type MapPrepend = { event: EVENTS; eventKind: EventKind; actionName?: CdsFunction; eventName?: CdsEvent };
 
