@@ -114,6 +114,7 @@ jobs:
         with:
           node-version: '20.x'
           registry-url: 'https://npm.pkg.github.com'
+          scope: '@dxfrontier'
 
       - run: npm ci
       - run: npm run build
