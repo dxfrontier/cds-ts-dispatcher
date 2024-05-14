@@ -100,28 +100,3 @@ jobs:
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-
-  # This will push the latest build of the project to github npm
-  publish-github-npm:
-    name: 'Publish: npm to GitHub'
-    needs: build
-    runs-on: ubuntu-latest
-
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v4
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-        with:
-          node-version: '20.x'
-          registry-url: https://npm.pkg.github.com
-          scope: '@dxfrontier'
-
-      - run: npm ci
-      - run: npm run build
-      - run: npm publish
