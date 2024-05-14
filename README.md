@@ -332,7 +332,7 @@ npm install
 ```
 
 > [!TIP]
-> If above option is being used, this means whenever we change a `.CDS` file the changes will be reflected in the generated `@cds-models` folder.
+> If above option is being used, this means whenever we change a `.CDS` file the changes will reflect in the generated `@cds-models` folder.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -346,19 +346,27 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 
 - Target folder :`./srv/util/types/entities` - Change to your desired destination folder.
 
-> [!TIP]
-> If above option is being used, you have to run every time the command when you do a change in a `.CDS file`
-
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 #### `Important`
 
 > [!CAUTION]
-> Import always the `generated entities from the service folders and not from the index.ts`
+> Import always the `generated entities` from the `service` folders and not from the `index.ts`
 
 ![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/common/cds_typer_entities_@cds-models.png?raw=true)
 
-For more info see official **[SAP CDS-Typer](https://cap.cloud.sap/docs/tools/cds-typer)** page.
+> [!TIP]
+> By default cds-typer will create in your `package.json` a quick path alias like :
+>
+> ```json
+> "imports": {
+>   "#cds-models/*": "./@cds-models/*/index.js"
+> }
+> ```
+>
+> **Use import helper to import entities from `#cds-models` like example :**
+>
+> - **`import { Book } from '#cds-models/CatalogService';`**
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

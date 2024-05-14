@@ -148,8 +148,7 @@ class CDSDispatcher {
    * @private
    */
   private registerPrependHandler(handlerAndEntity: [BaseHandler, Constructable]) {
-    const getProps = this.getHandlerProps(...handlerAndEntity);
-    const { eventKind } = getProps.getPrepend();
+    const { eventKind } = this.getHandlerProps(...handlerAndEntity).getPrepend();
 
     void this.srv.prepend(() => {
       switch (eventKind) {
