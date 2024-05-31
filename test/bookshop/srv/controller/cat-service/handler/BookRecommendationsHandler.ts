@@ -3,6 +3,7 @@
 import {
   BeforeCreate,
   BeforeUpdate,
+  CDS_DISPATCHER,
   EntityHandler,
   Inject,
   Next,
@@ -11,7 +12,6 @@ import {
   OnUpdate,
   Req,
   Service,
-  SRV,
   TypedRequest,
   Validate,
 } from '../../../../../../lib';
@@ -19,7 +19,7 @@ import { BookRecommendation } from '../../../../@cds-models/CatalogService';
 
 @EntityHandler(BookRecommendation)
 class BookRecommendationsHandler {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
   @BeforeCreate()
   @Validate<BookRecommendation>({ action: 'isLowercase' }, 'comment')

@@ -1,16 +1,19 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {
+  BeforeAll,
   BeforeCreate,
   BeforeDelete,
   BeforeRead,
   BeforeUpdate,
+  CDS_DISPATCHER,
   EntityHandler,
   Inject,
   Req,
   Request,
+  RequestResponse,
+  Res,
   Service,
   SingleInstanceSwitch,
-  SRV,
   TypedRequest,
 } from '../../../../../../lib';
 import { Review } from '../../../../@cds-models/CatalogService';
@@ -18,8 +21,13 @@ import ReviewService from '../../../service/ReviewService';
 
 @EntityHandler(Review)
 class ReviewHandler {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(ReviewService) private readonly reviewService: ReviewService;
+
+  @BeforeAll()
+  private async afterAll(@Req() req: Request, @Res() res: RequestResponse): Promise<void> {
+    res.setHeader('CustomHeader', 'BeforeAllTriggered');
+  }
 
   @BeforeCreate()
   private async beforeCreate(@Req() req: TypedRequest<Review>) {

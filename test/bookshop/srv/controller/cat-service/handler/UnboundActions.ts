@@ -1,6 +1,7 @@
 import {
   ActionRequest,
   ActionReturn,
+  CDS_DISPATCHER,
   Error,
   FieldsFormatter,
   GetRequest,
@@ -17,7 +18,6 @@ import {
   RequestResponse,
   Res,
   Service,
-  SRV,
   TypedRequest,
   UnboundActions,
   Use,
@@ -37,7 +37,7 @@ import type { ExposeFields } from '../../../../../../lib/types/validator';
 @UnboundActions()
 @Use(MiddlewareEntity1, MiddlewareEntity2)
 class UnboundActionsHandler {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
   @OnAction(changeBookProperties)
   @FieldsFormatter<ExposeFields<typeof changeBookProperties>>({ action: 'toLower' }, 'language')
