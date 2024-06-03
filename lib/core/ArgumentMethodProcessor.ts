@@ -1,8 +1,7 @@
 /* eslint-disable prefer-const */
 import 'reflect-metadata';
 
-// import { EventContext, Request } from '@sap/cds';
-import constants from '../constants/constants';
+import constants from '../constants/internalConstants';
 import parameterUtil from '../util/parameter/parameterUtil';
 import util from '../util/util';
 

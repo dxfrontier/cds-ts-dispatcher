@@ -3,6 +3,7 @@
 import {
   AfterRead,
   AfterReadDraft,
+  CDS_DISPATCHER,
   EntityHandler,
   Inject,
   Next,
@@ -16,14 +17,13 @@ import {
   Results,
   Service,
   SingleInstanceSwitch,
-  SRV,
 } from '../../../../../../lib';
 import { BookEvent } from '../../../../@cds-models/CatalogService';
 import BookEventsService from '../../../service/BookEventsService';
 
 @EntityHandler(BookEvent)
 class BookEventsHandler {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(BookEventsService) private readonly bookEventsService: BookEventsService;
 
   @OnNewDraft()

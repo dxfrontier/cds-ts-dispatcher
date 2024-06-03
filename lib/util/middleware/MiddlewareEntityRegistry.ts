@@ -1,4 +1,4 @@
-import constants from '../../constants/constants';
+import constants from '../../constants/internalConstants';
 import { MetadataDispatcher } from '../../core/MetadataDispatcher';
 import util from '../util';
 import middlewareUtil from './middlewareUtil';
@@ -24,13 +24,16 @@ export class MiddlewareEntityRegistry {
     await middlewareUtil.executeMiddlewareChain(req, startIndex, middlewares, this.entityInstance);
   };
 
-  private getActiveEntityOrDraftEntity(): any {
+  private getActiveEntityOrDraftEntity(): Constructable | undefined {
     const entity = MetadataDispatcher.getEntity(this.entityInstance);
-    return entity?.drafts ? entity.drafts : entity?.name;
+
+    if (!util.lodash.isUndefined(entity)) {
+      return entity.drafts ? entity.drafts : entity;
+    }
   }
 
   private registerBeforeHandlers(): void {
-    this.srv.before(constants.CDS_DISPATCHER.ALL_EVENTS, this.getActiveEntityOrDraftEntity(), async (req: Request) => {
+    this.srv.before(constants.ALL_EVENTS, this.getActiveEntityOrDraftEntity()!, async (req: Request) => {
       await this.executeMiddlewareChain(req);
     });
   }

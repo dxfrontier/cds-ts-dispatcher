@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { Container } from 'inversify';
 
 import cds from '@sap/cds';
+import util from '../util/util';
+import CDS_DISPATCHER from '../constants/constants';
 
-import { SRV } from '../constants/constants';
+import { Container } from 'inversify';
 import { HandlerType } from '../types/enum';
 import { MiddlewareEntityRegistry } from '../util/middleware/MiddlewareEntityRegistry';
-import util from '../util/util';
 import { MetadataDispatcher } from './MetadataDispatcher';
 
 import type { NonEmptyArray, BaseHandler } from '../types/internalTypes';
@@ -24,7 +24,7 @@ class CDSDispatcher {
    * @description Creates an instance of `CDS Dispatcher`.
    * @param entities An array of entity classes to manage event handlers for.
    * @example
-   * new CDSDispatcher([ Entity-1, Entity-2, Entity-n ]).initialize();
+   * export = new CDSDispatcher([ Entity-1, Entity-2, Entity-n ]).initialize();
    */
   constructor(private readonly entities: NonEmptyArray<Constructable>) {}
 
@@ -76,11 +76,17 @@ class CDSDispatcher {
     return await handler.callback.call(entity, results, req);
   }
 
-  private getActiveEntityOrDraft(handler: BaseHandler, entityInstance: Constructable): Constructable {
-    const { isDraft } = handler;
+  /**
+   * This method returns the active entity or the draft entity of the current handler class
+   *
+   * `Note`: If the handler class is `@UnboundActions` the getEntity will return `undefined`
+   */
+  private getActiveEntityOrDraft(handler: BaseHandler, entityInstance: Constructable): Constructable | undefined {
     const entity = MetadataDispatcher.getEntity(entityInstance);
 
-    return isDraft ? entity.drafts : entity;
+    if (!util.lodash.isUndefined(entity)) {
+      return handler.isDraft ? entity.drafts : entity;
+    }
   }
 
   private getHandlerProps(handler: BaseHandler, entityInstance: Constructable) {
@@ -145,7 +151,6 @@ class CDSDispatcher {
 
   /**
    * Registration of all `AFTER, AFTER, ON` events, for `PREPEND` only
-   * @private
    */
   private registerPrependHandler(handlerAndEntity: [BaseHandler, Constructable]) {
     const { eventKind } = this.getHandlerProps(...handlerAndEntity).getPrepend();
@@ -176,12 +181,11 @@ class CDSDispatcher {
 
   /**
    * Registration of `AFTER - SingleInstance` event `@AfterReadSingleInstance`,
-   * @private
    */
   private registerAfterSingleInstanceHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
     const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
 
-    this.srv.after(event, entity, async (data, req) => {
+    this.srv.after(event, entity!, async (data, req) => {
       const singleInstance = req.params && req.params.length > 0;
 
       if (singleInstance) {
@@ -192,12 +196,11 @@ class CDSDispatcher {
 
   /**
    * Registration of all `AFTER` events, like : `@AfterRead`, `@AfterUpdate`, ...
-   * @private
    */
   private registerAfterHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
     const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
 
-    this.srv.after(event, entity, async (data, req) => {
+    this.srv.after(event, entity!, async (data, req) => {
       return await this.executeAfterCallback(handlerAndEntity, req, data);
     });
   }
@@ -209,43 +212,40 @@ class CDSDispatcher {
   private registerBeforeHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
     const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
 
-    this.srv.before(event, entity, async (req) => {
+    this.srv.before(event, entity!, async (req) => {
       return await this.executeBeforeCallback(handlerAndEntity, req);
     });
   }
 
   /**
    * Registration of all `ON` events, like : `@OnRead`, `@OnUpdate`, `@OnBoundAction`, ...
-   * @private
    */
   private registerOnHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
     const getProps = this.getHandlerProps(...handlerAndEntity);
 
     const { event, entity } = getProps.getDefault();
+    const { actionName } = getProps.getAction();
+    const { eventName } = getProps.getEvent();
 
     switch (event) {
       case 'ACTION':
       case 'FUNC': {
-        const actionName = getProps.getAction().actionName!;
-
-        this.srv.on(actionName, async (req, next) => {
+        this.srv.on(actionName!, async (req, next) => {
           return await this.executeOnCallback(handlerAndEntity, req, next);
         });
+
         break;
       }
       case 'BOUND_ACTION':
       case 'BOUND_FUNC': {
-        const actionName = getProps.getAction().actionName!;
-
-        this.srv.on(actionName, entity.name, async (req, next) => {
+        this.srv.on(actionName!, entity!.name, async (req, next) => {
           return await this.executeOnCallback(handlerAndEntity, req, next);
         });
+
         break;
       }
       case 'EVENT': {
-        const eventName = getProps.getEvent().eventName!;
-
-        this.srv.on(eventName, async (req, next) => {
+        this.srv.on(eventName!, async (req, next) => {
           return await this.executeOnCallback(handlerAndEntity, req, next);
         });
 
@@ -256,13 +256,15 @@ class CDSDispatcher {
         this.srv.on('error', (err, req) => {
           return this.executeOnErrorCallback(handlerAndEntity, err, req);
         });
+
         break;
 
       // CRUD_EVENTS[NEW, CANCEL, CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
-      default:
-        this.srv.on(event, entity, async (req, next) => {
+      default: {
+        this.srv.on(event, entity!, async (req, next) => {
           return await this.executeOnCallback(handlerAndEntity, req, next);
         });
+      }
     }
   }
 
@@ -318,13 +320,11 @@ class CDSDispatcher {
         },
       };
     }
-
-    return undefined;
   }
 
   private readonly registerSrvAsConstant = (): void => {
-    if (!this.container.isBound(SRV)) {
-      this.container.bind<Service>(SRV).toConstantValue(this.srv);
+    if (!this.container.isBound(CDS_DISPATCHER.SRV)) {
+      this.container.bind<Service>(CDS_DISPATCHER.SRV).toConstantValue(this.srv);
     }
   };
 
@@ -336,7 +336,7 @@ class CDSDispatcher {
     this.entities.forEach((entity: Constructable) => {
       const createdEntity = this.resolveDependencies(entity);
       const entityHandlers = this.getHandlersBy(createdEntity);
-      const handlersFound = entityHandlers != null;
+      const handlersFound = entityHandlers !== undefined;
 
       if (handlersFound) {
         entityHandlers.buildHandlers();

@@ -1,10 +1,11 @@
 import 'reflect-metadata';
 
-import constants from '../constants/constants';
+import constants from '../constants/internalConstants';
 
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { MiddlewareImpl } from '../types/types';
 import type { BaseHandler } from '../types/internalTypes';
+import type CDS_DISPATCHER from '../constants/constants';
 
 export class MetadataDispatcher {
   constructor(
@@ -24,7 +25,7 @@ export class MetadataDispatcher {
 
   // STATIC METHODS
 
-  public static getEntity(entity: Constructable): { drafts: any; name: string } {
+  public static getEntity(entity: Constructable): { drafts: any; name: string } | undefined {
     return Reflect.getMetadata(constants.DECORATOR.ENTITY_HANDLER_NAME, entity.constructor);
   }
 
@@ -42,7 +43,7 @@ export class MetadataDispatcher {
     Reflect.defineMetadata(constants.DECORATOR.MIDDLEWARE_NAME, middlewares, this.target);
   }
 
-  public addEntityHandlerMetadata(entity: Constructable): void {
+  public addEntityHandlerMetadata(entity: Constructable | typeof CDS_DISPATCHER.ALL_ENTITIES): void {
     Reflect.defineMetadata(constants.DECORATOR.ENTITY_HANDLER_NAME, entity, this.target);
   }
 

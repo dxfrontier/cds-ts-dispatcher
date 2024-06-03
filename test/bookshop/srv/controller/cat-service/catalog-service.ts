@@ -1,4 +1,5 @@
 import { CDSDispatcher } from '../../../../../lib';
+import AllEntities from '../shared-handlers/AllHandlers';
 import BookEventsHandler from './handler/BookEventsHandler';
 import BookFormatsHandler from './handler/BookFormatsHandler';
 import BookHandler from './handler/BookHandler';
@@ -20,8 +21,13 @@ export = new CDSDispatcher([
   BookFormatsHandler,
   BookRecommendationsHandler,
   BookSalesHandler,
+
   // Draft
   BookEventsHandler,
+
   // Unbound actions
   UnboundActionsHandler,
+
+  // All entities
+  AllEntities,
 ]).initialize();

@@ -4,7 +4,9 @@ import {
   AfterRead,
   AfterReadSingleInstance,
   AfterUpdate,
+  AfterAll,
   BeforeRead,
+  CDS_DISPATCHER,
   EntityHandler,
   GetRequest,
   Inject,
@@ -20,7 +22,6 @@ import {
   Results,
   Service,
   SingleInstanceSwitch,
-  SRV,
   TypedRequest,
   Use,
 } from '../../../../../../lib';
@@ -35,12 +36,32 @@ import BookService from '../../../service/BookService';
 @EntityHandler(Book)
 @Use(MiddlewareEntity1, MiddlewareEntity2)
 class BookHandler {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(BookService) private readonly bookService: BookService;
 
   @Prepend({ eventDecorator: 'AfterReadSingleInstance' })
   public async prepend(@Req() req: Request): Promise<void> {
     req.locale = 'DE_de';
+  }
+
+  @AfterAll()
+  private async afterAll(
+    @Req() req: Request,
+    @Res() res: RequestResponse,
+    @Result() result: Book | Book[] | boolean,
+  ): Promise<void> {
+    if (Array.isArray(result)) {
+      // when after `read` event was triggered
+      // console.log('READ');
+    } else if (typeof result === 'boolean') {
+      // when after `delete` event was triggered
+      // console.log('DELETE');
+    } else {
+      // when after `create`, `update` as triggered
+      // console.log('CREATE and UPDATE');
+    }
+
+    res.setHeader('CustomHeader', 'AfterAllTriggered');
   }
 
   @AfterCreate()
@@ -61,10 +82,6 @@ class BookHandler {
     @Result() result: Book,
     @GetRequest('locale') locale: Request['locale'],
   ): Promise<void> {
-    // + res is any ?!?!?!? ? ha ? wtf SAP
-
-    // req.http?.res.setHeader('Accept-Language', locale);
-
     res.setHeader('Accept-Language', locale);
   }
 

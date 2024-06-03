@@ -1,4 +1,4 @@
-import constants from '../constants/constants';
+import constants from '../constants/internalConstants';
 import { ArgumentMethodProcessor } from '../core/ArgumentMethodProcessor';
 import { MetadataDispatcher } from '../core/MetadataDispatcher';
 import { HandlerType } from '../types/enum';
@@ -508,6 +508,18 @@ function buildOnCRUD<Target extends Object>(options: {
  */
 
 /**
+ * @description Use `@BeforeAll` decorator to execute custom logic before creating a new resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeall | CDS-TS-Dispatcher - @BeforeAll}
+ */
+const BeforeAll = buildBefore({ event: '*', handlerType: HandlerType.Before, isDraft: false });
+
+/**
+ * @description Use `@BeforeAllDraft` decorator to execute custom logic before creating a new `draft` resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeall | CDS-TS-Dispatcher - @BeforeAll}
+ */
+const BeforeAllDraft = buildBefore({ event: '*', handlerType: HandlerType.Before, isDraft: true });
+
+/**
  * @description Use `@BeforeCreate` decorator to execute custom logic before creating a new resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforecreate | CDS-TS-Dispatcher - @BeforeCreate}
  */
@@ -566,6 +578,18 @@ const BeforeDeleteDraft = buildBefore({ event: 'DELETE', handlerType: HandlerTyp
  * Start `After` methods
  * ####################################################################################################################
  */
+
+/**
+ * @description Use `@AfterAll` decorator to execute custom logic after creating a new resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreateall | CDS-TS-Dispatcher - @AfterCreateAll}
+ */
+const AfterAll = buildAfter({ event: '*', handlerType: HandlerType.After, isDraft: false });
+
+/**
+ * @description Use `@AfterCreateAll` decorator to execute custom logic after creating a new draft resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreateall | CDS-TS-Dispatcher - @AfterCreateAll}
+ */
+const AfterAllDraft = buildAfter({ event: '*', handlerType: HandlerType.After, isDraft: true });
 
 /**
  * @description Use `@AfterCreate` decorator to execute custom logic after creating a new resource.
@@ -646,6 +670,18 @@ const AfterDeleteDraft = buildAfter({ event: 'DELETE', handlerType: HandlerType.
  * Start `On` methods
  * ####################################################################################################################
  */
+
+/**
+ * @description Use `@OnAll` decorator to execute custom logic when a new resource is (READ, CREATED, UPDATED, DELETED)
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onall | CDS-TS-Dispatcher - @OnAll}
+ */
+const OnAll = buildOnCRUD({ event: '*', handlerType: HandlerType.On, isDraft: false });
+
+/**
+ * @description Use `@OnAllDraft` decorator to execute custom logic.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onall | CDS-TS-Dispatcher - @OnAllDraft}
+ */
+const OnAllDraft = buildOnCRUD({ event: '*', handlerType: HandlerType.On, isDraft: true });
 
 /**
  * @description Use `@OnCreate` decorator to execute custom logic when a new resource is created.
@@ -841,6 +877,7 @@ export {
   FieldsFormatter,
   // ========================================================================================================================================================
   // BEFORE events - Active entity
+  BeforeAll,
   BeforeCreate,
   BeforeRead,
   BeforeUpdate,
@@ -851,6 +888,7 @@ export {
   BeforeReadDraft,
   BeforeUpdateDraft,
   BeforeDeleteDraft,
+  BeforeAllDraft,
   // ========================================================================================================================================================
 
   // ========================================================================================================================================================
@@ -859,11 +897,14 @@ export {
   AfterRead,
   AfterUpdate,
   AfterDelete,
+  AfterAll,
+
   // AFTER events - Draft
   AfterCreateDraft,
   AfterReadDraft,
   AfterUpdateDraft,
   AfterDeleteDraft,
+  AfterAllDraft,
   // ========================================================================================================================================================
 
   // ========================================================================================================================================================
@@ -878,6 +919,8 @@ export {
   OnError,
   OnBoundAction,
   OnBoundFunction,
+  OnAll,
+
   // ON events - Draft
   OnCreateDraft,
   OnReadDraft,
@@ -885,6 +928,7 @@ export {
   OnDeleteDraft,
   OnBoundActionDraft,
   OnBoundFunctionDraft,
+  OnAllDraft,
   // ========================================================================================================================================================
 
   // ========================================================================================================================================================

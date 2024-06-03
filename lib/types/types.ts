@@ -11,11 +11,12 @@ export type CdsEvent = object;
 export type CDSTyperEntity<T> = Constructable<T>;
 export type RequestType = (...args: any[]) => Promise<any>;
 
+export type ALL_EVENTS = '*';
 export type ERROR_EVENT = 'ERROR';
 export type ON_EVENT = 'EVENT';
 export type ACTION_EVENTS = 'ACTION' | 'BOUND_ACTION';
 export type FUNCTION_EVENTS = 'FUNC' | 'BOUND_FUNC';
-export type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE';
+export type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | ALL_EVENTS;
 export type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE';
 
 export type EVENTS = CRUD_EVENTS | ACTION_EVENTS | FUNCTION_EVENTS | ERROR_EVENT | ON_EVENT | DRAFT_EVENTS;

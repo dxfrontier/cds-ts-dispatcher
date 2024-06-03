@@ -3,6 +3,8 @@
 import {
   ActionRequest,
   ActionReturn,
+  AfterAll,
+  CDS_DISPATCHER,
   EntityHandler,
   Inject,
   Next,
@@ -15,9 +17,11 @@ import {
   OnUpdate,
   Req,
   Request,
+  RequestResponse,
+  Res,
+  Result,
   Service,
   SingleInstanceSwitch,
-  SRV,
   TypedRequest,
 } from '../../../../../../lib';
 import { BookStat } from '../../../../@cds-models/CatalogService';
@@ -26,7 +30,7 @@ import BookStatsService from '../../../service/BookStatsService';
 
 @EntityHandler(BookStat)
 class BookStatsHandler {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(BookStatsService) private readonly bookStatsService: BookStatsService;
   @Inject(AuthorService) private readonly authorService: AuthorService;
 
@@ -34,6 +38,26 @@ class BookStatsHandler {
   public async create(@Req() req: TypedRequest<BookStat>, @Next() next: NextEvent) {
     this.bookStatsService.notifyCreated(req);
     return next();
+  }
+
+  @AfterAll()
+  private async afterAll(
+    @Req() req: Request,
+    @Res() res: RequestResponse,
+    @Result() result: BookStat | BookStat[] | boolean,
+  ): Promise<void> {
+    if (Array.isArray(result)) {
+      // when after `read` event was triggered
+      console.log('READ');
+    } else if (typeof result === 'boolean') {
+      // when after `delete` event was triggered
+      console.log('DELETE');
+    } else {
+      // when after `create`, `update` as triggered
+      console.log('CREATE and UPDATE');
+    }
+
+    res.setHeader('CustomHeader', 'AfterAllTriggered');
   }
 
   @OnRead()
@@ -58,6 +82,7 @@ class BookStatsHandler {
   @OnDelete()
   public async delete(@Req() req: Request, @Next() next: NextEvent) {
     this.bookStatsService.notifyDeleted(req);
+    return next();
   }
 
   // This action will be triggered on the 'BookStat' entity
