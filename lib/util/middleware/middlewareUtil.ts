@@ -1,9 +1,9 @@
-import type { MiddlewareImpl, Request, RequestType } from '../../types/types';
-
-import type { Constructable } from '@sap/cds/apis/internal/inference';
-import constants from '../../constants/constants';
+import constants from '../../constants/internalConstants';
 import { MetadataDispatcher } from '../../core/MetadataDispatcher';
 import util from '../util';
+
+import type { MiddlewareImpl, Request, RequestType } from '../../types/types';
+import type { Constructable } from '@sap/cds/apis/internal/inference';
 
 const middlewareUtil = {
   async executeMiddlewareChain<Middleware extends Constructable<MiddlewareImpl>>(

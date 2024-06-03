@@ -4,7 +4,7 @@ import template from 'string-placeholder';
 
 import { Request as RequestClass } from '@sap/cds';
 
-import constants from '../constants/constants';
+import constants from '../constants/internalConstants';
 
 import type { NextEvent, Request, ValidatorField } from '../types/types';
 import type { Validators } from '../types/validator';

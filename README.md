@@ -45,7 +45,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Use](#use)
     - [`Field`](#field)
       - [@Inject](#inject)
-      - [@Inject(SRV)](#injectsrv)
+      - [@Inject(CDS\_DISPATCHER.SRV)](#injectcds_dispatchersrv)
     - [`Parameter`](#parameter)
       - [@Req](#req)
       - [@Res](#res)
@@ -65,11 +65,13 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
         - [@BeforeRead](#beforeread)
         - [@BeforeUpdate](#beforeupdate)
         - [@BeforeDelete](#beforedelete)
+        - [@BeforeAll](#beforeall)
       - [`After`](#after)
         - [@AfterCreate](#aftercreate)
         - [@AfterRead](#afterread)
         - [@AfterUpdate](#afterupdate)
         - [@AfterDelete](#afterdelete)
+        - [@AfterAll](#afterall)
       - [`On`](#on)
         - [@OnCreate](#oncreate)
         - [@OnRead](#onread)
@@ -81,6 +83,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
         - [@OnError](#onerror)
         - [@OnBoundAction](#onboundaction)
         - [@OnBoundFunction](#onboundfunction)
+        - [@OnAll](#onall)
     - [`Method`-`draft entity`](#method-draft-entity)
       - [`Before`](#before-1)
         - [@BeforeNewDraft](#beforenewdraft)
@@ -432,17 +435,23 @@ export = new CDSDispatcher([
 
 ##### @EntityHandler
 
-**@EntityHandler**(`entity`: CDSTyperEntity)
+The `@EntityHandler` decorator is utilized at the `class-level` to annotate a class with:
 
-The `@EntityHandler` decorator is utilized at the `class-level` to annotate a class with the specific `entity` that will be used in all handlers.
+1. A specific `entity` that will serve as the base entity for all handler decorators within the class.
+2. `'*'` as `all entities` that will serve as the base entity for all handler decorators within the class.
 
-When `@EntityHandler` decorator applied to a class all events [Before](#before), [After](#after), [On](#on) will be triggered based on the argument `entity`.
+`Overloads`
+
+| Method                               | Parameters                               | Description                                                                                                                                                                                                                                                                                                                                                                        |
+| :----------------------------------- | :--------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. EntityHandler(`entity`: CDSTyper) | Must be a `CDS-Typer` generated class    | It ensures that all handlers within the class operate with the specified `entity context`.                                                                                                                                                                                                                                                                                         |
+| 2. EntityHandler(`entity`: `'*'`)    | A wildcard `'*'` indicating all entities | It ensures that all handlers within the class operate with a generic context indicating that registered events will be triggered for all `all entities` (`active entities` and `draft entities`) <br /> <br /> Excluded will be the [@OnAction](#onaction), [@OnFunction](#onfunction), [@OnEvent](#onevent), [@OnEvent](#onevent) as these actions belongs to the Service itself. |
 
 `Parameters`
 
-- `entity (CDSTyperEntity)`: A specialized class generated using the [CDS-Typer](#generate-cds-typed-entities).
+- `entity (CDSTyperEntity | '*')`: A specialized class generated using the [CDS-Typer](#generate-cds-typed-entities) or generic wild card `'*'` applicable to all entities.
 
-`Example`
+`Example 1` using `CDS-Typer`
 
 ```typescript
 import { EntityHandler } from '@dxfrontier/cds-ts-dispatcher';
@@ -452,7 +461,21 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 export class BookHandler {
   // ...
   constructor() {}
-  // ... all events like @AfterRead, @BeforeRead ...
+  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
+}
+```
+
+`Example 2` using `*` wildcard indicating that events will be triggered for all entities
+
+```typescript
+import { EntityHandler, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES) // or use the '*'
+export class BookHandler {
+  // ...
+  constructor() {}
+  // All events like @AfterRead, @BeforeRead, ... will be triggered on all entities using wildcard '*'
 }
 ```
 
@@ -674,7 +697,7 @@ export class MiddlewareClass implements MiddlewareImpl {
 `Example` usage
 
 ```typescript
-import { EntityHandler, Use, Inject, SRV } from '@dxfrontier/cds-ts-dispatcher';
+import { EntityHandler, Use, Inject, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 import { Middleware1, Middleware2, MiddlewareN } from 'YOUR_MIDDLEWARE_LOCATION';
@@ -685,7 +708,7 @@ import type { Service } from '@dxfrontier/cds-ts-dispatcher';
 @Use(Middleware1, Middleware2, MiddlewareN)
 export class CustomerHandler {
   // ...
-  @Inject(SRV) private srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private srv: Service;
   // ...
   constructor() {}
   // ...
@@ -721,7 +744,7 @@ The `@Inject` decorator is utilized as a `field-level` decorator and allows you 
 `Example`
 
 ```typescript
-import { EntityHandler, Inject, SRV } from "@dxfrontier/cds-ts-dispatcher";
+import { EntityHandler, Inject, CDS_DISPATCHER } from "@dxfrontier/cds-ts-dispatcher";
 import type { Service } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
@@ -733,7 +756,7 @@ export class CustomerHandler {
   @Inject(CustomerRepository) private customerService: CustomerRepository
   @Inject(AnyOtherInjectableClass) private repository: AnyOtherInjectableClass
 
-  @Inject(SRV) private srv: Service
+  @Inject(CDS_DISPATCHER.SRV) private srv: Service
   // ...
   constructor() {}
   // ...
@@ -745,9 +768,9 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### @Inject(SRV)
+##### @Inject(CDS_DISPATCHER.SRV)
 
-**@Inject**(SRV) `private srv: Service`
+**@Inject**(`CDS_DISPATCHER.SRV`) private srv: `Service`
 
 This specialized `@Inject` can be used as a `constant` in :
 
@@ -761,7 +784,7 @@ It can be accessed trough `this.srv` and contains the `CDS.ApplicationService` f
 `Example`
 
 ```typescript
-import { EntityHandler, Inject, SRV } from '@dxfrontier/cds-ts-dispatcher';
+import { EntityHandler, Inject, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
@@ -773,7 +796,7 @@ import type { Service } from '@dxfrontier/cds-ts-dispatcher';
 // OR @UnboundActions()
 export class CustomerHandler {
   // @Inject dependencies
-  @Inject(SRV) private srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private srv: Service;
 
   constructor() {}
   // ...
@@ -1586,6 +1609,52 @@ this.before('DELETE', MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+###### @BeforeAll
+
+The `@BeforeAll` decorator will be triggered when **_any_** of the following CRUD event is triggered:
+
+- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate) [@OnCreate()](#oncreate)
+- `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
+- `UPDATE` [@BeforeUpdate()](#beforeupdate), [@AfterUpdate()](#afterupdate), [@OnUpdate()](#onupdate)
+- `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
+- `BOUND ACTIONS` [@OnBoundAction()](#onboundaction)
+- `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
+
+**@BeforeAll**()
+
+`Example`
+
+```typescript
+import { BeforeAll } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeAll()
+private async beforeAllEvents(@Req() req: TypedRequest<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('*', MyEntity, async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@BeforeAll()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!TIP]
+> If `@odata.draft.enabled: true` and you need to read the draft then you should use `@BeforeAllDraft()` decorator.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ##### `After`
 
 Use [@AfterCreate()](#aftercreate), [@AfterRead()](#afterread), [@AfterUpdate()](#afterupdate), [@AfterDelete()](#afterdelete) register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.`
@@ -1622,7 +1691,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterCreate()
-private async afterCreateMethod(@Result() @Result() result: MyEntity, @Req() req: TypedRequest<MyEntity>) {
+private async afterCreateMethod(@Result() result: MyEntity, @Req() req: TypedRequest<MyEntity>) {
   // ...
 }
 ```
@@ -1741,6 +1810,62 @@ this.after('DELETE', MyEntity, async (deleted, req) => {
 
 > [!IMPORTANT]
 > Decorator `@AfterDelete()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @AfterAll
+
+The `@AfterAll` decorator will be triggered when **_any_** of the following CRUD event is triggered:
+
+- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate) [@OnCreate()](#oncreate)
+- `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
+- `UPDATE` [@BeforeUpdate()](#beforeupdate), [@AfterUpdate()](#afterupdate), [@OnUpdate()](#onupdate)
+- `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
+- `BOUND ACTIONS` [@OnBoundAction()](#onboundaction)
+- `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
+
+**@AfterAll**()
+
+`Example`
+
+```typescript
+import { AfterAll} from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterAll()
+private async afterAll(@Result() result: MyEntity[] | MyEntity | boolean, @Req() req: Request) {
+  if(Array.isArray(result)) {
+    // when after `READ` event was triggered
+  }
+  else if(typeof result === 'boolean' ) {
+    // when after `DELETE` event was triggered
+  }
+  else {
+    // when after `CREATE`, `UPDATE` was triggered
+  }
+
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('*', MyEntity, async (result, req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@AfterAll()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!TIP]
+> If `@odata.draft.enabled: true` and you need to read the draft then you should use `@AfterAll()` decorator.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -2145,6 +2270,56 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 > [!IMPORTANT]
 > Decorator `@OnBoundFunction()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @OnAll
+
+**@OnAll**()
+
+The `@OnAll` decorator will be triggered when one of the following CRUD event is called
+
+- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate) [@OnCreate()](#oncreate)
+- `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
+- `UPDATE` [@BeforeUpdate()](#beforeupdate), [@AfterUpdate()](#afterupdate), [@OnUpdate()](#onupdate)
+- `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
+- `BOUND ACTIONS` [@OnBoundAction()](#onboundaction)
+- `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
+
+> [TIP]
+> Except the `UNBOUND ACTIONS` [@OnAction()](#onaction), and `UNBOUND FUNCTIONS` [@OnFunction()](#onfunction) as these are bound to the service itself and not to an entity.
+
+`Example`
+
+```typescript
+import { OnAll, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnAll()
+private async onAll(@Req() req: Request, @Next() next: NextEvent) {
+  // ...
+  return next();
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('*', MyEntity, async (req, next) => {
+  // ...
+});
+```
+
+> [!TIP]
+> If `@odata.draft.enabled: true` and you need to read the draft then you should use `@OnAllDraft()` decorator.
+
+> [!IMPORTANT]
+> Decorator `@OnAll()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -2859,7 +3034,7 @@ Below is a list of available validators:
 import {
   EntityHandler,
   Inject,
-  SRV,
+  CDS_DISPATCHER,
   Validate,
   BeforeCreate,
   BeforeUpdate,
@@ -2875,7 +3050,7 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 @EntityHandler(MyEntity)
 export class CustomerHandler {
   // ...
-  @Inject(SRV) private srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private srv: Service;
   // ...
   constructor() {}
 
@@ -3022,7 +3197,7 @@ Here are the available formatter methods:
 import {
   EntityHandler,
   Inject,
-  SRV,
+  CDS_DISPATCHER,
   BeforeCreate,
   BeforeUpdate,
   AfterRead,
@@ -3039,7 +3214,7 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 @EntityHandler(MyEntity)
 export class CustomerHandler {
   // ...
-  @Inject(SRV) private srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private srv: Service;
   // ...
   constructor() {}
 
@@ -3215,7 +3390,7 @@ export class MiddlewareClass implements MiddlewareImpl {
 `Example` usage
 
 ```typescript
-import { EntityHandler, Use, Inject, SRV } from '@dxfrontier/cds-ts-dispatcher';
+import { EntityHandler, Use, Inject, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
 import type { Service, Request } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
@@ -3224,7 +3399,7 @@ import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 @EntityHandler(MyEntity)
 export class CustomerHandler {
   // ...
-  @Inject(SRV) private srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private srv: Service;
   // ...
   constructor() {}
 
@@ -3317,7 +3492,7 @@ mbt build
 
 <summary>Can I stack multiple decorators on the same callback ? </summary>
 
-Yes, you can stack multiple decorators, if the decorators have the same typed parameters like the other decorators, then you can stack them, otherwise an error will appear at the design time.
+Yes, you can stack multiple decorators.
 
 `Example 1`
 
@@ -3386,7 +3561,7 @@ export const customFormatter: Formatters<BookFormat> = {
 };
 ```
 
-`Import the customFormatter` into your handler
+`Import the customFormatter` in your handler
 
 ```ts
 @AfterRead()

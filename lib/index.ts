@@ -4,7 +4,8 @@ export * from './decorators/parameter';
 
 export * from './core/CDSDispatcher';
 
-export { SRV } from './constants/constants';
+export { SRV } from './constants/internalConstants';
+export * from './constants/constants';
 
 export type * from './types/types';
 export type * from './types/validator';

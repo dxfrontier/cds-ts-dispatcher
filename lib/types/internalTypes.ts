@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 import { Query } from '@sap/cds';
 
-import constants from '../constants/constants';
+import constants from '../constants/internalConstants';
 import { HandlerType } from './enum';
 
 import type {

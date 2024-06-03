@@ -3,7 +3,7 @@
 import { StatusCodes } from 'http-status-codes';
 import * as validatorActions from 'validator';
 
-import constants from '../../constants/constants';
+import constants from '../../constants/internalConstants';
 import util from '../util';
 
 import type { Validators } from '../../types/validator';
