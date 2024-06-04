@@ -24,6 +24,7 @@ import {
   SingleInstanceSwitch,
   TypedRequest,
   Use,
+  AfterReadEachInstance,
 } from '../../../../../../lib';
 import { Book } from '../../../../@cds-models/CatalogService';
 import { MiddlewareMethodAfterRead1 } from '../../../middleware/MiddlewareAfterRead1';
@@ -44,6 +45,15 @@ class BookHandler {
     req.locale = 'DE_de';
   }
 
+  @AfterReadEachInstance()
+  private async afterReadEachInstance(
+    @Req() req: Request,
+    @Res() res: RequestResponse,
+    @Result() result: Book,
+  ): Promise<void> {
+    //
+  }
+
   @AfterAll()
   private async afterAll(
     @Req() req: Request,
@@ -52,13 +62,13 @@ class BookHandler {
   ): Promise<void> {
     if (Array.isArray(result)) {
       // when after `read` event was triggered
-      // console.log('READ');
+      console.log('READ');
     } else if (typeof result === 'boolean') {
       // when after `delete` event was triggered
-      // console.log('DELETE');
+      console.log('DELETE');
     } else {
       // when after `create`, `update` as triggered
-      // console.log('CREATE and UPDATE');
+      console.log('CREATE and UPDATE');
     }
 
     res.setHeader('CustomHeader', 'AfterAllTriggered');

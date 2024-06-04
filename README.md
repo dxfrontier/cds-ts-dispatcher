@@ -45,7 +45,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Use](#use)
     - [`Field`](#field)
       - [@Inject](#inject)
-      - [@Inject(CDS_DISPATCHER.SRV)](#injectcds_dispatchersrv)
+      - [@Inject(CDS\_DISPATCHER.SRV)](#injectcds_dispatchersrv)
     - [`Parameter`](#parameter)
       - [@Req](#req)
       - [@Res](#res)
@@ -69,6 +69,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [`After`](#after)
         - [@AfterCreate](#aftercreate)
         - [@AfterRead](#afterread)
+        - [@AfterReadEachInstance](#afterreadeachinstance)
         - [@AfterUpdate](#afterupdate)
         - [@AfterDelete](#afterdelete)
         - [@AfterAll](#afterall)
@@ -1746,6 +1747,42 @@ this.after('READ', MyEntity, async (results, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+###### @AfterReadEachInstance
+
+**@AfterReadEachInstance**()
+
+The `@AfterReadEachInstance` decorator is used to execute custom logic after performing a read operation on `each individual instance`. This behavior is analogous to the JavaScript `Array.prototype.forEach` method.
+
+`Example`
+
+```typescript
+import { AfterReadEachInstance, Result, Req } from "@dxfrontier/cds-ts-dispatcher";
+import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterReadEachInstance()
+private async afterEach(@Result() result: MyEntity, @Req() req: TypedRequest<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('each', MyEntity, async (result, req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@AfterReadEachInstance()` will be triggered based on the [EntityHandler](#entityhandler) `argument` `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ###### @AfterUpdate
 
 **@AfterUpdate**()
@@ -1838,7 +1875,7 @@ import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @AfterAll()
-private async afterAll(@Result() result: MyEntity[] | MyEntity | boolean, @Req() req: Request) {
+private async afterAll(@Result() result: MyEntity | MyEntity[] | boolean, @Req() req: Request) {
   if(Array.isArray(result)) {
     // when after `READ` event was triggered
   }
@@ -2289,7 +2326,7 @@ The `@OnAll` decorator will be triggered when one of the following CRUD event is
 - `BOUND ACTIONS` [@OnBoundAction()](#onboundaction)
 - `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
 
-> [TIP]
+> [IMPORTANT]
 > Except the `UNBOUND ACTIONS` [@OnAction()](#onaction), and `UNBOUND FUNCTIONS` [@OnFunction()](#onfunction) as these are bound to the service itself and not to an entity.
 
 `Example`
@@ -2815,7 +2852,7 @@ If you want to execute logic for both cases (single instance and entity set) the
 
 `Example`
 
-Single request : http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
+Single request : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
 
 ```typescript
 import { AfterReadSingleInstance, Result, Req } from "@dxfrontier/cds-ts-dispatcher";
@@ -2878,7 +2915,9 @@ The `@Prepend` decorator is utilized as a `method-level` decorator to register a
 `Parameters`
 
 - `eventDecorator (string)` : The eventDecorator can be one of the following :
-  - `'BeforeCreate'`, `'BeforeRead'`, `'BeforeUpdate'`, `'BeforeDelete'`, `'AfterCreate'`, `'AfterRead'` `'AfterReadSingleInstance'`, `'AfterUpdate'`, `'AfterDelete'`, `'OnCreate'`, `'OnRead'`, `'OnUpdate'`, `'OnDelete'`, `'OnError'`, `'OnAction'`, `'OnFunction'`, `'OnBoundAction'`, `'OnBoundFunction'`, `'OnEvent'`.
+  - `BEFORE`: `'BeforeCreate'`, `'BeforeRead'`, `'BeforeUpdate'`, `'BeforeDelete'`, `'BeforeAll'`.
+  - `AFTER`: `'AfterCreate'`, `'AfterRead'`, `'AfterReadEachInstance'`, `'AfterReadSingleInstance'`, `'AfterUpdate'`, `'AfterDelete'`, `'AfterAll'`.
+  - `ON:` `'OnCreate'`, `'OnRead'`, `'OnUpdate'`, `'OnDelete'`, `'OnAll'`, `'OnAction'`, `'OnFunction'`, `'OnBoundAction'`, `'OnBoundFunction'`, `'OnEvent'`, `'OnError'`.
 - `actionName: (CDSFunction)` : Action name, applicable only for `OnAction`, `OnBoundAction`, `OnFunction`, `OnBoundFunction`.
 - `eventName: (CDSEvent)` : Event name, applicable only for `OnEvent`.
 
