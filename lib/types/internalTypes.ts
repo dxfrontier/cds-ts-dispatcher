@@ -105,16 +105,20 @@ export type PrependDecorators = {
     | 'AfterCreate'
     | 'AfterRead'
     | 'AfterReadSingleInstance'
+    | 'AfterReadEachInstance'
     | 'AfterUpdate'
     | 'AfterDelete'
+    | 'AfterAll'
     | 'BeforeCreate'
     | 'BeforeRead'
     | 'BeforeUpdate'
     | 'BeforeDelete'
+    | 'BeforeAll'
     | 'OnCreate'
     | 'OnRead'
     | 'OnUpdate'
     | 'OnDelete'
+    | 'OnAll'
     | 'OnError';
 };
 
@@ -125,16 +129,20 @@ export type PrependDraftDecorators = {
     | 'AfterCreateDraft'
     | 'AfterReadDraft'
     | 'AfterReadDraftSingleInstance'
+    | 'AfterReadDraftEachInstance'
     | 'AfterUpdateDraft'
     | 'AfterDeleteDraft'
+    | 'AfterAllDraft'
     | 'BeforeCreateDraft'
     | 'BeforeReadDraft'
     | 'BeforeUpdateDraft'
     | 'BeforeDeleteDraft'
+    | 'BeforeAllDraft'
     | 'OnCreateDraft'
     | 'OnReadDraft'
     | 'OnUpdateDraft'
-    | 'OnDeleteDraft';
+    | 'OnDeleteDraft'
+    | 'OnAllDraft';
 };
 
 export type PrependDraftAction = {

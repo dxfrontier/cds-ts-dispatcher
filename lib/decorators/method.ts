@@ -610,10 +610,22 @@ const AfterCreateDraft = buildAfter({ event: 'CREATE', handlerType: HandlerType.
 const AfterRead = buildAfter({ event: 'READ', handlerType: HandlerType.After, isDraft: false });
 
 /**
- * @description Use `@AfterReadDraft` decorator to execute custom logic after performing a DRAFT read operation.
+ * @description Use `@AfterReadDraft` decorator to execute custom logic after performing a draft read operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterread | CDS-TS-Dispatcher - @AfterReadDraft}
  */
 const AfterReadDraft = buildAfter({ event: 'READ', handlerType: HandlerType.After, isDraft: true });
+
+/**
+ * @description The `@AfterReadEachInstance` decorator is used to execute custom logic after performing a read operation on `each individual instance`. This behavior is analogous to the JavaScript `Array.prototype.forEach` method.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadeachinstance | CDS-TS-Dispatcher - @AfterReadEachInstance}
+ */
+const AfterReadEachInstance = buildAfter({ event: 'each', handlerType: HandlerType.After, isDraft: false });
+
+/**
+ * @description The `@AfterReadDraftEachInstance` decorator is used to execute custom logic after performing a read operation on `each individual draft instance`. This behavior is analogous to the JavaScript `Array.prototype.forEach` method.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadeachinstance | CDS-TS-Dispatcher - @AfterReadEachInstance}
+ */
+const AfterReadDraftEachInstance = buildAfter({ event: 'each', handlerType: HandlerType.After, isDraft: true });
 
 /**
  * @description Use `@AfterReadSingleInstance` decorator to execute custom logic after creating a new single instance resource.
@@ -895,6 +907,7 @@ export {
   // AFTER events - Active entity
   AfterCreate,
   AfterRead,
+  AfterReadEachInstance,
   AfterUpdate,
   AfterDelete,
   AfterAll,
@@ -902,6 +915,7 @@ export {
   // AFTER events - Draft
   AfterCreateDraft,
   AfterReadDraft,
+  AfterReadDraftEachInstance,
   AfterUpdateDraft,
   AfterDeleteDraft,
   AfterAllDraft,
