@@ -45,7 +45,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Use](#use)
     - [`Field`](#field)
       - [@Inject](#inject)
-      - [@Inject(CDS\_DISPATCHER.SRV)](#injectcds_dispatchersrv)
+      - [@Inject(CDS_DISPATCHER.SRV)](#injectcds_dispatchersrv)
     - [`Parameter`](#parameter)
       - [@Req](#req)
       - [@Res](#res)
