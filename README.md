@@ -118,7 +118,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 
 ## Prerequisites
 
-Install [**@sap/cds-dk**](https://cap.cloud.sap/docs/get-started/) globally:
+Install [**@sap/cds-dk**](https://cap.cloud.sap/docs/get-started/), `typescript`, `ts-node` globally:
 
 ```bash
 npm install -g @sap/cds-dk typescript ts-node
@@ -773,14 +773,12 @@ export class CustomerHandler {
 
 **@Inject**(`CDS_DISPATCHER.SRV`) private srv: `Service`
 
-This specialized `@Inject` can be used as a `constant` in :
+This specialized `@Inject` can be used as a `constant` in and contains the `CDS.ApplicationService` for further enhancements :
 
 - [@EntityHandler()](#entityhandler)
 - [@ServiceLogic()](#servicelogic)
 - [@Repository()](#repository)
 - [@UnboundActions()](#unboundactions)
-
-It can be accessed trough `this.srv` and contains the `CDS.ApplicationService` for further enhancements.
 
 `Example`
 
@@ -803,6 +801,9 @@ export class CustomerHandler {
   // ...
 }
 ```
+
+> [!TIP]
+> The CDS.ApplicationService can be accessed trough `this.srv`.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -1110,8 +1111,7 @@ class BookHandler {
 The `@IsRole` decorator is utilized at the `parameter level`. It allows you to verify
 if the `User` has assigned a given role.
 
-It applies an `OR` logic on the specified roles, meaning it
-checks if at `least one` of the specified roles is assigned.
+It applies an logical `OR` on the specified roles, meaning it checks if at `least one` of the specified roles is assigned
 
 `Parameters`
 
@@ -2326,7 +2326,7 @@ The `@OnAll` decorator will be triggered when one of the following CRUD event is
 - `BOUND ACTIONS` [@OnBoundAction()](#onboundaction)
 - `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
 
-> [IMPORTANT]
+> [!NOTE]
 > Except the `UNBOUND ACTIONS` [@OnAction()](#onaction), and `UNBOUND FUNCTIONS` [@OnFunction()](#onfunction) as these are bound to the service itself and not to an entity.
 
 `Example`
@@ -3372,7 +3372,7 @@ class UnboundActionsHandler {
 
 The `@ExecutionAllowedForRole` is used as a `method level` decorator and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
 
-It applies an `OR` logic on the specified **_roles_**, meaning it checks if at `least one` of the specified roles is assigned to the current request, then the execution will be allowed.
+It applies an logical `OR` on the specified **_roles_**, meaning it checks if at `least one` of the specified roles is assigned to the current request, then the execution will be allowed.
 
 `Parameters`
 
