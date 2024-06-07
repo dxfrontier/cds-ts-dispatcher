@@ -45,7 +45,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Use](#use)
     - [`Field`](#field)
       - [@Inject](#inject)
-      - [@Inject(CDS_DISPATCHER.SRV)](#injectcds_dispatchersrv)
+      - [@Inject(CDS\_DISPATCHER.SRV)](#injectcds_dispatchersrv)
     - [`Parameter`](#parameter)
       - [@Req](#req)
       - [@Res](#res)
@@ -443,10 +443,10 @@ The `@EntityHandler` decorator is utilized at the `class-level` to annotate a cl
 
 `Overloads`
 
-| Method                               | Parameters                               | Description                                                                                                                                                                                                                                                                                                                                                                        |
-| :----------------------------------- | :--------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. EntityHandler(`entity`: CDSTyper) | Must be a `CDS-Typer` generated class    | It ensures that all handlers within the class operate with the specified `entity context`.                                                                                                                                                                                                                                                                                         |
-| 2. EntityHandler(`entity`: `'*'`)    | A wildcard `'*'` indicating all entities | It ensures that all handlers within the class operate with a generic context indicating that registered events will be triggered for all `all entities` (`active entities` and `draft entities`) <br /> <br /> Excluded will be the [@OnAction](#onaction), [@OnFunction](#onfunction), [@OnEvent](#onevent), [@OnEvent](#onevent) as these actions belongs to the Service itself. |
+| Method                               | Parameters                               | Description                                                                                                                                                                                                                                                                                                                                                                            |
+| :----------------------------------- | :--------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. EntityHandler(`entity`: CDSTyper) | Must be a `CDS-Typer` generated class    | It ensures that all handlers within the class operate with the specified `entity context`.                                                                                                                                                                                                                                                                                             |
+| 2. EntityHandler(`entity`: `'*'`)    | A wildcard `'*'` indicating all entities | It ensures that all handlers within the class operate with a generic context indicating that registered events will be triggered for all `all entities` (`active entities` and `draft entities`) <br /> <br /> Excluded will be [@OnAction()](#onaction), [@OnFunction()](#onfunction), [@OnEvent()](#onevent), [@OnError()](#onerror) as these actions belongs to the Service itself. |
 
 `Parameters`
 
@@ -2317,7 +2317,7 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 **@OnAll**()
 
-The `@OnAll` decorator will be triggered when one of the following CRUD event is called
+The `@OnAll` decorator will be triggered when one of the following CRUD event is called:
 
 - `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate) [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
@@ -2327,7 +2327,7 @@ The `@OnAll` decorator will be triggered when one of the following CRUD event is
 - `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
 
 > [!NOTE]
-> Except the `UNBOUND ACTIONS` [@OnAction()](#onaction), and `UNBOUND FUNCTIONS` [@OnFunction()](#onfunction) as these are bound to the service itself and not to an entity.
+> Exception will be the following decorators [@OnEvent()](#onevent), [@OnError()](#onerror) and `UNBOUND ACTIONS` [@OnAction()](#onaction), `UNBOUND FUNCTIONS` [@OnFunction()](#onfunction) as these are bound to the service itself and not to an entity.
 
 `Example`
 
