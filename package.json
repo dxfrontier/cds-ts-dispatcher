@@ -15,21 +15,31 @@
     "eslint:message": "echo 'Eslint started...'",
     "eslint": "npx eslint .",
     "eslint:fix": "npx eslint . --fix",
+    
     "prettier:message": "echo 'Prettier started ...'",
     "prettier": "npx prettier . --check",
     "prettier:fix": "npx prettier . --write",
+
     "check": "run-s eslint:message eslint prettier:message prettier",
+    
     "fix": "run-s eslint:message eslint:fix prettier:message prettier:fix",
+    
     "start:bookshop": "npm run start --prefix ./test/bookshop",
+    
     "tests:newman": "newman run ./test/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/e2e/environment.json --bail",
     "test:unit": "npm run build:entities:test --prefix ./test/bookshop && jest",
     "test:e2e": "start-server-and-test start:bookshop http://localhost:4004 tests:newman",
     "test:all": "run-s test:unit test:e2e",
+    
     "prepare": "husky",
+
+    "commit": "commit",
+
     "build:message": "echo 'Build started...'",
     "build:clean": "echo 'Clean dist folder' && npx rimraf ./dist/{*.js,*.map,*.ts,*.mts,*.mjs}",
     "build:ts": "tsup",
     "build": "run-s build:clean build:message build:ts"
+    
   },
   "repository": {
     "type": "git",
@@ -72,15 +82,19 @@
     "validator": "^13.12.0"
   },
   "devDependencies": {
-    "@cap-js/cds-typer": "0.20.2",
+    "@cap-js/cds-typer": "0.21.2",
     "@cap-js/sqlite": "^1.7.1",
-    "@dxfrontier/cds-ts-repository": "^1.0.19",
+    "@dxfrontier/cds-ts-repository": "^1.0.22",
     "@types/jest": "^29.5.12",
-    "@types/lodash": "^4.17.4",
+    "@types/lodash": "^4.17.5",
     "@types/string-placeholder": "^1.0.3",
     "@types/validator": "^13.11.10",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@commitlint/prompt-cli": "^19.3.1",
+    "@commitlint/types": "^19.0.3",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard-with-typescript": "^43.0.1",
@@ -90,12 +104,12 @@
     "husky": "^9.0.11",
     "jest": "^29.7.0",
     "lint-staged": "^15.2.5",
-    "newman": "^6.1.2",
+    "newman": "^6.1.3",
     "npm-run-all": "^4.1.5",
-    "prettier": "3.2.5",
-    "start-server-and-test": "^2.0.3",
+    "prettier": "3.3.1",
+    "start-server-and-test": "^2.0.4",
     "ts-jest": "^29.1.4",
-    "tsup": "^8.0.2",
+    "tsup": "^8.1.0",
     "typescript": "^5.4.5"
   },
   "lint-staged": {
