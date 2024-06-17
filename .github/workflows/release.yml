@@ -131,19 +131,41 @@ jobs:
           draft: false
           make_latest: true
 
-      - name: Commit Changelog
+      - name: Commit Changelog to new branch
+        id: commit_changelog
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           set +e
+          git checkout -b update-changelog-${{ github.run_id }}
           git add CHANGELOG.md
           git commit -m "chore(doc): CHANGELOG.md updated"
-          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git main
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git update-changelog-${{ github.run_id }}
+
+  create_pull_request:
+    name: Create Pull Request and
+    needs: create_changelog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create a Pull Request and push the commit to merge
+        id: create_pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: chore(doc) CHANGELOG.md updated
+          branch: update-changelog-${{ github.run_id }}
+          base: main
+          title: chore(doc) CHANGELOG.md updated
+          body: 'Automated update of CHANGELOG.md'
+          draft: false
+          delete-branch: true
 
   # This will push the latest build of the project to npm
   publish-npm:
     name: Publish to npm publicly
-    needs: create_changelog
+    needs: create_pull_request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
