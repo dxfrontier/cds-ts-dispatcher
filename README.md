@@ -1614,7 +1614,7 @@ this.before('DELETE', MyEntity, async (req) => {
 
 The `@BeforeAll` decorator will be triggered when **_any_** of the following CRUD event is triggered:
 
-- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate) [@OnCreate()](#oncreate)
+- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
 - `UPDATE` [@BeforeUpdate()](#beforeupdate), [@AfterUpdate()](#afterupdate), [@OnUpdate()](#onupdate)
 - `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
@@ -1857,7 +1857,7 @@ this.after('DELETE', MyEntity, async (deleted, req) => {
 
 The `@AfterAll` decorator will be triggered when **_any_** of the following CRUD event is triggered:
 
-- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate) [@OnCreate()](#oncreate)
+- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
 - `UPDATE` [@BeforeUpdate()](#beforeupdate), [@AfterUpdate()](#afterupdate), [@OnUpdate()](#onupdate)
 - `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
@@ -2319,7 +2319,7 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 The `@OnAll` decorator will be triggered when one of the following CRUD event is called:
 
-- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate) [@OnCreate()](#oncreate)
+- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
 - `UPDATE` [@BeforeUpdate()](#beforeupdate), [@AfterUpdate()](#afterupdate), [@OnUpdate()](#onupdate)
 - `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
