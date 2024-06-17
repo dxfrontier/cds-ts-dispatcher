@@ -4,7 +4,7 @@ import { RuleConfigSeverity } from '@commitlint/types';
 const Configuration: UserConfig = {
   extends: ['@commitlint/config-conventional'],
   rules: {
-    'type-enum': [RuleConfigSeverity.Error, 'always', ['feat', 'chore', 'fix', 'test', 'style', 'refactor']],
+    'type-enum': [RuleConfigSeverity.Error, 'always', ['feat', 'chore', 'fix', 'test', 'style', 'refactor', 'delete']],
     'scope-enum': [
       RuleConfigSeverity.Error,
       'always',
@@ -23,8 +23,8 @@ const Configuration: UserConfig = {
         'build',
         // config: Changes to prettier, lint, github actions, husky, lint-staged ...
         'config',
-        // docs: Changes to documentation.
-        'docs',
+        // doc: Changes to documentation.
+        'doc',
         // deps: Updates to dependencies.
         'deps',
         // e2e-tests, unit, integration: Changes to all tests

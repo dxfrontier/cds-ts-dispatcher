@@ -4,47 +4,64 @@ name: Release
 
 on:
   pull_request:
+    branches:
+      - main
     types:
       - closed
     paths-ignore:
-      - '../../test'
-      - '../ISSUE_TEMPLATE'
-      - '../workflows'
+      - '../../test/*'
+      - '../ISSUE_TEMPLATE/*'
+      - '../workflows/*'
 
 permissions:
   contents: write
   pull-requests: read
 
 jobs:
-  if_merged:
-    name: Merge to main branch
+  # This job will check if the Pull request was merged into main branch
+  check_valid_merge:
+    name: Merge 'Pull request' to 'main' branch
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo The PR was merged
+          echo The PR was merged.
 
-  if_norelease_label_then_stop:
-    name: No release if label 'norelease'
-    needs: if_merged
+  # This will validate to see if the labels contains 'none' which means that if 'none' was found the release will not happen
+  check_valid_release:
+    name: Validate release conditions
+    needs: check_valid_merge
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'norelease') }}
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo The PR can continue to tags, release creation
+          echo The PR can continue to tags release creation.
 
-    # This will create automatic tags based on the last 50 comits and it will create latest release
-  release:
-    name: 'Create: tags and release'
+  # This will start build of the project
+  check_valid_build:
+    name: Check build validity
     runs-on: ubuntu-latest
-    needs: [if_merged, if_norelease_label_then_stop]
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    needs: [check_valid_merge, check_valid_release]
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - run: npm install
+      - run: npm run build
 
-      - name: 'Save version to .env'
+  # Steps for creation of the tags
+  create_tags:
+    name: Generate and push tags
+    runs-on: ubuntu-latest
+    needs: check_valid_build
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+
+      # Determine the tag version by checking the labels provided in the Pull request
+      - name: Determine Version Bump
         env:
           IS_PATCH_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'patch') }}
           IS_MINOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}
@@ -61,30 +78,72 @@ jobs:
             echo "version=major" >> $GITHUB_ENV
             echo "Version: major"
           else
-            echo "version=norelease" >> $GITHUB_ENV
-            echo "Version: norelease"
+            echo "version=none" >> $GITHUB_ENV
+            echo "Version: No release"
           fi
 
-      - uses: rymndhng/release-on-push-action@v0.28.0
-        with:
-          bump_version_scheme: ${{ env.version }}
-          release_name: 'Release <RELEASE_VERSION>'
-          tag_prefix: 'v'
+      # Create the tags
+      - name: Push tags
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: false
+          DEFAULT_BUMP: ${{ env.version }}
+          BRANCH_HISTORY: full
 
-  # This will start build of the project
-  build:
-    name: 'Start: build'
+  # Create of the changelog file and commit the file to the main branch
+  create_changelog:
+    name: Generate changelog, commit the CHANGELOG.md file
+    needs: create_tags
     runs-on: ubuntu-latest
-    needs: release
+    outputs:
+      release_body: ${{ steps.git-cliff.outputs.content }}
     steps:
-      - uses: actions/checkout@v4
-      - run: npm install
-      - run: npm run build
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Generate the changelog file based on the cliff.toml file
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v3
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: -vv --latest --strip header
+        env:
+          OUTPUT: CHANGELOG.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Display version
+        run: echo ${{ steps.git-cliff.outputs.version }}
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          body: ${{ steps.git-cliff.outputs.content }}
+          tag_name: ${{ steps.git-cliff.outputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: false
+          draft: false
+          make_latest: true
+
+      - name: Commit Changelog
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          set +e
+          git add CHANGELOG.md
+          git commit -m "chore(doc): CHANGELOG.md updated"
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git main
 
   # This will push the latest build of the project to npm
   publish-npm:
-    name: 'Publish: npm public'
-    needs: build
+    name: Publish to npm publicly
+    needs: create_changelog
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
