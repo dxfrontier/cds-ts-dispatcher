@@ -58,29 +58,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: '0'
+          fetch-depth: 0
 
-      # Determine the tag version by checking the labels provided in the Pull request
-      - name: Determine Version Bump
-        env:
-          IS_PATCH_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'patch') }}
-          IS_MINOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}
-          IS_MAJOR_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'major') }}
-          IS_NO_RELEASE_FOUND: ${{ contains(github.event.pull_request.labels.*.name, 'norelease') }}
-        run: |
-          if [ "${IS_MINOR_FOUND}" == "true" ]; then
-            echo "version=minor" >> $GITHUB_ENV
-            echo "Version: minor"
-          elif [ "${IS_PATCH_FOUND}" == "true" ]; then
-            echo "version=patch" >> $GITHUB_ENV
-            echo "Version: patch"
-          elif [ "${IS_MAJOR_FOUND}" == "true" ]; then
-            echo "version=major" >> $GITHUB_ENV
-            echo "Version: major"
-          else
-            echo "version=none" >> $GITHUB_ENV
-            echo "Version: No release"
-          fi
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
 
       # Create the tags
       - name: Push tags
@@ -88,9 +70,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: false
-          DEFAULT_BUMP: ${{ env.version }}
+          CUSTOM_TAG: ${{ steps.package-version.outputs.current-version}}
           BRANCH_HISTORY: full
-          INITIAL_VERSION: 2.0.24
 
   # Create of the changelog file and commit the file to the main branch
   create_changelog:
@@ -106,7 +87,7 @@ jobs:
           fetch-depth: 0
 
       # Generate the changelog file based on the cliff.toml file
-      - name: Generate a changelog
+      - name: Generate CHANGELOG.md
         uses: orhun/git-cliff-action@v3
         id: git-cliff
         with:
@@ -115,9 +96,6 @@ jobs:
         env:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
-
-      - name: Display version
-        run: echo ${{ steps.git-cliff.outputs.version }}
 
       - name: Create GitHub Release
         id: create_release
@@ -132,29 +110,27 @@ jobs:
           draft: false
           make_latest: true
 
-      - name: Commit Changelog to new branch
-        id: commit_changelog
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          set +e
-          git checkout -b update-changelog-${{ github.run_id }}
-          git add CHANGELOG.md
-          git commit -m "chore(doc): CHANGELOG.md updated"
-          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git update-changelog-${{ github.run_id }}
+      # - name: Commit Changelog to new branch
+      #   id: commit_changelog
+      #   run: |
+      #     git config user.name 'github-actions[bot]'
+      #     git config user.email 'github-actions[bot]@users.noreply.github.com'
+      #     set +e
+      #     git checkout -b update-changelog-${{ github.run_id }}
+      #     git add CHANGELOG.md
+      #     git commit -m "chore(doc): CHANGELOG.md updated"
+      #     git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git update-changelog-${{ github.run_id }}
 
-      - name: Create a Pull Request and push the CHANGELOG.md to main
-        id: create_pr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: chore(doc) CHANGELOG.md updated
-          branch: update-changelog-${{ github.run_id }}
-          base: main
-          title: chore(doc) CHANGELOG.md updated
-          body: 'Automated update of CHANGELOG.md'
-          draft: false
-          delete-branch: true
+      # - name: Create a Pull Request and push the commit to merge
+      #   id: create_pr
+      #   uses: peter-evans/create-pull-request@v6
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     branch: update-changelog-${{ github.run_id }}
+      #     base: main
+      #     title: chore(doc) CHANGELOG.md updated
+      #     body: 'Automated update of CHANGELOG.md'
+      #     delete-branch: true
 
   # This will push the latest build of the project to npm
   publish-npm:
