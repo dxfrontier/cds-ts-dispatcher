@@ -143,7 +143,7 @@ jobs:
           git commit -m "chore(doc): CHANGELOG.md updated"
           git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git update-changelog-${{ github.run_id }}
 
-      - name: Create a Pull Request and push the commit to merge
+      - name: Create a Pull Request and push the CHANGELOG.md to main
         id: create_pr
         uses: peter-evans/create-pull-request@v6
         with:
