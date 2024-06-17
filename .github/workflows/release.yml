@@ -90,6 +90,7 @@ jobs:
           WITH_V: false
           DEFAULT_BUMP: ${{ env.version }}
           BRANCH_HISTORY: full
+          INITIAL_VERSION: 2.0.24
 
   # Create of the changelog file and commit the file to the main branch
   create_changelog:
