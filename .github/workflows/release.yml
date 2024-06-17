@@ -142,13 +142,6 @@ jobs:
           git commit -m "chore(doc): CHANGELOG.md updated"
           git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git update-changelog-${{ github.run_id }}
 
-  create_pull_request:
-    name: Create Pull Request and
-    needs: create_changelog
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
       - name: Create a Pull Request and push the commit to merge
         id: create_pr
         uses: peter-evans/create-pull-request@v6
@@ -165,7 +158,7 @@ jobs:
   # This will push the latest build of the project to npm
   publish-npm:
     name: Publish to npm publicly
-    needs: create_pull_request
+    needs: create_changelog
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
