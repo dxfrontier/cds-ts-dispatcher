@@ -15,7 +15,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   # This job will check if the Pull request was merged into main branch
