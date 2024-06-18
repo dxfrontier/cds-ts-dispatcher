@@ -15,7 +15,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   # This job will check if the Pull request was merged into main branch
@@ -75,7 +75,7 @@ jobs:
 
   # Create of the changelog file and commit the file to the main branch
   create_changelog:
-    name: Generate changelog, commit the CHANGELOG.md file
+    name: Generate changelog, create PR for CHANGELOG.md
     needs: create_tags
     runs-on: ubuntu-latest
     outputs:
@@ -110,27 +110,16 @@ jobs:
           draft: false
           make_latest: true
 
-      # - name: Commit Changelog to new branch
-      #   id: commit_changelog
-      #   run: |
-      #     git config user.name 'github-actions[bot]'
-      #     git config user.email 'github-actions[bot]@users.noreply.github.com'
-      #     set +e
-      #     git checkout -b update-changelog-${{ github.run_id }}
-      #     git add CHANGELOG.md
-      #     git commit -m "chore(doc): CHANGELOG.md updated"
-      #     git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git update-changelog-${{ github.run_id }}
-
-      # - name: Create a Pull Request and push the commit to merge
-      #   id: create_pr
-      #   uses: peter-evans/create-pull-request@v6
-      #   with:
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     branch: update-changelog-${{ github.run_id }}
-      #     base: main
-      #     title: chore(doc) CHANGELOG.md updated
-      #     body: 'Automated update of CHANGELOG.md'
-      #     delete-branch: true
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          base: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: CHANGELOG.md updated
+          body: CHANGELOG.md updated with latest conventional commits.
+          labels: norelease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # This will push the latest build of the project to npm
   publish-npm:
