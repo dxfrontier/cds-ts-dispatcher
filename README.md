@@ -550,7 +550,7 @@ The **[CDS-TS-Repository - BaseRepository](https://github.com/dxfrontier/cds-ts-
 It simplifies the implementation by offering a set of ready-to-use actions for interacting with the database. These actions include:
 
 - `.create()`: Create new records in the database.
-- `.findAll()`: Retrieve all records from the database.
+- `.getAll()`: Retrieve all records from the database.
 - `.find()`: Query the database to find specific data.
 - `.delete()`: Remove records from the database.
 - `.exists()`: Check the existence of data in the database.
@@ -1467,10 +1467,10 @@ See also the official SAP JS **[CDS-Before](https://cap.cloud.sap/docs/node.js/c
 > [!TIP]
 > If `@odata.draft.enabled: true` to manage event handlers for draft version you can use
 >
-> - @BeforeCreateDraft()
-> - @BeforeReadDraft()
-> - @BeforeUpdateDraft()
-> - @BeforeDeleteDraft()
+> - `@BeforeCreateDraft()`
+> - `@BeforeReadDraft()`
+> - `@BeforeUpdateDraft()`
+> - `@BeforeDeleteDraft()`
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1612,7 +1612,11 @@ this.before('DELETE', MyEntity, async (req) => {
 
 ###### @BeforeAll
 
-The `@BeforeAll` decorator will be triggered when **_any_** of the following CRUD event is triggered:
+The `@BeforeAll` decorator is triggered whenever **_any CRUD (Create, Read, Update, Delete)_** event occurs, whether the entity is `active` or in `draft` mode.
+
+`ACTIVE ENTITY`
+
+For active entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
 
 - `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
@@ -1620,6 +1624,16 @@ The `@BeforeAll` decorator will be triggered when **_any_** of the following CRU
 - `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
 - `BOUND ACTIONS` [@OnBoundAction()](#onboundaction)
 - `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
+
+`DRAFT`
+
+For draft entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
+
+- `CREATE` [@BeforeNewDraft()](#beforenewdraft), [@AfterNewDraft()](#afternewdraft), [@OnNewDraft()](#onnewdraft)
+- `CANCEL` [@BeforeCancelDraft()](#beforecanceldraft), [@AfterCancelDraft()](#aftercanceldraft), [@OnCancelDraft()](#oncanceldraft)
+- `EDIT` [@BeforeEditDraft()](#beforeeditdraft), [@AfterEditDraft()](#aftereditdraft), [@OnEditDraft()](#oneditdraft)
+- `SAVE` [@BeforeSaveDraft()](#beforesavedraft), [@AfterSaveDraft()](#aftersavedraft), [@OnSaveDraft()](#onsavedraft)
+- :heavy_plus_sign: All active entity [Before](#before), [After](#after), [On](#on) events which have a `Draft` variant.
 
 **@BeforeAll**()
 
@@ -1649,7 +1663,7 @@ this.before('*', MyEntity, async (req) => {
 > Decorator `@BeforeAll()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
 
 > [!TIP]
-> If `@odata.draft.enabled: true` and you need to read the draft then you should use `@BeforeAllDraft()` decorator.
+> If the entity has drafts enabled `@odata.draft.enabled: true`, the `@BeforeAll` decorator will still be triggered for draft events.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -1855,7 +1869,11 @@ this.after('DELETE', MyEntity, async (deleted, req) => {
 
 ###### @AfterAll
 
-The `@AfterAll` decorator will be triggered when **_any_** of the following CRUD event is triggered:
+The `@AfterAll` decorator is triggered whenever **_any CRUD (Create, Read, Update, Delete)_** event occurs, whether the entity is `active` or in `draft` mode.
+
+`ACTIVE ENTITY`
+
+For active entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
 
 - `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
@@ -1863,6 +1881,16 @@ The `@AfterAll` decorator will be triggered when **_any_** of the following CRUD
 - `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
 - `BOUND ACTIONS` [@OnBoundAction()](#onboundaction)
 - `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
+
+`DRAFT`
+
+For draft entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
+
+- `CREATE` [@BeforeNewDraft()](#beforenewdraft), [@AfterNewDraft()](#afternewdraft), [@OnNewDraft()](#onnewdraft)
+- `CANCEL` [@BeforeCancelDraft()](#beforecanceldraft), [@AfterCancelDraft()](#aftercanceldraft), [@OnCancelDraft()](#oncanceldraft)
+- `EDIT` [@BeforeEditDraft()](#beforeeditdraft), [@AfterEditDraft()](#aftereditdraft), [@OnEditDraft()](#oneditdraft)
+- `SAVE` [@BeforeSaveDraft()](#beforesavedraft), [@AfterSaveDraft()](#aftersavedraft), [@OnSaveDraft()](#onsavedraft)
+- :heavy_plus_sign: All active entity [Before](#before), [After](#after), [On](#on) events which have a `Draft` variant.
 
 **@AfterAll**()
 
@@ -1902,7 +1930,7 @@ this.after('*', MyEntity, async (result, req) => {
 > Decorator `@AfterAll()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
 
 > [!TIP]
-> If `@odata.draft.enabled: true` and you need to read the draft then you should use `@AfterAll()` decorator.
+> If the entity has drafts enabled `@odata.draft.enabled: true`, the `@AfterAll` decorator will still be triggered for draft events.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -2317,7 +2345,11 @@ this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
 
 **@OnAll**()
 
-The `@OnAll` decorator will be triggered when one of the following CRUD event is called:
+The `@OnAll` decorator is triggered whenever **_any CRUD (Create, Read, Update, Delete)_** event occurs, whether the entity is `active` or in `draft` mode.
+
+`ACTIVE ENTITY`
+
+For active entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
 
 - `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
@@ -2325,6 +2357,16 @@ The `@OnAll` decorator will be triggered when one of the following CRUD event is
 - `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
 - `BOUND ACTIONS` [@OnBoundAction()](#onboundaction)
 - `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
+  
+`DRAFT`
+
+For draft entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
+
+- `CREATE` [@BeforeNewDraft()](#beforenewdraft), [@AfterNewDraft()](#afternewdraft), [@OnNewDraft()](#onnewdraft)
+- `CANCEL` [@BeforeCancelDraft()](#beforecanceldraft), [@AfterCancelDraft()](#aftercanceldraft), [@OnCancelDraft()](#oncanceldraft)
+- `EDIT` [@BeforeEditDraft()](#beforeeditdraft), [@AfterEditDraft()](#aftereditdraft), [@OnEditDraft()](#oneditdraft)
+- `SAVE` [@BeforeSaveDraft()](#beforesavedraft), [@AfterSaveDraft()](#aftersavedraft), [@OnSaveDraft()](#onsavedraft)
+- :heavy_plus_sign: All active entity [Before](#before), [After](#after), [On](#on) events which have a `Draft` variant.
 
 > [!NOTE]
 > Exception will be the following decorators [@OnEvent()](#onevent), [@OnError()](#onerror) and `UNBOUND ACTIONS` [@OnAction()](#onaction), `UNBOUND FUNCTIONS` [@OnFunction()](#onfunction) as these are bound to the service itself and not to an entity.
@@ -2352,11 +2394,11 @@ this.on('*', MyEntity, async (req, next) => {
 });
 ```
 
-> [!TIP]
-> If `@odata.draft.enabled: true` and you need to read the draft then you should use `@OnAllDraft()` decorator.
-
 > [!IMPORTANT]
 > Decorator `@OnAll()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!TIP]
+> If the entity has drafts enabled `@odata.draft.enabled: true`, the `@OnAll` decorator will still be triggered for draft events.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -2930,7 +2972,7 @@ import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @Prepend({ eventDecorator: 'AfterRead' })
-public async prepend(@Req() req: Request): Promise<void> {
+private async prepend(@Req() req: Request): Promise<void> {
   req.locale = 'DE_de';
 }
 
@@ -2954,7 +2996,7 @@ import type { TypedRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @Prepend({ eventDecorator: 'OnEvent', eventName: MyEvent })
-public async prepend(@Req() req: TypedRequest<MyEvent>) {
+private async prepend(@Req() req: TypedRequest<MyEvent>) {
   req.locale = 'DE_de';
 }
 
