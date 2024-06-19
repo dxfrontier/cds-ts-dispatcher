@@ -3,18 +3,31 @@ import {
   BeforeEditDraft,
   BeforeNewDraft,
   BeforeSaveDraft,
+  CDS_DISPATCHER,
   EntityHandler,
   Inject,
+  PrependDraft,
   Req,
+  RequestResponse,
+  Res,
+  Result,
   Service,
-  SRV,
   TypedRequest,
 } from '../../../../../../lib';
 import { UserActivityLog } from '../../../../@cds-models/AdminService';
 
 @EntityHandler(UserActivityLog)
 class UserActivityLogHandler {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
+
+  @PrependDraft({ eventDecorator: 'BeforeNewDraft' })
+  public async prepend(
+    @Req() req: Request,
+    @Res() res: RequestResponse,
+    @Result() result: UserActivityLog,
+  ): Promise<void> {
+    res.setHeader('Accept-Language', 'DE_de');
+  }
 
   @BeforeNewDraft()
   public async beforeNewDraft(@Req() req: TypedRequest<UserActivityLog>): Promise<void> {

@@ -51,19 +51,28 @@ const decoratorsUtil = {
       AfterReadDraftEachInstance: { event: 'each', eventKind: 'AFTER' },
       AfterUpdateDraft: { event: 'UPDATE', eventKind: 'AFTER' },
       AfterDeleteDraft: { event: 'DELETE', eventKind: 'AFTER' },
-      AfterAllDraft: { event: '*', eventKind: 'AFTER' },
+      AfterNewDraft: { event: 'NEW', eventKind: 'AFTER' },
+      AfterCancelDraft: { event: 'CANCEL', eventKind: 'AFTER' },
+      AfterEditDraft: { event: 'EDIT', eventKind: 'AFTER' },
+      AfterSaveDraft: { event: 'SAVE', eventKind: 'AFTER' },
       //
       BeforeCreateDraft: { event: 'CREATE', eventKind: 'BEFORE' },
       BeforeReadDraft: { event: 'READ', eventKind: 'BEFORE' },
       BeforeUpdateDraft: { event: 'UPDATE', eventKind: 'BEFORE' },
       BeforeDeleteDraft: { event: 'DELETE', eventKind: 'BEFORE' },
-      BeforeAllDraft: { event: '*', eventKind: 'BEFORE' },
+      BeforeNewDraft: { event: 'NEW', eventKind: 'BEFORE' },
+      BeforeCancelDraft: { event: 'CANCEL', eventKind: 'BEFORE' },
+      BeforeEditDraft: { event: 'EDIT', eventKind: 'BEFORE' },
+      BeforeSaveDraft: { event: 'SAVE', eventKind: 'BEFORE' },
       //
       OnCreateDraft: { event: 'CREATE', eventKind: 'ON' },
       OnReadDraft: { event: 'READ', eventKind: 'ON' },
       OnUpdateDraft: { event: 'UPDATE', eventKind: 'ON' },
       OnDeleteDraft: { event: 'DELETE', eventKind: 'ON' },
-      OnAllDraft: { event: '*', eventKind: 'ON' },
+      OnNewDraft: { event: 'NEW', eventKind: 'ON' },
+      OnCancelDraft: { event: 'CANCEL', eventKind: 'ON' },
+      OnEditDraft: { event: 'EDIT', eventKind: 'ON' },
+      OnSaveDraft: { event: 'SAVE', eventKind: 'ON' },
     };
 
     if (options.eventDecorator === 'OnBoundActionDraft' || options.eventDecorator === 'OnBoundFunctionDraft') {
