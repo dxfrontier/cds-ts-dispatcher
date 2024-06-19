@@ -22,6 +22,7 @@ export function _UserActivityLogAspect<TBase extends new (...args: any[]) => obj
 }
 export class UserActivityLog extends _._managedAspect(_UserActivityLogAspect(__.Entity)) {static drafts: typeof UserActivityLog}
 Object.defineProperty(UserActivityLog, 'name', { value: 'AdminService.UserActivityLog' })
+Object.defineProperty(UserActivityLog, 'is_singular', { value: true })
 export class UserActivityLog_ extends Array<UserActivityLog> {static drafts: typeof UserActivityLog
 $count?: number}
 Object.defineProperty(UserActivityLog_, 'name', { value: 'AdminService.UserActivityLog' })
@@ -40,6 +41,7 @@ export function _PromotionAspect<TBase extends new (...args: any[]) => object>(B
 }
 export class Promotion extends _PromotionAspect(__.Entity) {static drafts: typeof Promotion}
 Object.defineProperty(Promotion, 'name', { value: 'AdminService.Promotions' })
+Object.defineProperty(Promotion, 'is_singular', { value: true })
 export class Promotions extends Array<Promotion> {static drafts: typeof Promotion
 $count?: number}
 Object.defineProperty(Promotions, 'name', { value: 'AdminService.Promotions' })
@@ -66,6 +68,7 @@ export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: 
 }
 export class User extends _._managedAspect(_UserAspect(__.Entity)) {}
 Object.defineProperty(User, 'name', { value: 'AdminService.Users' })
+Object.defineProperty(User, 'is_singular', { value: true })
 export class Users extends Array<User> {$count?: number}
 Object.defineProperty(Users, 'name', { value: 'AdminService.Users' })
 

@@ -17,7 +17,7 @@
     "#cds-models/*": "./@cds-models/*/index.js"
   },
   "dependencies": {
-    "@sap/xssec": "^3.6.1",
+    "@sap/xssec": "^4.1.0",
     "passport": "^0.7.0"
   },
   "cds": {

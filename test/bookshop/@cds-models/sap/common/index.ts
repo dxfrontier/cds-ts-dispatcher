@@ -37,6 +37,7 @@ export function _LanguageAspect<TBase extends new (...args: any[]) => object>(Ba
 }
 export class Language extends _CodeListAspect(_LanguageAspect(__.Entity)) {}
 Object.defineProperty(Language, 'name', { value: 'sap.common.Languages' })
+Object.defineProperty(Language, 'is_singular', { value: true })
 export class Languages extends Array<Language> {$count?: number}
 Object.defineProperty(Languages, 'name', { value: 'sap.common.Languages' })
 
@@ -53,6 +54,7 @@ export function _CountryAspect<TBase extends new (...args: any[]) => object>(Bas
 }
 export class Country extends _CodeListAspect(_CountryAspect(__.Entity)) {}
 Object.defineProperty(Country, 'name', { value: 'sap.common.Countries' })
+Object.defineProperty(Country, 'is_singular', { value: true })
 export class Countries extends Array<Country> {$count?: number}
 Object.defineProperty(Countries, 'name', { value: 'sap.common.Countries' })
 
@@ -71,6 +73,7 @@ export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Ba
 }
 export class Currency extends _CodeListAspect(_CurrencyAspect(__.Entity)) {}
 Object.defineProperty(Currency, 'name', { value: 'sap.common.Currencies' })
+Object.defineProperty(Currency, 'is_singular', { value: true })
 export class Currencies extends Array<Currency> {$count?: number}
 Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
 
@@ -87,5 +90,6 @@ export function _TimezoneAspect<TBase extends new (...args: any[]) => object>(Ba
 }
 export class Timezone extends _CodeListAspect(_TimezoneAspect(__.Entity)) {}
 Object.defineProperty(Timezone, 'name', { value: 'sap.common.Timezones' })
+Object.defineProperty(Timezone, 'is_singular', { value: true })
 export class Timezones extends Array<Timezone> {$count?: number}
 Object.defineProperty(Timezones, 'name', { value: 'sap.common.Timezones' })

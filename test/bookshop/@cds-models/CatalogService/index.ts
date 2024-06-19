@@ -43,6 +43,7 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
 }
 export class Book extends _._managedAspect(_BookAspect(__.Entity)) {}
 Object.defineProperty(Book, 'name', { value: 'CatalogService.Books' })
+Object.defineProperty(Book, 'is_singular', { value: true })
 export class Books extends Array<Book> {$count?: number}
 Object.defineProperty(Books, 'name', { value: 'CatalogService.Books' })
 
@@ -70,6 +71,7 @@ export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base
 }
 export class Author extends _._managedAspect(_AuthorAspect(__.Entity)) {}
 Object.defineProperty(Author, 'name', { value: 'CatalogService.Authors' })
+Object.defineProperty(Author, 'is_singular', { value: true })
 export class Authors extends Array<Author> {$count?: number}
 Object.defineProperty(Authors, 'name', { value: 'CatalogService.Authors' })
 
@@ -97,6 +99,7 @@ export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base
 }
 export class Review extends _._managedAspect(_ReviewAspect(__.Entity)) {}
 Object.defineProperty(Review, 'name', { value: 'CatalogService.Reviews' })
+Object.defineProperty(Review, 'is_singular', { value: true })
 export class Reviews extends Array<Review> {$count?: number}
 Object.defineProperty(Reviews, 'name', { value: 'CatalogService.Reviews' })
 
@@ -119,6 +122,7 @@ export function _PublisherAspect<TBase extends new (...args: any[]) => object>(B
 }
 export class Publisher extends _._managedAspect(_PublisherAspect(__.Entity)) {}
 Object.defineProperty(Publisher, 'name', { value: 'CatalogService.Publishers' })
+Object.defineProperty(Publisher, 'is_singular', { value: true })
 export class Publishers extends Array<Publisher> {$count?: number}
 Object.defineProperty(Publishers, 'name', { value: 'CatalogService.Publishers' })
 
@@ -146,6 +150,7 @@ export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(B
 }
 export class BookOrder extends _._managedAspect(_BookOrderAspect(__.Entity)) {}
 Object.defineProperty(BookOrder, 'name', { value: 'CatalogService.BookOrders' })
+Object.defineProperty(BookOrder, 'is_singular', { value: true })
 export class BookOrders extends Array<BookOrder> {$count?: number}
 Object.defineProperty(BookOrders, 'name', { value: 'CatalogService.BookOrders' })
 
@@ -174,6 +179,7 @@ export function _BookRecommendationAspect<TBase extends new (...args: any[]) => 
 }
 export class BookRecommendation extends _._managedAspect(_BookRecommendationAspect(__.Entity)) {}
 Object.defineProperty(BookRecommendation, 'name', { value: 'CatalogService.BookRecommendations' })
+Object.defineProperty(BookRecommendation, 'is_singular', { value: true })
 export class BookRecommendations extends Array<BookRecommendation> {$count?: number}
 Object.defineProperty(BookRecommendations, 'name', { value: 'CatalogService.BookRecommendations' })
 
@@ -202,6 +208,7 @@ export function _BookFormatAspect<TBase extends new (...args: any[]) => object>(
 }
 export class BookFormat extends _._managedAspect(_BookFormatAspect(__.Entity)) {}
 Object.defineProperty(BookFormat, 'name', { value: 'CatalogService.BookFormats' })
+Object.defineProperty(BookFormat, 'is_singular', { value: true })
 export class BookFormats extends Array<BookFormat> {$count?: number}
 Object.defineProperty(BookFormats, 'name', { value: 'CatalogService.BookFormats' })
 
@@ -230,6 +237,7 @@ export function _BookSaleAspect<TBase extends new (...args: any[]) => object>(Ba
 }
 export class BookSale extends _._managedAspect(_._cuidAspect(_BookSaleAspect(__.Entity))) {}
 Object.defineProperty(BookSale, 'name', { value: 'CatalogService.BookSales' })
+Object.defineProperty(BookSale, 'is_singular', { value: true })
 export class BookSales extends Array<BookSale> {$count?: number}
 Object.defineProperty(BookSales, 'name', { value: 'CatalogService.BookSales' })
 
@@ -253,6 +261,7 @@ export function _BookEventAspect<TBase extends new (...args: any[]) => object>(B
 }
 export class BookEvent extends _._managedAspect(_._cuidAspect(_BookEventAspect(__.Entity))) {static drafts: typeof BookEvent}
 Object.defineProperty(BookEvent, 'name', { value: 'CatalogService.BookEvents' })
+Object.defineProperty(BookEvent, 'is_singular', { value: true })
 export class BookEvents extends Array<BookEvent> {static drafts: typeof BookEvent
 $count?: number}
 Object.defineProperty(BookEvents, 'name', { value: 'CatalogService.BookEvents' })
@@ -290,6 +299,7 @@ export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Ba
 }
 export class BookStat extends _._managedAspect(_BookStatAspect(__.Entity)) {}
 Object.defineProperty(BookStat, 'name', { value: 'CatalogService.BookStats' })
+Object.defineProperty(BookStat, 'is_singular', { value: true })
 export class BookStats extends Array<BookStat> {$count?: number}
 Object.defineProperty(BookStats, 'name', { value: 'CatalogService.BookStats' })
 
@@ -308,6 +318,7 @@ export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Ba
 }
 export class Currency extends _sap_common._CodeListAspect(_CurrencyAspect(__.Entity)) {}
 Object.defineProperty(Currency, 'name', { value: 'sap.common.Currencies' })
+Object.defineProperty(Currency, 'is_singular', { value: true })
 export class Currencies extends Array<Currency> {$count?: number}
 Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
 
@@ -322,11 +333,12 @@ export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base:
 }
 export class Genre extends _sap_common._CodeListAspect(_GenreAspect(__.Entity)) {}
 Object.defineProperty(Genre, 'name', { value: 'sap.capire.bookshop.Genres' })
+Object.defineProperty(Genre, 'is_singular', { value: true })
 export class Genres extends Array<Genre> {$count?: number}
 Object.defineProperty(Genres, 'name', { value: 'sap.capire.bookshop.Genres' })
 
 // event
-export class OrderedBook {
+export declare class OrderedBook {
     book: __.DeepRequired<Book>['ID'] | null;
     quantity: number | null;
     buyer: string | null;

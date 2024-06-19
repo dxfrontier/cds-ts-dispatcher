@@ -72,6 +72,7 @@ export function _HelloRequestAspect<TBase extends new (...args: any[]) => object
 }
 export class HelloRequest extends _HelloRequestAspect(__.Entity) {}
 Object.defineProperty(HelloRequest, 'name', { value: 'HelloRequest' })
+Object.defineProperty(HelloRequest, 'is_singular', { value: true })
 
 export function _HelloResponseAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class HelloResponse extends Base {
@@ -81,3 +82,4 @@ export function _HelloResponseAspect<TBase extends new (...args: any[]) => objec
 }
 export class HelloResponse extends _HelloResponseAspect(__.Entity) {}
 Object.defineProperty(HelloResponse, 'name', { value: 'HelloResponse' })
+Object.defineProperty(HelloResponse, 'is_singular', { value: true })
