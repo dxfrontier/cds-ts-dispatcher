@@ -4,7 +4,11 @@ import { RuleConfigSeverity } from '@commitlint/types';
 const Configuration: UserConfig = {
   extends: ['@commitlint/config-conventional'],
   rules: {
-    'type-enum': [RuleConfigSeverity.Error, 'always', ['feat', 'chore', 'fix', 'test', 'style', 'refactor', 'delete']],
+    'type-enum': [
+      RuleConfigSeverity.Error,
+      'always',
+      ['feat', 'fix', 'doc', 'perf', 'refactor', 'style', 'test', 'chore', 'revert', 'delete'],
+    ],
     'scope-enum': [
       RuleConfigSeverity.Error,
       'always',
@@ -29,7 +33,6 @@ const Configuration: UserConfig = {
         'deps',
         // e2e-tests, unit, integration: Changes to all tests
         'tests',
-        'other-functionality',
       ],
     ],
     'scope-empty': [RuleConfigSeverity.Error, 'never'],
