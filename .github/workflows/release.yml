@@ -73,8 +73,8 @@ jobs:
           CUSTOM_TAG: ${{ steps.package-version.outputs.current-version}}
           BRANCH_HISTORY: full
 
-  # Create of the changelog file and commit the file to the main branch
-  create_changelog:
+  # This create_changelog_partial will create the CHANGELOG only for the latest tag and create the RELEASE
+  create_changelog_partial:
     name: Generate changelog, create PR for CHANGELOG.md
     needs: create_tags
     runs-on: ubuntu-latest
@@ -109,6 +109,35 @@ jobs:
           prerelease: false
           draft: false
           make_latest: true
+
+  # This create_changelog_full will create the CHANGELOG.md
+  create_changelog_full:
+    name: Generate changelog, create PR for CHANGELOG.md
+    needs: create_tags
+    runs-on: ubuntu-latest
+    outputs:
+      release_body: ${{ steps.git-cliff.outputs.content }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Generate the changelog file based on the cliff.toml file
+      - name: Generate CHANGELOG.md
+        uses: orhun/git-cliff-action@v3
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: --verbose
+          OUTPUT: CHANGELOG.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Move CHANGELOG.md generated file to root folder
+        run: |
+          cp ./git-cliff/CHANGELOG.md ./ 
+          rm ./git-cliff/CHANGELOG.md
+          rmdir ./git-cliff/
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
