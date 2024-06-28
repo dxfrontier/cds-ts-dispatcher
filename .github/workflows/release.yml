@@ -153,7 +153,7 @@ jobs:
   # This will push the latest build of the project to npm
   publish-npm:
     name: Publish to npm public
-    needs: create_changelog
+    needs: [create_changelog_full, create_changelog_partial]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -172,7 +172,7 @@ jobs:
 
   publish-npm-github:
     name: Publish to github npm - internal
-    needs: create_changelog
+    needs: [create_changelog_full, create_changelog_partial]
     env:
       NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
