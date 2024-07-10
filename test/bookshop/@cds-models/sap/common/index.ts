@@ -65,7 +65,7 @@ Object.defineProperty(Countries, 'name', { value: 'sap.common.Countries' })
 */
 export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Currency extends Base {
-        code?: string | null;
+        code?: string;
         symbol?: string | null;
         minorUnit?: number | null;
       static readonly actions: Record<never, never>
