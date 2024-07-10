@@ -1,6 +1,6 @@
 {
   "name": "@dxfrontier/cds-ts-dispatcher",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement TS handlers provided by the SAP CAP framework.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -15,26 +15,18 @@
     "eslint:message": "echo 'Eslint started...'",
     "eslint": "npx eslint .",
     "eslint:fix": "npx eslint . --fix",
-
     "prettier:message": "echo 'Prettier started ...'",
     "prettier": "npx prettier . --check",
     "prettier:fix": "npx prettier . --write",
-    
     "check": "run-s eslint:message eslint prettier:message prettier",
-    
     "fix": "run-s eslint:message eslint:fix prettier:message prettier:fix",
-   
     "start:bookshop": "npm run start --prefix ./test/bookshop",
-   
     "tests:newman": "newman run ./test/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/e2e/environment.json --bail",
     "test:unit": "npm run build:entities:test --prefix ./test/bookshop && jest",
     "test:e2e": "start-server-and-test start:bookshop http://localhost:4004 tests:newman",
     "test:all": "run-s test:unit test:e2e",
-   
     "prepare": "husky",
-   
     "commit": "commit",
-   
     "build:message": "echo 'Build started...'",
     "build:clean": "echo 'Clean dist folder' && npx rimraf ./dist/{*.js,*.map,*.ts,*.mts,*.mjs}",
     "build:documentation:message": "echo 'Started creation of documentation based on TypeDoc ...'",
@@ -114,7 +106,6 @@
     "tsup": "^8.1.0",
     "typedoc": "^0.26.3",
     "typescript": "^5.5.3"
-    
   },
   "lint-staged": {
     "**/*.{ts, tsx}": [
