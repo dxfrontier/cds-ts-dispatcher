@@ -4,3 +4,5 @@ test/bookshop/@cds-models
 package.json
 dist
 *.md
+
+docs

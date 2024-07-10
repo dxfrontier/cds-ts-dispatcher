@@ -6,3 +6,5 @@ test/integration
 test/unit
 test/util
 test/bookshop/@cds-models
+
+docs
