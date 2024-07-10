@@ -23,7 +23,6 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
         genre_ID?: number | null;
         reviews?: __.Association.to.many<Reviews>;
         stats?: __.Association.to<BookStat> | null;
-        stats_ID?: number | null;
         bookFormats?: __.Association.to.many<BookFormats>;
         bookRecomanddations?: __.Association.to.many<BookRecommendations>;
       static readonly actions: Record<never, never>
@@ -50,7 +49,7 @@ Object.defineProperty(Publishers, 'name', { value: 'sap.capire.bookshop.Publishe
 
 export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookStat extends Base {
-        ID?: number | null;
+        ID?: number;
         views?: number | null;
         averageRating?: number | null;
         book?: __.Association.to<Book> | null;
@@ -66,7 +65,7 @@ Object.defineProperty(BookStats, 'name', { value: 'sap.capire.bookshop.BookStats
 
 export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Author extends Base {
-        ID?: number | null;
+        ID?: number;
         name?: string | null;
         dateOfBirth?: __.CdsDate | null;
         dateOfDeath?: __.CdsDate | null;
@@ -84,7 +83,7 @@ Object.defineProperty(Authors, 'name', { value: 'sap.capire.bookshop.Authors' })
 
 export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Genre extends Base {
-        ID?: number | null;
+        ID?: number;
         parent?: __.Association.to<Genre> | null;
         parent_ID?: number | null;
         children?: __.Composition.of.many<Genres>;
@@ -150,7 +149,7 @@ Object.defineProperty(BookSales, 'name', { value: 'sap.capire.bookshop.BookSales
 
 export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class User extends Base {
-        ID?: number | null;
+        ID?: number;
         username?: string | null;
         email?: string | null;
         role?: _.Roles | null;

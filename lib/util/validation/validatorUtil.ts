@@ -9,7 +9,19 @@ import util from '../util';
 import type { Validators } from '../../types/validator';
 import type { Request } from '../../types/types';
 
+/**
+ * Utility object for handling validation operations.
+ */
 const validatorUtil = {
+  /**
+   * Displays a message indicating the validation error.
+   * @param options An object containing the validation error details.
+   * @param options.field The field that failed validation.
+   * @param options.input The input value that failed validation.
+   * @param options.validator The validator that failed.
+   * @param options.message An optional custom message for the validation error.
+   * @param options.req The request object.
+   */
   showNotValidMessage(options: {
     field: string;
     input: string;
@@ -29,6 +41,13 @@ const validatorUtil = {
     options.req.reject(StatusCodes.BAD_REQUEST, message);
   },
 
+  /**
+   * Determines if validation can be applied to the given field in the request.
+   * @param req The request object.
+   * @param validator The validator object.
+   * @param field The field to validate.
+   * @returns True if validation can be applied, otherwise false.
+   */
   canValidate(req: Request, validator: Validators, field: string): boolean {
     const value = req.data[field];
 
@@ -44,6 +63,12 @@ const validatorUtil = {
     return true;
   },
 
+  /**
+   * Applies the specified validator to the given field in the request.
+   * @param req The request object.
+   * @param validator The validator object.
+   * @param field The field to validate.
+   */
   applyValidator(req: Request, validator: Validators, field: string): void {
     const value = req.data[field];
 

@@ -35,7 +35,6 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
         genre_ID?: number | null;
         reviews?: __.Association.to.many<Reviews>;
         stats?: __.Association.to<BookStat> | null;
-        stats_ID?: number | null;
         bookFormats?: __.Association.to.many<BookFormats>;
         bookRecomanddations?: __.Association.to.many<BookRecommendations>;
       static readonly actions: Record<never, never>
@@ -310,7 +309,7 @@ Object.defineProperty(BookStats, 'name', { value: 'CatalogService.BookStats' })
 */
 export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Currency extends Base {
-        code?: string | null;
+        code?: string;
         symbol?: string | null;
         minorUnit?: number | null;
       static readonly actions: Record<never, never>
@@ -324,7 +323,7 @@ Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
 
 export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Genre extends Base {
-        ID?: number | null;
+        ID?: number;
         parent?: __.Association.to<_sap_capire_bookshop.Genre> | null;
         parent_ID?: number | null;
         children?: __.Composition.of.many<_sap_capire_bookshop.Genres>;
@@ -350,13 +349,13 @@ export declare const changeBookProperties: { (format: __.DeepRequired<BookFormat
   language?: string | null,
   format?: __.DeepRequired<BookFormat>['format'] | null,
 } | null | null, kind: 'action'};
-export declare const submitOrder: { (book: __.DeepRequired<Book>['ID'] | null, quantity: number | null):  {
+export declare const submitOrder: { (book: __.DeepRequired<Book>['ID'], quantity: number | null):  {
   stock?: number | null,
-} | null | null, __parameters: {book: __.DeepRequired<Book>['ID'] | null, quantity: number | null}, __returns:  {
+} | null | null, __parameters: {book: __.DeepRequired<Book>['ID'], quantity: number | null}, __returns:  {
   stock?: number | null,
 } | null | null, kind: 'action'};
-export declare const submitOrderFunction: { (book: __.DeepRequired<Book>['ID'] | null, quantity: number | null):  {
+export declare const submitOrderFunction: { (book: __.DeepRequired<Book>['ID'], quantity: number | null):  {
   stock?: number | null,
-} | null | null, __parameters: {book: __.DeepRequired<Book>['ID'] | null, quantity: number | null}, __returns:  {
+} | null | null, __parameters: {book: __.DeepRequired<Book>['ID'], quantity: number | null}, __returns:  {
   stock?: number | null,
 } | null | null, kind: 'function'};

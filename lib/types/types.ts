@@ -1,6 +1,5 @@
-import type { Request, Service, CdsFunction, column_expr } from '@sap/cds';
+import type { ServiceImpl, Request, Service, CdsFunction, column_expr, TypedRequest } from '@sap/cds';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
-import type { ServiceImpl, TypedRequest } from '@sap/cds/apis/services';
 import type { ServerResponse } from 'http';
 
 // **************************************************************************************************************************
@@ -28,7 +27,7 @@ export type ValidatorField = string | number | undefined | null | boolean;
 // Standard export
 
 /**
- * @description This object is created internally by an HTTP server, not by the user. Contains various methods and properties related to the `response` object.
+ * This object is created internally by an HTTP server, not by the user. Contains various methods and properties related to the `response` object.
  */
 type RequestResponse = ServerResponse;
 
@@ -41,7 +40,7 @@ type RequestResponse = ServerResponse;
 // **************************************************************************************************************************
 
 /**
- * @description Use `NextMiddleware` type to annotate the `next` parameter of the implementation of the middleware.
+ * Use `NextMiddleware` type to annotate the `next` parameter of the implementation of the middleware.
  *
  * @example
  * export class Middleware implements MiddlewareImpl {
@@ -53,7 +52,7 @@ type RequestResponse = ServerResponse;
 export type NextMiddleware = () => Promise<unknown>;
 
 /**
- * @description Use `NextEvent` type to annotate the `next` parameter of the implementation of the `ON` events.
+ * Use `NextEvent` type to annotate the `next` parameter of the implementation of the `ON` events.
  * @example "@Next() next: NextEvent"
  */
 export type NextEvent = (req?: Request) => Function;
@@ -70,12 +69,12 @@ export type MiddlewareImpl = {
 // **************************************************************************************************************************
 
 /**
- * @description Use `ActionRequest` type to have the `Request` of `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
+ * Use `ActionRequest` type to have the `Request` of `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
  */
 export type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { data: T['__parameters'] };
 
 /**
- * @description Use `ActionReturn` type to have the `return` of the `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
+ * Use `ActionReturn` type to have the `return` of the `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
  */
 export type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void | Error>;
 

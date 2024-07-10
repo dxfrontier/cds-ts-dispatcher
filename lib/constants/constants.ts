@@ -1,5 +1,5 @@
 /**
- * @description CDS-TS-Dispatcher app helper constants.
+ * CDS-TS-Dispatcher app helper constants.
  */
 export const CDS_DISPATCHER = {
   /**

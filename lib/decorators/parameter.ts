@@ -3,7 +3,7 @@ import { ArgumentMethodProcessor } from '../core/ArgumentMethodProcessor';
 import type { PickQueryPropsByKey, CustomRequest, CRUDQueryKeys } from '../types/internalTypes';
 
 /**
- * @description Annotates a parameter of a method to enable `switching` between `single instance` and `entity set` functionality in your method.
+ * Annotates a parameter of a method to enable `switching` between `single instance` and `entity set` functionality in your method.
  * @example
  * "@SingleInstanceSwitch() isSingleInstance: boolean"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#singleinstanceswitch | CDS-TS-Dispatcher - @SingleInstanceSwitch}
@@ -20,7 +20,7 @@ function SingleInstanceSwitch(): ParameterDecorator {
 }
 
 /**
- * @description Annotates a parameter of a method with the `Error` response.
+ * Annotates a parameter of a method with the `Error` response.
  * @example
  * "@Error() err: Error"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#error | CDS-TS-Dispatcher - @Error}
@@ -37,8 +37,8 @@ function Error(): ParameterDecorator {
 }
 
 /**
- * @description Annotates a parameter of a method with the `next` event in the chain of execution.
- *  @example
+ * Annotates a parameter of a method with the `next` event in the chain of execution.
+ * @example
  * "@Next() next: NextEvent"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#next | CDS-TS-Dispatcher - @Next}
  */
@@ -54,7 +54,7 @@ function Next(): ParameterDecorator {
 }
 
 /**
- * @description Annotates a parameter of a method with the `results`.
+ * Annotates a parameter of a method with the `results`.
  * @example
  * "@Results() results: MyEntity[]"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#results | CDS-TS-Dispatcher - @Results}
@@ -71,7 +71,7 @@ function Results(): ParameterDecorator {
 }
 
 /**
- * @description Annotates a parameter of a method with the `result`.
+ * Annotates a parameter of a method with the `result`.
  * `NOTE`: This can be used on the `create`, `update`, `delete` when the result contains only an object `(create, update)` or boolean `(delete)`
  *
  * NOTE If the `results` is an `array` use `@Results` decorator.
@@ -93,7 +93,7 @@ function Result(): ParameterDecorator {
 }
 
 /**
- * @description Annotates a parameter of a method with the `Request` object.
+ * Annotates a parameter of a method with the `Request` object.
  * @example "@Req() req: Request"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#req | CDS-TS-Dispatcher - @Req}
  */
@@ -109,7 +109,7 @@ function Req(): ParameterDecorator {
 }
 
 /**
- * @description Annotates a parameter of a method with the `Req.res (Response)` object.
+ * Annotates a parameter of a method with the `Req.res (Response)` object.
  * @example "@Res() response: ServerResponse"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#res | CDS-TS-Dispatcher - @Res}
  */
@@ -125,7 +125,7 @@ function Res(): ParameterDecorator {
 }
 
 /**
- * @description Annotates a parameter of a method to `get` the `request.query[INSERT, SELECT, UPDATE, UPSERT, DELETE][property]` properties.
+ * Annotates a parameter of a method to `get` the `request.query[INSERT, SELECT, UPDATE, UPSERT, DELETE][property]` properties.
  * @param key The key indicating the type of query operation (`INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`).
  * @param property The specific property to get within the `request.query[key][property]`.
  * @example "GetQuery('SELECT', 'columns') columns: GetColumns"
@@ -143,7 +143,7 @@ function GetQuery<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsB
 }
 
 /**
- * @description Annotates a parameter of a method to `get` the `Request` properties.
+ * Annotates a parameter of a method to `get` the `Request` properties.
  *
  * `NOTE:` This is a convenient decorator to get only some properties of the `Request` object, to get all properties use `@Req()` decorator.
  *
@@ -164,7 +164,7 @@ function GetRequest(property: CustomRequest): ParameterDecorator {
 
 /**
  *
- * @description Annotates a parameter of a method to `check` existence of `request.query[INSERT, SELECT, UPSERT].columns - item` with the value from `field` parameter.
+ * Annotates a parameter of a method to `check` existence of `request.query[INSERT, SELECT, UPSERT].columns - item` with the value from `field` parameter.
  * @param field The name of the `column` to verify in the `request.query[INSERT, SELECT, UPSERT].columns`.
  * @example "@IsColumnSupplied('name') isPresent: boolean"
  * @returns boolean
@@ -183,7 +183,7 @@ function IsColumnSupplied<Key>(field: keyof Key): ParameterDecorator {
 
 /**
  *
- * @description Annotates a parameter of a method to `check` the `existence` of specific role values in the request.
+ * Annotates a parameter of a method to `check` the `existence` of specific role values in the request.
  *
  * `NOTE`: `IsRole` applies a logical `OR` between the roles, meaning it checks if at least one of the specified roles exists.
  * @param roles An array of role names to verify in `req.user.is(role)`.
@@ -203,7 +203,7 @@ function IsRole(...roles: string[]): ParameterDecorator {
 }
 
 /**
- * @description Annotates a parameter of a method to `check` existence of `request.query[INSERT, SELECT, UPDATE, UPSERT, DELETE][property]` various properties.
+ * Annotates a parameter of a method to `check` existence of `request.query[INSERT, SELECT, UPDATE, UPSERT, DELETE][property]` various properties.
  * @param key The key indicating the type of query operation (`INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`).
  * @param property The specific property to check within the `request.query[key][property]`.
  * @example "@IsPresent('SELECT', 'columns') hasColumns: boolean"
@@ -222,7 +222,7 @@ function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryProps
 }
 
 /**
- * @description Annotates a parameter of a method to retrieve the `JWT - (JSON Web Token)` from the request.
+ * Annotates a parameter of a method to retrieve the `JWT - (JSON Web Token)` from the request.
  * @example "@Jwt() token: string | undefined"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#jwt | CDS-TS-Dispatcher - @Jwt}
  */

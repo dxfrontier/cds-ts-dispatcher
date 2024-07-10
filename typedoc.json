@@ -1,0 +1,7 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./lib/**"],
+  "out": "./lib/docs",
+  "exclude": ["./lib"],
+  "excludePrivate": false
+}
