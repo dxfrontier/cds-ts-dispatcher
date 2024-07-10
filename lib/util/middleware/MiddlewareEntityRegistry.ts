@@ -8,10 +8,16 @@ import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { Service } from '@sap/cds';
 
 import type { Request } from '../../types/types';
+
 /**
- * @description This class registers the middleware classes for `@Use` decorator.
+ * This class registers the middleware classes for `@Use` decorator.
  */
 export class MiddlewareEntityRegistry {
+  /**
+   * Creates an instance of MiddlewareEntityRegistry.
+   * @param entityInstance The entity instance to be used.
+   * @param srv The service instance to be used.
+   */
   constructor(
     private readonly entityInstance: Constructable,
     private readonly srv: Service,
@@ -19,11 +25,20 @@ export class MiddlewareEntityRegistry {
 
   // PRIVATE routines
 
+  /**
+   * Executes the middleware chain starting from the specified index.
+   * @param req The request object.
+   * @param startIndex The index from which to start the middleware chain.
+   */
   private readonly executeMiddlewareChain = async (req: Request, startIndex: number = 0): Promise<void> => {
     const middlewares = MetadataDispatcher.getMiddlewares(this.entityInstance);
     await middlewareUtil.executeMiddlewareChain(req, startIndex, middlewares, this.entityInstance);
   };
 
+  /**
+   * Retrieves the active entity or its draft entity.
+   * @returns The active entity or its draft entity if available.
+   */
   private getActiveEntityOrDraftEntity(): Constructable | undefined {
     const entity = MetadataDispatcher.getEntity(this.entityInstance);
 
@@ -32,12 +47,18 @@ export class MiddlewareEntityRegistry {
     }
   }
 
+  /**
+   * Registers the `before` handlers for the entity.
+   */
   private registerBeforeHandlers(): void {
     this.srv.before(constants.ALL_EVENTS, this.getActiveEntityOrDraftEntity()!, async (req: Request) => {
       await this.executeMiddlewareChain(req);
     });
   }
 
+  /**
+   * Registers the `on` actions for the entity.
+   */
   private registerOnActions(): void {
     const handlers = MetadataDispatcher.getMetadataHandlers(this.entityInstance);
     handlers.forEach((handler) => {
@@ -75,7 +96,7 @@ export class MiddlewareEntityRegistry {
   }
 
   /**
-   * This routine will sort the 'Before' events over '*'. The '*' will be firstly and after the named ones as events are triggered in order.
+   * Sorts the `before` events to ensure the '*' events are triggered first.
    */
   private sortBeforeEvents(): void {
     (this.srv as unknown as ServiceBeforeHandlers)._handlers.before.sort(
@@ -95,6 +116,9 @@ export class MiddlewareEntityRegistry {
 
   // PUBLIC routines
 
+  /**
+   * Builds the middleware chain for the entity.
+   */
   public buildMiddlewares(): void {
     const entity = this.getActiveEntityOrDraftEntity();
 
@@ -113,6 +137,10 @@ export class MiddlewareEntityRegistry {
     this.sortBeforeEvents();
   }
 
+  /**
+   * Checks if the entity has middleware attached.
+   * @returns True if the entity has middleware attached, otherwise false.
+   */
   public hasEntityMiddlewaresAttached(): boolean {
     const middlewares = MetadataDispatcher.getMiddlewares(this.entityInstance);
     return middlewares && middlewares.length > 0;

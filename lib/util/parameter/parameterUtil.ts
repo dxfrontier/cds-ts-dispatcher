@@ -7,7 +7,16 @@ import type { MetadataFields, TemporaryArgs } from '../../types/internalTypes';
 import type { IncomingMessage, ServerResponse } from 'http';
 import type { Request } from '../../types/types';
 
+/**
+ * Utility object for handling parameter operations.
+ */
 const parameterUtil = {
+  /**
+   * Applies the 'is role' parameter to the request arguments.
+   * @param req The request object.
+   * @param args The arguments array.
+   * @param metadata The metadata fields array.
+   */
   applyIsRole(req: Request, args: any[], metadata: MetadataFields[]): void {
     metadata.forEach((parameter) => {
       if (parameter.type === 'ROLE') {
@@ -16,6 +25,12 @@ const parameterUtil = {
     });
   },
 
+  /**
+   * Finds if the execution is allowed based on roles.
+   * @param args The arguments array.
+   * @param roles The roles array.
+   * @returns True if the execution is allowed, otherwise false.
+   */
   findExecutionAllowedRoles(args: any[], roles: string[]): boolean {
     const req = util.findRequest(args);
 
@@ -24,6 +39,12 @@ const parameterUtil = {
     });
   },
 
+  /**
+   * Applies the 'is column supplied' parameter to the request arguments.
+   * @param req The request object.
+   * @param args The arguments array.
+   * @param metadata The metadata fields array.
+   */
   applyIsColumnSupplied(req: Request, args: any[], metadata: MetadataFields[]): void {
     metadata.forEach((parameter) => {
       if (parameter.type === 'CHECK_COLUMN_VALUE') {
@@ -46,6 +67,11 @@ const parameterUtil = {
     });
   },
 
+  /**
+   * Checks if the request is for a single instance.
+   * @param req The request object.
+   * @returns True if the request is for a single instance, otherwise false.
+   */
   isSingleInstance(req: Request): boolean {
     const hasParameters = req.params && req.params.length > 0;
     const SINGLE_INSTANCE = true;
@@ -58,6 +84,12 @@ const parameterUtil = {
     return ENTITY_SET;
   },
 
+  /**
+   * Handles request options and applies them to the arguments.
+   * @param req The request object.
+   * @param args The arguments array.
+   * @param metadata The metadata fields array.
+   */
   handleRequestOptions(req: Request, args: unknown[], metadata: MetadataFields[]): void {
     metadata.forEach((parameter) => {
       if (parameter.type === 'REQ') {
@@ -66,6 +98,14 @@ const parameterUtil = {
       }
     });
   },
+
+  /**
+   * Applies the 'is present' or 'get' decorator to the request arguments.
+   * @param type The type of decorator, either 'Get' or 'IsPresent'.
+   * @param metadataParameters The metadata parameters array.
+   * @param req The request object.
+   * @param args The arguments array.
+   */
 
   applyIsPresentOrGetDecorator(
     type: 'Get' | 'IsPresent',
@@ -173,14 +213,29 @@ const parameterUtil = {
     }
   },
 
+  /**
+   * Retrieves the JWT from the request.
+   * @param req The request object.
+   * @returns The JWT string if present, otherwise undefined.
+   */
   retrieveJwt(req: Request): string | undefined {
     return retrieveJwt(req.http?.req as IncomingMessage);
   },
 
+  /**
+   * Retrieves the response object from the request.
+   * @param req The request object.
+   * @returns The response object.
+   */
   retrieveResponse(req: Request) {
     return req.http?.res as ServerResponse;
   },
 
+  /**
+   * Finds the results from the argument.
+   * @param arg The argument.
+   * @returns The results array, boolean, object, or undefined.
+   */
   findResults(arg: any): any[] | boolean | object | undefined {
     if (Array.isArray(arg)) {
       return arg;

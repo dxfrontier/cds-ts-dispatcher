@@ -7,9 +7,21 @@ import util from '../util/util';
 
 import type { MetadataFields, MetadataInputs, TemporaryArgs } from '../types/internalTypes';
 
+/**
+ * The `ArgumentMethodProcessor` class is responsible for processing method arguments, including reordering arguments by type and applying decorators.
+ */
 export class ArgumentMethodProcessor {
+  /**
+   * A temporary storage for arguments, organized by type.
+   */
   private temporaryArgs: TemporaryArgs = Object.create({});
 
+  /**
+   * Creates an instance of `ArgumentMethodProcessor`.
+   * @param target - The target object.
+   * @param propertyName - The name of the property.
+   * @param args - The arguments to be processed.
+   */
   constructor(
     private readonly target: object,
     private readonly propertyName: string | symbol,
@@ -21,17 +33,26 @@ export class ArgumentMethodProcessor {
   // PRIVATE ROUTINES
 
   /**
-   * This method is executed on creation of the instance ArgumentMethodProcessor and serves as a ordering of the args based on the type for later use
-   * @private
+   * This method is executed on creation of the instance ArgumentMethodProcessor and serves as an ordering of the args based on the type for later use.
    */
   private onLoadReorderArgsByType(): void {
     this.temporaryArgs = parameterUtil.extractArguments(this.args);
   }
 
+  /**
+   * Retrieves metadata for the given metadata key.
+   * @param metadataKey - The metadata key.
+   * @returns The metadata fields or undefined.
+   */
   private getMetadata(metadataKey: keyof typeof constants.DECORATOR.PARAMETER): MetadataFields[] | undefined {
     return Reflect.getOwnMetadata(constants.DECORATOR.PARAMETER[metadataKey], this.target, this.propertyName);
   }
 
+  /**
+   * Checks if a decorator exists for the given metadata key.
+   * @param metadataKey - The metadata key.
+   * @returns True if the decorator exists, otherwise undefined.
+   */
   private existsDecorator(metadataKey: keyof typeof constants.DECORATOR.PARAMETER): boolean | undefined {
     const metadata = this.getMetadata(metadataKey);
 
@@ -41,22 +62,27 @@ export class ArgumentMethodProcessor {
   }
 
   /**
-   * This method will retrieve the assigned decorators, this means that it will check if for the current parameter if there's any decorator assigned
-   * @private
+   * Retrieves the assigned decorators, checking if for the current parameter if there's any decorator assigned.
+   * @returns An array of decorator keys.
    */
   private getAttachedDecorators(): Array<keyof typeof constants.DECORATOR.PARAMETER> {
     const decorators = Object.keys(constants.DECORATOR.PARAMETER) as Array<keyof typeof constants.DECORATOR.PARAMETER>;
     return decorators.filter((decorator) => this.existsDecorator(decorator));
   }
 
+  /**
+   * Checks if any decorators are attached.
+   * @returns True if any decorators are attached, otherwise false.
+   */
   private hasDecoratorsAttached(): boolean {
     return this.getAttachedDecorators().length > 0;
   }
 
   /**
-   * This method is used only for single decorators, the ones which can appear only once, like Next, Req, Results ...
-   * @private
+   * Applies a single decorator by key. This method is used only for single decorators, the ones which can appear only once, like Next, Req, Results, etc.
+   * @param decorator - The decorator metadata and data.
    */
+
   private applySingleDecoratorByKey(decorator: {
     metadataKey: keyof typeof constants.DECORATOR.PARAMETER;
     data: unknown;
@@ -65,6 +91,10 @@ export class ArgumentMethodProcessor {
     this.args[metadata[0].parameterIndex] = decorator.data;
   }
 
+  /**
+   * Applies multiple decorators by key.
+   * @param metadataKey - The metadata key.
+   */
   private applyMultipleDecoratorsByKey(metadataKey: keyof typeof constants.DECORATOR.PARAMETER): void {
     const metadata = this.getMetadata(metadataKey)!;
 
@@ -98,6 +128,10 @@ export class ArgumentMethodProcessor {
 
   // STATIC ROUTINES
 
+  /**
+   * Creates metadata by given input.
+   * @param metadata - The metadata inputs.
+   */
   public static createMetadataBy(metadata: MetadataInputs): void {
     const createOrGetMetadata =
       Reflect.getOwnMetadata(

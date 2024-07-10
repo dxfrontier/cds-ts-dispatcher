@@ -7,7 +7,15 @@ import type { ExtendedRequestWithResults } from '../../types/internalTypes';
 import type { Custom, Formatters } from '../../types/formatter';
 import type { Request } from '../../types/types';
 
+/**
+ * Utility functions for applying formatters to various data structures.
+ */
 const formatterUtil = {
+  /**
+   * Finds and returns results from the request object within the provided arguments.
+   * @param args - The array of arguments to search for the results.
+   * @returns The found results or `undefined` if no results are found.
+   */
   findResults<T>(args: any[]): T | T[] | undefined {
     const req = util.findRequest(args) as ExtendedRequestWithResults;
 
@@ -25,6 +33,12 @@ const formatterUtil = {
     return undefined;
   },
 
+  /**
+   * Applies the specified formatter to the given value.
+   * @param formatter - The formatter to apply.
+   * @param value - The value to format.
+   * @returns The formatted value.
+   */
   applyFormatter<T = any>(formatter: Exclude<Formatters<T>, Custom<T>>, value: any) {
     const input = String(value);
 
@@ -79,6 +93,12 @@ const formatterUtil = {
     }
   },
 
+  /**
+   * Applies the specified formatter to a single field of a single item.
+   * @param formatter - The formatter to apply.
+   * @param result - The item to format.
+   * @param field - The field of the item to format.
+   */
   handleOneItem<T, Result extends T = any, Field extends keyof T = any>(
     formatter: Exclude<Formatters<T>, Custom<T>>,
     result: Result,
@@ -87,6 +107,12 @@ const formatterUtil = {
     (result[field] as string) = this.applyFormatter(formatter, result[field]);
   },
 
+  /**
+   * Applies the specified formatter to a single field of multiple items.
+   * @param formatter - The formatter to apply.
+   * @param results - The items to format.
+   * @param field - The field of the items to format.
+   */
   handleManyItems<T, Results extends T[] = any, Field extends keyof Results[number] = any>(
     formatter: Exclude<Formatters<T>, Custom<T>>,
     results: Results,
@@ -95,6 +121,12 @@ const formatterUtil = {
     results.forEach((entry: any) => (entry[field] = this.applyFormatter(formatter, entry[field])));
   },
 
+  /**
+   * Applies the specified formatter to a single field of the request data.
+   * @param req - The request containing the data to format.
+   * @param formatter - The formatter to apply.
+   * @param field - The field of the request data to format.
+   */
   handleOneItemOfRequest<T, Field extends keyof T = any>(
     req: Request,
     formatter: Exclude<Formatters<T>, Custom<T>>,
@@ -107,6 +139,12 @@ const formatterUtil = {
     req.data[field] = this.applyFormatter(formatter, req.data[field]);
   },
 
+  /**
+   * Handles the application of a custom formatter.
+   * @param req - The request object.
+   * @param formatter - The custom formatter to apply.
+   * @param results - The results to format.
+   */
   async handleCustomFormatter<T>(req: Request, formatter: Custom<T>, results: T | T[] | undefined) {
     await formatter.callback(req, results as T[]);
   },

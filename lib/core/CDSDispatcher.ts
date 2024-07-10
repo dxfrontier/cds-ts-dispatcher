@@ -13,30 +13,71 @@ import type { NonEmptyArray, BaseHandler } from '../types/internalTypes';
 import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { Request, Service, ServiceImpl } from '../types/types';
 
+/**
+ * `CDSDispatcher` is responsible for managing and registering event handlers for entities within the CDS framework.
+ *
+ * It supports events such as `Before`, `After`, `On`, and `Prepend`.
+ */
 class CDSDispatcher {
+  /**
+   * The service instance used by the dispatcher.
+   *
+   * This is the service that the dispatcher will interact with to register handlers and perform operations.
+   */
   private srv: Service;
+
+  /**
+   * The dependency injection container for managing service instances and dependencies.
+   *
+   * This container is configured to:
+   * - Skip base class checks.
+   * - Automatically bind injectable classes.
+   */
   private readonly container: Container = new Container({
     skipBaseClassChecks: true,
     autoBindInjectable: true,
   });
 
   /**
-   * @description Creates an instance of `CDS Dispatcher`.
-   * @param entities An array of entity classes to manage event handlers for.
+   * Creates an instance of `CDSDispatcher`.
+   *
+   * @param entities - An array of entity classes to manage event handlers for.
    * @example
-   * export = new CDSDispatcher([ Entity-1, Entity-2, Entity-n ]).initialize();
+   * ```typescript
+   * export = new CDSDispatcher([Entity1, Entity2, EntityN]).initialize();
+   * ```
    */
   constructor(private readonly entities: NonEmptyArray<Constructable>) {}
 
+  /**
+   * Stores the service instance.
+   *
+   * @param srv - The service instance.
+   */
   private storeService(srv: Service): void {
     this.srv = srv;
   }
 
+  /**
+   * Executes a 'before' event handler.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
+   * @param req - The request object.
+   * @returns The result of the handler's callback.
+   */
   private async executeBeforeCallback(handlerAndEntity: [BaseHandler, Constructable], req: Request): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
     return await handler.callback.call(entity, req);
   }
 
+  /**
+   * Executes an 'onError' event handler.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
+   * @param err - The error object.
+   * @param req - The request object.
+   * @returns The result of the handler's callback.
+   */
   private executeOnErrorCallback(
     handlerAndEntity: [BaseHandler, Constructable],
     err: Error,
@@ -46,6 +87,14 @@ class CDSDispatcher {
     return handler.callback.call(entity, err, req);
   }
 
+  /**
+   * Executes an 'on' event handler.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
+   * @param req - The request object.
+   * @param next - The next middleware function.
+   * @returns The result of the handler's callback.
+   */
   private async executeOnCallback(
     handlerAndEntity: [BaseHandler, Constructable],
     req: Request,
@@ -55,6 +104,14 @@ class CDSDispatcher {
     return await handler.callback.call(entity, req, next);
   }
 
+  /**
+   * Executes an 'after' event handler.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
+   * @param req - The request object.
+   * @param results - The result of the request.
+   * @returns The result of the handler's callback.
+   */
   private async executeAfterCallback(
     handlerAndEntity: [BaseHandler, Constructable],
     req: Request,
@@ -77,9 +134,11 @@ class CDSDispatcher {
   }
 
   /**
-   * This method returns the active entity or the draft entity of the current handler class
+   * Returns the active entity or the draft entity of the current handler class.
    *
-   * `Note`: If the handler class is `@UnboundActions` the getEntity will return `undefined`
+   * @param handler - The handler instance.
+   * @param entityInstance - The entity instance.
+   * @returns The active entity or draft entity, or undefined if not applicable.
    */
   private getActiveEntityOrDraft(handler: BaseHandler, entityInstance: Constructable): Constructable | undefined {
     const entity = MetadataDispatcher.getEntity(entityInstance);
@@ -89,6 +148,13 @@ class CDSDispatcher {
     }
   }
 
+  /**
+   * Retrieves the properties of the handler.
+   *
+   * @param handler - The handler instance.
+   * @param entityInstance - The entity instance.
+   * @returns The handler properties.
+   */
   private getHandlerProps(handler: BaseHandler, entityInstance: Constructable) {
     const entity = this.getActiveEntityOrDraft(handler, entityInstance);
     const { event } = handler;
@@ -150,7 +216,9 @@ class CDSDispatcher {
   }
 
   /**
-   * Registration of all `AFTER, AFTER, ON` events, for `PREPEND` only
+   * Registers all `PREPEND` event handlers.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
    */
   private registerPrependHandler(handlerAndEntity: [BaseHandler, Constructable]) {
     const { eventKind } = this.getHandlerProps(...handlerAndEntity).getPrepend();
@@ -180,7 +248,9 @@ class CDSDispatcher {
   }
 
   /**
-   * Registration of `AFTER - SingleInstance` event `@AfterReadSingleInstance`,
+   * Registers `AFTER - SingleInstance` event handlers.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
    */
   private registerAfterSingleInstanceHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
     const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
@@ -195,7 +265,9 @@ class CDSDispatcher {
   }
 
   /**
-   * Registration of all `AFTER` events, like : `@AfterRead`, `@AfterUpdate`, ...
+   * Registers all `AFTER` event handlers.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
    */
   private registerAfterHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
     const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
@@ -206,8 +278,9 @@ class CDSDispatcher {
   }
 
   /**
-   * Registration of all `BEFORE` events, like : `@BeforeRead`, `@BeforeUpdate`, ...
-   * @private
+   * Registers all `BEFORE` event handlers.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
    */
   private registerBeforeHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
     const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
@@ -218,7 +291,9 @@ class CDSDispatcher {
   }
 
   /**
-   * Registration of all `ON` events, like : `@OnRead`, `@OnUpdate`, `@OnBoundAction`, ...
+   * Registers all `ON` event handlers.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
    */
   private registerOnHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
     const getProps = this.getHandlerProps(...handlerAndEntity);
@@ -268,6 +343,11 @@ class CDSDispatcher {
     }
   }
 
+  /**
+   * Builds the handler by type.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
+   */
   private buildHandlerBy(handlerAndEntity: [BaseHandler, Constructable]) {
     const [handler] = handlerAndEntity;
 
@@ -296,6 +376,11 @@ class CDSDispatcher {
     }
   }
 
+  /**
+   * Builds middleware for the entity instance.
+   *
+   * @param entityInstance - The entity instance.
+   */
   private buildMiddlewareBy(entityInstance: Constructable): void {
     const middlewareRegistry = new MiddlewareEntityRegistry(entityInstance, this.srv);
 
@@ -304,6 +389,12 @@ class CDSDispatcher {
     }
   }
 
+  /**
+   * Gets the handlers for the entity instance.
+   *
+   * @param entityInstance - The entity instance.
+   * @returns The handler registration functions if handlers are found.
+   */
   private getHandlersBy(entityInstance: Constructable) {
     const handlers = MetadataDispatcher.getMetadataHandlers(entityInstance);
 
@@ -322,16 +413,28 @@ class CDSDispatcher {
     }
   }
 
+  /**
+   * Registers the service as a constant in the container.
+   */
   private readonly registerSrvAsConstant = (): void => {
     if (!this.container.isBound(CDS_DISPATCHER.SRV)) {
       this.container.bind<Service>(CDS_DISPATCHER.SRV).toConstantValue(this.srv);
     }
   };
 
+  /**
+   * Resolves dependencies for the entity.
+   *
+   * @param entity - The entity class.
+   * @returns The resolved entity instance.
+   */
   private resolveDependencies(entity: Constructable): Constructable {
     return this.container.resolve<typeof entity>(entity);
   }
 
+  /**
+   * Registers handlers for all entities.
+   */
   private registerHandlers(): void {
     this.entities.forEach((entity: Constructable) => {
       const createdEntity = this.resolveDependencies(entity);
@@ -345,6 +448,11 @@ class CDSDispatcher {
     });
   }
 
+  /**
+   * Builds the service implementation.
+   *
+   * @returns The function that initializes the service.
+   */
   private buildServiceImplementation() {
     return (srv: Service): void => {
       this.storeService(srv);
@@ -356,7 +464,8 @@ class CDSDispatcher {
   // PUBLIC ROUTINES
 
   /**
-   * @description Initializes the entities within the `CDS Dispatcher`, registering their corresponding handlers.
+   * Initializes the entities within the `CDSDispatcher`, registering their corresponding handlers.
+   *
    * @returns An instance of `ServiceImpl` representing the registered service implementation.
    */
   public initialize(): ServiceImpl {

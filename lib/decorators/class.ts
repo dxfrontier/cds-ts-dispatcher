@@ -7,7 +7,7 @@ import type { CDSTyperEntity } from '../types/types';
 import type CDS_DISPATCHER from '../constants/constants';
 
 /**
- * @description This decorator is used to associate a handler class with a specific entity.
+ * This decorator is used to associate a handler class with a specific entity.
  * It ensures that all handlers within the class operate with the specified entity context.
  *
  * @param entity - The entity to associate with the handler class. Must be a `CDS-Typer` class.
@@ -17,7 +17,7 @@ import type CDS_DISPATCHER from '../constants/constants';
 function EntityHandler<T>(entity: CDSTyperEntity<T>): (target: new (...args: never) => unknown) => void;
 
 /**
- * @description This decorator is used to associate a handler class with all entities.
+ * This decorator is used to associate a handler class with all entities.
  * It ensures that all handlers within the class operate with a generic context applicable to all entities.
  *
  * @param entity - A wildcard `'*'` indicating all entities.
@@ -37,7 +37,7 @@ function EntityHandler<T>(entity: CDSTyperEntity<T> | typeof CDS_DISPATCHER.ALL_
 }
 
 /**
- * @description This decorator is used to mark a class as a repository, containing `repository logic`.
+ * This decorator is used to mark a class as a repository, containing `repository logic`.
  *
  * It makes the class injectable and allows dependency injection to be used within the class.
  */
@@ -48,7 +48,7 @@ function Repository<Target extends new (...args: never) => unknown>() {
 }
 
 /**
- * @description This decorator is used to mark a class as containing `business logic`.
+ * This decorator is used to mark a class as containing `business logic`.
  *
  * It makes the class injectable and allows dependency injection to be used within the class.
  */
@@ -59,7 +59,7 @@ function ServiceLogic<Target extends new (...args: never) => unknown>() {
 }
 
 /**
- * @description This decorator is used to mark a class as containing unbound actions.
+ * This decorator is used to mark a class as containing unbound actions.
  *
  * Unbound actions are operations that are not tied to a specific entity.
  * It makes the class injectable and allows dependency injection to be used within the class.

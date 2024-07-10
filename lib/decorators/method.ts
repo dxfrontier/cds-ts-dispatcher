@@ -28,7 +28,7 @@ import type { Formatters } from '../types/formatter';
 import type { PrependBase, PrependBaseDraft } from '../types/internalTypes';
 
 /**
- * @description Use `@PrependDraft` decorator to register an event handler to run before existing ones.
+ * Use `@PrependDraft` decorator to register an event handler to run before existing ones.
  * @param options - The options object.
  * @param options.eventDecorator - The event decorator name, example `BeforeCreate`, `AfterCreate`, `BeforeDelete`, etc.
  * @param [options.actionName] - `[Optional]` This option will appear when `eventDecorator` is `OnBoundActionDraft`, `OnBoundFunctionDraft`.
@@ -69,7 +69,7 @@ function PrependDraft(options: PrependBaseDraft) {
 }
 
 /**
- * @description Use `@Prepend` decorator to register an event handler to run before existing ones.
+ * Use `@Prepend` decorator to register an event handler to run before existing ones.
  * @param options - The options object.
  * @param options.eventDecorator - The event decorator name, example `BeforeCreate`, `AfterCreate`, `BeforeDelete`, etc.
  * @param [options.actionName] - `[Optional]` This option will appear when `eventDecorator` is `OnAction`, `OnFunction`, `OnBoundAction`, `OnBoundFunction`.
@@ -113,7 +113,7 @@ function Prepend(options: PrependBase) {
 }
 
 /**
- * @description Use `@ExecutionAllowedForRole` decorator to enforce role-based access control ensuring that only `Users` with specific role are authorized to execute the `event` (`AfterRead`, `AfterCreate`, ...) and the custom logic inside of the event.
+ * Use `@ExecutionAllowedForRole` decorator to enforce role-based access control ensuring that only `Users` with specific role are authorized to execute the `event` (`AfterRead`, `AfterCreate`, ...) and the custom logic inside of the event.
  * @param ...roles[] An array of roles that are permitted to execute the event logic.
  * @example
  * "@ExecutionAllowedForRole('Manager', 'CEO')"
@@ -137,7 +137,7 @@ function ExecutionAllowedForRole(...roles: string[]) {
 }
 
 /**
- * @description Use `@FieldsFormatter` decorator to `enhance / format` the fields.
+ * Use `@FieldsFormatter` decorator to `enhance / format` the fields.
  * @param formatter The formatter method to apply.
  * @param fields An array of fields to apply the formatter method on.
  * @example
@@ -184,7 +184,7 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: Array<keyof T>)
 }
 
 /**
- * @description Use `@Validate` decorator to validate fields.
+ * Use `@Validate` decorator to validate fields.
  * @param validator The validation method to apply.
  * @param fields An array of fields to validate.
  * @example
@@ -242,7 +242,7 @@ function SingleInstanceCapable<Target extends Object>() {
 }
 
 /**
- * @description Use the `@Use` decorator to associate a method or a class with a specified middleware classes, mainly used to `verify`, `enhance`, `validate` various request related-information.
+ * Use the `@Use` decorator to associate a method or a class with a specified middleware classes, mainly used to `verify`, `enhance`, `validate` various request related-information.
  * @param MiddlewareClasses - The middleware classes to be applied.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#use | CDS-TS-Dispatcher - @Use}
  */
@@ -508,61 +508,61 @@ function buildOnCRUD<Target extends Object>(options: {
  */
 
 /**
- * @description Use `@BeforeAll` decorator to execute custom logic before creating a new resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
+ * Use `@BeforeAll` decorator to execute custom logic before creating a new resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeall | CDS-TS-Dispatcher - @BeforeAll}
  */
 const BeforeAll = buildBefore({ event: '*', handlerType: HandlerType.Before, isDraft: false });
 
 /**
- * @description Use `@BeforeAllDraft` decorator to execute custom logic before creating a new `draft` resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
+ * Use `@BeforeAllDraft` decorator to execute custom logic before creating a new `draft` resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeall | CDS-TS-Dispatcher - @BeforeAll}
  */
 const BeforeAllDraft = buildBefore({ event: '*', handlerType: HandlerType.Before, isDraft: true });
 
 /**
- * @description Use `@BeforeCreate` decorator to execute custom logic before creating a new resource.
+ * Use `@BeforeCreate` decorator to execute custom logic before creating a new resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforecreate | CDS-TS-Dispatcher - @BeforeCreate}
  */
 const BeforeCreate = buildBefore({ event: 'CREATE', handlerType: HandlerType.Before, isDraft: false });
 
 /**
- * @description Use `@BeforeCreateDraft` decorator to execute custom logic before creating a new DRAFT resource.
+ * Use `@BeforeCreateDraft` decorator to execute custom logic before creating a new DRAFT resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeCreateDraft}
  */
 const BeforeCreateDraft = buildBefore({ event: 'CREATE', handlerType: HandlerType.Before, isDraft: true });
 
 /**
- * @description Use `@BeforeRead` decorator to execute custom logic before performing a read operation.
+ * Use `@BeforeRead` decorator to execute custom logic before performing a read operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeread | CDS-TS-Dispatcher - @BeforeRead}
  */
 const BeforeRead = buildBefore({ event: 'READ', handlerType: HandlerType.Before, isDraft: false });
 
 /**
- * @description Use `@BeforeReadDraft` decorator to execute custom logic before performing a DRAFT read operation.
+ * Use `@BeforeReadDraft` decorator to execute custom logic before performing a DRAFT read operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeReadDraft}
  */
 const BeforeReadDraft = buildBefore({ event: 'READ', handlerType: HandlerType.Before, isDraft: true });
 
 /**
- * @description Use `@BeforeUpdate` decorator to execute custom logic before performing an update operation.
+ * Use `@BeforeUpdate` decorator to execute custom logic before performing an update operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeupdate | CDS-TS-Dispatcher - @BeforeUpdate}
  */
 const BeforeUpdate = buildBefore({ event: 'UPDATE', handlerType: HandlerType.Before, isDraft: false });
 
 /**
- * @description Use `@BeforeUpdateDraft` decorator to execute custom logic before performing a DRAFT update operation.
+ * Use `@BeforeUpdateDraft` decorator to execute custom logic before performing a DRAFT update operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeUpdateDraft}
  */
 const BeforeUpdateDraft = buildBefore({ event: 'UPDATE', handlerType: HandlerType.Before, isDraft: true });
 
 /**
- * @description Use `@BeforeDelete` decorator to execute custom logic before performing a delete operation.
+ * Use `@BeforeDelete` decorator to execute custom logic before performing a delete operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforedelete | CDS-TS-Dispatcher - @BeforeDelete}
  */
 const BeforeDelete = buildBefore({ event: 'DELETE', handlerType: HandlerType.Before, isDraft: false });
 
 /**
- * @description Use `@BeforeDeleteDraft` decorator to execute custom logic before performing a delete operation on a draft.
+ * Use `@BeforeDeleteDraft` decorator to execute custom logic before performing a delete operation on a draft.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeDeleteDraft}
  */
 const BeforeDeleteDraft = buildBefore({ event: 'DELETE', handlerType: HandlerType.Before, isDraft: true });
@@ -580,55 +580,55 @@ const BeforeDeleteDraft = buildBefore({ event: 'DELETE', handlerType: HandlerTyp
  */
 
 /**
- * @description Use `@AfterAll` decorator to execute custom logic after creating a new resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
+ * Use `@AfterAll` decorator to execute custom logic after creating a new resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreateall | CDS-TS-Dispatcher - @AfterCreateAll}
  */
 const AfterAll = buildAfter({ event: '*', handlerType: HandlerType.After, isDraft: false });
 
 /**
- * @description Use `@AfterCreateAll` decorator to execute custom logic after creating a new draft resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
+ * Use `@AfterCreateAll` decorator to execute custom logic after creating a new draft resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreateall | CDS-TS-Dispatcher - @AfterCreateAll}
  */
 const AfterAllDraft = buildAfter({ event: '*', handlerType: HandlerType.After, isDraft: true });
 
 /**
- * @description Use `@AfterCreate` decorator to execute custom logic after creating a new resource.
+ * Use `@AfterCreate` decorator to execute custom logic after creating a new resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreate | CDS-TS-Dispatcher - @AfterCreate}
  */
 const AfterCreate = buildAfter({ event: 'CREATE', handlerType: HandlerType.After, isDraft: false });
 
 /**
- * @description Use `@AfterCreateDraft` decorator to execute custom logic after creating a new DRAFT resource.
+ * Use `@AfterCreateDraft` decorator to execute custom logic after creating a new DRAFT resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreate | CDS-TS-Dispatcher - @AfterCreateDraft}
  */
 const AfterCreateDraft = buildAfter({ event: 'CREATE', handlerType: HandlerType.After, isDraft: true });
 
 /**
- * @description Use `@AfterRead` decorator to execute custom logic after performing a read operation.
+ * Use `@AfterRead` decorator to execute custom logic after performing a read operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterread | CDS-TS-Dispatcher - @AfterRead}
  */
 const AfterRead = buildAfter({ event: 'READ', handlerType: HandlerType.After, isDraft: false });
 
 /**
- * @description Use `@AfterReadDraft` decorator to execute custom logic after performing a draft read operation.
+ * Use `@AfterReadDraft` decorator to execute custom logic after performing a draft read operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterread | CDS-TS-Dispatcher - @AfterReadDraft}
  */
 const AfterReadDraft = buildAfter({ event: 'READ', handlerType: HandlerType.After, isDraft: true });
 
 /**
- * @description The `@AfterReadEachInstance` decorator is used to execute custom logic after performing a read operation on `each individual instance`. This behavior is analogous to the JavaScript `Array.prototype.forEach` method.
+ * The `@AfterReadEachInstance` decorator is used to execute custom logic after performing a read operation on `each individual instance`. This behavior is analogous to the JavaScript `Array.prototype.forEach` method.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadeachinstance | CDS-TS-Dispatcher - @AfterReadEachInstance}
  */
 const AfterReadEachInstance = buildAfter({ event: 'each', handlerType: HandlerType.After, isDraft: false });
 
 /**
- * @description The `@AfterReadDraftEachInstance` decorator is used to execute custom logic after performing a read operation on `each individual draft instance`. This behavior is analogous to the JavaScript `Array.prototype.forEach` method.
+ * The `@AfterReadDraftEachInstance` decorator is used to execute custom logic after performing a read operation on `each individual draft instance`. This behavior is analogous to the JavaScript `Array.prototype.forEach` method.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadeachinstance | CDS-TS-Dispatcher - @AfterReadEachInstance}
  */
 const AfterReadDraftEachInstance = buildAfter({ event: 'each', handlerType: HandlerType.After, isDraft: true });
 
 /**
- * @description Use `@AfterReadSingleInstance` decorator to execute custom logic after creating a new single instance resource.
+ * Use `@AfterReadSingleInstance` decorator to execute custom logic after creating a new single instance resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadsingleinstance | CDS-TS-Dispatcher - @AfterReadSingleInstance}
  */
 const AfterReadSingleInstance = buildAfter({
@@ -638,7 +638,7 @@ const AfterReadSingleInstance = buildAfter({
 });
 
 /**
- * @description Use `@AfterReadDraftSingleInstance` decorator to execute custom logic after creating a new DRAFT single instance resource.
+ * Use `@AfterReadDraftSingleInstance` decorator to execute custom logic after creating a new DRAFT single instance resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadsingleinstance | CDS-TS-Dispatcher - @AfterReadSingleInstance}
  */
 const AfterReadDraftSingleInstance = buildAfter({
@@ -648,19 +648,19 @@ const AfterReadDraftSingleInstance = buildAfter({
 });
 
 /**
- * @description Use `@AfterUpdate` decorator to execute custom logic after performing an update operation.
+ * Use `@AfterUpdate` decorator to execute custom logic after performing an update operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterupdate | CDS-TS-Dispatcher - @AfterUpdate}
  */
 const AfterUpdate = buildAfter({ event: 'UPDATE', handlerType: HandlerType.After, isDraft: false });
 
 /**
- * @description Use `@AfterUpdateDraft` decorator to execute custom logic after performing a DRAFT update operation.
+ * Use `@AfterUpdateDraft` decorator to execute custom logic after performing a DRAFT update operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterupdate | CDS-TS-Dispatcher - @AfterUpdateDraft}
  */
 const AfterUpdateDraft = buildAfter({ event: 'UPDATE', handlerType: HandlerType.After, isDraft: true });
 
 /**
- * @description Use `@AfterDelete` decorator to execute custom logic after performing a delete operation.
+ * Use `@AfterDelete` decorator to execute custom logic after performing a delete operation.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterdelete | CDS-TS-Dispatcher - @AfterDelete}
  */
 const AfterDelete = buildAfter({ event: 'DELETE', handlerType: HandlerType.After, isDraft: false });
@@ -684,122 +684,121 @@ const AfterDeleteDraft = buildAfter({ event: 'DELETE', handlerType: HandlerType.
  */
 
 /**
- * @description Use `@OnAll` decorator to execute custom logic when a new resource is (READ, CREATED, UPDATED, DELETED)
+ * Use `@OnAll` decorator to execute custom logic when a new resource is (READ, CREATED, UPDATED, DELETED)
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onall | CDS-TS-Dispatcher - @OnAll}
  */
 const OnAll = buildOnCRUD({ event: '*', handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnAllDraft` decorator to execute custom logic.
+ * Use `@OnAllDraft` decorator to execute custom logic.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onall | CDS-TS-Dispatcher - @OnAllDraft}
  */
 const OnAllDraft = buildOnCRUD({ event: '*', handlerType: HandlerType.On, isDraft: true });
 
 /**
- * @description Use `@OnCreate` decorator to execute custom logic when a new resource is created.
+ * Use `@OnCreate` decorator to execute custom logic when a new resource is created.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oncreate | CDS-TS-Dispatcher - @OnCreate}
  */
 const OnCreate = buildOnCRUD({ event: 'CREATE', handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnCreateDraft` decorator to execute custom logic when a new DRAFT resource is created.
+ * Use `@OnCreateDraft` decorator to execute custom logic when a new DRAFT resource is created.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oncreate | CDS-TS-Dispatcher - @OnCreateDraft}
  */
 const OnCreateDraft = buildOnCRUD({ event: 'CREATE', handlerType: HandlerType.On, isDraft: true });
 
 /**
- * @description Use `@OnRead` decorator to execute custom logic when a read operation is performed.
+ * Use `@OnRead` decorator to execute custom logic when a read operation is performed.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onread | CDS-TS-Dispatcher - @OnRead}
  */
 const OnRead = buildOnCRUD({ event: 'READ', handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnReadDraft` decorator to execute custom logic when a read operation is performed on a DRAFT resource.
- *
+ * Use `@OnReadDraft` decorator to execute custom logic when a read operation is performed on a DRAFT resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onread | CDS-TS-Dispatcher - @OnReadDraft}
  */
 const OnReadDraft = buildOnCRUD({ event: 'READ', handlerType: HandlerType.On, isDraft: true });
 
 /**
- * @description Use `@OnUpdate` decorator to execute custom logic when an update operation is performed.
+ * Use `@OnUpdate` decorator to execute custom logic when an update operation is performed.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onupdate | CDS-TS-Dispatcher - @OnUpdate}
  */
 const OnUpdate = buildOnCRUD({ event: 'UPDATE', handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnUpdateDraft` decorator to execute custom logic when an update operation is performed on a DRAFT resource.
+ * Use `@OnUpdateDraft` decorator to execute custom logic when an update operation is performed on a DRAFT resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onupdate | CDS-TS-Dispatcher - @OnUpdateDraft}
  */
 const OnUpdateDraft = buildOnCRUD({ event: 'UPDATE', handlerType: HandlerType.On, isDraft: true });
 
 /**
- * @description Use `@OnDelete` decorator to execute custom logic when a delete operation is performed.
+ * Use `@OnDelete` decorator to execute custom logic when a delete operation is performed.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#ondelete | CDS-TS-Dispatcher - @OnDelete}
  */
 const OnDelete = buildOnCRUD({ event: 'DELETE', handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnDeleteDraft` decorator to execute custom logic when a delete operation is performed on a DRAFT resource.
+ * Use `@OnDeleteDraft` decorator to execute custom logic when a delete operation is performed on a DRAFT resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#ondelete | CDS-TS-Dispatcher - @OnDeleteDraft}
  */
 const OnDeleteDraft = buildOnCRUD({ event: 'DELETE', handlerType: HandlerType.On, isDraft: true });
 
 /**
- * @description Use `@OnAction` decorator to execute custom logic when a custom action event is triggered.
+ * Use `@OnAction` decorator to execute custom logic when a custom action event is triggered.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onaction | CDS-TS-Dispatcher - @OnAction}
  */
 const OnAction = buildOnAction({ event: 'ACTION', handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnBoundAction` decorator to execute custom logic when a custom bound action event is triggered.
+ * Use `@OnBoundAction` decorator to execute custom logic when a custom bound action event is triggered.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction | CDS-TS-Dispatcher - @OnBoundAction}
  */
 const OnBoundAction = buildOnAction({ event: 'BOUND_ACTION', handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnBoundActionDraft` decorator to execute custom logic when a custom bound action event is triggered on a DRAFT resource.
+ * Use `@OnBoundActionDraft` decorator to execute custom logic when a custom bound action event is triggered on a DRAFT resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction | CDS-TS-Dispatcher - @OnBoundActionDraft}
  */
 const OnBoundActionDraft = buildOnAction({ event: 'BOUND_ACTION', handlerType: HandlerType.On, isDraft: true });
 
 /**
- * @description Use `@OnBoundFunction` decorator to execute custom logic when a custom bound function event is triggered.
+ * Use `@OnBoundFunction` decorator to execute custom logic when a custom bound function event is triggered.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction | CDS-TS-Dispatcher - @OnBoundFunction}
  */
 const OnBoundFunction = buildOnAction({ event: 'BOUND_FUNC', handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnBoundFunctionDraft` decorator to execute custom logic when a custom bound function event is triggered on a DRAFT resource.
+ * Use `@OnBoundFunctionDraft` decorator to execute custom logic when a custom bound function event is triggered on a DRAFT resource.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction | CDS-TS-Dispatcher - @OnBoundFunctionDraft}
  */
 const OnBoundFunctionDraft = buildOnAction({ event: 'BOUND_FUNC', handlerType: HandlerType.On, isDraft: true });
 
 /**
- * @description Use `@OnFunction` decorator to execute custom logic when a custom function event is triggered.
+ * Use `@OnFunction` decorator to execute custom logic when a custom function event is triggered.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onfunction | CDS-TS-Dispatcher - @OnFunction}
  */
 const OnFunction = buildOnAction({ event: 'FUNC', handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnEvent` decorator to execute custom logic when a custom event is triggered.
+ * Use `@OnEvent` decorator to execute custom logic when a custom event is triggered.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onevent | CDS-TS-Dispatcher - @OnEvent}
  */
 const OnEvent = buildOnEvent({ handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnError` decorator to execute custom logic when an error occurs.
+ * Use `@OnError` decorator to execute custom logic when an error occurs.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onerror | CDS-TS-Dispatcher - @OnError}
  */
 const OnError = buildOnError({ handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnEditDraft` decorator to execute custom logic when a new draft is created from an active instance.
+ * Use `@OnEditDraft` decorator to execute custom logic when a new draft is created from an active instance.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oneditdraft | CDS-TS-Dispatcher - @OnEditDraft}
  */
 const OnEditDraft = buildOnCRUD({ event: 'EDIT', handlerType: HandlerType.On, isDraft: false });
 
 /**
- * @description Use `@OnSaveDraft` decorator to execute custom logic when the 'active entity' is changed.
+ * Use `@OnSaveDraft` decorator to execute custom logic when the 'active entity' is changed.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onsavedraft | CDS-TS-Dispatcher - @OnSaveDraft}
  */
 const OnSaveDraft = buildOnCRUD({ event: 'SAVE', handlerType: HandlerType.On, isDraft: false });
@@ -817,61 +816,61 @@ const OnSaveDraft = buildOnCRUD({ event: 'SAVE', handlerType: HandlerType.On, is
  */
 
 /**
- * @description Use `@OnNewDraft` decorator to execute custom logic when a 'draft' is created.
+ * Use `@OnNewDraft` decorator to execute custom logic when a 'draft' is created.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onnewdraft | CDS-TS-Dispatcher - @OnNewDraft}
  */
 const OnNewDraft = buildOnCRUD({ event: 'NEW', handlerType: HandlerType.On, isDraft: true });
 
 /**
- * @description Use `@OnCancelDraft` decorator to execute custom logic when a 'draft' is cancelled.
+ * Use `@OnCancelDraft` decorator to execute custom logic when a 'draft' is cancelled.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oncanceldraft | CDS-TS-Dispatcher - @OnCancelDraft}
  */
 const OnCancelDraft = buildOnCRUD({ event: 'CANCEL', handlerType: HandlerType.On, isDraft: true });
 
 /**
- * @description Use `@BeforeNewDraft` decorator to execute custom logic before a 'draft' is created.
+ * Use `@BeforeNewDraft` decorator to execute custom logic before a 'draft' is created.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforenewdraft | CDS-TS-Dispatcher - @BeforeNewDraft}
  */
 const BeforeNewDraft = buildBefore({ event: 'NEW', handlerType: HandlerType.Before, isDraft: true });
 
 /**
- * @description Use `@BeforeCancelDraft` decorator to execute custom logic before a 'draft' is cancelled.
+ * Use `@BeforeCancelDraft` decorator to execute custom logic before a 'draft' is cancelled.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforecanceldraft | CDS-TS-Dispatcher - @BeforeCancelDraft}
  */
 const BeforeCancelDraft = buildBefore({ event: 'CANCEL', handlerType: HandlerType.Before, isDraft: true });
 
 /**
- * @description Use `@BeforeEditDraft` decorator to execute custom logic before a 'draft' is edited.
+ * Use `@BeforeEditDraft` decorator to execute custom logic before a 'draft' is edited.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeeditdraft | CDS-TS-Dispatcher - @BeforeEditDraft}
  */
 const BeforeEditDraft = buildBefore({ event: 'EDIT', handlerType: HandlerType.Before, isDraft: false });
 
 /**
- * @description Use `@BeforeSaveDraft` decorator to execute custom logic before a 'draft' is saved.
+ * Use `@BeforeSaveDraft` decorator to execute custom logic before a 'draft' is saved.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforesavedraft | CDS-TS-Dispatcher - @BeforeSaveDraft}
  */
 const BeforeSaveDraft = buildBefore({ event: 'SAVE', handlerType: HandlerType.Before, isDraft: false });
 
 /**
- * @description Use `@AfterNewDraft` decorator to execute custom logic after a new 'draft' is created.
+ * Use `@AfterNewDraft` decorator to execute custom logic after a new 'draft' is created.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afternewdraft | CDS-TS-Dispatcher - @AfterNewDraft}
  */
 const AfterNewDraft = buildAfter({ event: 'NEW', handlerType: HandlerType.After, isDraft: true });
 
 /**
- * @description Use `@AfterCancelDraft` decorator to execute custom logic after a 'draft' is cancelled.
+ * Use `@AfterCancelDraft` decorator to execute custom logic after a 'draft' is cancelled.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercanceldraft | CDS-TS-Dispatcher - @AfterCancelDraft}
  */
 const AfterCancelDraft = buildAfter({ event: 'CANCEL', handlerType: HandlerType.After, isDraft: true });
 
 /**
- * @description Use `@AfterEditDraft` decorator to execute custom logic after a 'draft' is edited.
+ * Use `@AfterEditDraft` decorator to execute custom logic after a 'draft' is edited.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftereditdraft | CDS-TS-Dispatcher - @AfterEditDraft}
  */
 const AfterEditDraft = buildAfter({ event: 'EDIT', handlerType: HandlerType.After, isDraft: false });
 
 /**
- * @description Use `@AfterSaveDraft` decorator to execute custom logic after a 'draft' is saved.
+ * Use `@AfterSaveDraft` decorator to execute custom logic after a 'draft' is saved.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftersavedraft | CDS-TS-Dispatcher - @AfterSaveDraft}
  */
 const AfterSaveDraft = buildAfter({ event: 'SAVE', handlerType: HandlerType.After, isDraft: false });
