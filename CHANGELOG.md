@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.2] - 2024-07-11
+
+### 🐛 Bug Fixes
+
+- *(config)* Fixed package.json script
+
+### 📚 Documentation
+
+- *(doc)* Created technical documentation
+
+### ⚙️ Miscellaneous Tasks
+
+- Version bump to 2.1.2
+
 ## [2.1.1] - 2024-07-10
 
 ### ⚙️ Miscellaneous Tasks
