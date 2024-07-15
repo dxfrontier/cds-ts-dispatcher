@@ -15,7 +15,6 @@
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/dxfrontier/cds-ts-dispatcher/main?logo=git)
 ![GitHub issues](https://img.shields.io/github/issues/dxfrontier/cds-ts-dispatcher?logo=git)
 ![GitHub contributors](https://img.shields.io/github/contributors/dxfrontier/cds-ts-dispatcher?logo=git)
-![GitHub top language](https://img.shields.io/github/languages/top/dxfrontier/cds-ts-dispatcher?logo=git)
 ![GitHub Repo stars](https://img.shields.io/github/stars/dxfrontier/cds-ts-dispatcher?style=flat&logo=git)
 
 The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate code required to implement **Typescript handlers** provided by the SAP CAP framework.
@@ -503,7 +502,7 @@ export class BookHandler {
 
 **@ServiceLogic()**
 
-The `@ServiceLogic` decorator is utilized at the `class-level` to annotate a `class` as a specialized class containing only business logic.
+The `@ServiceLogic` decorator is utilized at the `class-level` to annotate a `class` as a specialized class that will contain business logic.
 
 `Example`
 
@@ -1059,7 +1058,7 @@ export class BookHandler {
 
 **@IsPresent\<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsByKey\<Key>)**
 
-The `@IsPresent` decorator is utilized at the `parameter level`. It allows you to verify the existence of a specified Query `property` values.
+The `@IsPresent` decorator is utilized at the `parameter level`. It allows you to verify the existence of a specified Query `property` value in the current request.
 
 `Parameters`
 
@@ -1088,8 +1087,9 @@ class BookHandler {
     @Req() req: Request,
     @Results() results: MyEntity[],
 
-    @IsPresent('SELECT', 'columns') columnsPresent: boolean,
+    @IsPresent('SELECT', 'columns') columnsPresent: boolean
   ) {
+
     if (columnsPresent) {
       // ...
     }
@@ -1111,7 +1111,7 @@ class BookHandler {
 The `@IsRole` decorator is utilized at the `parameter level`. It allows you to verify
 if the `User` has assigned a given role.
 
-It applies an logical `OR` on the specified roles, meaning it checks if at `least one` of the specified roles is assigned
+It applies an logical `OR` on the specified roles, meaning it checks if at `least one` of the specified roles is assigned, otherwise will return false.
 
 `Parameters`
 
@@ -1139,7 +1139,7 @@ class BookHandler {
     @Req() req: Request,
     @Results() results: MyEntity[],
 
-    @IsRole('role', 'anotherRole') roleAssigned: boolean,
+    @IsRole('role', 'anotherRole') roleAssigned: boolean
   ) {
     if (roleAssigned) {
       // ...
@@ -1159,7 +1159,7 @@ class BookHandler {
 
 **@IsColumnSupplied\<T\>(field : keyof T)**
 
-The `@IsColumnSupplied<T>()` decorator is utilized at the `parameter level`. It allows your to verify the existence of a column in the `SELECT`, `INSERT` or `UPSERT` Query.
+The `@IsColumnSupplied<T>()` decorator is utilized at the `parameter level`. It allows your to verify the existence of a column in the `SELECT`, `INSERT` or `UPSERT` Query of the current request.
 
 `Parameters`
 
@@ -1187,8 +1187,9 @@ class BookHandler {
     @Req() req: Request,
     @Results() results: MyEntity[],
 
-    @IsColumnSupplied<MyEntity>('price') priceSupplied: boolean,
+    @IsColumnSupplied<MyEntity>('price') priceSupplied: boolean
   ) {
+
     if (priceSupplied) {
       // ...
     }
@@ -1302,10 +1303,11 @@ class BookHandler {
     @GetQuery('SELECT', 'columns') columns: GetQueryType['columns']['forSelect'],
 
     @GetQuery('SELECT', 'orderBy') orderBy: GetQueryType['orderBy'],
-    @GetQuery('SELECT', 'groupBy') groupBy: GetQueryType['groupBy'],
+    @GetQuery('SELECT', 'groupBy') groupBy: GetQueryType['groupBy']
   ) {
+
     if (columnsPresent) {
-      // do something with columns values
+      // do something with `columns` or `orderBy` or `groupBy` values
       // columns.forEach(...)
     }
 
@@ -1323,7 +1325,7 @@ class BookHandler {
 
 **@GetRequest(property : keyof Request)**
 
-The `@GetRequest` decorator is utilized at the `parameter level`. It allows you tu retrieve the specified `property` value from the `Request` object.
+The `@GetRequest` decorator is utilized at the `parameter level`. It allows you to retrieve the specified `property` value from the `Request` object.
 
 `Parameters`
 
@@ -1353,7 +1355,7 @@ The `@GetRequest` decorator is utilized at the `parameter level`. It allows you 
 import { EntityHandler, Results, GetRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-import type { GetTypeLocale, GetTypeMethod, Request } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 @EntityHandler(MyEntity)
 class BookHandler {
