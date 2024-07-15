@@ -7,7 +7,7 @@ const Configuration: UserConfig = {
     'type-enum': [
       RuleConfigSeverity.Error,
       'always',
-      ['feat', 'fix', 'doc', 'perf', 'refactor', 'style', 'test', 'chore', 'revert', 'delete'],
+      ['build', 'chore', 'ci', 'docs', 'feat', 'fix', 'perf', 'refactor', 'revert', 'style', 'test', 'delete'],
     ],
     'scope-enum': [
       RuleConfigSeverity.Error,
@@ -28,11 +28,14 @@ const Configuration: UserConfig = {
         // config: Changes to prettier, lint, github actions, husky, lint-staged ...
         'config',
         // doc: Changes to documentation.
-        'doc',
+        'readme',
+        'typedoc',
         // deps: Updates to dependencies.
         'deps',
-        // e2e-tests, unit, integration: Changes to all tests
-        'tests',
+        // e2e, unit, integration tests
+        'e2e',
+        'unit',
+        'integration',
       ],
     ],
     'scope-empty': [RuleConfigSeverity.Error, 'never'],
