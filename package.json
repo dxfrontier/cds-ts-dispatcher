@@ -78,8 +78,6 @@
     "validator": "^13.12.0"
   },
   "devDependencies": {
-    "@cap-js/cds-typer": "0.23.0",
-    "@cap-js/sqlite": "^1.7.3",
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@commitlint/prompt-cli": "^19.3.1",
