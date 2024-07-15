@@ -35,7 +35,7 @@ class BookSalesService {
     if (args.locale) {
       args.req.notify('locale');
     }
-    if (args.columns.length > 0) {
+    if (args.columns && args.columns.length > 0) {
       args.req.notify('columns');
     }
     if (args.orderBy && args.orderBy?.length > 0) {

@@ -6,18 +6,19 @@
   ],
   "scripts": {
     "start": "npm run build:entities && cds-ts watch",
-    "build:entities": "cds-typer '*' --outputDirectory ./@cds-models --logLevel NONE",
+    "build:entities": "cds-typer '*' --outputDirectory ./@cds-models --logLevel SILENT",
     "build:entities:test": "npm run build:entities && npm run clean:js",
     "clean:js": "npx rimraf ./@cds-models/{*.js,**/*.js,**/**/*.js,**/**/**/*.js}"
   },
   "devDependencies": {
-    "@cap-js/cds-typer": ">=0.19.0"
+    "@cap-js/cds-typer": ">=0.23.0",
+    "@cap-js/sqlite": "^1.7.3"
   },
   "imports": {
     "#cds-models/*": "./@cds-models/*/index.js"
   },
   "dependencies": {
-    "@sap/xssec": "^4.1.0",
+    "@sap/xssec": "^4.1.3",
     "passport": "^0.7.0"
   },
   "cds": {
