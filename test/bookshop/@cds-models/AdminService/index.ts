@@ -4,7 +4,7 @@ import * as __ from './../_';
 import * as _sap_capire_bookshop from './../sap/capire/bookshop';
 export default { name: 'AdminService' }
 export function _UserActivityLogAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class UserActivityLog extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -20,7 +20,7 @@ export function _UserActivityLogAspect<TBase extends new (...args: any[]) => obj
       static readonly actions: Record<never, never>
   };
 }
-export class UserActivityLog extends _._managedAspect(_UserActivityLogAspect(__.Entity)) {static drafts: typeof UserActivityLog}
+export class UserActivityLog extends _UserActivityLogAspect(__.Entity) {static drafts: typeof UserActivityLog}
 Object.defineProperty(UserActivityLog, 'name', { value: 'AdminService.UserActivityLog' })
 Object.defineProperty(UserActivityLog, 'is_singular', { value: true })
 export class UserActivityLog_ extends Array<UserActivityLog> {static drafts: typeof UserActivityLog
@@ -28,7 +28,7 @@ $count?: number}
 Object.defineProperty(UserActivityLog_, 'name', { value: 'AdminService.UserActivityLog' })
 
 export function _PromotionAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Promotion extends Base {
+  return class extends Base {
         ID?: number;
         name?: string | null;
         description?: string | null;
@@ -47,7 +47,7 @@ $count?: number}
 Object.defineProperty(Promotions, 'name', { value: 'AdminService.Promotions' })
 
 export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class User extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -66,7 +66,7 @@ export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: 
       static readonly actions: Record<never, never>
   };
 }
-export class User extends _._managedAspect(_UserAspect(__.Entity)) {}
+export class User extends _UserAspect(__.Entity) {}
 Object.defineProperty(User, 'name', { value: 'AdminService.Users' })
 Object.defineProperty(User, 'is_singular', { value: true })
 export class Users extends Array<User> {$count?: number}

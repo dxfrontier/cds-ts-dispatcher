@@ -23,7 +23,7 @@ export type BookTypes = "BOOK_SIGNING" | "AUTHOR_TALK" | "BOOK_LUNCH"
 
 // the following represents the CDS aspect 'cuid'
 export function _cuidAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class cuid extends Base {
+  return class extends Base {
         ID?: string;
       static readonly actions: Record<never, never>
   };
@@ -31,7 +31,7 @@ export function _cuidAspect<TBase extends new (...args: any[]) => object>(Base: 
 export class cuid extends _cuidAspect(__.Entity) {}
 // the following represents the CDS aspect 'managed'
 export function _managedAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class managed extends Base {
+  return class extends Base {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -48,7 +48,7 @@ export function _managedAspect<TBase extends new (...args: any[]) => object>(Bas
 export class managed extends _managedAspect(__.Entity) {}
 // the following represents the CDS aspect 'temporal'
 export function _temporalAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class temporal extends Base {
+  return class extends Base {
         validFrom?: __.CdsTimestamp | null;
         validTo?: __.CdsTimestamp | null;
       static readonly actions: Record<never, never>
@@ -57,14 +57,14 @@ export function _temporalAspect<TBase extends new (...args: any[]) => object>(Ba
 export class temporal extends _temporalAspect(__.Entity) {}
 // the following represents the CDS aspect 'extensible'
 export function _extensibleAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extensible extends Base {
+  return class extends Base {
         extensions__?: string | null;
       static readonly actions: Record<never, never>
   };
 }
 export class extensible extends _extensibleAspect(__.Entity) {}
 export function _HelloRequestAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class HelloRequest extends Base {
+  return class extends Base {
         greeterName?: string | null;
         toName?: string | null;
       static readonly actions: Record<never, never>
@@ -75,7 +75,7 @@ Object.defineProperty(HelloRequest, 'name', { value: 'HelloRequest' })
 Object.defineProperty(HelloRequest, 'is_singular', { value: true })
 
 export function _HelloResponseAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class HelloResponse extends Base {
+  return class extends Base {
         greetingMessage?: string | null;
       static readonly actions: Record<never, never>
   };
