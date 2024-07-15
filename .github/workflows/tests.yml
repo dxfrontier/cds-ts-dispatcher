@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Instal SAP CDS-DK
+      - name: Install ts-node
         run: npm i -g ts-node
 
       - name: Start unit / integration tests
@@ -54,8 +54,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Instal SAP CDS-DK
-        run: npm i -g @sap/cds-dk ts-node
+      - name: Instal ts-node
+        run: npm i -g ts-node
 
       - name: Instal Globally typescript
         run: npm i -g typescript
