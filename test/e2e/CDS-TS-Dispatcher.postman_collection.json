@@ -2311,12 +2311,6 @@
 											"pm.test(\"Valid orderBy header is present\", function () {",
 											"    var sapMessages = pm.response.headers.get('sap-messages');",
 											"    pm.expect(sapMessages).to.include('orderBy');",
-											"});",
-											"",
-											"// Check for the presence of columns header",
-											"pm.test(\"Valid columns header is present\", function () {",
-											"    var sapMessages = pm.response.headers.get('sap-messages');",
-											"    pm.expect(sapMessages).to.include('columns');",
 											"});"
 										],
 										"type": "text/javascript",

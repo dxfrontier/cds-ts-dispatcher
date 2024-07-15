@@ -94,7 +94,7 @@ entity BookEvents : managed, cuid {
 
 }
 
-entity BookSales : managed, cuid {
+entity BookSales : managed {
   key ID         : Integer;
       saleDate   : Date; // Date of the sale
       saleAmount : Decimal; // Amount of the sale

@@ -3,7 +3,7 @@ import * as __ from './../../_';
 export type Locale = string;
 // the following represents the CDS aspect 'CodeList'
 export function _CodeListAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class CodeList extends Base {
+  return class extends Base {
         name?: string | null;
         descr?: string | null;
       static readonly actions: Record<never, never>
@@ -12,7 +12,7 @@ export function _CodeListAspect<TBase extends new (...args: any[]) => object>(Ba
 export class CodeList extends _CodeListAspect(__.Entity) {}
 // the following represents the CDS aspect 'TextsAspect'
 export function _TextsAspectAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class TextsAspect extends Base {
+  return class extends Base {
     /**
     * Type for a language code
     */
@@ -27,7 +27,7 @@ export class TextsAspect extends _TextsAspectAspect(__.Entity) {}
 * See https://cap.cloud.sap/docs/cds/common#entity-languages
 */
 export function _LanguageAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Language extends Base {
+  return class extends _CodeListAspect(Base) {
     /**
     * Type for a language code
     */
@@ -35,7 +35,7 @@ export function _LanguageAspect<TBase extends new (...args: any[]) => object>(Ba
       static readonly actions: Record<never, never>
   };
 }
-export class Language extends _CodeListAspect(_LanguageAspect(__.Entity)) {}
+export class Language extends _LanguageAspect(__.Entity) {}
 Object.defineProperty(Language, 'name', { value: 'sap.common.Languages' })
 Object.defineProperty(Language, 'is_singular', { value: true })
 export class Languages extends Array<Language> {$count?: number}
@@ -47,12 +47,12 @@ Object.defineProperty(Languages, 'name', { value: 'sap.common.Languages' })
 * See https://cap.cloud.sap/docs/cds/common#entity-countries
 */
 export function _CountryAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Country extends Base {
+  return class extends _CodeListAspect(Base) {
         code?: string;
       static readonly actions: Record<never, never>
   };
 }
-export class Country extends _CodeListAspect(_CountryAspect(__.Entity)) {}
+export class Country extends _CountryAspect(__.Entity) {}
 Object.defineProperty(Country, 'name', { value: 'sap.common.Countries' })
 Object.defineProperty(Country, 'is_singular', { value: true })
 export class Countries extends Array<Country> {$count?: number}
@@ -64,14 +64,14 @@ Object.defineProperty(Countries, 'name', { value: 'sap.common.Countries' })
 * See https://cap.cloud.sap/docs/cds/common#entity-currencies
 */
 export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Currency extends Base {
+  return class extends _CodeListAspect(Base) {
         code?: string;
         symbol?: string | null;
         minorUnit?: number | null;
       static readonly actions: Record<never, never>
   };
 }
-export class Currency extends _CodeListAspect(_CurrencyAspect(__.Entity)) {}
+export class Currency extends _CurrencyAspect(__.Entity) {}
 Object.defineProperty(Currency, 'name', { value: 'sap.common.Currencies' })
 Object.defineProperty(Currency, 'is_singular', { value: true })
 export class Currencies extends Array<Currency> {$count?: number}
@@ -83,12 +83,12 @@ Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
 * See https://cap.cloud.sap/docs/cds/common#entity-timezones
 */
 export function _TimezoneAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Timezone extends Base {
+  return class extends _CodeListAspect(Base) {
         code?: string;
       static readonly actions: Record<never, never>
   };
 }
-export class Timezone extends _CodeListAspect(_TimezoneAspect(__.Entity)) {}
+export class Timezone extends _TimezoneAspect(__.Entity) {}
 Object.defineProperty(Timezone, 'name', { value: 'sap.common.Timezones' })
 Object.defineProperty(Timezone, 'is_singular', { value: true })
 export class Timezones extends Array<Timezone> {$count?: number}
