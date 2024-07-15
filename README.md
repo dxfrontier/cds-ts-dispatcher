@@ -1323,7 +1323,7 @@ class BookHandler {
 
 **@GetRequest(property : keyof Request)**
 
-The `@GetRequest` decorator is utilized at the `parameter level`. It allows you tu retrieve the specified `property` value from the `Request` object.
+The `@GetRequest` decorator is utilized at the `parameter level`. It allows you to retrieve the specified `property` value from the `Request` object.
 
 `Parameters`
 
@@ -1353,7 +1353,7 @@ The `@GetRequest` decorator is utilized at the `parameter level`. It allows you 
 import { EntityHandler, Results, GetRequest } from '@dxfrontier/cds-ts-dispatcher';
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-import type { GetTypeLocale, GetTypeMethod, Request } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 @EntityHandler(MyEntity)
 class BookHandler {
