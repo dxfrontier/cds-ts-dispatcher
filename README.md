@@ -121,7 +121,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 Install [**@sap/cds-dk**](https://cap.cloud.sap/docs/get-started/), `typescript`, `ts-node` globally:
 
 ```bash
-npm install -g @sap/cds-dk typescript ts-node
+npm install -g @sap/cds-dk@7.9.5 typescript ts-node
 ```
 
 ## Installation
