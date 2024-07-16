@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.3] - 2024-07-16
+
+### 📚 Documentation
+
+- *(doc)* Readme updated
+- *(doc)* Removed from README.md unused types
+
+### 🧪 Testing
+
+- *(tests)* Updated tests due to cds-typer version increase
+
+### ⚙️ Miscellaneous Tasks
+
+- *(build)* Added node version 21 and restricted cds-dk to 7.9.5
+- Version bump to 2.1.3
+
 ## [2.1.2] - 2024-07-11
 
 ### 🐛 Bug Fixes
