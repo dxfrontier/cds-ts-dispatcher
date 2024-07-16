@@ -5,7 +5,7 @@ import * as _sap_capire_bookshop from './../sap/capire/bookshop';
 import * as _sap_common from './../sap/common';
 export default { name: 'CatalogService' }
 export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Book extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -40,14 +40,14 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
       static readonly actions: Record<never, never>
   };
 }
-export class Book extends _._managedAspect(_BookAspect(__.Entity)) {}
+export class Book extends _BookAspect(__.Entity) {}
 Object.defineProperty(Book, 'name', { value: 'CatalogService.Books' })
 Object.defineProperty(Book, 'is_singular', { value: true })
 export class Books extends Array<Book> {$count?: number}
 Object.defineProperty(Books, 'name', { value: 'CatalogService.Books' })
 
 export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Author extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -68,14 +68,14 @@ export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base
       static readonly actions: Record<never, never>
   };
 }
-export class Author extends _._managedAspect(_AuthorAspect(__.Entity)) {}
+export class Author extends _AuthorAspect(__.Entity) {}
 Object.defineProperty(Author, 'name', { value: 'CatalogService.Authors' })
 Object.defineProperty(Author, 'is_singular', { value: true })
 export class Authors extends Array<Author> {$count?: number}
 Object.defineProperty(Authors, 'name', { value: 'CatalogService.Authors' })
 
 export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Review extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -96,14 +96,14 @@ export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base
       static readonly actions: Record<never, never>
   };
 }
-export class Review extends _._managedAspect(_ReviewAspect(__.Entity)) {}
+export class Review extends _ReviewAspect(__.Entity) {}
 Object.defineProperty(Review, 'name', { value: 'CatalogService.Reviews' })
 Object.defineProperty(Review, 'is_singular', { value: true })
 export class Reviews extends Array<Review> {$count?: number}
 Object.defineProperty(Reviews, 'name', { value: 'CatalogService.Reviews' })
 
 export function _PublisherAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Publisher extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -119,14 +119,14 @@ export function _PublisherAspect<TBase extends new (...args: any[]) => object>(B
       static readonly actions: Record<never, never>
   };
 }
-export class Publisher extends _._managedAspect(_PublisherAspect(__.Entity)) {}
+export class Publisher extends _PublisherAspect(__.Entity) {}
 Object.defineProperty(Publisher, 'name', { value: 'CatalogService.Publishers' })
 Object.defineProperty(Publisher, 'is_singular', { value: true })
 export class Publishers extends Array<Publisher> {$count?: number}
 Object.defineProperty(Publishers, 'name', { value: 'CatalogService.Publishers' })
 
 export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class BookOrder extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -147,14 +147,14 @@ export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(B
       static readonly actions: Record<never, never>
   };
 }
-export class BookOrder extends _._managedAspect(_BookOrderAspect(__.Entity)) {}
+export class BookOrder extends _BookOrderAspect(__.Entity) {}
 Object.defineProperty(BookOrder, 'name', { value: 'CatalogService.BookOrders' })
 Object.defineProperty(BookOrder, 'is_singular', { value: true })
 export class BookOrders extends Array<BookOrder> {$count?: number}
 Object.defineProperty(BookOrders, 'name', { value: 'CatalogService.BookOrders' })
 
 export function _BookRecommendationAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class BookRecommendation extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -176,14 +176,14 @@ export function _BookRecommendationAspect<TBase extends new (...args: any[]) => 
       static readonly actions: Record<never, never>
   };
 }
-export class BookRecommendation extends _._managedAspect(_BookRecommendationAspect(__.Entity)) {}
+export class BookRecommendation extends _BookRecommendationAspect(__.Entity) {}
 Object.defineProperty(BookRecommendation, 'name', { value: 'CatalogService.BookRecommendations' })
 Object.defineProperty(BookRecommendation, 'is_singular', { value: true })
 export class BookRecommendations extends Array<BookRecommendation> {$count?: number}
 Object.defineProperty(BookRecommendations, 'name', { value: 'CatalogService.BookRecommendations' })
 
 export function _BookFormatAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class BookFormat extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -205,14 +205,14 @@ export function _BookFormatAspect<TBase extends new (...args: any[]) => object>(
       static readonly actions: Record<never, never>
   };
 }
-export class BookFormat extends _._managedAspect(_BookFormatAspect(__.Entity)) {}
+export class BookFormat extends _BookFormatAspect(__.Entity) {}
 Object.defineProperty(BookFormat, 'name', { value: 'CatalogService.BookFormats' })
 Object.defineProperty(BookFormat, 'is_singular', { value: true })
 export class BookFormats extends Array<BookFormat> {$count?: number}
 Object.defineProperty(BookFormats, 'name', { value: 'CatalogService.BookFormats' })
 
 export function _BookSaleAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class BookSale extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -234,14 +234,14 @@ export function _BookSaleAspect<TBase extends new (...args: any[]) => object>(Ba
       static readonly actions: Record<never, never>
   };
 }
-export class BookSale extends _._managedAspect(_._cuidAspect(_BookSaleAspect(__.Entity))) {}
+export class BookSale extends _BookSaleAspect(__.Entity) {}
 Object.defineProperty(BookSale, 'name', { value: 'CatalogService.BookSales' })
 Object.defineProperty(BookSale, 'is_singular', { value: true })
 export class BookSales extends Array<BookSale> {$count?: number}
 Object.defineProperty(BookSales, 'name', { value: 'CatalogService.BookSales' })
 
 export function _BookEventAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class BookEvent extends Base {
+  return class extends _._managedAspect(_._cuidAspect(Base)) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -258,7 +258,7 @@ export function _BookEventAspect<TBase extends new (...args: any[]) => object>(B
       static readonly actions: Record<never, never>
   };
 }
-export class BookEvent extends _._managedAspect(_._cuidAspect(_BookEventAspect(__.Entity))) {static drafts: typeof BookEvent}
+export class BookEvent extends _BookEventAspect(__.Entity) {static drafts: typeof BookEvent}
 Object.defineProperty(BookEvent, 'name', { value: 'CatalogService.BookEvents' })
 Object.defineProperty(BookEvent, 'is_singular', { value: true })
 export class BookEvents extends Array<BookEvent> {static drafts: typeof BookEvent
@@ -266,7 +266,7 @@ $count?: number}
 Object.defineProperty(BookEvents, 'name', { value: 'CatalogService.BookEvents' })
 
 export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class BookStat extends Base {
+  return class extends _._managedAspect(Base) {
         createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
@@ -296,7 +296,7 @@ export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Ba
       }
   };
 }
-export class BookStat extends _._managedAspect(_BookStatAspect(__.Entity)) {}
+export class BookStat extends _BookStatAspect(__.Entity) {}
 Object.defineProperty(BookStat, 'name', { value: 'CatalogService.BookStats' })
 Object.defineProperty(BookStat, 'is_singular', { value: true })
 export class BookStats extends Array<BookStat> {$count?: number}
@@ -308,21 +308,21 @@ Object.defineProperty(BookStats, 'name', { value: 'CatalogService.BookStats' })
 * See https://cap.cloud.sap/docs/cds/common#entity-currencies
 */
 export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Currency extends Base {
+  return class extends _sap_common._CodeListAspect(Base) {
         code?: string;
         symbol?: string | null;
         minorUnit?: number | null;
       static readonly actions: Record<never, never>
   };
 }
-export class Currency extends _sap_common._CodeListAspect(_CurrencyAspect(__.Entity)) {}
+export class Currency extends _CurrencyAspect(__.Entity) {}
 Object.defineProperty(Currency, 'name', { value: 'sap.common.Currencies' })
 Object.defineProperty(Currency, 'is_singular', { value: true })
 export class Currencies extends Array<Currency> {$count?: number}
 Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
 
 export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Genre extends Base {
+  return class extends _sap_common._CodeListAspect(Base) {
         ID?: number;
         parent?: __.Association.to<_sap_capire_bookshop.Genre> | null;
         parent_ID?: number | null;
@@ -330,7 +330,7 @@ export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base:
       static readonly actions: Record<never, never>
   };
 }
-export class Genre extends _sap_common._CodeListAspect(_GenreAspect(__.Entity)) {}
+export class Genre extends _GenreAspect(__.Entity) {}
 Object.defineProperty(Genre, 'name', { value: 'sap.capire.bookshop.Genres' })
 Object.defineProperty(Genre, 'is_singular', { value: true })
 export class Genres extends Array<Genre> {$count?: number}
