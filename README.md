@@ -23,6 +23,8 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
+- [`Notice`](#notice)
+  - [`SAP CDS Version 8` (currently in evaluation)](#sap-cds-version-8-currently-in-evaluation)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
   - [`Option 1 :` Install CDS-TS-Dispatcher - `New project`](#option-1--install-cds-ts-dispatcher---new-project)
@@ -116,12 +118,19 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 - [License](#license)
 - [Authors](#authors)
 
+## `Notice` 
+
+### `SAP CDS Version 8` (currently in evaluation)
+
+Currently we use the `@sap/cds`, `@sap/cds-dk` version `7`, SAP released [version 8](https://cap.cloud.sap/docs/releases/jun24), we currently evaluating to release a new version to support also version 8.
+
+
 ## Prerequisites
 
 Install [**@sap/cds-dk**](https://cap.cloud.sap/docs/get-started/), `typescript`, `ts-node` globally:
 
 ```bash
-npm install -g @sap/cds-dk@7.9.5 typescript ts-node
+npm install -g @sap/cds-dk typescript ts-node
 ```
 
 ## Installation
@@ -200,6 +209,9 @@ tsc --init
 ```bash
 cds-ts watch
 ```
+
+> [!CAUTION]
+> Currently we use the `@sap/cds`, `@sap/cds-dk`  **version 7**, SAP released [version 8](https://cap.cloud.sap/docs/releases/jun24), we currently evaluating to release a new version to support also version 8.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
