@@ -1,4 +1,4 @@
-import type { Constructable } from '@sap/cds/apis/internal/inference';
+import type { Constructable } from '../../lib/types/internalTypes';
 
 import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, EntityHandler } from '../../lib';
 import { MetadataDispatcher } from '../../lib/core/MetadataDispatcher';
