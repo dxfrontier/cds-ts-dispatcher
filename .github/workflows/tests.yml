@@ -18,7 +18,7 @@ jobs:
     name: Unit
     strategy:
       matrix:
-        version: [21, 20, 18]
+        version: [20, 18]
         platform: [macos-latest, ubuntu-latest]
 
     runs-on: ${{ matrix.platform }}
@@ -31,7 +31,7 @@ jobs:
         run: npm install
 
       - name: Instal SAP CDS-DK
-        run: npm i -g @sap/cds-dk@7.9.5 ts-node
+        run: npm i -g @sap/cds-dk ts-node
 
       - name: Start unit / integration tests
         run: npm run test:unit
@@ -42,7 +42,7 @@ jobs:
     needs: test-unit
     strategy:
       matrix:
-        version: [21, 20, 18]
+        version: [20, 18]
         platform: [macos-latest, ubuntu-latest]
 
     runs-on: ${{ matrix.platform }}
@@ -55,7 +55,7 @@ jobs:
         run: npm install
 
       - name: Instal SAP CDS-DK
-        run: npm i -g @sap/cds-dk@7.9.5 ts-node
+        run: npm i -g @sap/cds-dk ts-node
 
       - name: Instal Globally typescript
         run: npm i -g typescript
