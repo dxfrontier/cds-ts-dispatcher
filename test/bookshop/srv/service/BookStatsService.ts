@@ -1,16 +1,11 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { Inject, Service, ServiceLogic, SRV } from '../../../../lib';
-import BookRepository from '../repository/BookRepository';
-import BookStatsRepository from '../repository/BookStatsRepository';
+import { Inject, Service, ServiceLogic, CDS_DISPATCHER } from '../../../../lib';
 
 import type { ActionRequest, Request, TypedRequest } from '../../../../lib';
-import type { BookStat } from '../../@cds-models/CatalogService';
+import { Book, BookStat } from '../../@cds-models/CatalogService';
 
 @ServiceLogic()
 class BookStatsService {
-  @Inject(SRV) private readonly srv: Service;
-  @Inject(BookStatsRepository) private readonly bookStatsRepository: BookStatsRepository;
-  @Inject(BookRepository) private readonly bookRepository: BookRepository;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
   public notifyDeleted(req: Request): void {
     req.notify('Item deleted');
@@ -25,20 +20,17 @@ class BookStatsService {
   }
 
   public async updatedViews(req: TypedRequest<BookStat>) {
-    await this.bookStatsRepository.update({ ID: 2 }, { views: 444233 });
-    return await this.bookStatsRepository.getAll();
+    await UPDATE(BookStat).where({ ID: 2 }).set({ views: 444233 });
   }
 
   public async getUpdatedBook(req: ActionRequest<typeof BookStat.actions.GenerateReport>) {
-    return await this.bookRepository.findOne({ ID: req.data.ID });
+    return await SELECT(Book).where({ ID: req.data.ID });
   }
 
   public async handleReport(req: ActionRequest<typeof BookStat.actions.GenerateReport>) {
     const statsID = req.params[0] as string;
-
-    const bookStats = await this.bookStatsRepository.findOne({ ID: parseInt(statsID) });
-
-    const book = await this.bookRepository.findOne({ ID: bookStats!.book_ID! });
+    const bookStats = await SELECT.one(BookStat).where({ ID: parseInt(statsID) });
+    const book: Book = await SELECT.one(Book).where({ ID: bookStats!.book_ID! });
 
     return {
       book: book!.title,

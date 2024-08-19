@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { Inject, Service, ServiceLogic, SRV } from '../../../../lib';
+import { Inject, Service, ServiceLogic, CDS_DISPATCHER } from '../../../../lib';
 
 @ServiceLogic()
 class BookOrdersService {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
   public showBeforeReadNotify() {
     console.log('****************** Before read event');

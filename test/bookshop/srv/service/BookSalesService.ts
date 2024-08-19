@@ -1,10 +1,10 @@
-import { Inject, Service, ServiceLogic, SRV } from '../../../../lib';
+import { Inject, Service, ServiceLogic, CDS_DISPATCHER } from '../../../../lib';
 
 import type { GetQueryType, Request } from '../../../../lib';
 
 @ServiceLogic()
 class BookSalesService {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
   public showAfterReadNotifies(args: {
     req: Request;

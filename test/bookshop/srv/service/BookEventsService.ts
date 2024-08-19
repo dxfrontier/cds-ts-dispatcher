@@ -1,11 +1,11 @@
-import { Inject, Service, ServiceLogic, SRV } from '../../../../lib';
+import { CDS_DISPATCHER, Inject, Service, ServiceLogic } from '../../../../lib';
 
 import type { Request } from '../../../../lib';
 import type { BookEvent } from '#cds-models/CatalogService';
 
 @ServiceLogic()
 class BookEventsService {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
   public showNewDraftMessage(req: Request): void {
     req.notify('On new draft');
