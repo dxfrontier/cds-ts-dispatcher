@@ -3,21 +3,21 @@ import * as __ from './../../_';
 export type Locale = string;
 // the following represents the CDS aspect 'CodeList'
 export function _CodeListAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends Base {
-        name?: string | null;
-        descr?: string | null;
-      static readonly actions: Record<never, never>
+  return class CodeList extends Base {
+        declare name?: string | null;
+        declare descr?: string | null;
+      declare static readonly actions: Record<never, never>
   };
 }
 export class CodeList extends _CodeListAspect(__.Entity) {}
 // the following represents the CDS aspect 'TextsAspect'
 export function _TextsAspectAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends Base {
+  return class TextsAspect extends Base {
     /**
     * Type for a language code
     */
-        locale?: Locale;
-      static readonly actions: Record<never, never>
+        declare locale?: Locale;
+      declare static readonly actions: Record<never, never>
   };
 }
 export class TextsAspect extends _TextsAspectAspect(__.Entity) {}
@@ -27,12 +27,12 @@ export class TextsAspect extends _TextsAspectAspect(__.Entity) {}
 * See https://cap.cloud.sap/docs/cds/common#entity-languages
 */
 export function _LanguageAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends _CodeListAspect(Base) {
+  return class Language extends _CodeListAspect(Base) {
     /**
     * Type for a language code
     */
-        code?: Locale;
-      static readonly actions: Record<never, never>
+        declare code?: Locale;
+      declare static readonly actions: typeof CodeList.actions & Record<never, never>
   };
 }
 export class Language extends _LanguageAspect(__.Entity) {}
@@ -47,9 +47,9 @@ Object.defineProperty(Languages, 'name', { value: 'sap.common.Languages' })
 * See https://cap.cloud.sap/docs/cds/common#entity-countries
 */
 export function _CountryAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends _CodeListAspect(Base) {
-        code?: string;
-      static readonly actions: Record<never, never>
+  return class Country extends _CodeListAspect(Base) {
+        declare code?: string;
+      declare static readonly actions: typeof CodeList.actions & Record<never, never>
   };
 }
 export class Country extends _CountryAspect(__.Entity) {}
@@ -64,11 +64,11 @@ Object.defineProperty(Countries, 'name', { value: 'sap.common.Countries' })
 * See https://cap.cloud.sap/docs/cds/common#entity-currencies
 */
 export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends _CodeListAspect(Base) {
-        code?: string;
-        symbol?: string | null;
-        minorUnit?: number | null;
-      static readonly actions: Record<never, never>
+  return class Currency extends _CodeListAspect(Base) {
+        declare code?: string;
+        declare symbol?: string | null;
+        declare minorUnit?: number | null;
+      declare static readonly actions: typeof CodeList.actions & Record<never, never>
   };
 }
 export class Currency extends _CurrencyAspect(__.Entity) {}
@@ -83,9 +83,9 @@ Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
 * See https://cap.cloud.sap/docs/cds/common#entity-timezones
 */
 export function _TimezoneAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends _CodeListAspect(Base) {
-        code?: string;
-      static readonly actions: Record<never, never>
+  return class Timezone extends _CodeListAspect(Base) {
+        declare code?: string;
+      declare static readonly actions: typeof CodeList.actions & Record<never, never>
   };
 }
 export class Timezone extends _TimezoneAspect(__.Entity) {}
