@@ -3,7 +3,7 @@ import { MetadataDispatcher } from '../../core/MetadataDispatcher';
 import util from '../util';
 
 import type { MiddlewareImpl, Request, RequestType } from '../../types/types';
-import type { Constructable } from '@sap/cds/apis/internal/inference';
+import type { Constructable } from '../../types/internalTypes';
 
 /**
  * Utility object for handling middleware operations.
@@ -20,7 +20,7 @@ const middlewareUtil = {
    */
   async executeMiddlewareChain<Middleware extends Constructable<MiddlewareImpl>>(
     req: Request,
-    index: number = 0,
+    index = 0,
     middlewares: Middleware[],
     entityInstance?: Constructable<any>,
   ) {
@@ -64,7 +64,7 @@ const middlewareUtil = {
         await middlewareUtil.executeMiddlewareChain(req, 0, middlewares);
       }
 
-      await originalMethod!.apply(this, args);
+      await originalMethod?.apply(this, args);
     };
   },
 

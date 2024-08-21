@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-
 import { StatusCodes } from 'http-status-codes';
 import * as validatorActions from 'validator';
 
@@ -75,7 +73,7 @@ const validatorUtil = {
     const input = String(value);
     const customMessage: string | null = validator.customMessage ?? null;
 
-    let isValid: boolean = false;
+    let isValid = false;
 
     switch (validator.action) {
       // START 'Lodash' formatters

@@ -22,10 +22,9 @@ import type {
   RequestType,
 } from '../types/types';
 
-import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
-import type { PrependBase, PrependBaseDraft } from '../types/internalTypes';
+import type { Constructable, PrependBase, PrependBaseDraft } from '../types/internalTypes';
 
 /**
  * Use `@PrependDraft` decorator to register an event handler to run before existing ones.
@@ -145,7 +144,7 @@ function ExecutionAllowedForRole(...roles: string[]) {
  * "@FieldsFormatter<Book>({ action: 'blacklist', charsToRemove: 'W' }, 'title')"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#fieldsformatter | CDS-TS-Dispatcher - @FieldsFormatter}
  */
-function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: Array<keyof T>) {
+function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
     const originalMethod = descriptor.value!;
 
@@ -194,7 +193,7 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: Array<keyof T>)
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#validate | CDS-TS-Dispatcher - @Validate}
  */
 
-function Validate<T>(validator: Validators, ...fields: Array<keyof T>) {
+function Validate<T>(validator: Validators, ...fields: (keyof T)[]) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
     const originalMethod = descriptor.value!;
 
@@ -219,7 +218,7 @@ function Validate<T>(validator: Validators, ...fields: Array<keyof T>) {
  * @see  {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#singleinstanceswitch | CDS-TS-Dispatcher - @SingleInstanceSwitch}
  */
 
-function SingleInstanceCapable<Target extends Object>() {
+function SingleInstanceCapable<Target extends object>() {
   return function (target: Target, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
     const originalMethod = descriptor.value!;
 
@@ -270,7 +269,7 @@ function buildAfter(options: {
   handlerType: HandlerType;
   isDraft: boolean;
 }) {
-  return function <Target extends Object>() {
+  return function <Target extends object>() {
     return function (
       target: Target,
       propertyName: string | symbol,
@@ -311,7 +310,7 @@ function buildBefore(options: {
   handlerType: HandlerType;
   isDraft: boolean;
 }) {
-  return function <Target extends Object>() {
+  return function <Target extends object>() {
     return function (
       target: Target,
       propertyName: string | symbol,
@@ -352,7 +351,7 @@ function buildOnAction(options: {
   handlerType: HandlerType;
   isDraft: boolean;
 }) {
-  return function <Target extends Object>(name: CdsFunction) {
+  return function <Target extends object>(name: CdsFunction) {
     return function (
       target: Target,
       propertyName: string | symbol,
@@ -390,7 +389,7 @@ function buildOnAction(options: {
 }
 
 function buildOnEvent(options: { handlerType: HandlerType; isDraft: boolean }) {
-  return function <Target extends Object>(name: CdsEvent) {
+  return function <Target extends object>(name: CdsEvent) {
     return function (
       target: Target,
       propertyName: string | symbol,
@@ -428,7 +427,7 @@ function buildOnEvent(options: { handlerType: HandlerType; isDraft: boolean }) {
 }
 
 function buildOnError(options: { handlerType: HandlerType; isDraft: boolean }) {
-  return function <Target extends Object>() {
+  return function <Target extends object>() {
     return function (target: Target, propertyName: string | symbol, descriptor: TypedPropertyDescriptor<any>): void {
       const method = descriptor.value!;
 
@@ -460,7 +459,7 @@ function buildOnError(options: { handlerType: HandlerType; isDraft: boolean }) {
   };
 }
 
-function buildOnCRUD<Target extends Object>(options: {
+function buildOnCRUD<Target extends object>(options: {
   event: CRUD_EVENTS | DRAFT_EVENTS;
   handlerType: HandlerType;
   isDraft: boolean;

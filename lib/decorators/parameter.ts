@@ -211,7 +211,7 @@ function IsRole(...roles: string[]): ParameterDecorator {
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#ispresent | CDS-TS-Dispatcher - @IsPresent}
  */
 function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsByKey<Key>): ParameterDecorator {
-  return function (target: Object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
     ArgumentMethodProcessor.createMetadataBy({
       metadataKey: 'IS_PRESENT',
       propertyKey: propertyKey!,
@@ -227,7 +227,7 @@ function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryProps
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#jwt | CDS-TS-Dispatcher - @Jwt}
  */
 function Jwt(): ParameterDecorator {
-  return function (target: Object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
     ArgumentMethodProcessor.createMetadataBy({
       metadataKey: 'JWT',
       propertyKey: propertyKey!,

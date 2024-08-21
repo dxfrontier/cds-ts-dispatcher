@@ -27,8 +27,8 @@ import type {
 } from 'validator';
 
 import type { IsIBANOptions } from 'validator/lib/isIBAN';
-import type { CdsFunction } from './types';
 import type { Options } from 'validator/lib/isBoolean';
+import type { CdsFunction } from './types';
 
 // * ########################################################################################################
 // * START Validator types
