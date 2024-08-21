@@ -1952,18 +1952,38 @@
 							"response": []
 						},
 						{
-							"name": "@Res - TODO",
+							"name": "@Res",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Test to check if the response headers contain a property 'token' which should not be empty",
+											"pm.test(\"Headers contain a property 'res' which should not be empty\", function () {",
+											"    pm.expect(pm.response.headers.has('res')).to.be.true;",
+											"    pm.expect(pm.response.headers.get('res')).to.not.be.empty;",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
+									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"{{catalogService}}",
-										"{{bookSalesEntity}}"
+										"{{booksEntity}}"
 									]
 								}
 							},
@@ -2397,6 +2417,61 @@
 									"path": [
 										"{{catalogService}}",
 										"{{bookSalesEntity}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@Jwt",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Enity set : Title contains \\\"10 % discount!\\\"\", function () {",
+											"    const response = pm.response.json();",
+											"    response.value.forEach((item) => {",
+											"        pm.expect(item.title).to.include(\"10 % discount!\")",
+											"    })",
+											"});",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Test to check if the response headers contain a property 'token' which should not be empty",
+											"pm.test(\"Headers contain a property 'token' which should not be empty\", function () {",
+											"    pm.expect(pm.response.headers.has('token')).to.be.true;",
+											"    pm.expect(pm.response.headers.get('token')).to.not.be.empty;",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "testToken",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{booksEntity}}"
 									]
 								}
 							},
