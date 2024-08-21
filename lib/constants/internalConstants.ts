@@ -1,4 +1,3 @@
-/* eslint-disable no-template-curly-in-string */
 export const constants = {
   DECORATOR: {
     MIDDLEWARE_KEY: 'MIDDLEWARE_KEY',
@@ -33,11 +32,5 @@ export const constants = {
 
   ALL_EVENTS: '*' as const,
 };
-
-/**
- * Use SRV to inject the CDS Service into your class as a dependency.
- * @deprecated use `CDS_DISPATCHER.SRV` instead, this will be removed in the next releases.
- */
-export const SRV = 'srv';
 
 export default constants;

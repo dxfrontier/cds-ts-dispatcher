@@ -12,14 +12,14 @@ import {
   Res,
   Result,
   Service,
-  SRV,
+  CDS_DISPATCHER,
   TypedRequest,
 } from '../../../../../../lib';
 import { Promotion } from '../../../../@cds-models/AdminService';
 
 @EntityHandler(Promotion)
 class PromotionHandler {
-  @Inject(SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
   @PrependDraft({ eventDecorator: 'AfterReadDraftSingleInstance' })
   public async prepend(@Req() req: Request, @Res() res: RequestResponse, @Result() result: Promotion): Promise<void> {

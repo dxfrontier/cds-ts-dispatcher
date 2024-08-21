@@ -10,7 +10,7 @@ import {
   BeforeUpdateDraft,
 } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/core/MetadataDispatcher';
-import { type Constructable } from '@sap/cds/apis/internal/inference';
+import { Constructable } from '../../../lib/types/internalTypes';
 
 class Customer {
   @BeforeReadDraft()

@@ -1,5 +1,3 @@
-import type { Constructable } from '@sap/cds/apis/internal/inference';
-
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, EntityHandler, Use } from '../../lib';
 import { MetadataDispatcher } from '../../lib/core/MetadataDispatcher';
@@ -11,6 +9,7 @@ import { MiddlewareEntity1 } from '../util/middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../util/middleware/MiddlewareEntity2';
 
 import type { CRUD_EVENTS, TypedRequest } from '../../lib/types/types';
+import type { Constructable } from '../../lib/types/internalTypes';
 
 @EntityHandler(Book)
 @Use(MiddlewareEntity1, MiddlewareEntity2)

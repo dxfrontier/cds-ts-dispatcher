@@ -2,8 +2,8 @@
 import { EntityHandler, Request } from '../../../lib/index';
 import { OnBoundActionDraft, OnBoundFunctionDraft } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/core/MetadataDispatcher';
-import { type Constructable } from '@sap/cds/apis/internal/inference';
 import { Book, submitOrder } from '../../bookshop/@cds-models/CatalogService';
+import { Constructable } from '../../../lib/types/internalTypes';
 
 @EntityHandler(Book)
 class BookHandler {

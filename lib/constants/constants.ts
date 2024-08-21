@@ -19,6 +19,24 @@ export const CDS_DISPATCHER = {
    * "@Inject(CDS_DISPATCHER.SRV) private readonly srv: Service"
    */
   SRV: 'srv',
+
+  /**
+   * Often, remote operations should be delayed until the main transaction succeeded.
+   *
+   * Otherwise, the remote operations are also triggered in case of a rollback.
+   *
+   * To enable this, an outbox can be used to defer remote operations until the success of the current transaction.
+   *
+   * Benefits of outboxed service :
+   *
+   * - save events in your database
+   * - replay/resend them in case of an error
+   * - monitor events for errors
+   * - have truly asynchronous events. The transactions in your event handler will no longer be tied to transactions in your event emitter. If event handler fails, it will not have any effect on event emitter.
+   *
+   * @see {@link [Outboxed](https://cap.cloud.sap/docs/node.js/outbox)}
+   */
+  OUTBOXED_SRV: 'outboxed_srv',
 } as const;
 
 export default CDS_DISPATCHER;

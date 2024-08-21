@@ -3,8 +3,7 @@ import { MetadataDispatcher } from '../../core/MetadataDispatcher';
 import util from '../util';
 import middlewareUtil from './middlewareUtil';
 
-import type { ServiceBeforeHandlers } from '../../types/internalTypes';
-import type { Constructable } from '@sap/cds/apis/internal/inference';
+import type { Constructable, ServiceBeforeHandlers } from '../../types/internalTypes';
 import type { Service } from '@sap/cds';
 
 import type { Request } from '../../types/types';
@@ -30,7 +29,7 @@ export class MiddlewareEntityRegistry {
    * @param req The request object.
    * @param startIndex The index from which to start the middleware chain.
    */
-  private readonly executeMiddlewareChain = async (req: Request, startIndex: number = 0): Promise<void> => {
+  private readonly executeMiddlewareChain = async (req: Request, startIndex = 0): Promise<void> => {
     const middlewares = MetadataDispatcher.getMiddlewares(this.entityInstance);
     await middlewareUtil.executeMiddlewareChain(req, startIndex, middlewares, this.entityInstance);
   };
@@ -39,11 +38,11 @@ export class MiddlewareEntityRegistry {
    * Retrieves the active entity or its draft entity.
    * @returns The active entity or its draft entity if available.
    */
-  private getActiveEntityOrDraftEntity(): Constructable | undefined {
+  private getActiveEntityOrDraftEntity(): string | undefined {
     const entity = MetadataDispatcher.getEntity(this.entityInstance);
 
     if (!util.lodash.isUndefined(entity)) {
-      return entity.drafts ? entity.drafts : entity;
+      return entity.drafts ? entity.drafts.name : entity.name;
     }
   }
 
@@ -51,9 +50,12 @@ export class MiddlewareEntityRegistry {
    * Registers the `before` handlers for the entity.
    */
   private registerBeforeHandlers(): void {
-    this.srv.before(constants.ALL_EVENTS, this.getActiveEntityOrDraftEntity()!, async (req: Request) => {
-      await this.executeMiddlewareChain(req);
-    });
+    const entity = this.getActiveEntityOrDraftEntity();
+    if (entity) {
+      this.srv.before(constants.ALL_EVENTS, entity, async (req: Request) => {
+        await this.executeMiddlewareChain(req);
+      });
+    }
   }
 
   /**

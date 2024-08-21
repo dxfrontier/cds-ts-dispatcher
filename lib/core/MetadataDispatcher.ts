@@ -2,9 +2,8 @@ import 'reflect-metadata';
 
 import constants from '../constants/internalConstants';
 
-import type { Constructable } from '@sap/cds/apis/internal/inference';
 import type { MiddlewareImpl } from '../types/types';
-import type { BaseHandler } from '../types/internalTypes';
+import type { BaseHandler, Constructable, Entity } from '../types/internalTypes';
 import type CDS_DISPATCHER from '../constants/constants';
 
 /**
@@ -47,7 +46,7 @@ export class MetadataDispatcher {
    * @param entity - The entity constructor.
    * @returns The entity metadata, or `undefined` if not found.
    */
-  public static getEntity(entity: Constructable): { drafts: any; name: string } | undefined {
+  public static getEntity(entity: Constructable): Entity | undefined {
     return Reflect.getMetadata(constants.DECORATOR.ENTITY_HANDLER_NAME, entity.constructor);
   }
 
@@ -56,7 +55,7 @@ export class MetadataDispatcher {
    * @param entity - The entity constructor.
    * @returns An array of middleware constructors.
    */
-  public static getMiddlewares(entity: Constructable): Array<Constructable<MiddlewareImpl>> {
+  public static getMiddlewares(entity: Constructable): Constructable<MiddlewareImpl>[] {
     return Reflect.getMetadata(constants.DECORATOR.MIDDLEWARE_NAME, entity.constructor);
   }
 
@@ -75,7 +74,7 @@ export class MetadataDispatcher {
    * Sets the middlewares metadata for the target object.
    * @param middlewares - An array of middleware constructors.
    */
-  public setMiddlewares(middlewares: Array<Constructable<MiddlewareImpl>>): void {
+  public setMiddlewares(middlewares: Constructable<MiddlewareImpl>[]): void {
     Reflect.defineMetadata(constants.DECORATOR.MIDDLEWARE_NAME, middlewares, this.target);
   }
 

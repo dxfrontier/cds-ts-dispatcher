@@ -25,6 +25,7 @@ import {
   TypedRequest,
   Use,
   AfterReadEachInstance,
+  Jwt,
 } from '../../../../../../lib';
 import { Book } from '../../../../@cds-models/CatalogService';
 import { MiddlewareMethodAfterRead1 } from '../../../middleware/MiddlewareAfterRead1';
@@ -38,6 +39,7 @@ import BookService from '../../../service/BookService';
 @Use(MiddlewareEntity1, MiddlewareEntity2)
 class BookHandler {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
+  @Inject(CDS_DISPATCHER.OUTBOXED_SRV) private readonly outboxedSrv: Service;
   @Inject(BookService) private readonly bookService: BookService;
 
   @Prepend({ eventDecorator: 'AfterReadSingleInstance' })
@@ -106,8 +108,9 @@ class BookHandler {
     @IsPresent('SELECT', 'columns') hasColumns: boolean,
     @IsRole('Developer', 'AnotherRole') role: boolean,
     @GetRequest('locale') locale: Request['locale'],
+    @Jwt() jwt: string | undefined,
   ): Promise<void> {
-    await this.bookService.manageAfterReadMethods({ req, results, singleInstance });
+    await this.bookService.manageAfterReadMethods({ req, res, results, singleInstance, jwt });
   }
 
   @AfterUpdate()

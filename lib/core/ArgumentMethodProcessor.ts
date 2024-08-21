@@ -65,8 +65,8 @@ export class ArgumentMethodProcessor {
    * Retrieves the assigned decorators, checking if for the current parameter if there's any decorator assigned.
    * @returns An array of decorator keys.
    */
-  private getAttachedDecorators(): Array<keyof typeof constants.DECORATOR.PARAMETER> {
-    const decorators = Object.keys(constants.DECORATOR.PARAMETER) as Array<keyof typeof constants.DECORATOR.PARAMETER>;
+  private getAttachedDecorators(): (keyof typeof constants.DECORATOR.PARAMETER)[] {
+    const decorators = Object.keys(constants.DECORATOR.PARAMETER) as (keyof typeof constants.DECORATOR.PARAMETER)[];
     return decorators.filter((decorator) => this.existsDecorator(decorator));
   }
 
@@ -88,6 +88,7 @@ export class ArgumentMethodProcessor {
     data: unknown;
   }): void {
     const metadata = this.getMetadata(decorator.metadataKey)!;
+
     this.args[metadata[0].parameterIndex] = decorator.data;
   }
 

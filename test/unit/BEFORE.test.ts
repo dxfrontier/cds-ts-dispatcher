@@ -1,4 +1,4 @@
-import type { Constructable } from '@sap/cds/apis/internal/inference';
+import type { Constructable } from '../../lib/types/internalTypes';
 
 import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate } from '../../lib';
 import { MetadataDispatcher } from '../../lib/core/MetadataDispatcher';

@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/consistent-type-imports */
-import { Query } from '@sap/cds';
+import type { Query } from '@sap/cds';
 
-import constants from '../constants/internalConstants';
+import type constants from '../constants/internalConstants';
 import { HandlerType } from './enum';
 
 import type {
@@ -23,6 +22,10 @@ import type {
 // **************************************************************************************************************************
 // Common types
 // **************************************************************************************************************************
+
+export type Entity = { drafts: { name: string }; name: string };
+
+export type Constructable<T = any> = new (...args: any[]) => T;
 
 export type ServiceBeforeHandlers = {
   _handlers: {

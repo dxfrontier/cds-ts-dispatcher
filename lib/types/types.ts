@@ -1,6 +1,8 @@
-import type { ServiceImpl, Request, Service, CdsFunction, column_expr, TypedRequest } from '@sap/cds';
-import type { Constructable } from '@sap/cds/apis/internal/inference';
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { ServerResponse } from 'http';
+import type { Constructable } from './internalTypes';
+import type { ServiceImpl, CdsFunction, column_expr, TypedRequest } from '@sap/cds';
+import { Service, Request } from '@sap/cds';
 
 // **************************************************************************************************************************
 // Common types
@@ -12,28 +14,20 @@ export type RequestType = (...args: any[]) => Promise<any>;
 
 export type ALL_EVENTS = '*';
 export type EACH_INSTANCE = 'each';
-
 export type ERROR_EVENT = 'ERROR';
 export type ON_EVENT = 'EVENT';
 export type ACTION_EVENTS = 'ACTION' | 'BOUND_ACTION';
 export type FUNCTION_EVENTS = 'FUNC' | 'BOUND_FUNC';
 export type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | ALL_EVENTS | EACH_INSTANCE;
 export type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE';
-
 export type EVENTS = CRUD_EVENTS | ACTION_EVENTS | FUNCTION_EVENTS | ERROR_EVENT | ON_EVENT | DRAFT_EVENTS;
 
 export type ValidatorField = string | number | undefined | null | boolean;
-
-// Standard export
 
 /**
  * This object is created internally by an HTTP server, not by the user. Contains various methods and properties related to the `response` object.
  */
 type RequestResponse = ServerResponse;
-
-// **************************************************************************************************************************
-// @Use decorator types
-// **************************************************************************************************************************
 
 // **************************************************************************************************************************
 // @Use decorator types

@@ -23,51 +23,43 @@ export type BookTypes = "BOOK_SIGNING" | "AUTHOR_TALK" | "BOOK_LUNCH"
 
 // the following represents the CDS aspect 'cuid'
 export function _cuidAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends Base {
-        ID?: string;
-      static readonly actions: Record<never, never>
+  return class cuid extends Base {
+        declare ID?: string;
+      declare static readonly actions: Record<never, never>
   };
 }
 export class cuid extends _cuidAspect(__.Entity) {}
 // the following represents the CDS aspect 'managed'
 export function _managedAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends Base {
-        createdAt?: __.CdsTimestamp | null;
+  return class managed extends Base {
+        declare createdAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
-        createdBy?: User | null;
-        modifiedAt?: __.CdsTimestamp | null;
+        declare createdBy?: User | null;
+        declare modifiedAt?: __.CdsTimestamp | null;
     /**
     * Canonical user ID
     */
-        modifiedBy?: User | null;
-      static readonly actions: Record<never, never>
+        declare modifiedBy?: User | null;
+      declare static readonly actions: Record<never, never>
   };
 }
 export class managed extends _managedAspect(__.Entity) {}
 // the following represents the CDS aspect 'temporal'
 export function _temporalAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends Base {
-        validFrom?: __.CdsTimestamp | null;
-        validTo?: __.CdsTimestamp | null;
-      static readonly actions: Record<never, never>
+  return class temporal extends Base {
+        declare validFrom?: __.CdsTimestamp | null;
+        declare validTo?: __.CdsTimestamp | null;
+      declare static readonly actions: Record<never, never>
   };
 }
 export class temporal extends _temporalAspect(__.Entity) {}
-// the following represents the CDS aspect 'extensible'
-export function _extensibleAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends Base {
-        extensions__?: string | null;
-      static readonly actions: Record<never, never>
-  };
-}
-export class extensible extends _extensibleAspect(__.Entity) {}
 export function _HelloRequestAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends Base {
+  return class HelloRequest extends Base {
         greeterName?: string | null;
         toName?: string | null;
-      static readonly actions: Record<never, never>
+      declare static readonly actions: Record<never, never>
   };
 }
 export class HelloRequest extends _HelloRequestAspect(__.Entity) {}
@@ -75,9 +67,9 @@ Object.defineProperty(HelloRequest, 'name', { value: 'HelloRequest' })
 Object.defineProperty(HelloRequest, 'is_singular', { value: true })
 
 export function _HelloResponseAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class extends Base {
+  return class HelloResponse extends Base {
         greetingMessage?: string | null;
-      static readonly actions: Record<never, never>
+      declare static readonly actions: Record<never, never>
   };
 }
 export class HelloResponse extends _HelloResponseAspect(__.Entity) {}

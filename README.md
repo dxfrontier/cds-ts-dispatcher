@@ -15,7 +15,6 @@
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/dxfrontier/cds-ts-dispatcher/main?logo=git)
 ![GitHub issues](https://img.shields.io/github/issues/dxfrontier/cds-ts-dispatcher?logo=git)
 ![GitHub contributors](https://img.shields.io/github/contributors/dxfrontier/cds-ts-dispatcher?logo=git)
-![GitHub top language](https://img.shields.io/github/languages/top/dxfrontier/cds-ts-dispatcher?logo=git)
 ![GitHub Repo stars](https://img.shields.io/github/stars/dxfrontier/cds-ts-dispatcher?style=flat&logo=git)
 
 The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate code required to implement **Typescript handlers** provided by the SAP CAP framework.
@@ -23,16 +22,15 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
-- [`Notice`](#notice)
-  - [`SAP CDS Version 8` (currently in evaluation)](#sap-cds-version-8-currently-in-evaluation)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
   - [`Option 1 :` Install CDS-TS-Dispatcher - `New project`](#option-1--install-cds-ts-dispatcher---new-project)
+    - [`Using:` @sap/cds `v8`](#using-sapcds-v8)
+    - [`Using:` @sap/cds `v7`](#using-sapcds-v7)
+    - [`Migration:` from @sap/cds `v7` to `v8`](#migration-from-sapcds-v7-to-v8)
   - [`Option 2 :` Install CDS-TS-Dispatcher - `Existing project`](#option-2--install-cds-ts-dispatcher---existing-project)
   - [`Option 3 :` Install CDS-TS-Dispatcher - `.devcontainer on VSCode & Docker`](#option-3--install-cds-ts-dispatcher---devcontainer-on-vscode--docker)
   - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
-    - [Option 1 - `Recommended`](#option-1---recommended)
-    - [Option 2](#option-2)
     - [`Important`](#important)
 - [Usage](#usage)
   - [`Architecture`](#architecture)
@@ -47,7 +45,8 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Use](#use)
     - [`Field`](#field)
       - [@Inject](#inject)
-      - [@Inject(CDS\_DISPATCHER.SRV)](#injectcds_dispatchersrv)
+      - [@Inject(`CDS_DISPATCHER.SRV`)](#injectcds_dispatchersrv)
+      - [@Inject(CDS\_DISPATCHER.OUTBOXED\_SRV)](#injectcds_dispatcheroutboxed_srv)
     - [`Parameter`](#parameter)
       - [@Req](#req)
       - [@Res](#res)
@@ -113,16 +112,10 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Use](#use-1)
 - [`Deployment` to BTP using MTA](#deployment-to-btp-using-mta)
 - [`Best practices` \& `tips`](#best-practices--tips)
-- [`Examples`](#examples)
+- [`Samples`](#samples)
 - [Contributing](#contributing)
 - [License](#license)
 - [Authors](#authors)
-
-## `Notice` 
-
-### `SAP CDS Version 8` (currently in evaluation)
-
-Currently we use the `@sap/cds`, `@sap/cds-dk` version `7`, SAP released [version 8](https://cap.cloud.sap/docs/releases/jun24), we currently evaluating to release a new version to support also version 8.
 
 
 ## Prerequisites
@@ -136,6 +129,87 @@ npm install -g @sap/cds-dk typescript ts-node
 ## Installation
 
 ### `Option 1 :` Install CDS-TS-Dispatcher - `New project`
+
+#### `Using:` @sap/cds `v8`
+
+Use the following steps if you want to create a new **SAP CAP project.**
+
+1. Create new folder :
+
+```bash
+mkdir project
+cd project
+```
+
+2. Initialize the CDS folder structure :
+
+```bash
+cds init
+```
+
+3. Add `TypeScript` and [CDS-Typer](#generate-cds-typed-entities) to your npm package.json:
+
+```bash
+cds add typescript
+```
+
+4. Add `CDS-TS-Dispatcher` to your npm package.json :
+
+```bash
+npm install @dxfrontier/cds-ts-dispatcher
+```
+
+5. It is recommended to use the following **tsconfig.json** properties:
+
+```json
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "strictPropertyInitialization": false,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    /* Allow decorators */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* Strictness */
+    "strict": true,
+
+    "lib": ["es2022"],
+
+    "outDir": "./gen/srv"
+  },
+  "include": ["./srv"]
+}
+```
+
+6. Install packages
+
+```bash
+npm install
+```
+
+7. Run the `CDS-TS` server
+
+```bash
+cds-ts w
+```
+
+> [!IMPORTANT]
+> CDS-TS-Dispatcher uses `@sap/cds`, `@sap/cds-dk` [version 8](https://cap.cloud.sap/docs/releases/jun24)
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### `Using:` @sap/cds `v7`
+
 
 Use the following steps if you want to create a new **SAP CAP project.**
 
@@ -162,7 +236,7 @@ npm install
 4. Add the the following NPM packages :
 
 ```bash
-npm install @dxfrontier/cds-ts-dispatcher
+npm install @dxfrontier/cds-ts-dispatcher@2
 npm install --save-dev @types/node
 ```
 
@@ -210,10 +284,84 @@ tsc --init
 cds-ts watch
 ```
 
-> [!CAUTION]
-> Currently we use the `@sap/cds`, `@sap/cds-dk`  **version 7**, SAP released [version 8](https://cap.cloud.sap/docs/releases/jun24), we currently evaluating to release a new version to support also version 8.
+#### `Migration:` from @sap/cds `v7` to `v8`
 
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+Use the following steps if you want to migrate from `@sap/cds@7` to `@sap/cds@8`:
+
+1. Verify you've installed the `cds@v8` globally by running the following command:
+
+
+```bash
+cds -v -i
+``` 
+| packages | version                        |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| @cap-js/asyncapi       | 1.0.1                                                                          |
+| @cap-js/cds-typer      | 0.24.0                                                                         |
+| @cap-js/cds-types      | 0.6.4                                                                          |
+| @cap-js/openapi        | 1.0.4                                                                          |
+| @cap-js/sqlite         | 1.7.3                                                                          |
+| `@sap/cds`               | `8.1.0`                                                                          |
+| @sap/cds-compiler      | 5.1.2                                                                          |
+| `@sap/cds-dk (global)`   | `8.0.2`                                                                          |
+| @sap/cds-fiori         | 1.2.7                                                                          |
+| @sap/cds-foss          | 5.0.1                                                                          |
+| @sap/cds-lsp           | 8.0.0                                                                          |
+| @sap/cds-mtxs          | 1.18.2                                                                         |
+| @sap/eslint-plugin-cds | 3.0.4                                                                          |
+| Node.js                | v22.4.1                                                                        |
+
+> [!TIP] 
+> If you see a smaller version than `@sap/cds-dk (global)` `8.0.2` run the following command : 
+> ```bash
+> npm install -g @sap/cds-dk@latest
+> ```
+
+2. Run the following command inside of your project:
+
+```bash
+cds add typescript
+```
+
+> [!TIP] 
+> Command above will add the following packages:
+> - `@types/node`
+> - `@cap-js/cds-types`
+> - `@cap-js/cds-typer`
+> - `typescript`
+
+
+3. After running command above the `package.json` will look similar to : 
+
+```json
+{
+  "dependencies": {
+    "@dxfrontier/cds-ts-dispatcher": "^3.0.0",
+    "@dxfrontier/cds-ts-repository": "^1.1.3",
+    "@sap/cds": "^8.1.0",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1.7.3",
+    "@cap-js/cds-types": "^0.6.4",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.1.0",
+    "@cap-js/cds-typer": ">=0.24.0"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds-ts w",
+  },
+}
+```
+> [!IMPORTANT] 
+> You might delete the `node_modules` folder and `package-lock.json` in case `npm run watch` fails working.
+> 
+> Re-run the following command : 
+> ```bash
+> npm install
+> ```
+
 
 ### `Option 2 :` Install CDS-TS-Dispatcher - `Existing project`
 
@@ -270,7 +418,7 @@ It is recommended to use the following **tsconfig.json** properties:
 > Run the following command :
 >
 > ```bash
-> npm install @sap/cds@latest
+> npm install -g @sap/cds-dk@latest
 > ```
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
@@ -335,8 +483,6 @@ git push -u origin main
 
 ### `Generate CDS Typed entities`
 
-#### Option 1 - `Recommended`
-
 Execute the following commands :
 
 ```bash
@@ -351,7 +497,7 @@ npm install
 > If above option is being used, this means whenever we change a `.CDS` file the changes will reflect in the generated `@cds-models` folder.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
+<!-- 
 #### Option 2
 
 Execute the command :
@@ -362,11 +508,11 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 
 - Target folder :`./srv/util/types/entities` - Change to your desired destination folder.
 
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p> -->
 
 #### `Important`
 
-> [!CAUTION]
+> [!IMPORTANT]
 > Import always the `generated entities` from the `service` folders and not from the `index.ts`
 
 ![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/common/cds_typer_entities_@cds-models.png?raw=true)
@@ -401,6 +547,10 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 ![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/architecture_folder_structure.png?raw=true) <= expanded folders => ![alt text](https://github.com/dxfrontier/markdown-resources/blob/main/cds-ts-dispatcher/architecture_folder_structure_expanded.png?raw=true)
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+
+> [!TIP]
+> You can have a look over the [CDS-TS-Dispatcher-Samples](https://github.com/dxfrontier/cds-ts-samples) where we use the Controller-Service-Repository pattern and Dispatcher.
 
 ### `CDSDispatcher`
 
@@ -781,11 +931,13 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### @Inject(CDS_DISPATCHER.SRV)
+##### @Inject(`CDS_DISPATCHER.SRV`)
 
 **@Inject**(`CDS_DISPATCHER.SRV`) private srv: `Service`
 
-This specialized `@Inject` can be used as a `constant` in and contains the `CDS.ApplicationService` for further enhancements :
+This specialized `@Inject` can be used as a `constant` in and contains the `CDS.ApplicationService` for further enhancements.
+
+It can be injected in the following :
 
 - [@EntityHandler()](#entityhandler)
 - [@ServiceLogic()](#servicelogic)
@@ -807,7 +959,7 @@ import type { Service } from '@dxfrontier/cds-ts-dispatcher';
 // OR @UnboundActions()
 export class CustomerHandler {
   // @Inject dependencies
-  @Inject(CDS_DISPATCHER.SRV) private srv: Service;
+  @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
   constructor() {}
   // ...
@@ -816,6 +968,52 @@ export class CustomerHandler {
 
 > [!TIP]
 > The CDS.ApplicationService can be accessed trough `this.srv`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Inject(CDS_DISPATCHER.OUTBOXED_SRV)
+
+**@Inject**(`CDS_DISPATCHER.OUTBOXED_SRV`) private srv: `Service`
+
+This specialized `@Inject` can be used as a `constant` and contains the `CDS.outboxed` service.
+
+It can be injected in the following :
+
+- [@EntityHandler()](#entityhandler)
+- [@ServiceLogic()](#servicelogic)
+- [@Repository()](#repository)
+- [@UnboundActions()](#unboundactions)
+
+`Example`
+
+```typescript
+import { EntityHandler, Inject, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+import type { Service } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(MyEntity)
+// OR @ServiceLogic()
+// OR @Repository()
+// OR @UnboundActions()
+export class CustomerHandler {
+  // @Inject dependencies
+  @Inject(CDS_DISPATCHER.OUTBOXED_SRV) private readonly outboxedSrv: Service;
+
+  constructor() {}
+  // ...
+}
+```
+
+> [!TIP]
+> More info about `outboxed` ca be found at [SAP CAP Node.js Outboxed](https://cap.cloud.sap/docs/node.js/outbox)
+
+> [!TIP]
+> The CDS.ApplicationService can be accessed trough `this.outboxedSrv`
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -2902,7 +3100,7 @@ All active entity [On](#on), [Before](#before), [After](#after) events have also
 
 The `@AfterReadSingleInstance` decorator is utilized as a method-level and it can be used when you want to execute custom logic for single instance request.
 
-If you want to execute logic for both cases (single instance and entity set) then you should use the [@AfterRead()](#afterread), and you can apply the parameter [@SingleInstanceSwitch()](#singleinstanceswitch) decorator to switch between entity set and single instance.
+If you want to execute logic for both cases (single instance and entity set) then you should use the [@AfterRead()](#afterread) and applying the [@SingleInstanceSwitch()](#singleinstanceswitch) decorator to switch between entity set and single instance.
 
 `Example`
 
@@ -2920,9 +3118,6 @@ private async afterReadSingleInstance(@Result() result: MyEntity, @Req() req: Ty
   // ...
 }
 ```
-
-> [!IMPORTANT]
-> Decorator [@AfterReadSingleInstance()](#afterreadsingleinstance) will be triggered based on the [EntityHandler](#entityhandler) `argument` `MyEntity`.
 
 > [!CAUTION]
 > If [@AfterReadSingleInstance()](#afterreadsingleinstance) is used all together with [@AfterRead()](#afterread), the event `GET (Read), PATCH (Update)` will trigger both decorators, this applies only when both decorators are used in the same [@EntityHandler()](#entityhandler).
@@ -2951,6 +3146,10 @@ private async afterReadSingleInstance(@Result() result: MyEntity, @Req() req: Ty
 >   // The `GET` will trigger for both cases (single instance & entity instance), but you can use the `singleInstance` flag to verify if it's single or entity set.
 > }
 > ```
+
+
+> [!IMPORTANT]
+> Decorator [@AfterReadSingleInstance()](#afterreadsingleinstance) will be triggered based on the [EntityHandler](#entityhandler) `argument` `MyEntity`.
 
 > [!TIP]
 > If `@odata.draft.enabled: true` and you need to read the draft then you should use `@AfterReadDraftSingleInstance()` decorator.
@@ -3312,30 +3511,30 @@ export class CustomerHandler {
   constructor() {}
 
   @BeforeCreate()
-  @FieldsFormatter<MyEntity>({ action: 'blacklist', charsToRemove: 'le' }, 'format')
+  @FieldsFormatter<MyEntity>({ action: 'blacklist', charsToRemove: 'le' }, 'name')
   private async beforeCreate(@Req() req: TypedRequest<MyEntity>) {
     // ...
   }
 
   @BeforeUpdate()
-  @FieldsFormatter<MyEntity>({ action: 'truncate', options: { length: 7 } }, 'format')
+  @FieldsFormatter<MyEntity>({ action: 'truncate', options: { length: 7 } }, 'comment')
   private async beforeUpdate(@Req() req: TypedRequest<MyEntity>) {
     // ...
   }
 
   @AfterRead()
-  @FieldsFormatter<MyEntity>({ action: 'toUpper' }, 'format')
+  @FieldsFormatter<MyEntity>({ action: 'toUpper' }, 'lastName')
   @FieldsFormatter<MyEntity>(
     {
       action: 'customFormatter',
       callback(req, results) {
         if (results) {
           // make first item 'toLowerCase' and leave the rest 'toUpper'
-          results[0].format = results[0].format?.toLowerCase();
+          results[0].lastName = results[0].lastName?.toLowerCase();
         }
       },
     },
-    'format',
+    'lastName',
   )
   private async afterRead(@Results() results: MyEntity[], @Req() req: TypedRequest<MyEntity>) {
     // ...
@@ -3671,7 +3870,7 @@ private async afterRead(@Results() results: MyEntity[], @Req() req: TypedRequest
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-## `Examples`
+## `Samples`
 
 Find here a collection of samples for the [CDS-TS-Dispatcher-Samples](https://github.com/dxfrontier/cds-ts-samples)
 

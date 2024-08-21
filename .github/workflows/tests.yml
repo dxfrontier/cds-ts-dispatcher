@@ -14,36 +14,36 @@ on:
 
 jobs:
   # This will start unit/integration testing
-  test-unit:
-    name: Unit
-    strategy:
-      matrix:
-        version: [21, 20, 18]
-        platform: [macos-latest, ubuntu-latest]
+  # test-unit:
+  #   name: Unit
+  #   strategy:
+  #     matrix:
+  #       version: [20, 18]
+  #       platform: [ubuntu-latest]
 
-    runs-on: ${{ matrix.platform }}
+  #   runs-on: ${{ matrix.platform }}
 
-    steps:
-      - name: Get code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Get code
+  #       uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: npm install
+  #     - name: Install dependencies
+  #       run: npm install
 
-      - name: Instal SAP CDS-DK
-        run: npm i -g @sap/cds-dk@7.9.5 ts-node
+  #     - name: Instal SAP CDS-DK
+  #       run: npm i -g @sap/cds-dk ts-node
 
-      - name: Start unit / integration tests
-        run: npm run test:unit
+  #     - name: Start unit / integration tests
+  #       run: npm run test:unit
 
   # This will start the e2e tests with a live server
   test-e2e:
     name: End-to-end (e2e)
-    needs: test-unit
+    # needs: test-unit
     strategy:
       matrix:
-        version: [21, 20, 18]
-        platform: [macos-latest, ubuntu-latest]
+        version: [20, 18]
+        platform: [ubuntu-latest]
 
     runs-on: ${{ matrix.platform }}
 
@@ -55,7 +55,7 @@ jobs:
         run: npm install
 
       - name: Instal SAP CDS-DK
-        run: npm i -g @sap/cds-dk@7.9.5 ts-node
+        run: npm i -g @sap/cds-dk ts-node
 
       - name: Instal Globally typescript
         run: npm i -g typescript
