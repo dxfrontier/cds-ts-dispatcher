@@ -69,6 +69,7 @@
   "homepage": "https://github.com/dxfrontier/cds-ts-dispatcher#readme",
   "dependencies": {
     "@sap-cloud-sdk/connectivity": "^3.18.1",
+    "@sap/cds-dk": "^8.1.2",
     "@sap/cds": "^8.1.1",
     "http-status-codes": "^2.3.0",
     "inversify": "^6.0.2",
