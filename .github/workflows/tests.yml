@@ -39,7 +39,7 @@ jobs:
   # This will start the e2e tests with a live server
   test-e2e:
     name: End-to-end (e2e)
-    needs: test-unit
+    # needs: test-unit
     strategy:
       matrix:
         version: [20, 18]
