@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2024-08-21
+
+### 🚀 Features
+
+- *(dispatcher)* Added outboxed srv, changes to CDSDipatcher affected by migration of cds to v8
+
+### 🚜 Refactor
+
+- *(util)* Deprecated SRV in favor of CDS_DISPATCHER.SRV
+- *(types)* Eslint v9 changes
+- *(types)* Created custom Constructable type as sap deleted it in v8
+
+### ⚙️ Miscellaneous Tasks
+
+- *(config)* Migrated to ESLint v9
+- *(config)* Commitlintrc, new type enums
+- *(readme)* Readme updated
+- *(config)* Removed deprecated husky sh
+- *(build)* Dropped node 21 and changed cds-dk to latest
+- *(e2e)* Generated cds-typer new entities
+- *(e2e)* Cleanup testing files
+- *(unit)* Updated unit tests due to migration of v8
+- *(unit)* Cds-format has been used on this file
+- *(e2e)* Fixed a date in a CSV which failed when deployed
+- *(e2e)* Added 2 instead of cents for the minorUnit as deployed it failed
+- *(e2e)* Updated newman tests
+- *(build)* Dropped ubuntu-latest on the matrix of the tests
+- Version bump to 3.0.0
+- *(build)* Dropped unit tests as fails on github actions
+- *(build)* Commented the needs of test-e2e
+
 ## [2.1.4] - 2024-07-18
 
 ### 📚 Documentation
