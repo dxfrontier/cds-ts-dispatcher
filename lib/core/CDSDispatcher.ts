@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-
 import cds from '@sap/cds';
 import util from '../util/util';
 import CDS_DISPATCHER from '../constants/constants';
@@ -9,8 +7,7 @@ import { HandlerType } from '../types/enum';
 import { MiddlewareEntityRegistry } from '../util/middleware/MiddlewareEntityRegistry';
 import { MetadataDispatcher } from './MetadataDispatcher';
 
-import type { NonEmptyArray, BaseHandler } from '../types/internalTypes';
-import type { Constructable } from '@sap/cds/apis/internal/inference';
+import type { NonEmptyArray, BaseHandler, Constructable } from '../types/internalTypes';
 import type { Request, Service, ServiceImpl } from '../types/types';
 
 /**
@@ -98,6 +95,7 @@ class CDSDispatcher {
   private async executeOnCallback(
     handlerAndEntity: [BaseHandler, Constructable],
     req: Request,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     next: Function,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
@@ -140,11 +138,11 @@ class CDSDispatcher {
    * @param entityInstance - The entity instance.
    * @returns The active entity or draft entity, or undefined if not applicable.
    */
-  private getActiveEntityOrDraft(handler: BaseHandler, entityInstance: Constructable): Constructable | undefined {
+  private getActiveEntityOrDraft(handler: BaseHandler, entityInstance: Constructable): string | undefined {
     const entity = MetadataDispatcher.getEntity(entityInstance);
 
     if (!util.lodash.isUndefined(entity)) {
-      return handler.isDraft ? entity.drafts : entity;
+      return handler.isDraft ? entity.drafts.name : entity.name;
     }
   }
 
@@ -313,7 +311,7 @@ class CDSDispatcher {
       }
       case 'BOUND_ACTION':
       case 'BOUND_FUNC': {
-        this.srv.on(actionName!, entity!.name, async (req, next) => {
+        this.srv.on(actionName!, entity!, async (req, next) => {
           return await this.executeOnCallback(handlerAndEntity, req, next);
         });
 
@@ -414,12 +412,22 @@ class CDSDispatcher {
   }
 
   /**
-   * Registers the service as a constant in the container.
+   * Registers a service as a constant in the container.
+   * @param serviceKey - The key under which the service should be bound.
+   * @param serviceValue - The value to bind as a constant.
    */
-  private readonly registerSrvAsConstant = (): void => {
-    if (!this.container.isBound(CDS_DISPATCHER.SRV)) {
-      this.container.bind<Service>(CDS_DISPATCHER.SRV).toConstantValue(this.srv);
+  private registerServiceAsConstant(serviceKey: string, serviceValue: Service): void {
+    if (!this.container.isBound(serviceKey)) {
+      this.container.bind<Service>(serviceKey).toConstantValue(serviceValue);
     }
+  }
+
+  private registerOutboxedAsConstant() {
+    this.registerServiceAsConstant(CDS_DISPATCHER.OUTBOXED_SRV, cds.outboxed(this.srv));
+  }
+
+  private readonly registerSrvAsConstant = (): void => {
+    this.registerServiceAsConstant(CDS_DISPATCHER.SRV, this.srv);
   };
 
   /**
@@ -456,6 +464,7 @@ class CDSDispatcher {
   private buildServiceImplementation() {
     return (srv: Service): void => {
       this.storeService(srv);
+      this.registerOutboxedAsConstant();
       this.registerSrvAsConstant();
       this.registerHandlers();
     };
