@@ -1,0 +1,14 @@
+/.devcontainer.json linguist-generated
+/.gitattributes linguist-generated
+/.github/ISSUE_TEMPLATE/bug_report.yml linguist-generated
+/.github/ISSUE_TEMPLATE/feature_request.yml linguist-generated
+/.github/ISSUE_TEMPLATE/question.yml linguist-generated
+/.gitignore linguist-generated
+/.prettierignore linguist-generated
+/.prettierrc.json linguist-generated
+/.vscode/settings.json linguist-generated
+/.vscode/launch.json linguist-generated
+/package-lock.json linguist-generated
+/package.json linguist-generated
+/tsconfig.json linguist-generated
+lib/docs/*.html linguist-generated
