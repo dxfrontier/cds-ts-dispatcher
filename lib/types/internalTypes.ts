@@ -47,6 +47,8 @@ export type TemporaryArgs = {
 
 export type NonEmptyArray<T> = [T, ...T[]];
 
+export type ParameterDecorators = keyof typeof constants.DECORATOR.PARAMETER;
+
 // **************************************************************************************************************************
 // @AfterRead, @AfterCreate, @BeforeCreate, @BeforeUpdate, @OnRead, etc decorator types
 // **************************************************************************************************************************
