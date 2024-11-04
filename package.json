@@ -110,6 +110,9 @@
   },
   "lint-staged": {
     "**/*.ts": [
+      "npm run eslint:fix",
+      "npm run prettier:fix",
+      "npm run test:unit --bail --findRelatedTests ./test"
     ]
   },
   "imports": {
