@@ -3463,7 +3463,7 @@ class UnboundActionsHandler {
 ```
 
 > [!TIP]
-> If you want to catch the validators use the following decorator [@ValidationResults](#exposevalidationflags)
+> If you want to catch the validators use the following decorator [@ValidationResults](#validationresults)
 > 
 > This approach is useful if you need to conditionally process data based on validation outcomes within the same function.
 > 
