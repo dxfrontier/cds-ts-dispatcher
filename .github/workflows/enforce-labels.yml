@@ -22,10 +22,10 @@ jobs:
         with:
           REQUIRED_LABELS_ANY: 'patch,minor,major,norelease'
           REQUIRED_LABELS_ANY_DESCRIPTION: "Select at least one label ['patch', 'minor', 'major', 'norelease']"
-
+  
   if-label-norelease-stop:
     name: No bump version if label 'norelease'
-    needs: enforce-label-version-release
+    needs: enforce-label-version-release 
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'norelease') }}
     runs-on: ubuntu-latest
     steps:
