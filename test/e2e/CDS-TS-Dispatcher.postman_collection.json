@@ -2476,6 +2476,96 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "@ValidationResults",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"pm.test(\"Response headers contain isAlphanumeric equals to 'true' and isLowercase isNumeric to 'true'\", function () {",
+											"    pm.expect(pm.response.headers.get('isAlphanumeric')).to.equal('true');",
+											"    pm.expect(pm.response.headers.get('isNumeric')).to.equal('true');",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ID\": 4,\n    \"views\": 20,\n    \"averageRating\": 1.2,\n    \"book_ID\": 251\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookStatsEntity}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@Locale",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Test to verify the locale header",
+											"pm.test(\"Response header 'locale' is equal to 'en'\", function () {",
+											"    pm.expect(pm.response.headers.get('locale')).to.equal('en');",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ID\": 5,\n    \"views\": 20,\n    \"averageRating\": 1.2,\n    \"book_ID\": 252\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{bookStatsEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{bookStatsEntity}}"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -2967,7 +3057,7 @@
 														"header": [],
 														"body": {
 															"mode": "raw",
-															"raw": "{\n    \"ID\": 5,\n    \"book_ID\": 201,\n    \"recommended_ID\": 203,\n    \"rating\": 5,\n    \"comment\": \"YEEEEEEE greattt !\"\n}",
+															"raw": "{\n    \"ID\": 6,\n    \"book_ID\": 201,\n    \"recommended_ID\": 203,\n    \"rating\": 5,\n    \"comment\": \"YEEEEEEE greattt !\"\n}",
 															"options": {
 																"raw": {
 																	"language": "json"
@@ -3014,7 +3104,7 @@
 														"header": [],
 														"body": {
 															"mode": "raw",
-															"raw": "{\n    \"ID\": 6,\n    \"book_ID\": 207,\n    \"recommended_ID\": 203,\n    \"rating\": 2\n    // \"comment\": \"BLEAH\"\n}",
+															"raw": "{\n    \"ID\": 7,\n    \"book_ID\": 207,\n    \"recommended_ID\": 203,\n    \"rating\": 2\n    // \"comment\": \"BLEAH\"\n}",
 															"options": {
 																"raw": {
 																	"language": "json"
@@ -3035,7 +3125,7 @@
 													"response": []
 												},
 												{
-													"name": "Validate fields with 'description field in the body for endsWith letter 'N'",
+													"name": "Validate fields with 'comment' field and ''description' in the body request",
 													"event": [
 														{
 															"listen": "test",
@@ -3055,7 +3145,7 @@
 														"header": [],
 														"body": {
 															"mode": "raw",
-															"raw": "{\n    \"ID\": 7,\n    \"book_ID\": 207,\n    \"recommended_ID\": 203,\n    \"rating\": 2,\n    \"comment\": \"bleah\",\n    \"description\": \"This will check if the description endsWith letter 'N' : HAVE A DESCRIPTION\"\n}",
+															"raw": "{\n    \"ID\": 8,\n    \"book_ID\": 207,\n    \"recommended_ID\": 203,\n    \"rating\": 2,\n    \"comment\": \"bleah\",\n    \"description\": \"This will check if the description endsWith letter 'N' : HAVE A DESCRIPTION\"\n}",
 															"options": {
 																"raw": {
 																	"language": "json"
@@ -3152,7 +3242,7 @@
 														"header": [],
 														"body": {
 															"mode": "raw",
-															"raw": "{\n    \"ID\": 8,\n    \"book_ID\": 201,\n    \"recommended_ID\": 203,\n    \"rating\": 5,\n    \"comment\": \"yeeepp greattt !\",\n    \"description\": \"This will check if the description endsWith letter 'N' : HAVE A DESCRIPTION\"\n}",
+															"raw": "{\n    \"ID\": 10,\n    \"book_ID\": 201,\n    \"recommended_ID\": 203,\n    \"rating\": 5,\n    \"comment\": \"yeeepp greattt !\",\n    \"description\": \"This will check if the description endsWith letter 'N' : HAVE A DESCRIPTION\"\n}",
 															"options": {
 																"raw": {
 																	"language": "json"

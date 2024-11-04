@@ -27,20 +27,6 @@ class PublishersHandler {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(BookService) private readonly bookService: BookService;
 
-  @BeforeCreate()
-  @Validate<Publisher>({ action: 'isLowercase', exposeValidatorResult: true }, 'name')
-  @Validate<Publisher>({ action: 'isNumeric', exposeValidatorResult: true }, 'ID')
-  public async beforeCreate(
-    @Req() req: TypedRequest<BookRecommendation>,
-    @Res() res: RequestResponse,
-    @ValidationResults() validator: ValidatorFlags<'endsWith' | 'isNumeric'>,
-    @Locale() locale: string,
-  ) {
-    res.setHeader('endsWith', String(validator.endsWith));
-    res.setHeader('isNumeric', String(validator.isNumeric));
-    res.setHeader('locale', locale);
-  }
-
   @AfterRead()
   private async afterRead(
     @Results() results: Publisher[],
