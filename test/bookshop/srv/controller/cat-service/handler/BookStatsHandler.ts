@@ -4,9 +4,11 @@ import {
   ActionRequest,
   ActionReturn,
   AfterAll,
+  BeforeCreate,
   CDS_DISPATCHER,
   EntityHandler,
   Inject,
+  Locale,
   Next,
   NextEvent,
   OnBoundAction,
@@ -23,8 +25,11 @@ import {
   Service,
   SingleInstanceSwitch,
   TypedRequest,
+  Validate,
+  ValidationResults,
+  ValidatorFlags,
 } from '../../../../../../lib';
-import { BookStat } from '../../../../@cds-models/CatalogService';
+import { BookRecommendation, BookStat, Publisher } from '../../../../@cds-models/CatalogService';
 import AuthorService from '../../../service/AuthorService';
 import BookStatsService from '../../../service/BookStatsService';
 
@@ -33,6 +38,20 @@ class BookStatsHandler {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(BookStatsService) private readonly bookStatsService: BookStatsService;
   @Inject(AuthorService) private readonly authorService: AuthorService;
+
+  @BeforeCreate()
+  @Validate<BookStat>({ action: 'isAlphanumeric', exposeValidatorResult: true }, 'book_ID')
+  @Validate<BookStat>({ action: 'isNumeric', exposeValidatorResult: true }, 'views')
+  public async beforeCreate(
+    @Req() req: TypedRequest<BookStat>,
+    @Res() res: RequestResponse,
+    @ValidationResults() validator: ValidatorFlags<'isAlphanumeric' | 'isNumeric'>,
+    @Locale() locale: string,
+  ) {
+    res.setHeader('isAlphanumeric', String(validator.isAlphanumeric));
+    res.setHeader('isNumeric', String(validator.isNumeric));
+    res.setHeader('locale', locale);
+  }
 
   @OnCreate()
   public async create(@Req() req: TypedRequest<BookStat>, @Next() next: NextEvent) {
