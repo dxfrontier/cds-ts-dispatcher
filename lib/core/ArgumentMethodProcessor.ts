@@ -195,7 +195,18 @@ export class ArgumentMethodProcessor {
             metadataKey,
             data: parameterUtil.isSingleInstance(this.temporaryArgs.req),
           });
+
           break;
+        }
+
+        case 'LOCALE': {
+          this.applySingleDecoratorByKey({
+            metadataKey,
+            data: parameterUtil.retrieveLocale(this.temporaryArgs.req),
+          });
+
+          break;
+        }
 
         /**
          * @IsColumnSupplied, @IsRole, @GetRequest, @GetQuery, @IsPresent, can be present multiple times per callback.

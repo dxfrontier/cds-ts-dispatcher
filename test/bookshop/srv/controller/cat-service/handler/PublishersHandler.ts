@@ -6,6 +6,7 @@ import {
   CDS_DISPATCHER,
   EntityHandler,
   Inject,
+  Locale,
   Req,
   Request,
   Results,
@@ -18,6 +19,13 @@ import BookService from '../../../service/BookService';
 class PublishersHandler {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(BookService) private readonly bookService: BookService;
+
+  @BeforeCreate()
+  public async beforeCreate(
+    @Locale() locale: string,
+  ) {
+    res.setHeader('locale', locale);
+  }
 
   @AfterRead()
   private async afterRead(

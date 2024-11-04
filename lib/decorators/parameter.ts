@@ -237,6 +237,35 @@ function Jwt(): ParameterDecorator {
   };
 }
 
+/**
+ * Parameter decorator used to inject locale information into a method parameter.
+ *
+ * ### Usage
+ * Apply `@Locale` to a method parameter to receive the locale context, for instance:
+ *
+ * @example
+ *
+ * ```typescript
+ * public async someMethod(
+ *   /@Req() req: TypedRequest<MyEntity>,
+ *   /@Locale() locale: string
+ * ) {
+ *   if (locale === 'en-US') {
+ *     // handle logic specific to the 'en-US' locale
+ *   }
+ * }
+ * ```
+ */
+function Locale(): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'LOCALE',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'INDEX_DECORATOR', parameterIndex },
+    });
+  };
+}
 export {
   SingleInstanceSwitch,
   Error,
@@ -251,4 +280,5 @@ export {
   IsRole,
   IsPresent,
   Jwt,
+  Locale,
 };

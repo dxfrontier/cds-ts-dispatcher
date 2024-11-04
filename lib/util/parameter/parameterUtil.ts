@@ -282,6 +282,14 @@ const parameterUtil = {
 
     return temporaryArgs;
   },
+
+  /**
+   * Retrieves the locale language of the current req
+   * @param req The request object.
+   * @returns The locale language.
+   */
+  retrieveLocale(req: Request): string {
+    return req.locale;
 };
 
 export default parameterUtil;

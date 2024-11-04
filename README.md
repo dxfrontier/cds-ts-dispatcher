@@ -60,6 +60,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@GetQuery](#getquery)
       - [@GetRequest](#getrequest)
       - [@SingleInstanceSwitch](#singleinstanceswitch)
+      - [@Locale](#locale)
     - [`Method`-`active entity`](#method-active-entity)
       - [`Before`](#before)
         - [@BeforeCreate](#beforecreate)
@@ -1660,6 +1661,30 @@ private async singeInstanceMethodAndEntitySet(@Results() results : MyEntity[], @
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+
+
+##### @Locale
+
+**@Locale**
+
+Parameter decorator used to inject locale information into a method parameter.
+
+
+`Example`
+
+```ts
+@BeforeCreate()
+public async beforeCreate(
+  @Req() req: TypedRequest<MyEntity>,
+  @Locale() locale: stromg
+) {
+  if (locale === 'en-US') {
+    // handle logic specific to the 'en-US' locale
+  }
+}
+```
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 #### `Method`-`active entity`
