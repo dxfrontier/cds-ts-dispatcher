@@ -5,10 +5,6 @@ name: Test
 on:
   pull_request:
     types: [opened, edited, synchronize]
-    paths-ignore:
-      - '../../README.md'
-      - '../ISSUE_TEMPLATE'
-      - '../workflows'
 
   workflow_dispatch:
 
