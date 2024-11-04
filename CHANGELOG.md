@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.1] - 2024-11-04
+
+### 🚀 Features
+
+- *(locale)* New `@Locale` decorator to get the locale in the parameter method
+- *(validator)* `@Validate` now can behave like an `if-else` by catching the flags in the method
+
+### 🐛 Bug Fixes
+
+- *(gitattributes)* Fix gittattributes
+- *(package)* Reverted back the deleted lint-staged
+- *(readme)* Fixed readme anchors
+
+### ⚙️ Miscellaneous Tasks
+
+- *(gitattributes)* Added gitattribute to remove the lib/docs from the stats of githubc
+- *(commitlint)* Removed mandatory scopes
+- *(gitattributes)* Refactored to remove from that github stats html files
+- Version bump to 3.1.0
+- *(actions)* Refactored github actions to split the bump and release and deployment
+- Version bump to 3.1.1
+
 ## [3.0.0] - 2024-08-21
 
 ### 🚀 Features
