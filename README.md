@@ -29,7 +29,6 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
     - [`Using:` @sap/cds `v7`](#using-sapcds-v7)
     - [`Migration:` from @sap/cds `v7` to `v8`](#migration-from-sapcds-v7-to-v8)
   - [`Option 2 :` Install CDS-TS-Dispatcher - `Existing project`](#option-2--install-cds-ts-dispatcher---existing-project)
-  - [`Option 3 :` Install CDS-TS-Dispatcher - `.devcontainer on VSCode & Docker`](#option-3--install-cds-ts-dispatcher---devcontainer-on-vscode--docker)
   - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
     - [`Important`](#important)
 - [Usage](#usage)
@@ -60,6 +59,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@GetQuery](#getquery)
       - [@GetRequest](#getrequest)
       - [@SingleInstanceSwitch](#singleinstanceswitch)
+      - [@ValidationResults](#validationresults)
       - [@Locale](#locale)
     - [`Method`-`active entity`](#method-active-entity)
       - [`Before`](#before)
@@ -421,64 +421,6 @@ It is recommended to use the following **tsconfig.json** properties:
 > ```bash
 > npm install -g @sap/cds-dk@latest
 > ```
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-### `Option 3 :` Install CDS-TS-Dispatcher - `.devcontainer on VSCode & Docker`
-
-The `CDS-TS-Dispatcher dev container` repository contains the [CDS-TS-Dispatcher](https://github.com/dxfrontier/cds-ts-dispatcher) & [CDS-TS-Repository](https://github.com/dxfrontier/cds-ts-repository) and `all dependencies` needed to boot a new project :
-
-`Tools` installed inside of the container :
-
-- `Controller` - `Service` - `Repository` project structure folders :
-  - `controller`
-  - `service`
-  - `repository`
-  - `middleware`
-  - `util`
-  - `test`
-- `ESLint`, `Prettier`
-- `VSCode Extensions` best extensions for SAP CAP TypeScript development
-- `Cloud MTA Build tool` for building `MTA file`
-- `Cloud Foundry CLI (CF)`
-- `Git`, `Cds`, `Npm`, `Node`
-- `CDS-Typer` for building typescript entities out of `CDS files`
-- `tsconfig.json, .eslintrc, .prettierrc` - predefined properties
-- `package.json` - predefined `scripts`
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-`Steps`
-
-1. Install [**Docker desktop**](https://www.docker.com/products/docker-desktop/)
-2. Clone [CDS-TS-Dispatcher devcontainer](https://github.com/dxfrontier/cds-ts-dispatcher-dev-container.git) using below command :
-
-```bash
-git clone https://github.com/dxfrontier/cds-ts-dispatcher-dev-container
-```
-
-3. Open project in `VSCode` using:
-
-```bash
-code cds-ts-dispatcher-dev-container
-```
-
-4. Change GIT remote origin to your origin
-
-```bash
-git remote remove origin
-git remote add origin https://github.com/user/YOUR_GIT_REPOSITORY.git
-git branch -M main
-git push -u origin main
-```
-
-6. Install [Remote development pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) VScode extension
-
-7. COMMAND + SHIFT + P on `MacOS` or CTRL + SHIFT + P on `Windows`
-
-   1. Type - `Rebuild and Reopen in Container` - This step will start creating the container project and start the Node server.
-
-8. Start development as usual.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -1255,7 +1197,7 @@ export class BookHandler {
   // ... all events like @AfterRead, @BeforeRead ...
 
   @AfterRead()
-  private async aMethod(@Req() req: Request, @Results() results: MyEntity[], @Jwt(): string | undefined) {
+  private async aMethod(@Req() req: Request, @Results() results: MyEntity[], @Jwt() jwt: string | undefined) {
     // ... req...
   }
 }
@@ -1663,6 +1605,47 @@ private async singeInstanceMethodAndEntitySet(@Results() results : MyEntity[], @
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+##### @ValidationResults
+
+**@ValidationResults**
+
+The `@ValidationResults` decorator is designed to capture and inject validation results directly into a method parameter, allowing access to individual validation flags within the decorated method. 
+
+When used alongside the [@Validate](#validate) decorator, it enables you to perform conditional logic based on specific validation outcomes.
+
+
+`Example`
+
+```ts
+@BeforeCreate()
+@Validate<MyEntity>({ action: 'isLowercase', exposeValidatorResult: true }, 'comment')
+@Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
+public async beforeCreate(
+  @Req() req: TypedRequest<MyEntity>,
+  @ValidationResults() validator: ValidatorFlags<'isLowercase' | 'endsWith'>
+) {
+    // Conditional handling based on validation flags
+    if (validator.isLowercase) {
+      // Execute logic when field `comment` is lowercase 
+    }
+    else {
+      // Execute logic when field `comment` is not lowercase
+    }
+
+    if (validator.endsWith) {
+      // Execute logic when field `description` is endsWith with letter 'N'
+    }
+    else {
+      // Execute logic when field `description` doesn't endsWith with letter 'N'
+    }
+}
+```
+
+> [!IMPORTANT] 
+> For `@ValidationResults` to work, each [@Validate](#validate) decorator must set the `exposeValidatorResult` option to `true`. This ensures that the validation results are available as flags in the method.
+
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 
 ##### @Locale
@@ -3129,7 +3112,7 @@ If you want to execute logic for both cases (single instance and entity set) the
 
 `Example`
 
-Single request : http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
+Single request : `http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
 
 ```typescript
 import { AfterReadSingleInstance, Result, Req } from "@dxfrontier/cds-ts-dispatcher";
@@ -3161,7 +3144,7 @@ private async afterReadSingleInstance(@Result() result: MyEntity, @Req() req: Ty
 >   // The `GET` will trigger the single instance request
 > }
 >
-> // or this
+> // or this as alternative to above `@AfterReadSingleInstance`
 > @AfterRead()
 > private async afterRead(
 >   @Req() req: Request,
@@ -3169,6 +3152,9 @@ private async afterReadSingleInstance(@Result() result: MyEntity, @Req() req: Ty
 >   @SingleInstanceSwitch() singleInstance: boolean
 > ): Promise<void> {
 >   // The `GET` will trigger for both cases (single instance & entity instance), but you can use the `singleInstance` flag to verify if it's single or entity set.
+>   if(singleInstance) {
+>  
+>   }
 > }
 > ```
 
@@ -3264,7 +3250,7 @@ The `@Validate` decorator is utilized as a `method-level` decorator, used to val
 > [!TIP]
 > Think of it as a `pre-validation` helper.
 
-The `@Validate` decorator can be used when you want to `validate` the `Request`.`data` _(Request Body)_ of the `@sap/cds - Request` object on the following decorators :
+The `@Validate` decorator is useful when you need to `validate` the `Request`.`data` _(Request Body)_ of the `@sap/cds - Request` object in the following contexts:
 
 - `ON`
   - [@OnCreate()](#oncreate)
@@ -3279,15 +3265,52 @@ The `@Validate` decorator can be used when you want to `validate` the `Request`.
 
 `Parameters`
 
-- `action`: Choose from a list of predefined `Validators`.
-- `options?`: _[Optional]_ Additional options for customizing the validation process.
-- `...fields`: Specify the fields of your entity that require validation.
+- <span style="color:#32CD32">**action**</span>: Choose from a list of predefined <span style="color:#32CD32"> **Validators** </span>.
+- <span style="color:#FF8C00">**options**?</span>: _[Optional]_ Additional options for customizing the validation process.
+
+  The `options` parameter accepts the following settings to customize validation behavior:
+
+  - **`exposeValidatorResult`** (boolean):  
+    Determines if the validator results are captured and passed to the method as parameters.
+    
+    - If `true`, the validator results (e.g., `ValidatorFlags<'isBoolean' | 'equals'>`) will be available as a parameter in the method.
+    - To use this, apply the `@ValidationResults` decorator to the method parameter where you want the validator flags injected.
+
+    **Default:** `false`
+
+    **Example:**
+    ```typescript
+    @Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
+    public async beforeCreate(
+      @Req() req: TypedRequest<MyEntity>,
+      @ValidationResults() validator: ValidatorFlags<'isBoolean' | 'equals'>,
+    ) {
+      if (validator.isBoolean) {
+        // logic based on validation result
+      }
+    }
+    ```
+    
+  - **`customMessage`** (string):  
+    Custom message to replace the default validation error message.
+
+    - If provided, this message will be shown instead of the default error.
+
+  - **`mandatoryFieldValidation`** (boolean):  
+    Controls whether the validator requires the presence of the fields in `Request.data`.
+
+    - If `true`, the specified fields must be present in `Request.data`, or validation will fail.
+    - If `false` (or omitted), validation will pass even if the field is missing.
+
+    **Default:** `false`
+
+- <span style="color:#32CD32">**...fields**</span>: Specify the fields of your entity that require validation.
 
 `Returns`
 
 The decorator will raise a `Request.reject` message if the validation requirements are not met.
 
-`Validators`
+<span style="color:#32CD32"> **Validators** </span>
 
 Below is a list of available validators:
 
@@ -3438,6 +3461,30 @@ class UnboundActionsHandler {
   }
 }
 ```
+
+> [!TIP]
+> If you want to catch the validators use the following decorator [@ValidationResults](#exposevalidationflags)
+> 
+> This approach is useful if you need to conditionally process data based on validation outcomes within the same function.
+> 
+> **Example Use Case**: Suppose you want to validate multiple fields but only perform certain actions when specific validations pass. By using `@ValidationResults`, you `gain access` to a detailed `validator object` containing the `results` for each validation, allowing for flexible and targeted logic.
+
+> ```ts
+>  @Validate<MyEntity>({ action: 'isLowercase', exposeValidatorResult: true }, 'comment')
+>  @Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
+>public async beforeCreate(
+>  @Req() req: TypedRequest<MyEntity>,
+>  @ValidationResults() validator: ValidatorFlags<'isLowercase' | 'endsWith'>) {
+>  // Conditional handling based on validation flags
+>  if (validator.isLowercase) {
+>    // Execute logic when the "isLowercase" validation succeeds
+>  }
+>
+>  if (validator.endsWith) {
+>    // Separate handling for "endsWith" validation result
+>  }
+>}
+> ```
 
 > [!IMPORTANT]
 > To get the fields for

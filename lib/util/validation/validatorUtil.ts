@@ -67,138 +67,114 @@ const validatorUtil = {
    * @param validator The validator object.
    * @param field The field to validate.
    */
-  applyValidator(req: Request, validator: Validators, field: string): void {
+  applyValidator(req: Request, validator: Validators, field: string): Record<Validators['action'], boolean> | void {
     const value = req.data[field];
-
     const input = String(value);
-    const customMessage: string | null = validator.customMessage ?? null;
+    const foundValidators: Record<Validators['action'], boolean> = Object.create({});
 
-    let isValid = false;
+    // Self invoking func
+    const isValid = (() => {
+      switch (validator.action) {
+        case 'startsWith':
+        case 'endsWith':
+          return util.lodash[validator.action](input, validator.target, validator.position);
 
-    switch (validator.action) {
-      // START 'Lodash' formatters
+        case 'isBoolean':
+        case 'isDecimal':
+        case 'isFloat':
+        case 'isInt':
+        case 'isMailtoURI':
+        case 'isNumeric':
+        case 'isTime':
+        case 'isDate':
+        case 'isEmail':
+        case 'isCurrency':
+        case 'isIBAN':
+        case 'isIMEI':
+        case 'isURL':
+        case 'isUUID':
+        case 'isCreditCard':
+        case 'isLength':
+          return validatorActions[validator.action](input, validator.options as any);
 
-      case 'startsWith':
-      case 'endsWith': {
-        isValid = util.lodash[validator.action](input, validator.target, validator.position);
-        break;
+        case 'isAlpha':
+        case 'isAlphanumeric':
+        case 'isMobilePhone':
+          return validatorActions[validator.action](input, validator.locale as any, validator.options);
+
+        case 'isBIC':
+        case 'isEAN':
+        case 'isHexadecimal':
+        case 'isLatLong':
+        case 'isMD5':
+        case 'isMimeType':
+        case 'isPort':
+        case 'isSlug':
+        case 'isLowercase':
+        case 'isUppercase':
+        case 'isDataURI':
+        case 'isJSON':
+        case 'isJWT':
+          return validatorActions[validator.action](input);
+
+        case 'isIP':
+        case 'isISBN':
+          return validatorActions[validator.action](input, validator.version as any);
+
+        case 'isEmpty':
+          // isEmpty returns false when it's empty and true when not empty
+          return !validatorActions[validator.action](input);
+
+        case 'isPassportNumber':
+        case 'isVAT':
+          return validatorActions[validator.action](input, validator.countryCode as any);
+
+        case 'isIdentityCard':
+        case 'isPostalCode':
+          return validatorActions[validator.action](input, validator.locale as any);
+
+        case 'isIn':
+          return validatorActions[validator.action](input, validator.values);
+
+        case 'isWhitelisted':
+          return validatorActions[validator.action](input, validator.chars);
+
+        case 'equals':
+          return validatorActions[validator.action](input, validator.comparison);
+
+        case 'contains':
+          return validatorActions[validator.action](input, validator.seed, validator.options);
+
+        case 'matches':
+          return validatorActions[validator.action](input, validator.pattern);
+
+        case 'isHash':
+          return validatorActions[validator.action](input, validator.algorithm);
+
+        case 'isBefore':
+        case 'isAfter':
+          return validatorActions[validator.action](input, validator.date);
+
+        default:
+          return false;
       }
+    })();
 
-      // END 'Lodash'
-
-      // -------------------------------------------------------------------------
-
-      // START 'Validator' formatters
-
-      case 'isBoolean':
-      case 'isDecimal':
-      case 'isFloat':
-      case 'isInt':
-      case 'isMailtoURI':
-      case 'isNumeric':
-      case 'isTime':
-      case 'isDate':
-      case 'isEmail':
-      case 'isCurrency':
-      case 'isIBAN':
-      case 'isIMEI':
-      case 'isURL':
-      case 'isUUID':
-      case 'isCreditCard':
-      case 'isLength': {
-        isValid = validatorActions[validator.action](input, validator.options as any);
-        break;
-      }
-
-      case 'isAlpha':
-      case 'isAlphanumeric':
-      case 'isMobilePhone': {
-        isValid = validatorActions[validator.action](input, validator.locale as any, validator.options);
-        break;
-      }
-
-      case 'isBIC':
-      case 'isEAN':
-      case 'isHexadecimal':
-      case 'isLatLong':
-      case 'isMD5':
-      case 'isMimeType':
-      case 'isPort':
-      case 'isSlug':
-      case 'isLowercase':
-      case 'isUppercase':
-      case 'isDataURI':
-      case 'isJSON':
-      case 'isJWT': {
-        isValid = validatorActions[validator.action](input);
-        break;
-      }
-
-      case 'isIP':
-      case 'isISBN': {
-        isValid = validatorActions[validator.action](input, validator.version as any);
-        break;
-      }
-
-      case 'isEmpty': {
-        // isEmpty returns 'false' when it's empty and 'true' when is not empty.
-        isValid = !validatorActions[validator.action](input);
-        break;
-      }
-
-      case 'isPassportNumber':
-      case 'isVAT': {
-        isValid = validatorActions[validator.action](input, validator.countryCode as any);
-        break;
-      }
-
-      case 'isIdentityCard':
-      case 'isPostalCode': {
-        isValid = validatorActions[validator.action](input, validator.locale as any);
-        break;
-      }
-
-      case 'isIn': {
-        isValid = validatorActions[validator.action](input, validator.values);
-        break;
-      }
-
-      case 'isWhitelisted': {
-        isValid = validatorActions[validator.action](input, validator.chars);
-        break;
-      }
-
-      case 'equals': {
-        isValid = validatorActions[validator.action](input, validator.comparison);
-        break;
-      }
-
-      case 'contains': {
-        isValid = validatorActions[validator.action](input, validator.seed, validator.options);
-        break;
-      }
-
-      case 'matches': {
-        isValid = validatorActions[validator.action](input, validator.pattern);
-        break;
-      }
-
-      case 'isHash': {
-        isValid = validatorActions[validator.action](input, validator.algorithm);
-        break;
-      }
-
-      case 'isBefore':
-      case 'isAfter': {
-        isValid = validatorActions[validator.action](input, validator.date);
-        break;
-      }
-
-      // END 'Validator'
+    if (validator.exposeValidatorResult) {
+      foundValidators[validator.action] = isValid;
+      return foundValidators;
     }
 
+    // Handle validation failure cases
     if (!isValid) {
-      this.showNotValidMessage({ field, input, req, validator: validator.action, message: customMessage });
+      const message = validator.exposeValidatorResult === false ? (validator.customMessage ?? null) : '';
+      this.showNotValidMessage({
+        field,
+        input,
+        req,
+        validator: validator.action,
+        message,
+      });
     }
   },
 };

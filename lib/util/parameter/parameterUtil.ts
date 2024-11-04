@@ -254,6 +254,8 @@ const parameterUtil = {
     const temporaryArgs: TemporaryArgs = Object.create({});
 
     args.forEach((arg) => {
+      if (arg === undefined) return;
+
       switch (true) {
         case arg instanceof RequestClass:
           temporaryArgs.req = arg;
@@ -275,8 +277,12 @@ const parameterUtil = {
           temporaryArgs.results = arg;
           break;
 
-        default:
-          util.throwErrorMessage('Option not handled for extractArgument method!');
+        default: {
+          const allOthersExceptString = typeof arg !== 'string';
+          if (allOthersExceptString) {
+            util.throwErrorMessage(`Option ${arg} is not handled for extractArgument method!`);
+          }
+        }
       }
     });
 
@@ -290,6 +296,7 @@ const parameterUtil = {
    */
   retrieveLocale(req: Request): string {
     return req.locale;
+  },
 };
 
 export default parameterUtil;

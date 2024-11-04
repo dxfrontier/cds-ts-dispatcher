@@ -194,17 +194,26 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
  */
 
 function Validate<T>(validator: Validators, ...fields: (keyof T)[]) {
-  return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+  return function <Target extends object>(
+    target: Target,
+    propertyKey: string | symbol,
+    descriptor: TypedPropertyDescriptor<RequestType>,
+  ) {
     const originalMethod = descriptor.value!;
 
     descriptor.value = async function (...args: any[]) {
       const req = util.findRequest(args);
+      const argumentProcessor = new ArgumentMethodProcessor(target, propertyKey, args);
 
       for (const field of fields) {
         const options: [Request, Validators, string] = [req, validator, field as string];
 
         if (validatorUtil.canValidate(...options)) {
-          validatorUtil.applyValidator(...options);
+          const validators = validatorUtil.applyValidator(...options);
+
+          if (validators) {
+            argumentProcessor.setValidatorFlags(validators);
+          }
         }
       }
 

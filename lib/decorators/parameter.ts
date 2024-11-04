@@ -238,6 +238,43 @@ function Jwt(): ParameterDecorator {
 }
 
 /**
+ * Parameter decorator used to inject validation flags into a method parameter.
+ *
+ * The `@ValidationResults` decorator captures validation results from
+ * the `@Validate` decorator and makes them accessible as a parameter in the
+ * decorated method. This allows conditional logic based on validation outcomes.
+ *
+ * ### Usage
+ * Apply `@ValidationResults` to a method parameter to receive validation flags,
+ * for instance:
+ *
+ * @example
+ *
+ * ```typescript
+ * /@Validate<MyEntity>({ action: 'isLowercase', exposeValidatorResult: true }, 'comment')
+ * /@Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
+ * public async beforeCreate(
+ *   /@Req() req: TypedRequest<MyEntity>,
+ *   /@ValidationResults() validator: ValidatorFlags<'isLowercase' | 'endsWith'>
+ * ) {
+ *   if (validator.isLowercase) {
+ *     // handle logic based on validation result
+ *   }
+ * }
+ * ```
+ */
+function ValidationResults(): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'VALIDATORS',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'INDEX_DECORATOR', parameterIndex },
+    });
+  };
+}
+
+/**
  * Parameter decorator used to inject locale information into a method parameter.
  *
  * ### Usage
@@ -266,6 +303,7 @@ function Locale(): ParameterDecorator {
     });
   };
 }
+
 export {
   SingleInstanceSwitch,
   Error,
@@ -280,5 +318,6 @@ export {
   IsRole,
   IsPresent,
   Jwt,
+  ValidationResults,
   Locale,
 };

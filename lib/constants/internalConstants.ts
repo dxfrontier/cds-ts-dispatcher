@@ -18,6 +18,7 @@ export const constants = {
       NEXT: Symbol('NEXT'),
       ERROR: Symbol('ERROR'),
       JWT: Symbol('JWT'),
+      VALIDATORS: Symbol('VALIDATORS'),
       LOCALE: Symbol('LOCALE'),
     },
   },

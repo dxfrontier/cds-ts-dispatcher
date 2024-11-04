@@ -583,28 +583,111 @@ export type EndsWith = {
   position?: number;
 };
 
+export type LodashValidators = StartsWith | EndsWith;
+
 // * ########################################################################################################
 // * END Lodash types
 // * ########################################################################################################
 
 export type ExposeFields<T extends CdsFunction> = { data: T['__parameters'] }['data'];
 
-export type ValidatorBase = {
+type ValidatorBase = {
   /**
-   * 'customMessage' will replace the standard message of the validator.
-   */
-  customMessage?: string;
-
-  /**
-   * If `mandatoryFieldValidation : true` this will mandatory check the `Request.data` object for the field which needs to be validated.
-   * if `mandatoryFieldValidation : false` or omitted, this will let the `Request.data` not to have the field in the `body` and the validation will just be omitted.
-   * `Default` is set to `false`
+   * Controls whether the validator requires the presence of the fields in `Request.data`.
+   *
+   * - If set to `true`, the fields are required in `Request.data`, and validation will fail if it is absent.
+   * - If set to `false` (or omitted), validation will pass even if the field is missing in `Request.data`.
+   *
+   * @default false
    */
   mandatoryFieldValidation?: boolean;
 };
 
-export type LodashValidators = ValidatorBase & (StartsWith | EndsWith);
+/**
+ * This type must have 'customMessage' when 'exposeValidatorResult' is false
+ */
+type ValidatorBaseWithMessage = {
+  /**
+   * Determines if the validator results are captured and passed to the method as parameters.
+   *
+   * - If set to `true`, the validator results (e.g., `ValidatorFlags<'isBoolean' | 'equals'>`) will be caught
+   *   and made available as a parameter in the method where validation is applied.
+   * - If set to `false` (or omitted), the method will not receive these validator results as parameters.
+   *
+   * This option is useful when a method requires access to the validation outcomes to conditionally
+   * handle logic based on validator flags.
+   *
+   * **Note:** To access these results, apply the `@ValidationResults` decorator to the method `parameter` where
+   * the validator flags should be injected.
+   *
+   * Example usage:
+   * ```typescript
+   * /@Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
+   * public async beforeCreate(
+   *   /@Req() req: TypedRequest<BookRecommendation>,
+   *   /@ValidationResults() validator: ValidatorFlags<'isBoolean' | 'equals'>,
+   * ) {
+   *   // validator will contain the results of 'isBoolean' and 'equals' validations
+   *   if (validator.isBoolean) {
+   *     // handle logic based on the validation result
+   *   }
+   * }
+   * ```
+   *
+   * @default false
+   */
+  exposeValidatorResult?: false;
+
+  /**
+   * Custom message to replace the standard validation error message.
+   * If provided, this message will be displayed instead of the default.
+   */
+  customMessage?: string;
+};
+
+/**
+ * This type must NOT have 'customMessage' when 'exposeValidatorResult' is true
+ */
+type ValidatorBaseWithoutMessage = {
+  /**
+   * Determines if the validator results are captured and passed to the method as parameters.
+   *
+   * - If set to `true`, the validator results (e.g., `ValidatorFlags<'isBoolean' | 'equals'>`) will be caught
+   *   and made available as a parameter in the method where validation is applied.
+   * - If set to `false` (or omitted), the method will not receive these validator results as parameters.
+   *
+   * This option is useful when a method requires access to the validation outcomes to conditionally
+   * handle logic based on validator flags.
+   *
+   * **Note:** To access these results, apply the `@ValidationResults` decorator to the method `parameter` where
+   * the validator flags should be injected.
+   *
+   * Example usage:
+   * ```typescript
+   * /@Validate<BookRecommendation>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
+   * /@Validate<BookRecommendation>({ action: 'isLowercase', exposeValidatorResult: true }, 'comment')
+   * public async beforeCreate(
+   *   /@Req() req: TypedRequest<BookRecommendation>,
+   *   /@ValidationResults() validator: ValidatorFlags<'endsWith' | 'isLowercase'>,
+   * ) {
+   *   // validator will contain the results of 'endsWith' and 'isLowercase' validations
+   *   if (validator.endsWith) {
+   *     // handle logic based on the validation result
+   *   }
+   *   //...
+   * }
+   * ```
+   *
+   * @default false
+   */
+  exposeValidatorResult?: true;
+};
+
+export type ValidatorFlags<T extends Validators['action']> = Record<T, boolean>;
+
+// Concatenation of all properties
 export type Validators = ValidatorBase &
+  (ValidatorBaseWithMessage | ValidatorBaseWithoutMessage) &
   (
     | LodashValidators
     | ValidatorsWithOptions
@@ -614,5 +697,3 @@ export type Validators = ValidatorBase &
     | ValidatorsWithCountryCode
     | ValidatorsWithMultipleOptions
   );
-
-export type OnlyEntityStrings<T> = Extract<keyof T, string>;

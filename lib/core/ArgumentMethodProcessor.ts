@@ -5,7 +5,8 @@ import constants from '../constants/internalConstants';
 import parameterUtil from '../util/parameter/parameterUtil';
 import util from '../util/util';
 
-import type { MetadataFields, MetadataInputs, TemporaryArgs } from '../types/internalTypes';
+import type { MetadataFields, MetadataInputs, ParameterDecorators, TemporaryArgs } from '../types/internalTypes';
+import { Validators } from '../types/validator';
 
 /**
  * The `ArgumentMethodProcessor` class is responsible for processing method arguments, including reordering arguments by type and applying decorators.
@@ -44,7 +45,7 @@ export class ArgumentMethodProcessor {
    * @param metadataKey - The metadata key.
    * @returns The metadata fields or undefined.
    */
-  private getMetadata(metadataKey: keyof typeof constants.DECORATOR.PARAMETER): MetadataFields[] | undefined {
+  private getMetadata(metadataKey: ParameterDecorators): MetadataFields[] | undefined {
     return Reflect.getOwnMetadata(constants.DECORATOR.PARAMETER[metadataKey], this.target, this.propertyName);
   }
 
@@ -53,7 +54,7 @@ export class ArgumentMethodProcessor {
    * @param metadataKey - The metadata key.
    * @returns True if the decorator exists, otherwise undefined.
    */
-  private existsDecorator(metadataKey: keyof typeof constants.DECORATOR.PARAMETER): boolean | undefined {
+  private existsDecorator(metadataKey: ParameterDecorators): boolean | undefined {
     const metadata = this.getMetadata(metadataKey);
 
     if (!util.lodash.isUndefined(metadata)) {
@@ -63,11 +64,17 @@ export class ArgumentMethodProcessor {
 
   /**
    * Retrieves the assigned decorators, checking if for the current parameter if there's any decorator assigned.
+   * VALIDATORS is excluded from typing
    * @returns An array of decorator keys.
    */
-  private getAttachedDecorators(): (keyof typeof constants.DECORATOR.PARAMETER)[] {
-    const decorators = Object.keys(constants.DECORATOR.PARAMETER) as (keyof typeof constants.DECORATOR.PARAMETER)[];
-    return decorators.filter((decorator) => this.existsDecorator(decorator));
+  private getAttachedDecorators(): Exclude<ParameterDecorators, 'VALIDATORS'>[] {
+    const decorators = Object.keys(constants.DECORATOR.PARAMETER) as ParameterDecorators[];
+    return (
+      decorators
+        // exclude VALIDATORS
+        .filter((decorator) => decorator !== 'VALIDATORS')
+        .filter((decorator) => this.existsDecorator(decorator))
+    );
   }
 
   /**
@@ -83,10 +90,7 @@ export class ArgumentMethodProcessor {
    * @param decorator - The decorator metadata and data.
    */
 
-  private applySingleDecoratorByKey(decorator: {
-    metadataKey: keyof typeof constants.DECORATOR.PARAMETER;
-    data: unknown;
-  }): void {
+  private applySingleDecoratorByKey(decorator: { metadataKey: ParameterDecorators; data: unknown }): void {
     const metadata = this.getMetadata(decorator.metadataKey)!;
 
     this.args[metadata[0].parameterIndex] = decorator.data;
@@ -96,7 +100,7 @@ export class ArgumentMethodProcessor {
    * Applies multiple decorators by key.
    * @param metadataKey - The metadata key.
    */
-  private applyMultipleDecoratorsByKey(metadataKey: keyof typeof constants.DECORATOR.PARAMETER): void {
+  private applyMultipleDecoratorsByKey(metadataKey: ParameterDecorators): void {
     const metadata = this.getMetadata(metadataKey)!;
 
     switch (metadataKey) {
@@ -153,6 +157,34 @@ export class ArgumentMethodProcessor {
 
   // PUBLIC ROUTINES
 
+  public setValidatorFlags(validators: Record<Validators['action'], boolean>): void {
+    const metadata = Reflect.getOwnMetadata(
+      constants.DECORATOR.PARAMETER['VALIDATORS'],
+      this.target,
+      this.propertyName,
+    );
+    const parameterIndex = metadata[0].parameterIndex;
+
+    // private routines for this func
+
+    // If parameter exists add to the existing one
+    const assignToExistingParameter = () => {
+      Object.assign(this.args[parameterIndex], validators);
+    };
+
+    // If parameter does not exist, fill it.
+    const initializeValidatorFlags = () => {
+      this.args[parameterIndex] = validators;
+    };
+
+    if (this.args[parameterIndex]) {
+      assignToExistingParameter();
+      return;
+    }
+
+    initializeValidatorFlags();
+  }
+
   /**
    * Registration of decorators
    */
@@ -164,7 +196,7 @@ export class ArgumentMethodProcessor {
     this.getAttachedDecorators().forEach((metadataKey) => {
       switch (metadataKey) {
         /**
-         * @Req(), @Res(), @Error(), @Next(), @Results(), @Result(), @Jwt, @SingleInstanceSwitch can be present only once per callback
+         * @Req(), @Res(), @Error(), @Next(), @Results(), @Result(), @Jwt, '@SingleInstanceSwitch' can be present only once per callback
          */
         case 'ERROR':
         case 'NEXT':
@@ -172,6 +204,7 @@ export class ArgumentMethodProcessor {
         case 'REQ': {
           let key = util.lodash.lowerCase(metadataKey) as 'req' | 'results' | 'next' | 'error';
           this.applySingleDecoratorByKey({ metadataKey, data: this.temporaryArgs[key] });
+
           break;
         }
 
@@ -180,17 +213,20 @@ export class ArgumentMethodProcessor {
             metadataKey,
             data: parameterUtil.retrieveResponse(this.temporaryArgs.req),
           });
+
           break;
         }
 
-        case 'JWT':
+        case 'JWT': {
           this.applySingleDecoratorByKey({
             metadataKey,
             data: parameterUtil.retrieveJwt(this.temporaryArgs.req),
           });
-          break;
 
-        case 'SINGLE_INSTANCE_SWITCH':
+          break;
+        }
+
+        case 'SINGLE_INSTANCE_SWITCH': {
           this.applySingleDecoratorByKey({
             metadataKey,
             data: parameterUtil.isSingleInstance(this.temporaryArgs.req),
@@ -221,7 +257,7 @@ export class ArgumentMethodProcessor {
         }
 
         default:
-          util.throwErrorMessage('Parameter decorator option not handled !');
+          util.throwErrorMessage(`Parameter decorator ${metadataKey} option not handled !`);
           break;
       }
     });
