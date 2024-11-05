@@ -1609,7 +1609,7 @@ private async singeInstanceMethodAndEntitySet(@Results() results : MyEntity[], @
 
 **@ValidationResults**
 
-The `@ValidationResults` decorator is designed to capture and inject validation results directly into a method parameter, allowing access to individual validation flags within the decorated method. 
+The `@ValidationResults` decorator allows to capture and inject validation results directly into a method parameter, allowing access to `individual validation flags` within the decorated method. 
 
 When used alongside the [@Validate](#validate) decorator, it enables you to perform conditional logic based on specific validation outcomes.
 
@@ -1661,7 +1661,7 @@ Parameter decorator used to inject locale information into a method parameter.
 @BeforeCreate()
 public async beforeCreate(
   @Req() req: TypedRequest<MyEntity>,
-  @Locale() locale: stromg
+  @Locale() locale: string
 ) {
   if (locale === 'en-US') {
     // handle logic specific to the 'en-US' locale
