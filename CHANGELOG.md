@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.2] - 2024-11-05
+
+### ⚙️ Miscellaneous Tasks
+
+- *(tests)* Updated tests
+- *(github)* Added linguist-vendored to be excluded from github stats the html files
+- *(readme)* Updated readme
+- Version bump to 3.1.2
+
 ## [3.1.1] - 2024-11-04
 
 ### 🚀 Features
