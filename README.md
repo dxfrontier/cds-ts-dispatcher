@@ -61,6 +61,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@SingleInstanceSwitch](#singleinstanceswitch)
       - [@ValidationResults](#validationresults)
       - [@Locale](#locale)
+      - [@Env](#env)
     - [`Method`-`active entity`](#method-active-entity)
       - [`Before`](#before)
         - [@BeforeCreate](#beforecreate)
@@ -169,26 +170,32 @@ npm install @dxfrontier/cds-ts-dispatcher
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "strictNullChecks": true,
     "strictPropertyInitialization": false,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
-    "strictNullChecks": true,
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-
-    /* Allow decorators */
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
 
     /* Strictness */
     "strict": true,
 
-    "lib": ["es2022"],
+    /* Decorators */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
 
-    "outDir": "./gen/srv"
+    "target": "ES2021",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    "outDir": "./gen/srv",
+    "rootDir": ".",
+
+    "paths": {
+      "#cds-models/*": ["./@cds-models/*/index.ts"]
+    }
   },
-  "include": ["./srv"]
+  "include": ["./srv", "./@dispatcher"]
 }
 ```
 
@@ -256,27 +263,34 @@ tsc --init
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "strictNullChecks": true,
     "strictPropertyInitialization": false,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
-    "strictNullChecks": true,
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-
-    /* Allow decorators */
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
 
     /* Strictness */
     "strict": true,
 
-    "lib": ["es2022"],
+    /* Decorators */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
 
-    "outDir": "./gen/srv"
+    "target": "ES2021",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    "outDir": "./gen/srv",
+    "rootDir": ".",
+
+    "paths": {
+      "#cds-models/*": ["./@cds-models/*/index.ts"]
+    }
   },
-  "include": ["./srv"]
+  "include": ["./srv", "./@dispatcher"]
 }
+
 ```
 
 7. Run the `CDS-TS` server
@@ -1668,6 +1682,74 @@ public async beforeCreate(
   }
 }
 ```
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Env
+
+**@Env**
+
+The `@Env` decorator is a parameter decorator used to inject values from the cds.env configuration object directly into a method parameter.
+
+`Parameters`
+
+- `env (string)`: A string path representing a property from `cds.env`. This path follows the format `property string path`, which allows access to deeply nested configuration properties.
+  - E.g. : `'requires.db.credentials.url'` corresponds to **cds.env.requires.db.credentials.url** object.
+
+
+`Return` :
+
+- The decorator returns the value of the specified `cds.env` property value.
+
+`Example`
+
+```ts
+// Generated import inside of your package.json when you run 'npm install' or install the cds-ts-dispatcher
+import { CDS_ENV } from '@dispatcher';  
+
+@BeforeCreate()
+public async beforeCreate(
+  @Req() req: TypedRequest<MyEntity>,
+  @Env<CDS_ENV>('requires.db.credentials.url') dbUrl: CDS_ENV['requires']['db']['credentials']['url'],
+  // or @Env<CDS_ENV>('requires.db.credentials.url') dbUrl: string
+  // or @Env<CDS_ENV>('requires.db.credentials.url') dbUrl: any
+  // or any other type if you do not want to use the CDS_ENV generated types
+) {
+  if (dbUrl) {
+    // handle logic using dbUrl
+  }
+}
+```
+> [!NOTE]
+> When you install cds-ts-dispatcher `(e.g. npm install @dxfrontier/cds-ts-dispatcher)` or run a general `npm install`, the following will be generated or updated : 
+> - New `@dispatcher` folder is generated at the project ***root***. 
+> This folder contains the `CDS ENV TS interfaces`, generated based on the structure of your current `cds.env` project specific configuration (retrieved from `cds env get` cli command).
+> ```text
+> ...
+> @dispatcher
+> ...
+> ```
+> - `package.json` will be updated with a new `import`:
+> ```json
+>  "imports": {
+>    "#dispatcher": "./@dispatcher/index.js"
+>  }
+> ```
+> - `tsconfig.json` will be updated:  
+> ```json
+>  "include": [
+>    "...",
+>    "./@dispatcher"
+>  ]
+> ```
+> - `.gitignore` will be updated::
+> ```text
+> ...
+> @dispatcher
+> ```
+
+> [!NOTE] 
+> The `@dispatcher` folder is ***regenerated each time you run npm install.***
+
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 #### `Method`-`active entity`
