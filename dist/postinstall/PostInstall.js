@@ -73,7 +73,7 @@ var GenerateEnv = class {
 export ${typeDefinitions}`);
   }
   compileEnvFile() {
-    this.executeShellCommand("tsc", [
+    this.executeShellCommand("npx tsc", [
       this.envFilePath,
       "--outDir",
       this.dispatcherFolderPath
@@ -83,30 +83,28 @@ export ${typeDefinitions}`);
     this.appendLineIfAbsent(this.gitignoreFilePath, "@dispatcher");
   }
   updatePackageJsonImports() {
-    if (!(0, import_fs.existsSync)(this.packageJsonFilePath)) {
-      throw new Error("Could not find package.json");
-    }
-    const packageJson = JSON.parse((0, import_fs.readFileSync)(this.packageJsonFilePath, "utf8"));
-    packageJson.imports = packageJson.imports || {};
-    if (!packageJson.imports["#dispatcher"]) {
-      packageJson.imports["#dispatcher"] = "./@dispatcher/index.js";
-      (0, import_fs.writeFileSync)(this.packageJsonFilePath, JSON.stringify(packageJson, null, 2));
+    if ((0, import_fs.existsSync)(this.packageJsonFilePath)) {
+      const packageJson = JSON.parse((0, import_fs.readFileSync)(this.packageJsonFilePath, "utf8"));
+      packageJson.imports = packageJson.imports || {};
+      if (!packageJson.imports["#dispatcher"]) {
+        packageJson.imports["#dispatcher"] = "./@dispatcher/index.js";
+        (0, import_fs.writeFileSync)(this.packageJsonFilePath, JSON.stringify(packageJson, null, 2));
+      }
     }
   }
   updateTsconfigInclude() {
-    if (!(0, import_fs.existsSync)(this.tsconfigFilePath)) {
-      throw new Error("Could not find tsconfig.json");
-    }
-    const tsconfigContent = (0, import_fs.readFileSync)(this.tsconfigFilePath, "utf8");
-    const errors = [];
-    const tsconfig = (0, import_jsonc_parser.parse)(tsconfigContent, errors);
-    if (errors.length > 0) {
-      throw new Error("tsconfig.json contains comments or invalid JSON format, which is not allowed.");
-    }
-    tsconfig.include = tsconfig.include || [];
-    if (!tsconfig.include.includes("./@dispatcher")) {
-      tsconfig.include.push("./@dispatcher");
-      (0, import_fs.writeFileSync)(this.tsconfigFilePath, JSON.stringify(tsconfig, null, 2));
+    if ((0, import_fs.existsSync)(this.tsconfigFilePath)) {
+      const tsconfigContent = (0, import_fs.readFileSync)(this.tsconfigFilePath, "utf8");
+      const errors = [];
+      const tsconfig = (0, import_jsonc_parser.parse)(tsconfigContent, errors);
+      if (errors.length > 0) {
+        throw new Error("tsconfig.json contains comments or invalid JSON format, which is not allowed.");
+      }
+      tsconfig.include = tsconfig.include || [];
+      if (!tsconfig.include.includes("./@dispatcher")) {
+        tsconfig.include.push("./@dispatcher");
+        (0, import_fs.writeFileSync)(this.tsconfigFilePath, JSON.stringify(tsconfig, null, 2));
+      }
     }
   }
   appendLineIfAbsent(filePath, line) {
