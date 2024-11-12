@@ -1,12 +1,13 @@
 {
   "name": "@dxfrontier/cds-ts-dispatcher",
-  "version": "3.1.2",
+  "version": "3.2.0",
   "description": "The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement TS handlers provided by the SAP CAP framework.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "./dist",
+    "./postinstall"
   ],
   "workspaces": [
     "test/bookshop"
@@ -26,16 +27,17 @@
     "test:e2e": "start-server-and-test start:bookshop http://localhost:4004 test:newman",
     "test": "run-s test:unit test:e2e",
     "commit": "commit",
+    "prepare": "husky",
+    "postinstall": "node ./dist/postinstall/PostInstall.js",
     "documentation:message": "echo 'Started creation of documentation based on TypeDoc ...'",
     "documentation:build": "npx typedoc",
     "documentation:start:server": "http-server ./lib/docs",
     "documentation:open:browser": "open-cli http://127.0.0.1:8080",
     "documentation": "run-p documentation:start:server documentation:open:browser",
     "build:message": "echo 'Build started...'",
-    "build:clean": "echo 'Clean dist folder' && npx rimraf ./dist/{*.js,*.map,*.ts,*.mts,*.mjs}",
+    "build:clean": "echo 'Clean dist folder' && rm -rf ./dist/",
     "build:ts": "tsup",
-    "build": "run-s build:clean build:message build:ts",
-    "prepare": "husky"
+    "build": "run-s build:clean build:message build:ts"
   },
   "repository": {
     "type": "git",
@@ -69,24 +71,26 @@
   "homepage": "https://github.com/dxfrontier/cds-ts-dispatcher#readme",
   "dependencies": {
     "@sap-cloud-sdk/connectivity": "^3.22.2",
-    "@sap/cds-dk": "^8.4.0",
-    "@sap/cds": "^8.4.0",
+    "@sap/cds": "^8.4.1",
+    "@sap/cds-dk": "^8.4.1",
     "http-status-codes": "^2.3.0",
-    "inversify": "^6.0.3",
+    "inversify": "^6.1.1",
+    "json-ts": "^1.6.4",
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.2.2",
     "string-placeholder": "^1.0.2",
-    "validator": "^13.12.0"
+    "validator": "^13.12.0",
+    "jsonc-parser": "^3.3.1"
   },
   "devDependencies": {
-    "@cap-js/cds-typer": "0.28.0",
+    "@cap-js/cds-typer": "0.28.1",
     "@cap-js/cds-types": "^0.7.0",
-    "@cap-js/sqlite": "^1.7.5",
+    "@cap-js/sqlite": "^1.7.6",
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
     "@commitlint/prompt-cli": "^19.5.0",
     "@commitlint/types": "^19.5.0",
-    "@swc/core": "^1.7.42",
+    "@swc/core": "^1.9.1",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.13",
     "@types/string-placeholder": "^1.0.3",
@@ -106,7 +110,7 @@
     "tsup": "^8.3.5",
     "typedoc": "^0.26.11",
     "typescript": "^5.6.3",
-    "typescript-eslint": "^8.12.2"
+    "typescript-eslint": "^8.13.0"
   },
   "lint-staged": {
     "**/*.ts": [
@@ -114,8 +118,5 @@
       "npm run prettier:fix",
       "npm run test:unit --bail --findRelatedTests ./test"
     ]
-  },
-  "imports": {
-    "#cds-models/*": "./@cds-models/*/index.js"
   }
 }

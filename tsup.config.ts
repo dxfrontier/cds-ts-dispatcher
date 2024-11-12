@@ -1,11 +1,19 @@
 import { defineConfig } from 'tsup';
 
-export default defineConfig({
-  entry: ['lib/index.ts'],
-  target: 'es2022',
-  format: ['cjs', 'esm'],
-  splitting: true,
-  sourcemap: true,
-  clean: true,
-  dts: true,
-});
+export default defineConfig([
+  {
+    entry: ['./lib/index.ts'],
+    target: 'es2022',
+    format: ['cjs', 'esm'],
+    splitting: true,
+    sourcemap: true,
+    clean: true,
+    dts: true,
+  },
+  {
+    entry: ['./postinstall/PostInstall.ts'],
+    target: 'es2022',
+    clean: true,
+    outDir: './dist/postinstall',
+  },
+]);

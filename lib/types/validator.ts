@@ -622,13 +622,14 @@ type ValidatorBaseWithMessage = {
    *
    * Example usage:
    * ```typescript
+   * /@Validate<MyEntity>({ action: 'startsWith', target: 'Comment:', exposeValidatorResult: true }, 'comment')
    * /@Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
    * public async beforeCreate(
    *   /@Req() req: TypedRequest<BookRecommendation>,
-   *   /@ValidationResults() validator: ValidatorFlags<'isBoolean' | 'equals'>,
+   *   /@ValidationResults() validator: ValidatorFlags<'endsWith' | 'startsWith'>,
    * ) {
    *   // validator will contain the results of 'isBoolean' and 'equals' validations
-   *   if (validator.isBoolean) {
+   *   if (validator.endsWith) {
    *     // handle logic based on the validation result
    *   }
    * }

@@ -26,6 +26,7 @@ import {
   Use,
   AfterReadEachInstance,
   Jwt,
+  Env,
 } from '../../../../../../lib';
 import { Book } from '../../../../@cds-models/CatalogService';
 import { MiddlewareMethodAfterRead1 } from '../../../middleware/MiddlewareAfterRead1';
@@ -34,6 +35,7 @@ import { MiddlewareMethodBeforeRead } from '../../../middleware/MiddlewareBefore
 import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
 import BookService from '../../../service/BookService';
+import { CDS_ENV } from '#dispatcher';
 
 @EntityHandler(Book)
 @Use(MiddlewareEntity1, MiddlewareEntity2)
@@ -109,8 +111,9 @@ class BookHandler {
     @IsRole('Developer', 'AnotherRole') role: boolean,
     @GetRequest('locale') locale: Request['locale'],
     @Jwt() jwt: string | undefined,
+    @Env<CDS_ENV>('requires.auth.kind') env: CDS_ENV['requires']['auth']['kind'],
   ): Promise<void> {
-    await this.bookService.manageAfterReadMethods({ req, res, results, singleInstance, jwt });
+    await this.bookService.manageAfterReadMethods({ req, res, results, singleInstance, jwt, env });
   }
 
   @AfterUpdate()

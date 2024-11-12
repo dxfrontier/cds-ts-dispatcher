@@ -14,11 +14,14 @@ class BookService {
     results: Book[];
     singleInstance: boolean;
     jwt: string | undefined;
+    env: string;
   }) {
     args.res.setHeader('token', args.jwt ?? '');
     args.res.setHeader('res', 'res');
+    args.res.setHeader('env', args.env);
 
     await this.emitOrderedBookData(args.req);
+
     this.notifySingleInstance(args.req, args.singleInstance);
     this.enrichTitle(args.results);
   }

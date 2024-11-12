@@ -1,5 +1,5 @@
 import { retrieveJwt } from '@sap-cloud-sdk/connectivity';
-import { EventContext, Request as RequestClass } from '@sap/cds';
+import cds, { EventContext, Request as RequestClass } from '@sap/cds';
 
 import util from '../util';
 
@@ -296,6 +296,21 @@ const parameterUtil = {
    */
   retrieveLocale(req: Request): string {
     return req.locale;
+  },
+
+  applyEnv(args: any[], metadata: MetadataFields[]): void {
+    const getNestedProperty = (accumulator: any, path: string): any => {
+      return path.split('.').reduce((acc, key) => acc && acc[key], accumulator);
+    };
+
+    metadata.forEach((parameter) => {
+      if (parameter.type === 'ENV') {
+        const path = parameter.property;
+        const envValue = getNestedProperty(cds.env, path);
+
+        args[parameter.parameterIndex] = envValue;
+      }
+    });
   },
 };
 

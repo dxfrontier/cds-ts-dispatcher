@@ -92,7 +92,12 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+
+# Ignore everything in dist
+/dist/*
+
+# But not the postinstall folder
+!/dist/postinstall/
 
 # Gatsby files
 .cache/
@@ -133,3 +138,7 @@ dist
 .pnp.*
 .npmrc
 @cds-models
+@dispatcher
+
+# But not the @dispatcher folder from the test
+!/test/bookshop/@dispatcher

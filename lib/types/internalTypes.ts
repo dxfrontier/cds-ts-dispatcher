@@ -224,6 +224,11 @@ export type PickQueryPropsByKey<Key extends QueryKeys> = Key extends QueryInsert
           ? QueryUpsertProps['props']
           : never;
 
+type EnvProperty = {
+  type: 'ENV';
+  property: string;
+};
+
 type OnlyParameterIndexDecorator = {
   type: 'INDEX_DECORATOR';
 };
@@ -257,6 +262,7 @@ export type MetadataFields = {
   | OnlyParameterIndexDecorator
   | IsColumnValueSupplied
   | IsRoleProperties
+  | EnvProperty
 );
 
 export type MetadataInputs = {
@@ -269,6 +275,23 @@ export type MetadataInputs = {
 type ExcludedRequestMethods = 'reject' | 'notify' | 'reply' | 'warn' | 'error';
 
 export type CustomRequest = Exclude<keyof Request, ExcludedRequestMethods>;
+
+// **************************************************************************************************************************
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @Env types
+// **************************************************************************************************************************
+
+type Primitive = string | number | bigint | boolean | undefined | symbol;
+
+export type PropertyStringPath<T, Prefix = ''> = {
+  [K in keyof T]: K extends 'valueOf' | 'toString'
+    ? never
+    : T[K] extends Primitive | any[]
+      ? `${string & Prefix}${string & K}`
+      : `${string & Prefix}${string & K}` | PropertyStringPath<T[K], `${string & Prefix}${string & K}.`>;
+}[keyof T];
 
 // **************************************************************************************************************************
 // **************************************************************************************************************************

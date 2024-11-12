@@ -117,14 +117,21 @@ export class ArgumentMethodProcessor {
         break;
 
       case 'IS_PRESENT':
-      case 'GET_QUERY':
+      case 'GET_QUERY': {
         parameterUtil.applyIsPresentOrGetDecorator(
           metadataKey === 'GET_QUERY' ? 'Get' : 'IsPresent',
           metadata,
           this.temporaryArgs.req,
           this.args,
         );
+
         break;
+      }
+
+      case 'ENV': {
+        parameterUtil.applyEnv(this.args, metadata);
+        break;
+      }
 
       default:
         util.throwErrorMessage('Unsupported decorator key');
@@ -251,7 +258,8 @@ export class ArgumentMethodProcessor {
         case 'IS_PRESENT':
         case 'IS_ROLE':
         case 'GET_REQUEST':
-        case 'IS_COLUMN_SUPPLIED': {
+        case 'IS_COLUMN_SUPPLIED':
+        case 'ENV': {
           this.applyMultipleDecoratorsByKey(metadataKey);
           break;
         }
