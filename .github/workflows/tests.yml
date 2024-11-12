@@ -48,13 +48,35 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: npm install
-
-      - name: Instal SAP CDS-DK
-        run: npm i -g @sap/cds-dk ts-node
-
-      - name: Instal Globally typescript
-        run: npm i -g typescript
+        run: |
+          npm install -g @sap/cds-dk ts-node typescript
+          npm install
 
       - name: Start server and start e2e tests
         run: npm run test:e2e
+
+  # This decorator is a special decorator which needs an extensive testing due to creation of:
+  # - @dispatcher folder
+  # - injection of @dispatcher folder inside of the package.json - imports
+  # - injection of @dispatcher folder inside of the tsconfig.json - include
+  # - injection of @dispatcher folder inside of the .gitignore
+  test-env-decorator:
+    name: Test @Env decorator
+    strategy:
+      matrix:
+        version: [20, 18]
+        platform: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          npm install -g @sap/cds-dk ts-node typescript
+          npm install
+
+      - name: Verify @decorator folder, index.ts file, and content
+        run: ts-node ./postinstall/util/Verifier.ts
