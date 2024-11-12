@@ -1,6 +1,6 @@
 import { ArgumentMethodProcessor } from '../core/ArgumentMethodProcessor';
 
-import type { PickQueryPropsByKey, CustomRequest, CRUDQueryKeys } from '../types/internalTypes';
+import type { PickQueryPropsByKey, CustomRequest, CRUDQueryKeys, PropertyStringPath } from '../types/internalTypes';
 
 /**
  * Annotates a parameter of a method to enable `switching` between `single instance` and `entity set` functionality in your method.
@@ -304,6 +304,37 @@ function Locale(): ParameterDecorator {
   };
 }
 
+/**
+ * Apply `@Env` to a method parameter to retrieve specific environment properties from configuration files.
+ * This can be useful for injecting runtime configurations without directly accessing the environment variables.
+ * @param env - The path to the environment property as a string, supporting nested properties (e.g., `'database.host'`).
+ *
+ * @example
+ *
+ * ```typescript
+ * public async someMethod(
+ *   /@Req() req: TypedRequest<MyEntity>,
+ *   /@Env('requires.db.kind') dbKind: string
+ * ) {
+ *   if(dbKind) {
+ *    //
+ *   }
+ * }
+ * ```
+ *
+ */
+
+function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'ENV',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'ENV', parameterIndex, property: env },
+    });
+  };
+}
+
 export {
   SingleInstanceSwitch,
   Error,
@@ -320,4 +351,5 @@ export {
   Jwt,
   ValidationResults,
   Locale,
+  Env,
 };

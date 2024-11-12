@@ -20,6 +20,7 @@ export const constants = {
       JWT: Symbol('JWT'),
       VALIDATORS: Symbol('VALIDATORS'),
       LOCALE: Symbol('LOCALE'),
+      ENV: Symbol('ENV'),
     },
   },
 
