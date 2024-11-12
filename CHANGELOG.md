@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.0] - 2024-11-12
+
+### 🚀 Features
+
+- *(env)* New `@Env` parameter decorator to fetch cds env directly into method parameter
+- *(postinstall)* `npm install` will generate `@dispatcher` folder which contains env interfaces
+
+### 🐛 Bug Fixes
+
+- *(tests)* Fixed tests by adding a `npm run build` before testing the new `@Env` decorator
+- *(tests)* Added `npm run build` before e2e tests
+- *(test)* Excluded from ignore the `@dispatcher folder` for test
+
+### ⚙️ Miscellaneous Tasks
+
+- *(commitlint)* Removed mandatory scopes
+- *(lint)* Added `dist` and `@dispatcher` folder to lint ignore
+- *(test)* Test workflow now tests the newly `@Env` decorator on all platforms (windows,mac,linux)
+- *(test)* Updated tests for the newly `@Env` decorator
+- *(readme)* Updated readme with the usage of the new `@Env` decorator
+- *(gitignore)* Updated .gitignore
+- Version bump to 3.2.0
+- *(tsup)* Split compilation into 2 parts, one for postinstall one for the library
+- *(dist)* PostInstall will always be pushed to dist as is needed for `npm install` command
+- *(gitignore)* Excluded from gitingore the `./dist/postinstall` as is needed when `npm install`
+- *(tsconfig)* Excluded form compilation the `./dist/postinstall`
+
 ## [3.1.2] - 2024-11-05
 
 ### ⚙️ Miscellaneous Tasks
