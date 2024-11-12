@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": true,
@@ -10,30 +9,20 @@
     "strictPropertyInitialization": false,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
-
-    /* Strictness */
     "strict": true,
-
-    /* d.ts files */
     "declaration": true,
-
-    /* Building for a library in a monorepo: */
     "declarationMap": true,
-
     "lib": ["ES2021"],
     "target": "ES2021",
     "module": "CommonJS",
     "moduleResolution": "Node",
-
-    /* Decorators */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-
     "outDir": "./dist"
   },
   "typedocOptions": {
     "entryPoints": ["./lib/**"],
     "out": "./lib/docs"
   },
-  "exclude": ["node_modules", "test"]
+  "exclude": ["./node_modules", "./test", "./dist"]
 }
