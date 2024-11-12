@@ -52,6 +52,9 @@ jobs:
           npm install -g @sap/cds-dk ts-node typescript
           npm install
 
+      - name: Build project
+        run: npm run build
+
       - name: Start server and start e2e tests
         run: npm run test:e2e
 
