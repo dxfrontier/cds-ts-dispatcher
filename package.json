@@ -6,7 +6,8 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "./dist",
+    "./postinstall"
   ],
   "workspaces": [
     "test/bookshop"
@@ -27,17 +28,18 @@
     "test": "run-s test:unit test:e2e",
     "commit": "commit",
     "prepare": "husky",
-    "postinstall": "node ./dist/PostInstall.js",
+    "postinstall": "node ./dist/postinstall/PostInstall.js",
     "documentation:message": "echo 'Started creation of documentation based on TypeDoc ...'",
     "documentation:build": "npx typedoc",
     "documentation:start:server": "http-server ./lib/docs",
     "documentation:open:browser": "open-cli http://127.0.0.1:8080",
     "documentation": "run-p documentation:start:server documentation:open:browser",
     "build:message": "echo 'Build started...'",
-    "build:clean": "echo 'Clean dist folder' && npx rimraf ./dist/{*.js,*.map,*.ts,*.mts,*.mjs}",
+    "build:clean": "echo 'Clean dist folder' && rm -rf ./dist/* && cp -r ./dist/postinstall ./dist/",
     "build:ts": "tsup",
-    "build:post:install": "tsup ./postinstall/PostInstall.ts --no-config",
-    "build": "run-s build:clean build:message build:ts build:post:install"
+    "build:copy:postinstall:message": "echo 'Copy postinstall folder ...'",
+    "build:copy:postinstall": "cp -r ./postinstall ./dist/",
+    "build": "run-s build:clean build:message build:ts build:copy:postinstall:message build:copy:postinstall"
   },
   "repository": {
     "type": "git",
