@@ -35,11 +35,9 @@
     "documentation:open:browser": "open-cli http://127.0.0.1:8080",
     "documentation": "run-p documentation:start:server documentation:open:browser",
     "build:message": "echo 'Build started...'",
-    "build:clean": "echo 'Clean dist folder' && rm -rf ./dist/* && cp -r ./dist/postinstall ./dist/",
+    "build:clean": "echo 'Clean dist folder' && rm -rf ./dist/",
     "build:ts": "tsup",
-    "build:copy:postinstall:message": "echo 'Copy postinstall folder ...'",
-    "build:copy:postinstall": "cp -r ./postinstall ./dist/",
-    "build": "run-s build:clean build:message build:ts build:copy:postinstall:message build:copy:postinstall"
+    "build": "run-s build:clean build:message build:ts"
   },
   "repository": {
     "type": "git",
