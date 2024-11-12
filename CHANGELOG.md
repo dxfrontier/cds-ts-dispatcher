@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.1] - 2024-11-12
+
+### 🐛 Bug Fixes
+
+- *(env)* Fixed `@Env` when project was `mbt build` for production ready
+
+### ⚙️ Miscellaneous Tasks
+
+- Version bump to 3.2.1
+
 ## [3.2.0] - 2024-11-12
 
 ### 🚀 Features
