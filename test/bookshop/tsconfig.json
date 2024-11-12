@@ -26,5 +26,5 @@
 
     "outDir": "./gen/srv"
   },
-  "include": ["./srv"]
+  "include": ["./srv", "./@dispatcher"]
 }

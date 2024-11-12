@@ -2566,6 +2566,40 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "@Env",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Test to verify the 'env' header",
+											"pm.test(\"Env header is present and fulfilled\", function () {",
+											"    pm.expect(pm.response.headers.get('env')).to.equal('basic');",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{catalogService}}",
+										"{{booksEntity}}"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},

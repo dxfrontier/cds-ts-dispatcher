@@ -10,7 +10,8 @@
     "clean:js": "npx rimraf ./@cds-models/{*.js,**/*.js,**/**/*.js,**/**/**/*.js}"
   },
   "imports": {
-    "#cds-models/*": "./@cds-models/*/index.js"
+    "#cds-models/*": "./@cds-models/*/index.js",
+    "#dispatcher": "./@dispatcher/index.js"
   },
   "author": "",
   "license": "ISC",
