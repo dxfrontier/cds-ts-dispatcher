@@ -92,7 +92,12 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+
+# Ignore everything in dist
+/dist/*
+
+# But not the postinstall folder
+!/dist/postinstall/
 
 # Gatsby files
 .cache/
