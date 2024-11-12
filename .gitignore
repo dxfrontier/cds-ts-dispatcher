@@ -139,3 +139,6 @@ out
 .npmrc
 @cds-models
 @dispatcher
+
+# But not the @dispatcher folder from the test
+!/test/bookshop/@dispatcher
