@@ -133,3 +133,4 @@ dist
 .pnp.*
 .npmrc
 @cds-models
+@dispatcher
