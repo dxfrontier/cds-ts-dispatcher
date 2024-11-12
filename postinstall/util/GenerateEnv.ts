@@ -46,7 +46,7 @@ export class GenerateEnv {
   }
 
   private compileEnvFile() {
-    this.executeShellCommand('tsc', [this.envFilePath, '--outDir', this.dispatcherFolderPath]);
+    this.executeShellCommand('npx tsc', [this.envFilePath, '--outDir', this.dispatcherFolderPath]);
   }
 
   private addToGitignore() {
@@ -54,38 +54,34 @@ export class GenerateEnv {
   }
 
   private updatePackageJsonImports() {
-    if (!existsSync(this.packageJsonFilePath)) {
-      throw new Error('Could not find package.json');
-    }
+    if (existsSync(this.packageJsonFilePath)) {
+      const packageJson = JSON.parse(readFileSync(this.packageJsonFilePath, 'utf8'));
+      packageJson.imports = packageJson.imports || {};
 
-    const packageJson = JSON.parse(readFileSync(this.packageJsonFilePath, 'utf8'));
-    packageJson.imports = packageJson.imports || {};
-
-    if (!packageJson.imports['#dispatcher']) {
-      packageJson.imports['#dispatcher'] = './@dispatcher/index.js';
-      writeFileSync(this.packageJsonFilePath, JSON.stringify(packageJson, null, 2));
+      if (!packageJson.imports['#dispatcher']) {
+        packageJson.imports['#dispatcher'] = './@dispatcher/index.js';
+        writeFileSync(this.packageJsonFilePath, JSON.stringify(packageJson, null, 2));
+      }
     }
   }
 
   private updateTsconfigInclude() {
-    if (!existsSync(this.tsconfigFilePath)) {
-      throw new Error('Could not find tsconfig.json');
-    }
+    if (existsSync(this.tsconfigFilePath)) {
+      const tsconfigContent = readFileSync(this.tsconfigFilePath, 'utf8');
+      const errors: ParseError[] = [];
 
-    const tsconfigContent = readFileSync(this.tsconfigFilePath, 'utf8');
-    const errors: ParseError[] = [];
+      const tsconfig = parseJsonc(tsconfigContent, errors);
 
-    const tsconfig = parseJsonc(tsconfigContent, errors);
+      if (errors.length > 0) {
+        throw new Error('tsconfig.json contains comments or invalid JSON format, which is not allowed.');
+      }
 
-    if (errors.length > 0) {
-      throw new Error('tsconfig.json contains comments or invalid JSON format, which is not allowed.');
-    }
-
-    // Ensure `include` property is present and update if needed
-    tsconfig.include = tsconfig.include || [];
-    if (!tsconfig.include.includes('./@dispatcher')) {
-      tsconfig.include.push('./@dispatcher');
-      writeFileSync(this.tsconfigFilePath, JSON.stringify(tsconfig, null, 2));
+      // Ensure `include` property is present and update if needed
+      tsconfig.include = tsconfig.include || [];
+      if (!tsconfig.include.includes('./@dispatcher')) {
+        tsconfig.include.push('./@dispatcher');
+        writeFileSync(this.tsconfigFilePath, JSON.stringify(tsconfig, null, 2));
+      }
     }
   }
 
