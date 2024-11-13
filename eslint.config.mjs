@@ -15,6 +15,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['@dispatcher/', 'dist/', 'build/', 'test/', 'lib/docs/', '*.js'],
+    ignores: ['@dispatcher/', 'dist/', 'build/', 'test/', 'lib/docs/', '*.js', 'postinstall/'],
   },
 );
