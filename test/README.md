@@ -2,8 +2,7 @@
 
 - [Testing](#testing)
   - [Installation](#installation)
-    - [Run unit/integration](#run-unitintegration)
-    - [Run e2e tests](#run-e2e-tests)
+    - [Run tests](#run-tests)
 
 ## Installation
 
@@ -13,20 +12,11 @@ To test the project go to the `root` of `(cds-ts-dispatcher)` and run :
 npm install
 ```
 
-### Run unit/integration
+### Run tests
 
 Go to the `root` folder and run :
 
 ```bash
-npm run test:unit
+npm test
 ```
-
-### Run e2e tests
-
-Go to the `root` folder and run :
-
-```bash
-npm run test:all
-```
-
 Check if all tests are completed.
