@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.2] - 2024-11-13
+
+### 🚜 Refactor
+
+- *(env)* Moved Verifier outside of postinstall folder, added esm and cjs to compilation of env
+- *(tsup)* Added `cjs` and `esm` to compilation of postinstall
+
+### ⚙️ Miscellaneous Tasks
+
+- *(readme)* Readme updates
+- *(eslint)* Added eslint to ignore
+- *(gitignore)* Removed dispatcher form gitignore
+- Version bump to 3.2.2
+
 ## [3.2.1] - 2024-11-12
 
 ### 🐛 Bug Fixes
