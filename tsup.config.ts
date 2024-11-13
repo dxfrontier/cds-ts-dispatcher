@@ -7,13 +7,15 @@ export default defineConfig([
     format: ['cjs', 'esm'],
     splitting: true,
     sourcemap: true,
-    clean: true,
     dts: true,
   },
   {
     entry: ['./postinstall/PostInstall.ts'],
     target: 'es2022',
-    clean: true,
-    outDir: './dist/postinstall',
+    format: ['cjs', 'esm'],
+    splitting: true,
+    sourcemap: true,
+    dts: true,
+    outDir: './postinstall',
   },
 ]);
