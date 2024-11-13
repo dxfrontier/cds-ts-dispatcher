@@ -85,4 +85,4 @@ jobs:
         run: npm run build
 
       - name: Verify @decorator folder, index.ts file, and content
-        run: ts-node ./postinstall/util/Verifier.ts
+        run: ts-node ./test/postinstall/Verifier.ts

@@ -96,9 +96,6 @@ out
 # Ignore everything in dist
 /dist/*
 
-# But not the postinstall folder
-!/dist/postinstall/
-
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
@@ -139,6 +136,3 @@ out
 .npmrc
 @cds-models
 @dispatcher
-
-# But not the @dispatcher folder from the test
-!/test/bookshop/@dispatcher
