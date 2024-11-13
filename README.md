@@ -1326,15 +1326,19 @@ class BookHandler {
 
 **@IsColumnSupplied\<T\>(field : keyof T)**
 
-The `@IsColumnSupplied<T>()` decorator is utilized at the `parameter level`. It allows your to verify the existence of a column in the `SELECT`, `INSERT` or `UPSERT` Query.
+The `@IsColumnSupplied<T>(field : keyof T)` decorator is utilized at the `parameter level`. It allows your to verify the existence of a column in the `SELECT`, `INSERT` or `UPSERT` Query.
 
 `Parameters`
 
-- `column (string)`: A string representing the name of the column to be verified.
+- `field (string)`: A string representing the name of the column to be verified.
+
+`Type Parameters`
+
+- `T`: The entity type (e.g., `MyEntity`) representing the table or collection on which the decorator operates. This allows TypeScript to enforce type safety for the field parameter.
 
 `Return` :
 
-- `boolean`: This decorator returns `true` if `column` was found, `false` otherwise
+- `boolean`: This decorator returns `true` if `field / column` was found, `false` otherwise
 
 `Example`
 
@@ -1686,7 +1690,7 @@ public async beforeCreate(
 
 ##### @Env
 
-**@Env**
+**@Env\<T\>(env: PropertyStringPath\<T\>)**
 
 The `@Env` decorator is a parameter decorator used to inject values from the cds.env configuration object directly into a method parameter.
 
@@ -1695,6 +1699,9 @@ The `@Env` decorator is a parameter decorator used to inject values from the cds
 - `env (string)`: A string path representing a property from `cds.env`. This path follows the format `property string path`, which allows access to deeply nested configuration properties.
   - E.g. : `'requires.db.credentials.url'` corresponds to **cds.env.requires.db.credentials.url** object.
 
+`Type Parameters`
+
+- `T`: The `CDS environmental variables` type (e.g., `cds env get`) representing the collection on which the decorator operates. This allows TypeScript to enforce type safety.
 
 `Return` :
 
@@ -1703,8 +1710,7 @@ The `@Env` decorator is a parameter decorator used to inject values from the cds
 `Example`
 
 ```ts
-// Generated import inside of your package.json when you run 'npm install' or install the cds-ts-dispatcher
-import { CDS_ENV } from '@dispatcher';  
+import { CDS_ENV } from '#dispatcher';  
 
 @BeforeCreate()
 public async beforeCreate(
@@ -1715,10 +1721,11 @@ public async beforeCreate(
   // or any other type if you do not want to use the CDS_ENV generated types
 ) {
   if (dbUrl) {
-    // handle logic using dbUrl
+    // handle custom logic ...
   }
 }
 ```
+
 > [!NOTE]
 > When you install cds-ts-dispatcher `(e.g. npm install @dxfrontier/cds-ts-dispatcher)` or run a general `npm install`, the following will be generated or updated : 
 > - New `@dispatcher` folder is generated at the project ***root***. 
@@ -1749,6 +1756,12 @@ public async beforeCreate(
 
 > [!NOTE] 
 > The `@dispatcher` folder is ***regenerated each time you run npm install.***
+
+> [!TIP]
+> You can import the generated `CDS env` from the generated `@dispatcher` folder by using : 
+> ```ts
+> import { CDS_ENV } from '#dispatcher'; 
+> ```
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
