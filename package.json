@@ -28,16 +28,18 @@
     "test": "run-s test:unit test:e2e",
     "commit": "commit",
     "prepare": "husky",
-    "postinstall": "node ./dist/postinstall/PostInstall.js",
+    "postinstall": "node ./postinstall/PostInstall.js",
     "documentation:message": "echo 'Started creation of documentation based on TypeDoc ...'",
     "documentation:build": "npx typedoc",
     "documentation:start:server": "http-server ./lib/docs",
     "documentation:open:browser": "open-cli http://127.0.0.1:8080",
     "documentation": "run-p documentation:start:server documentation:open:browser",
     "build:message": "echo 'Build started...'",
-    "build:clean": "echo 'Clean dist folder' && rm -rf ./dist/",
+    "build:clean": "echo 'Clean dist folder ...' && rm -rf ./dist/",
+    "build:clean:postinstall": "echo 'Clean postinstall folder ...' && npx rimraf ./postinstall/PostInstall.js",
     "build:ts": "tsup",
-    "build": "run-s build:clean build:message build:ts"
+    "build": "run-s build:clean build:clean:postinstall build:message build:ts",
+    "test:verifier": "ts-node ./test/postinstall/Verifier.ts"
   },
   "repository": {
     "type": "git",
