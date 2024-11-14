@@ -650,37 +650,6 @@ type ValidatorBaseWithMessage = {
  * This type must NOT have 'customMessage' when 'exposeValidatorResult' is true
  */
 type ValidatorBaseWithoutMessage = {
-  /**
-   * Determines if the validator results are captured and passed to the method as parameters.
-   *
-   * - If set to `true`, the validator results (e.g., `ValidatorFlags<'isBoolean' | 'equals'>`) will be caught
-   *   and made available as a parameter in the method where validation is applied.
-   * - If set to `false` (or omitted), the method will not receive these validator results as parameters.
-   *
-   * This option is useful when a method requires access to the validation outcomes to conditionally
-   * handle logic based on validator flags.
-   *
-   * **Note:** To access these results, apply the `@ValidationResults` decorator to the method `parameter` where
-   * the validator flags should be injected.
-   *
-   * Example usage:
-   * ```typescript
-   * /@Validate<BookRecommendation>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
-   * /@Validate<BookRecommendation>({ action: 'isLowercase', exposeValidatorResult: true }, 'comment')
-   * public async beforeCreate(
-   *   /@Req() req: TypedRequest<BookRecommendation>,
-   *   /@ValidationResults() validator: ValidatorFlags<'endsWith' | 'isLowercase'>,
-   * ) {
-   *   // validator will contain the results of 'endsWith' and 'isLowercase' validations
-   *   if (validator.endsWith) {
-   *     // handle logic based on the validation result
-   *   }
-   *   //...
-   * }
-   * ```
-   *
-   * @default false
-   */
   exposeValidatorResult?: true;
 };
 

@@ -225,6 +225,7 @@ function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryProps
  * Annotates a parameter of a method to retrieve the `JWT - (JSON Web Token)` from the request.
  * @example "@Jwt() token: string | undefined"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#jwt | CDS-TS-Dispatcher - @Jwt}
+ * @returns string | undefined
  */
 function Jwt(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -244,7 +245,6 @@ function Jwt(): ParameterDecorator {
  * the `@Validate` decorator and makes them accessible as a parameter in the
  * decorated method. This allows conditional logic based on validation outcomes.
  *
- * ### Usage
  * Apply `@ValidationResults` to a method parameter to receive validation flags,
  * for instance:
  *
@@ -262,6 +262,7 @@ function Jwt(): ParameterDecorator {
  *   }
  * }
  * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#validationresults | CDS-TS-Dispatcher - @ValidationResults}
  */
 function ValidationResults(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -277,7 +278,6 @@ function ValidationResults(): ParameterDecorator {
 /**
  * Parameter decorator used to inject locale information into a method parameter.
  *
- * ### Usage
  * Apply `@Locale` to a method parameter to receive the locale context, for instance:
  *
  * @example
@@ -292,6 +292,7 @@ function ValidationResults(): ParameterDecorator {
  *   }
  * }
  * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#locale | CDS-TS-Dispatcher - @Locale}
  */
 function Locale(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -310,18 +311,19 @@ function Locale(): ParameterDecorator {
  * @param env - The path to the environment property as a string, supporting nested properties (e.g., `'database.host'`).
  *
  * @example
- *
  * ```typescript
+ * import { CDS_ENV } from '#dispatcher';
+ *
  * public async someMethod(
  *   /@Req() req: TypedRequest<MyEntity>,
- *   /@Env('requires.db.kind') dbKind: string
+ *   /@Env<CDS_ENV>('requires.db.kind') dbKind: string
  * ) {
  *   if(dbKind) {
- *    //
+ *    // custom logic
  *   }
  * }
  * ```
- *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#env | CDS-TS-Dispatcher - @Env}
  */
 
 function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
