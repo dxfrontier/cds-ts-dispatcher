@@ -12,7 +12,7 @@
 ![NPM Version](https://img.shields.io/npm/v/%40dxfrontier%2Fcds-ts-dispatcher?logo=npm)
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/dxfrontier/cds-ts-dispatcher/release.yml?logo=git)
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/dxfrontier/cds-ts-dispatcher/main?logo=git)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/dxfrontier/cds-ts-dispatcher/dev?logo=git)
 ![GitHub issues](https://img.shields.io/github/issues/dxfrontier/cds-ts-dispatcher?logo=git)
 ![GitHub contributors](https://img.shields.io/github/contributors/dxfrontier/cds-ts-dispatcher?logo=git)
 ![GitHub Repo stars](https://img.shields.io/github/stars/dxfrontier/cds-ts-dispatcher?style=flat&logo=git)
