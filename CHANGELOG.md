@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.3] - 2024-11-14
+
+### ⚙️ Miscellaneous Tasks
+
+- *(tsdoc)* Removed unnecesary tsdoc from some properties and rearanged a bit some tsdocs
+- *(readme)* Fixed the shield of the `last commit` by changing to `dev` branch
+- Version bump to 3.2.3
+
 ## [3.2.2] - 2024-11-13
 
 ### 🚜 Refactor
