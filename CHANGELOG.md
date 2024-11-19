@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.4] - 2024-11-19
+
+### 🚀 Features
+
+- *(postinstall)* Regenerated postinstall scripts
+
+### 🐛 Bug Fixes
+
+- Updated "ActionReturn" type to be compatible with the latest version of "cds-typer"
+- *(postinstall)* Fixed `postinstall` on `windows 10` by using the `cross-spawn` package
+- *(github-actions)* Fixed actions after were refactored
+
+### ⚙️ Miscellaneous Tasks
+
+- *(deployment,release)* Refactored github actions for better visibility by moving some steps
+- *(readme)* Small update to `last commit` shield
+- *(test)* Extending tests for windows
+- *(github-action)* Fixed the release github action after refactoring
+- *(release)* Fixed create pull request of the release workflow
+
 ## [3.2.3] - 2024-11-14
 
 ### ⚙️ Miscellaneous Tasks

@@ -1,6 +1,6 @@
 {
   "name": "@dxfrontier/cds-ts-dispatcher",
-  "version": "3.2.3",
+  "version": "3.2.4",
   "description": "The goal of CDS-TS-Dispatcher is to significantly reduce the boilerplate code required to implement TS handlers provided by the SAP CAP framework.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -98,7 +98,7 @@
     "@types/lodash": "^4.17.13",
     "@types/string-placeholder": "^1.0.3",
     "@types/validator": "^13.12.2",
-    "@types/cross-spawn": "^6.0.6", 
+    "@types/cross-spawn": "^6.0.6",
     "eslint": "^9.15.0",
     "http-server": "^14.1.1",
     "husky": "^9.1.7",
