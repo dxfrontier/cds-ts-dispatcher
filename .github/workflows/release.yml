@@ -41,6 +41,10 @@ jobs:
         with:
           node-version: '20'
 
+      # Install package.json dependencies
+      - name: Install dependencies
+        run: npm install
+
       # Determine version bump type
       - name: Determine version bump type
         env:
@@ -63,16 +67,7 @@ jobs:
 
       # Update package version
       - name: Update Package Version
-        id: version-bump
-        uses: phips28/gh-action-bump-version@v11.0.0
-        with:
-          version-type: ${{ env.VERSION_BUMP }}
-          minor-wording: minor
-          major-wording: major
-          patch-wording: patch
-          skip-tag: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm version ${{ env.VERSION_BUMP }} --no-git-tag-version
 
       # Push git created tag
       - name: Push git tag

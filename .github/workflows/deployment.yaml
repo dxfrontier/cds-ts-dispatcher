@@ -15,7 +15,6 @@ jobs:
   # This will validate to see if the labels contains 'none' which means that if 'none' was found the release will not happen
   check_valid_deploy:
     name: Validate deploy conditions
-    needs: check_valid_merge
     if: ${{ contains(github.event.pull_request.labels.*.name, 'deploy') }}
     runs-on: ubuntu-latest
     steps:
