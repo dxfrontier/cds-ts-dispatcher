@@ -1,4 +1,5 @@
-import { spawnSync } from 'child_process';
+import { sync } from 'cross-spawn';
+
 import { existsSync, appendFileSync, writeFileSync, mkdirSync, readFileSync } from 'fs';
 import * as path from 'path';
 import { json2ts } from 'json-ts';
@@ -97,10 +98,10 @@ export class GenerateEnv {
   }
 
   private executeShellCommand(command: string, args: string[]) {
-    const result = spawnSync(command, args, { encoding: 'utf8', cwd: this.clientCwd });
+    const result = sync(command, args, { encoding: 'utf8', cwd: this.clientCwd });
 
     if (result.stderr) {
-      console.error(result.stderr);
+      throw new Error(result.stderr);
     }
 
     return result.stdout;

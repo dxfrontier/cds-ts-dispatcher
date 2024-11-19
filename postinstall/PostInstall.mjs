@@ -2,7 +2,7 @@ var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, 'name', { value, configurable: true });
 
 // postinstall/util/GenerateEnv.ts
-import { spawnSync } from 'child_process';
+import { sync } from 'cross-spawn';
 import { existsSync, appendFileSync, writeFileSync, mkdirSync, readFileSync } from 'fs';
 import * as path from 'path';
 import { json2ts } from 'json-ts';
@@ -99,7 +99,7 @@ ${line}
     });
   }
   executeShellCommand(command, args) {
-    const result = spawnSync(command, args, {
+    const result = sync(command, args, {
       encoding: 'utf8',
       cwd: this.clientCwd,
     });

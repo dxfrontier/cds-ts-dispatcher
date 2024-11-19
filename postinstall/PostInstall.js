@@ -20,7 +20,7 @@ var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, 'name', { value, configurable: true });
 
 // postinstall/util/GenerateEnv.ts
-var _child_process = require('child_process');
+var _crossspawn = require('cross-spawn');
 var _fs = require('fs');
 var _path = require('path');
 var path = _interopRequireWildcard(_path);
@@ -120,7 +120,7 @@ ${line}
       });
     }
     executeShellCommand(command, args) {
-      const result = _child_process.spawnSync.call(void 0, command, args, {
+      const result = _crossspawn.sync.call(void 0, command, args, {
         encoding: 'utf8',
         cwd: this.clientCwd,
       });
