@@ -3,7 +3,7 @@ name: Deployment
 on:
   pull_request:
     branches:
-      - dev
+      - main
     types:
       - closed
 
@@ -12,15 +12,6 @@ permissions:
   pull-requests: write
 
 jobs:
-  # This job will check if the Pull request was merged into dev branch
-  check_valid_merge:
-    name: Merge 'Pull request' to 'dev' branch
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo The PR was merged.
-
   # This will validate to see if the labels contains 'none' which means that if 'none' was found the release will not happen
   check_valid_deploy:
     name: Validate deploy conditions
@@ -28,8 +19,7 @@ jobs:
     if: ${{ contains(github.event.pull_request.labels.*.name, 'deploy') }}
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo The PR can continue to deploy the version.
+      - run: echo "Proceed valid"
 
     # This will start build of the project
   check_valid_build:
