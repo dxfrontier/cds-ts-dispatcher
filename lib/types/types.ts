@@ -70,7 +70,7 @@ export type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { dat
 /**
  * Use `ActionReturn` type to have the `return` of the `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
  */
-export type ActionReturn<T extends CdsFunction> = Promise<T['__returns'] | void | Error>;
+export type ActionReturn<T extends CdsFunction> = Promise<Exclude<T['__returns'], Promise<any>> | void | Error>;
 
 // **************************************************************************************************************************
 // **************************************************************************************************************************
