@@ -69,6 +69,11 @@ jobs:
       - name: Update Package Version
         run: npm version ${{ env.VERSION_BUMP }} --no-git-tag-version
 
+      # Fetch the updated npm SemVer and use it in the 'Push git tag' step
+      - name: Retrieve updated npm version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
       # Push git created tag
       - name: Push git tag
         id: tag
@@ -76,7 +81,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: false
-          CUSTOM_TAG: ${{ env.VERSION_BUMP }}
+          CUSTOM_TAG: ${{ steps.package-version.outputs.current-version }}
           BRANCH_HISTORY: full
 
       # Generate the changelog file using the configuration from cliff.toml.
@@ -125,5 +130,5 @@ jobs:
           branch: feature-version-bump
           title: 'chore: update version and changelog'
           body: 'This PR updates the version and changelog.'
-          base: dev
+          base: main
           labels: deploy
