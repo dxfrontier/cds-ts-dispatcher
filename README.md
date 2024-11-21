@@ -11,7 +11,7 @@
 ![NPM Downloads](https://img.shields.io/npm/dm/%40dxfrontier%2Fcds-ts-dispatcher?logo=npm)
 ![NPM Version](https://img.shields.io/npm/v/%40dxfrontier%2Fcds-ts-dispatcher?logo=npm)
 
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/dxfrontier/cds-ts-dispatcher/release.yml?logo=git)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/dxfrontier/cds-ts-dispatcher/deployment.yml?logo=git)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/dxfrontier/cds-ts-dispatcher/main?logo=git)
 ![GitHub issues](https://img.shields.io/github/issues/dxfrontier/cds-ts-dispatcher?logo=git)
 ![GitHub contributors](https://img.shields.io/github/contributors/dxfrontier/cds-ts-dispatcher?logo=git)
@@ -119,7 +119,6 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 - [License](#license)
 - [Authors](#authors)
 
-
 ## Prerequisites
 
 Install [**@sap/cds-dk**](https://cap.cloud.sap/docs/get-started/), `typescript`, `ts-node` globally:
@@ -218,7 +217,6 @@ cds-ts w
 
 #### `Using:` @sap/cds `v7`
 
-
 Use the following steps if you want to create a new **SAP CAP project.**
 
 1. Create new folder :
@@ -305,10 +303,10 @@ Use the following steps if you want to migrate from `@sap/cds@7` to `@sap/cds@8`
 
 1. Verify you've installed the `cds@v8` globally by running the following command:
 
-
 ```bash
 cds -v -i
-``` 
+```
+
 | packages | version                        |
 | ---------------------- | ------------------------------------------------------------------------------ |
 | @cap-js/asyncapi       | 1.0.1                                                                          |
@@ -326,8 +324,9 @@ cds -v -i
 | @sap/eslint-plugin-cds | 3.0.4                                                                          |
 | Node.js                | v22.4.1                                                                        |
 
-> [!TIP] 
-> If you see a smaller version than `@sap/cds-dk (global)` `8.0.2` run the following command : 
+> [!TIP]
+> If you see a smaller version than `@sap/cds-dk (global)` `8.0.2` run the following command :
+>
 > ```bash
 > npm install -g @sap/cds-dk@latest
 > ```
@@ -338,15 +337,15 @@ cds -v -i
 cds add typescript
 ```
 
-> [!TIP] 
+> [!TIP]
 > Command above will add the following packages:
+>
 > - `@types/node`
 > - `@cap-js/cds-types`
 > - `@cap-js/cds-typer`
 > - `typescript`
 
-
-3. After running command above the `package.json` will look similar to : 
+3. After running command above the `package.json` will look similar to :
 
 ```json
 {
@@ -369,14 +368,15 @@ cds add typescript
   },
 }
 ```
-> [!IMPORTANT] 
+
+> [!IMPORTANT]
 > You might delete the `node_modules` folder and `package-lock.json` in case `npm run watch` fails working.
-> 
-> Re-run the following command : 
+>
+> Re-run the following command :
+>
 > ```bash
 > npm install
 > ```
-
 
 ### `Option 2 :` Install CDS-TS-Dispatcher - `Existing project`
 
@@ -505,7 +505,6 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-
 > [!TIP]
 > You can have a look over the [CDS-TS-Dispatcher-Samples](https://github.com/dxfrontier/cds-ts-samples) where we use the Controller-Service-Repository pattern and Dispatcher.
 
@@ -600,7 +599,7 @@ export class BookHandler {
 ```
 
 > [!TIP]
-> After creation of `BookHandler` class, you can `import it` into the [CDSDispatcher](#CDSDispatcher).
+> After creation of `BookHandler` class, you can `import it` into the [CDSDispatcher](#cdsdispatcher).
 >
 > ```typescript
 > import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
@@ -765,7 +764,7 @@ export class UnboundActionsHandler {
 }
 ```
 
-`Imported it` in the [CDSDispatcher](#CDSDispatcher)
+`Imported it` in the [CDSDispatcher](#cdsdispatcher)
 
 ```typescript
 import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
@@ -1568,7 +1567,7 @@ It allows you to manage different behaviors based on whether the request is for 
 
 `Example 1`
 
-Single request : http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
+Single request : <http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`>
 
 ```typescript
 import { AfterRead, SingleInstanceCapable } from "@dxfrontier/cds-ts-dispatcher";
@@ -1589,7 +1588,7 @@ private async singeInstanceMethodAndEntitySet(@Results() results : MyEntity[], @
 
 `Example 2`
 
-Entity request : http://localhost:4004/odata/v4/main/`MyEntity`
+Entity request : <http://localhost:4004/odata/v4/main/`MyEntity`>
 
 ```typescript
 import { AfterRead, SingleInstanceCapable } from "@dxfrontier/cds-ts-dispatcher";
@@ -1627,10 +1626,9 @@ private async singeInstanceMethodAndEntitySet(@Results() results : MyEntity[], @
 
 **@ValidationResults**
 
-The `@ValidationResults` decorator allows to capture and inject validation results directly into a method parameter, allowing access to `individual validation flags` within the decorated method. 
+The `@ValidationResults` decorator allows to capture and inject validation results directly into a method parameter, allowing access to `individual validation flags` within the decorated method.
 
 When used alongside the [@Validate](#validate) decorator, it enables you to perform conditional logic based on specific validation outcomes.
-
 
 `Example`
 
@@ -1659,19 +1657,16 @@ public async beforeCreate(
 }
 ```
 
-> [!IMPORTANT] 
+> [!IMPORTANT]
 > For `@ValidationResults` to work, each [@Validate](#validate) decorator must set the `exposeValidatorResult` option to `true`. This ensures that the validation results are available as flags in the method.
 
-
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
 
 ##### @Locale
 
 **@Locale**
 
 Parameter decorator used to inject locale information into a method parameter.
-
 
 `Example`
 
@@ -1686,6 +1681,7 @@ public async beforeCreate(
   }
 }
 ```
+
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### @Env
@@ -1727,38 +1723,47 @@ public async beforeCreate(
 ```
 
 > [!NOTE]
-> When you install cds-ts-dispatcher `(e.g. npm install @dxfrontier/cds-ts-dispatcher)` or run a general `npm install`, the following will be generated or updated : 
-> - New `@dispatcher` folder is generated at the project ***root***. 
+> When you install cds-ts-dispatcher `(e.g. npm install @dxfrontier/cds-ts-dispatcher)` or run a general `npm install`, the following will be generated or updated :
+>
+> - New `@dispatcher` folder is generated at the project _**root**_.
 > This folder contains the `CDS ENV TS interfaces`, generated based on the structure of your current `cds.env` project specific configuration (retrieved from `cds env get` cli command).
+>
 > ```text
 > ...
 > @dispatcher
 > ...
 > ```
+>
 > - `package.json` will be updated with a new `import`:
+>
 > ```json
 >  "imports": {
 >    "#dispatcher": "./@dispatcher/index.js"
 >  }
 > ```
+>
 > - `tsconfig.json` will be updated:  
+>
 > ```json
 >  "include": [
 >    "...",
 >    "./@dispatcher"
 >  ]
 > ```
+>
 > - `.gitignore` will be updated::
+>
 > ```text
 > ...
 > @dispatcher
 > ```
 
-> [!NOTE] 
-> The `@dispatcher` folder is ***regenerated each time you run npm install.***
+> [!NOTE]
+> The `@dispatcher` folder is _**regenerated each time you run npm install.**_
 
 > [!TIP]
-> You can import the generated `CDS env` from the generated `@dispatcher` folder by using : 
+> You can import the generated `CDS env` from the generated `@dispatcher` folder by using :
+>
 > ```ts
 > import { CDS_ENV } from '#dispatcher'; 
 > ```
@@ -1929,7 +1934,7 @@ The `@BeforeAll` decorator is triggered whenever **_any CRUD (Create, Read, Upda
 
 `ACTIVE ENTITY`
 
-For active entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
+For active entities, the @BeforeAll decorator will be triggered when at least __one__ of the following events occurs:
 
 - `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
@@ -1940,7 +1945,7 @@ For active entities, the @BeforeAll decorator will be triggered when at least *_
 
 `DRAFT`
 
-For draft entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
+For draft entities, the @BeforeAll decorator will be triggered when at least __one__ of the following events occurs:
 
 - `CREATE` [@BeforeNewDraft()](#beforenewdraft), [@AfterNewDraft()](#afternewdraft), [@OnNewDraft()](#onnewdraft)
 - `CANCEL` [@BeforeCancelDraft()](#beforecanceldraft), [@AfterCancelDraft()](#aftercanceldraft), [@OnCancelDraft()](#oncanceldraft)
@@ -2116,7 +2121,7 @@ this.after('each', MyEntity, async (result, req) => {
 
 `Example`
 
-Single request : http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`
+Single request : <http://localhost:4004/odata/v4/main/`MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)`>
 
 ```typescript
 import { AfterUpdate } from "@dxfrontier/cds-ts-dispatcher";
@@ -2186,7 +2191,7 @@ The `@AfterAll` decorator is triggered whenever **_any CRUD (Create, Read, Updat
 
 `ACTIVE ENTITY`
 
-For active entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
+For active entities, the @BeforeAll decorator will be triggered when at least __one__ of the following events occurs:
 
 - `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
@@ -2197,7 +2202,7 @@ For active entities, the @BeforeAll decorator will be triggered when at least *_
 
 `DRAFT`
 
-For draft entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
+For draft entities, the @BeforeAll decorator will be triggered when at least __one__ of the following events occurs:
 
 - `CREATE` [@BeforeNewDraft()](#beforenewdraft), [@AfterNewDraft()](#afternewdraft), [@OnNewDraft()](#onnewdraft)
 - `CANCEL` [@BeforeCancelDraft()](#beforecanceldraft), [@AfterCancelDraft()](#aftercanceldraft), [@OnCancelDraft()](#oncanceldraft)
@@ -2662,7 +2667,7 @@ The `@OnAll` decorator is triggered whenever **_any CRUD (Create, Read, Update, 
 
 `ACTIVE ENTITY`
 
-For active entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
+For active entities, the @BeforeAll decorator will be triggered when at least __one__ of the following events occurs:
 
 - `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
@@ -2673,7 +2678,7 @@ For active entities, the @BeforeAll decorator will be triggered when at least *_
   
 `DRAFT`
 
-For draft entities, the @BeforeAll decorator will be triggered when at least *_one_* of the following events occurs:
+For draft entities, the @BeforeAll decorator will be triggered when at least __one__ of the following events occurs:
 
 - `CREATE` [@BeforeNewDraft()](#beforenewdraft), [@AfterNewDraft()](#afternewdraft), [@OnNewDraft()](#onnewdraft)
 - `CANCEL` [@BeforeCancelDraft()](#beforecanceldraft), [@AfterCancelDraft()](#aftercanceldraft), [@OnCancelDraft()](#oncanceldraft)
@@ -3227,7 +3232,7 @@ private async afterReadSingleInstance(@Result() result: MyEntity, @Req() req: Ty
 >
 > The vice-versa doesn't apply, this means that if you trigger the entity set request the [@AfterReadSingleInstance()](#afterreadsingleinstance) will not be triggered.
 >
-> Example `GET`: http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)
+> Example `GET`: <http://localhost:4004/odata/v4/main/MyEntity(ID=2f12d711-b09e-4b57-b035-2cbd0a023a09)>
 >
 > ```ts
 > // use this
@@ -3252,7 +3257,6 @@ private async afterReadSingleInstance(@Result() result: MyEntity, @Req() req: Ty
 >   }
 > }
 > ```
-
 
 > [!IMPORTANT]
 > Decorator [@AfterReadSingleInstance()](#afterreadsingleinstance) will be triggered based on the [EntityHandler](#entityhandler) `argument` `MyEntity`.
@@ -3367,13 +3371,14 @@ The `@Validate` decorator is useful when you need to `validate` the `Request`.`d
 
   - **`exposeValidatorResult`** (boolean):  
     Determines if the validator results are captured and passed to the method as parameters.
-    
+
     - If `true`, the validator results (e.g., `ValidatorFlags<'isBoolean' | 'equals'>`) will be available as a parameter in the method.
     - To use this, apply the `@ValidationResults` decorator to the method parameter where you want the validator flags injected.
 
     **Default:** `false`
 
     **Example:**
+
     ```typescript
     @Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
     public async beforeCreate(
@@ -3385,7 +3390,7 @@ The `@Validate` decorator is useful when you need to `validate` the `Request`.`d
       }
     }
     ```
-    
+
   - **`customMessage`** (string):  
     Custom message to replace the default validation error message.
 
@@ -3435,7 +3440,7 @@ Below is a list of available validators:
 | isEmpty          | Check if the string has a length of zero.                                                                | **ignore_whitespace:** If set to `true`, whitespace characters will be ignored. _Default: false_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | isIBAN           | Check if a string is an IBAN.                                                                            | **whitelist**: An array of IBAN countries to whitelist. _Default: undefined_ <br> **blacklist**: An array of IBAN countries to blacklist. _Default: undefined_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | isIMEI           | Check if the string is a valid IMEI.                                                                     | **allow_hyphens**: If set to `true`, allows IMEI numbers with hyphens. _Default: false_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| isIP             | Check if the string is an IP (version 4 or 6).                                                           | ` "4", "6", 4, 6;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| isIP             | Check if the string is an IP (version 4 or 6).                                                           | `"4", "6", 4, 6;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | isIdentityCard   | Check if the string is a valid identity card code.                                                       | **locale**: An array of supported locales for identity cards. Acceptable values: "ar-LY", "ar-TN", "ES", "FI", "he-IL", "IN", "IR", "IT", "LK", "NO", "PL", "TH", "zh-CN", "zh-HK", "zh-TW" or 'any'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | isIn             | Check if the string is in an array of allowed values.                                                    |
 | isJSON           | Check if the string is valid JSON (note: uses `JSON.parse`).                                             |
@@ -3559,9 +3564,9 @@ class UnboundActionsHandler {
 
 > [!TIP]
 > If you want to catch the validators use the following decorator [@ValidationResults](#validationresults)
-> 
+>
 > This approach is useful if you need to conditionally process data based on validation outcomes within the same function.
-> 
+>
 > **Example Use Case**: Suppose you want to validate multiple fields but only perform certain actions when specific validations pass. By using `@ValidationResults`, you `gain access` to a detailed `validator object` containing the `results` for each validation, allowing for flexible and targeted logic.
 
 > ```ts
