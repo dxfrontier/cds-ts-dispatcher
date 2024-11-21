@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.5] - 2024-11-21
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+- *(readme)* Small changes to README.md
+- *(readme)* Changed `build` shield to deployment.yml
+
 ## [3.2.4] - 2024-11-19
 
 ### 🚀 Features
