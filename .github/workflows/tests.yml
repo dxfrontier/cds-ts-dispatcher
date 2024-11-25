@@ -1,6 +1,6 @@
 # This will run unit / integration and e2e tests
 
-name: Test
+name: Tests (unit, e2e)
 
 on:
   pull_request:

@@ -1,4 +1,4 @@
-name: Version bump
+name: Enforce labels
 
 on:
   pull_request:
