@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.6] - 2024-11-25
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+- *(readme)* Fixed deployment badge
+- *(actions)* Renamed enforce-label and tests github actions for better visibility
+
 ## [3.2.5] - 2024-11-21
 
 ### ⚙️ Miscellaneous Tasks
