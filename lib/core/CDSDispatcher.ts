@@ -136,14 +136,28 @@ class CDSDispatcher {
    *
    * @param handler - The handler instance.
    * @param entityInstance - The entity instance.
-   * @returns The active entity or draft entity, or undefined if not applicable.
+   * @returns The active `entity` or `draft entity`, or `undefined` for Unbound actions
    */
   private getActiveEntityOrDraft(handler: BaseHandler, entityInstance: Constructable): string | undefined {
     const entity = MetadataDispatcher.getEntity(entityInstance);
 
-    if (!util.lodash.isUndefined(entity)) {
-      return handler.isDraft ? entity.drafts.name : entity.name;
+    if (util.lodash.isUndefined(entity)) {
+      return;
     }
+
+    const getEntityName = () => {
+      if (entity.name) {
+        return handler.isDraft ? entity.drafts.name : entity.name;
+      }
+    };
+
+    const getAllEntitiesStar = () => {
+      if (typeof entity === 'string' && entity === CDS_DISPATCHER.ALL_ENTITIES) {
+        return CDS_DISPATCHER.ALL_ENTITIES;
+      }
+    };
+
+    return getEntityName() ?? getAllEntitiesStar();
   }
 
   /**
