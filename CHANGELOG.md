@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.7] - 2025-01-14
+
+### 🐛 Bug Fixes
+
+- *(dispatcher)* Fixed `CDS_DISPATCHER.ALLENTITIES` due to cds `8.6.0`
+
+### 🧪 Testing
+
+- *(cds-typer)* Updated generated cds typed entities
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+
 ## [3.2.6] - 2024-11-25
 
 ### ⚙️ Miscellaneous Tasks
