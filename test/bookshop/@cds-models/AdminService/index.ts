@@ -19,10 +19,10 @@ export function _UserActivityLogAspect<TBase extends new (...args: any[]) => obj
     declare modifiedBy?: _.User | null
     declare ID?: __.Key<number>
     declare actionType?: string | null
-    static readonly kind: "entity" | "type" | "aspect" = 'entity';
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<UserActivityLog>;
     declare static readonly elements: __.ElementsOf<UserActivityLog>;
-    static readonly actions: Record<never, never>;
+    declare static readonly actions: Record<never, never>;
   };
 }
 /**
@@ -33,6 +33,11 @@ export function _UserActivityLogAspect<TBase extends new (...args: any[]) => obj
 export class UserActivityLog extends _UserActivityLogAspect(__.Entity) {static drafts: __.DraftOf<UserActivityLog>}
 Object.defineProperty(UserActivityLog, 'name', { value: 'AdminService.UserActivityLog' })
 Object.defineProperty(UserActivityLog, 'is_singular', { value: true })
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
 export class UserActivityLog_ extends Array<UserActivityLog> {static drafts: __.DraftsOf<UserActivityLog>
 $count?: number}
 Object.defineProperty(UserActivityLog_, 'name', { value: 'AdminService.UserActivityLog' })
@@ -46,10 +51,10 @@ export function _PromotionAspect<TBase extends new (...args: any[]) => object>(B
     declare endDate?: __.CdsDate | null
     declare discount?: number | null
     declare books?: __.Association.to.many<_sap_capire_bookshop.Books>
-    static readonly kind: "entity" | "type" | "aspect" = 'entity';
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Promotion>;
     declare static readonly elements: __.ElementsOf<Promotion>;
-    static readonly actions: Record<never, never>;
+    declare static readonly actions: Record<never, never>;
   };
 }
 export class Promotion extends _PromotionAspect(__.Entity) {static drafts: __.DraftOf<Promotion>}
@@ -72,10 +77,10 @@ export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: 
     declare email?: string | null
     declare role?: _.Roles | null
     declare reviews?: __.Association.to.many<_sap_capire_bookshop.Reviews>
-    static readonly kind: "entity" | "type" | "aspect" = 'entity';
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<User>;
     declare static readonly elements: __.ElementsOf<User>;
-    static readonly actions: Record<never, never>;
+    declare static readonly actions: Record<never, never>;
   };
 }
 /**
@@ -86,6 +91,11 @@ export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: 
 export class User extends _UserAspect(__.Entity) {}
 Object.defineProperty(User, 'name', { value: 'AdminService.Users' })
 Object.defineProperty(User, 'is_singular', { value: true })
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
 export class Users extends Array<User> {$count?: number}
 Object.defineProperty(Users, 'name', { value: 'AdminService.Users' })
 

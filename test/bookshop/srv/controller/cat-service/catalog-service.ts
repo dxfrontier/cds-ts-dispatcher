@@ -22,10 +22,10 @@ export = new CDSDispatcher([
   BookRecommendationsHandler,
   BookSalesHandler,
 
-  // Draft
+  // // Draft
   BookEventsHandler,
 
-  // Unbound actions
+  // // Unbound actions
   UnboundActionsHandler,
 
   // All entities
