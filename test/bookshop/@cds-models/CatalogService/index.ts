@@ -31,20 +31,22 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
     * See https://cap.cloud.sap/docs/cds/common#type-currency
     */
     declare currency?: _.Currency | null
-    declare currency_code?: __.Key<string> | null
+    declare currency_code?: string | null
     declare image?: Buffer | string | {value: import("stream").Readable, $mediaContentType: string, $mediaContentDispositionFilename?: string, $mediaContentDispositionType?: string} | null
     declare author?: __.Association.to<Author> | null
-    declare author_ID?: __.Key<number> | null
+    declare author_ID?: number | null
     declare genre?: __.Association.to<Genre> | null
-    declare genre_ID?: __.Key<number> | null
+    declare genre_ID?: number | null
     declare reviews?: __.Association.to.many<Reviews>
     declare stats?: __.Association.to<BookStat> | null
     declare bookFormats?: __.Association.to.many<BookFormats>
     declare bookRecomanddations?: __.Association.to.many<BookRecommendations>
+    declare texts?: __.Composition.of.many<Books.texts>
+    declare localized?: __.Association.to<Books.text> | null
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Book>;
     declare static readonly elements: __.ElementsOf<Book>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -81,7 +83,7 @@ export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Author>;
     declare static readonly elements: __.ElementsOf<Author>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -110,15 +112,15 @@ export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base
     declare modifiedBy?: _.User | null
     declare ID?: __.Key<number>
     declare book?: __.Association.to<Book> | null
-    declare book_ID?: __.Key<number> | null
+    declare book_ID?: number | null
     declare reviewer?: __.Association.to<_sap_capire_bookshop.User> | null
-    declare reviewer_ID?: __.Key<number> | null
+    declare reviewer_ID?: number | null
     declare rating?: number | null
     declare comment?: string | null
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Review>;
     declare static readonly elements: __.ElementsOf<Review>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -150,7 +152,7 @@ export function _PublisherAspect<TBase extends new (...args: any[]) => object>(B
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Publisher>;
     declare static readonly elements: __.ElementsOf<Publisher>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -183,11 +185,11 @@ export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(B
     declare totalAmount?: number | null
     declare status?: string | null
     declare customer?: __.Association.to<_sap_capire_bookshop.User> | null
-    declare customer_ID?: __.Key<number> | null
+    declare customer_ID?: number | null
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<BookOrder>;
     declare static readonly elements: __.ElementsOf<BookOrder>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -219,13 +221,13 @@ export function _BookRecommendationAspect<TBase extends new (...args: any[]) => 
     declare comment?: string | null
     declare description?: string | null
     declare book?: __.Association.to<Book> | null
-    declare book_ID?: __.Key<number> | null
+    declare book_ID?: number | null
     declare recommended?: __.Association.to<Book> | null
-    declare recommended_ID?: __.Key<number> | null
+    declare recommended_ID?: number | null
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<BookRecommendation>;
     declare static readonly elements: __.ElementsOf<BookRecommendation>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -259,11 +261,11 @@ export function _BookFormatAspect<TBase extends new (...args: any[]) => object>(
     declare language?: string | null
     declare publicationDate?: __.CdsDate | null
     declare book?: __.Association.to<Book> | null
-    declare book_ID?: __.Key<number> | null
+    declare book_ID?: number | null
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<BookFormat>;
     declare static readonly elements: __.ElementsOf<BookFormat>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -295,13 +297,13 @@ export function _BookSaleAspect<TBase extends new (...args: any[]) => object>(Ba
     declare saleAmount?: number | null
     declare quantity?: number | null
     declare book?: __.Association.to<Book> | null
-    declare book_ID?: __.Key<number> | null
+    declare book_ID?: number | null
     declare customer?: __.Association.to<_sap_capire_bookshop.User> | null
-    declare customer_ID?: __.Key<number> | null
+    declare customer_ID?: number | null
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<BookSale>;
     declare static readonly elements: __.ElementsOf<BookSale>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -334,7 +336,7 @@ export function _BookEventAspect<TBase extends new (...args: any[]) => object>(B
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<BookEvent>;
     declare static readonly elements: __.ElementsOf<BookEvent>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -366,7 +368,7 @@ export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Ba
     declare views?: number | null
     declare averageRating?: number | null
     declare book?: __.Association.to<Book> | null
-    declare book_ID?: __.Key<number> | null
+    declare book_ID?: number | null
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<BookStat>;
     declare static readonly elements: __.ElementsOf<BookStat>;
@@ -421,14 +423,18 @@ export class BookStats extends Array<BookStat> {$count?: number}
 Object.defineProperty(BookStats, 'name', { value: 'CatalogService.BookStats' })
 
 export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Currency extends _sap_common._CodeListAspect(Base) {
+  return class Currency extends Base {
+    declare name?: string | null
+    declare descr?: string | null
     declare code?: __.Key<string>
     declare symbol?: string | null
     declare minorUnit?: number | null
-    static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare texts?: __.Composition.of.many<Currencies.texts>
+    declare localized?: __.Association.to<Currencies.text> | null
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Currency>;
     declare static readonly elements: __.ElementsOf<Currency>;
-    declare static readonly actions: typeof _sap_common.CodeList.actions & Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -437,7 +443,7 @@ export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Ba
 * See https://cap.cloud.sap/docs/cds/common#entity-currencies
 */
 export class Currency extends _CurrencyAspect(__.Entity) {}
-Object.defineProperty(Currency, 'name', { value: 'sap.common.Currencies' })
+Object.defineProperty(Currency, 'name', { value: 'CatalogService.Currencies' })
 Object.defineProperty(Currency, 'is_singular', { value: true })
 /**
 * Code list for currencies
@@ -448,19 +454,28 @@ export class Currencies extends Array<Currency> {$count?: number}
 Object.defineProperty(Currencies, 'name', { value: 'CatalogService.Currencies' })
 
 export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
-  return class Genre extends _sap_common._CodeListAspect(Base) {
+  return class Genre extends Base {
+    declare name?: string | null
+    declare descr?: string | null
     declare ID?: __.Key<number>
-    declare parent?: __.Association.to<_sap_capire_bookshop.Genre> | null
-    declare parent_ID?: __.Key<number> | null
-    declare children?: __.Composition.of.many<_sap_capire_bookshop.Genres>
-    static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare parent?: __.Association.to<Genre> | null
+    declare parent_ID?: number | null
+    declare children?: __.Composition.of.many<Genres>
+    declare texts?: __.Composition.of.many<Genres.texts>
+    declare localized?: __.Association.to<Genres.text> | null
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Genre>;
     declare static readonly elements: __.ElementsOf<Genre>;
-    declare static readonly actions: typeof _sap_common.CodeList.actions & Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
+/**
+* Aspect for a code list with name and description
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-codelist
+*/
 export class Genre extends _GenreAspect(__.Entity) {}
-Object.defineProperty(Genre, 'name', { value: 'sap.capire.bookshop.Genres' })
+Object.defineProperty(Genre, 'name', { value: 'CatalogService.Genres' })
 Object.defineProperty(Genre, 'is_singular', { value: true })
 /**
 * Aspect for a code list with name and description
@@ -479,7 +494,7 @@ export declare class OrderedBook {
 
 export declare const changeBookProperties:  {
   // positional
-  (format: __.DeepRequired<BookFormat>['format'] | null, language: __.DeepRequired<BookFormat>['language'] | null): Promise< {
+  (format: __.DeepRequired<BookFormat>['format'] | null, language: __.DeepRequired<BookFormat>['language'] | null): globalThis.Promise< {
   language?: string | null,
   format?: __.DeepRequired<BookFormat>['format'] | null,
 } | null> |  {
@@ -487,7 +502,7 @@ export declare const changeBookProperties:  {
   format?: __.DeepRequired<BookFormat>['format'] | null,
 } | null
   // named
-  ({format, language}: {format?: __.DeepRequired<BookFormat>['format'] | null, language?: __.DeepRequired<BookFormat>['language'] | null}): Promise< {
+  ({format, language}: {format?: __.DeepRequired<BookFormat>['format'] | null, language?: __.DeepRequired<BookFormat>['language'] | null}): globalThis.Promise< {
   language?: string | null,
   format?: __.DeepRequired<BookFormat>['format'] | null,
 } | null> |  {
@@ -495,7 +510,7 @@ export declare const changeBookProperties:  {
   format?: __.DeepRequired<BookFormat>['format'] | null,
 } | null
   // metadata (do not use)
-  __parameters: {format?: __.DeepRequired<BookFormat>['format'] | null, language?: __.DeepRequired<BookFormat>['language'] | null}, __returns: Promise< {
+  __parameters: {format?: __.DeepRequired<BookFormat>['format'] | null, language?: __.DeepRequired<BookFormat>['language'] | null}, __returns: globalThis.Promise< {
   language?: string | null,
   format?: __.DeepRequired<BookFormat>['format'] | null,
 } | null> |  {
@@ -507,19 +522,19 @@ export declare const changeBookProperties:  {
 
 export declare const submitOrder:  {
   // positional
-  (book: __.Key<__.DeepRequired<Book>['ID']>, quantity: number | null): Promise< {
+  (book: __.Key<__.DeepRequired<Book>['ID']>, quantity: number | null): globalThis.Promise< {
   stock?: number | null,
 } | null> |  {
   stock?: number | null,
 } | null
   // named
-  ({book, quantity}: {book?: __.Key<__.DeepRequired<Book>['ID']>, quantity?: number | null}): Promise< {
+  ({book, quantity}: {book?: __.Key<__.DeepRequired<Book>['ID']>, quantity?: number | null}): globalThis.Promise< {
   stock?: number | null,
 } | null> |  {
   stock?: number | null,
 } | null
   // metadata (do not use)
-  __parameters: {book?: __.Key<__.DeepRequired<Book>['ID']>, quantity?: number | null}, __returns: Promise< {
+  __parameters: {book?: __.Key<__.DeepRequired<Book>['ID']>, quantity?: number | null}, __returns: globalThis.Promise< {
   stock?: number | null,
 } | null> |  {
   stock?: number | null,
@@ -529,22 +544,85 @@ export declare const submitOrder:  {
 
 export declare const submitOrderFunction:  {
   // positional
-  (book: __.Key<__.DeepRequired<Book>['ID']>, quantity: number | null): Promise< {
+  (book: __.Key<__.DeepRequired<Book>['ID']>, quantity: number | null): globalThis.Promise< {
   stock?: number | null,
 } | null> |  {
   stock?: number | null,
 } | null
   // named
-  ({book, quantity}: {book?: __.Key<__.DeepRequired<Book>['ID']>, quantity?: number | null}): Promise< {
+  ({book, quantity}: {book?: __.Key<__.DeepRequired<Book>['ID']>, quantity?: number | null}): globalThis.Promise< {
   stock?: number | null,
 } | null> |  {
   stock?: number | null,
 } | null
   // metadata (do not use)
-  __parameters: {book?: __.Key<__.DeepRequired<Book>['ID']>, quantity?: number | null}, __returns: Promise< {
+  __parameters: {book?: __.Key<__.DeepRequired<Book>['ID']>, quantity?: number | null}, __returns: globalThis.Promise< {
   stock?: number | null,
 } | null> |  {
   stock?: number | null,
 } | null
   kind: 'function'
+}
+export namespace Books {
+  export function _textAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+    return class text extends Base {
+      /** Type for a language code */
+      declare locale?: __.Key<_sap_common.Locale>
+      declare ID?: __.Key<number>
+      declare title?: string | null
+      declare descr?: string | null
+      static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+      declare static readonly keys: __.KeysOf<text>;
+      declare static readonly elements: __.ElementsOf<text>;
+      declare static readonly actions: globalThis.Record<never, never>;
+    };
+  }
+  export class text extends _textAspect(__.Entity) {}
+  Object.defineProperty(text, 'name', { value: 'CatalogService.Books.texts' })
+  Object.defineProperty(text, 'is_singular', { value: true })
+  export class texts extends Array<text> {$count?: number}
+  Object.defineProperty(texts, 'name', { value: 'CatalogService.Books.texts' })
+  
+}
+export namespace Currencies {
+  export function _textAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+    return class text extends Base {
+      /** Type for a language code */
+      declare locale?: __.Key<_sap_common.Locale>
+      declare name?: string | null
+      declare descr?: string | null
+      declare code?: __.Key<string>
+      static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+      declare static readonly keys: __.KeysOf<text>;
+      declare static readonly elements: __.ElementsOf<text>;
+      declare static readonly actions: globalThis.Record<never, never>;
+    };
+  }
+  export class text extends _textAspect(__.Entity) {}
+  Object.defineProperty(text, 'name', { value: 'CatalogService.Currencies.texts' })
+  Object.defineProperty(text, 'is_singular', { value: true })
+  export class texts extends Array<text> {$count?: number}
+  Object.defineProperty(texts, 'name', { value: 'CatalogService.Currencies.texts' })
+  
+}
+export namespace Genres {
+  export function _textAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+    return class text extends Base {
+      /** Type for a language code */
+      declare locale?: __.Key<_sap_common.Locale>
+      declare name?: string | null
+      declare descr?: string | null
+      declare ID?: __.Key<number>
+      static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+      declare static readonly keys: __.KeysOf<text>;
+      declare static readonly elements: __.ElementsOf<text>;
+      declare static readonly actions: globalThis.Record<never, never>;
+    };
+  }
+  export class text extends _textAspect(__.Entity) {}
+  Object.defineProperty(text, 'name', { value: 'CatalogService.Genres.texts' })
+  Object.defineProperty(text, 'is_singular', { value: true })
+  export class texts extends Array<text> {$count?: number}
+  Object.defineProperty(texts, 'name', { value: 'CatalogService.Genres.texts' })
+  
 }

@@ -8,24 +8,24 @@ import { MiddlewareMethodAfterRead2 } from '../util/middleware/MiddlewareAfterRe
 import { MiddlewareEntity1 } from '../util/middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../util/middleware/MiddlewareEntity2';
 
-import type { CRUD_EVENTS, TypedRequest } from '../../lib/types/types';
+import type { CRUD_EVENTS, Request } from '../../lib/types/types';
 import type { Constructable } from '../../lib/types/internalTypes';
 
 @EntityHandler(Book)
 @Use(MiddlewareEntity1, MiddlewareEntity2)
 class BookHandler {
   @AfterCreate()
-  public async afterCreateMethod(result: Book, req: TypedRequest<Book>) {}
+  public async afterCreateMethod(result: Book, req: Request<Book>) {}
 
   @AfterRead()
   @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2)
-  public async afterReadMethod(results: Book[], req: TypedRequest<Book>) {}
+  public async afterReadMethod(results: Book[], req: Request<Book>) {}
 
   @AfterUpdate()
-  public async afterUpdateMethod(result: Book, req: TypedRequest<Book>) {}
+  public async afterUpdateMethod(result: Book, req: Request<Book>) {}
 
   @AfterDelete()
-  public async afterDeleteMethod(deleted: boolean, req: TypedRequest<Book>) {}
+  public async afterDeleteMethod(deleted: boolean, req: Request<Book>) {}
 }
 
 const newBook = (Book: Constructable) => new Book();

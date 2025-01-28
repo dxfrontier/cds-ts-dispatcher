@@ -1,4 +1,4 @@
-import type { TypedRequest } from './types';
+import type { Request } from './types';
 import type { ReplaceFunction, TruncateOptions } from 'lodash';
 
 // * ########################################################################################################
@@ -153,7 +153,7 @@ export type Replace = {
 
 export type Custom<T> = {
   action: 'customFormatter';
-  callback: (req: TypedRequest<T>, results?: T[]) => Promise<void | Error> | void | Error;
+  callback: (req: Request<T>, results?: T[]) => Promise<void | Error> | void | Error;
 };
 
 export type LodashFormatters =

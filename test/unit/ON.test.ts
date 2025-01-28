@@ -14,43 +14,43 @@ import {
 } from '../../lib';
 import { MetadataDispatcher } from '../../lib/core/MetadataDispatcher';
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { OnError, Request } from '../../lib/index';
+import { OnError } from '../../lib/index';
 import { HandlerType } from '../../lib/types/enum';
 import { Book, OrderedBook, submitOrder } from '../bookshop/@cds-models/CatalogService';
 
-import type { CRUD_EVENTS, EVENTS, TypedRequest } from '../../lib/types/types';
+import type { CRUD_EVENTS, EVENTS, Request } from '../../lib/types/types';
 
 @EntityHandler(Book)
 class BookHandler {
   @OnCreate()
-  public async onCreateMethod(req: TypedRequest<Request>, next: Function) {}
+  public async onCreateMethod(req: Request<Request>, next: Function) {}
 
   @OnRead()
   public async onReadMethod(req: Request, next: Function) {}
 
   @OnUpdate()
-  public async onUpdateMethod(req: TypedRequest<Request>, next: Function) {}
+  public async onUpdateMethod(req: Request<Request>, next: Function) {}
 
   @OnDelete()
   public async onDeleteMethod(req: Request, next: Function) {}
 
   @OnAction(submitOrder)
-  public async onActionMethod(req: TypedRequest<Request>, next: Function) {}
+  public async onActionMethod(req: Request<Request>, next: Function) {}
 
   @OnFunction(submitOrder)
   public async onFunctionMethod(req: Request, next: Function) {}
 
   @OnEvent(OrderedBook)
-  public async onEvent(req: TypedRequest<OrderedBook>) {}
+  public async onEvent(req: Request<OrderedBook>) {}
 
   @OnError()
   public async onError(error: Error, req: Request) {}
 
   @OnBoundAction(submitOrder)
-  public async onBoundActionMethod(req: TypedRequest<Request>, next: Function) {}
+  public async onBoundActionMethod(req: Request<Request>, next: Function) {}
 
   @OnBoundFunction(submitOrder)
-  public async onBoundFunctionMethod(req: TypedRequest<Request>, next: Function) {}
+  public async onBoundFunctionMethod(req: Request<Request>, next: Function) {}
 }
 
 const newBook = (Book: Constructable) => new Book();

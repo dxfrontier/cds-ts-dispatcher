@@ -1,6 +1,6 @@
 import { Inject, Service, ServiceLogic, CDS_DISPATCHER } from '../../../../lib';
 
-import type { ActionRequest, Request, TypedRequest } from '../../../../lib';
+import type { ActionRequest, Request } from '../../../../lib';
 import { Book, BookStat } from '../../@cds-models/CatalogService';
 
 @ServiceLogic()
@@ -19,7 +19,7 @@ class BookStatsService {
     req.notify(201, 'On Create executed');
   }
 
-  public async updatedViews(req: TypedRequest<BookStat>) {
+  public async updatedViews(req: Request<BookStat>) {
     await UPDATE(BookStat).where({ ID: 2 }).set({ views: 444233 });
   }
 
@@ -30,7 +30,7 @@ class BookStatsService {
   public async handleReport(req: ActionRequest<typeof BookStat.actions.GenerateReport>) {
     const statsID = req.params[0] as string;
     const bookStats = await SELECT.one(BookStat).where({ ID: parseInt(statsID) });
-    const book: Book = await SELECT.one(Book).where({ ID: bookStats!.book_ID! });
+    const book = await SELECT.one(Book).where({ ID: bookStats!.book_ID! });
 
     return {
       book: book!.title,

@@ -1,6 +1,6 @@
 import { Inject, Service, ServiceLogic, CDS_DISPATCHER } from '../../../../lib';
 
-import type { TypedRequest, Request } from '../../../../lib';
+import type { Request } from '../../../../lib';
 
 import type { Review } from '../../@cds-models/CatalogService';
 
@@ -8,7 +8,7 @@ import type { Review } from '../../@cds-models/CatalogService';
 class ReviewService {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
-  public validateComment(req: TypedRequest<Review>): void {
+  public validateComment(req: Request<Review>): void {
     if (req.data.comment != null && req.data.comment?.length > 10) {
       req.reject(400, 'Message must be larger than 10');
     }

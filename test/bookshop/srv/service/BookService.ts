@@ -1,6 +1,6 @@
 import { CDS_DISPATCHER, Inject, Service, ServiceLogic } from '../../../../lib';
 
-import type { ActionRequest, Request, RequestResponse, TypedRequest } from '../../../../lib';
+import type { ActionRequest, Request, RequestResponse } from '../../../../lib';
 
 import { Book, submitOrder } from '../../@cds-models/CatalogService';
 
@@ -56,7 +56,7 @@ class BookService {
     }
   }
 
-  public async addDefaultTitleText(result: Book, req: TypedRequest<Book>) {
+  public async addDefaultTitleText(result: Book, req: Request<Book>) {
     await UPDATE(Book).where({ ID: req.data.ID }).set({ title: 'Dracula' });
   }
 

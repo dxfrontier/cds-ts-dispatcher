@@ -29,7 +29,7 @@ export function _cuidAspect<TBase extends new (...args: any[]) => object>(Base: 
     static readonly kind: 'entity' | 'type' | 'aspect' = 'aspect';
     declare static readonly keys: __.KeysOf<cuid>;
     declare static readonly elements: __.ElementsOf<cuid>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -57,7 +57,7 @@ export function _managedAspect<TBase extends new (...args: any[]) => object>(Bas
     static readonly kind: 'entity' | 'type' | 'aspect' = 'aspect';
     declare static readonly keys: __.KeysOf<managed>;
     declare static readonly elements: __.ElementsOf<managed>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -81,7 +81,7 @@ export function _temporalAspect<TBase extends new (...args: any[]) => object>(Ba
     static readonly kind: 'entity' | 'type' | 'aspect' = 'aspect';
     declare static readonly keys: __.KeysOf<temporal>;
     declare static readonly elements: __.ElementsOf<temporal>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -104,7 +104,7 @@ export function _HelloRequestAspect<TBase extends new (...args: any[]) => object
     static readonly kind: 'entity' | 'type' | 'aspect' = 'type';
     declare static readonly keys: __.KeysOf<HelloRequest>;
     declare static readonly elements: __.ElementsOf<HelloRequest>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 export class HelloRequest extends _HelloRequestAspect(__.Entity) {}
@@ -117,7 +117,7 @@ export function _HelloResponseAspect<TBase extends new (...args: any[]) => objec
     static readonly kind: 'entity' | 'type' | 'aspect' = 'type';
     declare static readonly keys: __.KeysOf<HelloResponse>;
     declare static readonly elements: __.ElementsOf<HelloResponse>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 export class HelloResponse extends _HelloResponseAspect(__.Entity) {}

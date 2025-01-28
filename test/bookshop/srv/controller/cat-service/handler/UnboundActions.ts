@@ -14,11 +14,10 @@ import {
   OnFunction,
   Prepend,
   Req,
-  Request,
   RequestResponse,
   Res,
   Service,
-  TypedRequest,
+  Request,
   UnboundActions,
   Use,
   Validate,
@@ -63,7 +62,7 @@ class UnboundActionsHandler {
   }
 
   @Prepend({ eventDecorator: 'OnEvent', eventName: OrderedBook })
-  public async prependEvent(@Req() req: TypedRequest<OrderedBook>): Promise<void> {
+  public async prependEvent(@Req() req: Request<OrderedBook>): Promise<void> {
     req.locale = 'DE_de';
   }
 
@@ -92,7 +91,7 @@ class UnboundActionsHandler {
   }
 
   @OnEvent(OrderedBook)
-  public async orderedBook(@Req() req: TypedRequest<OrderedBook>, @Res() res: RequestResponse): Promise<void> {
+  public async orderedBook(@Req() req: Request<OrderedBook>, @Res() res: RequestResponse): Promise<void> {
     res.setHeader('Content-Language', 'DE_de');
     if (req.event !== 'OrderedBook') {
       req.reject(400, 'Not OrderedBook: check @OnEvent decorator');

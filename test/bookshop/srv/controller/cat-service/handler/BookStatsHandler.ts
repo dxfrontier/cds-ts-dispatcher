@@ -18,13 +18,12 @@ import {
   OnRead,
   OnUpdate,
   Req,
-  Request,
   RequestResponse,
   Res,
   Result,
   Service,
   SingleInstanceSwitch,
-  TypedRequest,
+  Request,
   Validate,
   ValidationResults,
   ValidatorFlags,
@@ -43,7 +42,7 @@ class BookStatsHandler {
   @Validate<BookStat>({ action: 'isAlphanumeric', exposeValidatorResult: true }, 'book_ID')
   @Validate<BookStat>({ action: 'isNumeric', exposeValidatorResult: true }, 'views')
   public async beforeCreate(
-    @Req() req: TypedRequest<BookStat>,
+    @Req() req: Request<BookStat>,
     @Res() res: RequestResponse,
     @ValidationResults() validator: ValidatorFlags<'isAlphanumeric' | 'isNumeric'>,
     @Locale() locale: string,
@@ -54,7 +53,7 @@ class BookStatsHandler {
   }
 
   @OnCreate()
-  public async create(@Req() req: TypedRequest<BookStat>, @Next() next: NextEvent) {
+  public async create(@Req() req: Request<BookStat>, @Next() next: NextEvent) {
     this.bookStatsService.notifyCreated(req);
     return next();
   }
@@ -81,7 +80,7 @@ class BookStatsHandler {
 
   @OnRead()
   public async read(
-    @Req() req: TypedRequest<BookStat>,
+    @Req() req: Request<BookStat>,
     @Next() next: NextEvent,
     @SingleInstanceSwitch() isSingleInstance: boolean,
   ) {
@@ -93,7 +92,7 @@ class BookStatsHandler {
   }
 
   @OnUpdate()
-  public async update(@Req() req: TypedRequest<BookStat>, @Next() next: NextEvent) {
+  public async update(@Req() req: Request<BookStat>, @Next() next: NextEvent) {
     this.bookStatsService.notifyUpdated(req);
     return next();
   }

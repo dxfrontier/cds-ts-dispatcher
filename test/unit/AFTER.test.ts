@@ -5,21 +5,21 @@ import { MetadataDispatcher } from '../../lib/core/MetadataDispatcher';
 import { HandlerType } from '../../lib/types/enum';
 import { Book } from '../bookshop/@cds-models/CatalogService';
 
-import type { CRUD_EVENTS, TypedRequest } from '../../lib/types/types';
+import type { CRUD_EVENTS, Request } from '../../lib/types/types';
 
 @EntityHandler(Book)
 class BookHandler {
   @AfterCreate()
-  public async afterCreateMethod(result: Book, req: TypedRequest<Book>) {}
+  public async afterCreateMethod(result: Book, req: Request<Book>) {}
 
   @AfterRead()
-  public async afterReadMethod(results: Book[], req: TypedRequest<Book>) {}
+  public async afterReadMethod(results: Book[], req: Request<Book>) {}
 
   @AfterUpdate()
-  public async afterUpdateMethod(result: Book, req: TypedRequest<Book>) {}
+  public async afterUpdateMethod(result: Book, req: Request<Book>) {}
 
   @AfterDelete()
-  public async afterDeleteMethod(deleted: boolean, req: TypedRequest<Book>) {}
+  public async afterDeleteMethod(deleted: boolean, req: Request<Book>) {}
 }
 
 const newBook = (Book: Constructable) => new Book();

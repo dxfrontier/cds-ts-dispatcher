@@ -86,8 +86,8 @@
     "validator": "^13.12.0"
   },
   "devDependencies": {
-    "@cap-js/cds-typer": "0.31.0",
-    "@cap-js/cds-types": "^0.8.0",
+    "@cap-js/cds-typer": "0.32.0",
+    "@cap-js/cds-types": "^0.9.0",
     "@cap-js/sqlite": "^1.7.8",
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
@@ -109,12 +109,12 @@
     "open-cli": "^8.0.0",
     "prettier": "3.4.2",
     "rimraf": "^6.0.1",
-    "start-server-and-test": "^2.0.9",
+    "start-server-and-test": "^2.0.10",
     "ts-jest": "^29.2.5",
     "tsup": "^8.3.5",
     "typedoc": "^0.27.6",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.19.1"
+    "typescript-eslint": "^8.20.0"
   },
   "lint-staged": {
     "**/*.ts": [

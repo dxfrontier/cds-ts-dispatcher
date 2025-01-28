@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { ServerResponse } from 'http';
 import type { Constructable } from './internalTypes';
-import type { ServiceImpl, CdsFunction, column_expr, TypedRequest } from '@sap/cds';
+import type { ServiceImpl, CdsFunction, column_expr } from '@sap/cds';
 import { Service, Request } from '@sap/cds';
 
 // **************************************************************************************************************************
@@ -38,7 +38,7 @@ type RequestResponse = ServerResponse;
  *
  * @example
  * export class Middleware implements MiddlewareImpl {
- *    public async use(req: TypedRequest<MyEntity>, next: NextMiddleware) {
+ *    public async use(req: Request<MyEntity>, next: NextMiddleware) {
  *      await next();
  *    }
  * }
@@ -128,6 +128,5 @@ export {
   Service,
   type RequestResponse,
   type CdsFunction,
-  type TypedRequest,
   type ServiceImpl,
 };
