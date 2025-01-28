@@ -625,7 +625,7 @@ type ValidatorBaseWithMessage = {
    * /@Validate<MyEntity>({ action: 'startsWith', target: 'Comment:', exposeValidatorResult: true }, 'comment')
    * /@Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
    * public async beforeCreate(
-   *   /@Req() req: TypedRequest<BookRecommendation>,
+   *   /@Req() req: Request<BookRecommendation>,
    *   /@ValidationResults() validator: ValidatorFlags<'endsWith' | 'startsWith'>,
    * ) {
    *   // validator will contain the results of 'isBoolean' and 'equals' validations

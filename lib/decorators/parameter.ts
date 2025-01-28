@@ -254,7 +254,7 @@ function Jwt(): ParameterDecorator {
  * /@Validate<MyEntity>({ action: 'isLowercase', exposeValidatorResult: true }, 'comment')
  * /@Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
  * public async beforeCreate(
- *   /@Req() req: TypedRequest<MyEntity>,
+ *   /@Req() req: Request<MyEntity>,
  *   /@ValidationResults() validator: ValidatorFlags<'isLowercase' | 'endsWith'>
  * ) {
  *   if (validator.isLowercase) {
@@ -284,7 +284,7 @@ function ValidationResults(): ParameterDecorator {
  *
  * ```typescript
  * public async someMethod(
- *   /@Req() req: TypedRequest<MyEntity>,
+ *   /@Req() req: Request<MyEntity>,
  *   /@Locale() locale: string
  * ) {
  *   if (locale === 'en-US') {
@@ -315,7 +315,7 @@ function Locale(): ParameterDecorator {
  * import { CDS_ENV } from '#dispatcher';
  *
  * public async someMethod(
- *   /@Req() req: TypedRequest<MyEntity>,
+ *   /@Req() req: Request<MyEntity>,
  *   /@Env<CDS_ENV>('requires.db.kind') dbKind: string
  * ) {
  *   if(dbKind) {
