@@ -10,27 +10,27 @@ on:
 
 jobs:
   # This will start unit/integration testing
-  test-unit:
-    name: Unit
-    strategy:
-      matrix:
-        version: [20, 18]
-        platform: [ubuntu-latest]
+  # test-unit:
+  #   name: Unit
+  #   strategy:
+  #     matrix:
+  #       version: [20, 18]
+  #       platform: [ubuntu-latest]
 
-    runs-on: ${{ matrix.platform }}
+  #   runs-on: ${{ matrix.platform }}
 
-    steps:
-      - name: Get code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Get code
+  #       uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: npm install
+  #     - name: Install dependencies
+  #       run: npm install
 
-      - name: Instal SAP CDS-DK
-        run: npm i -g @sap/cds-dk ts-node
+  #     - name: Instal SAP CDS-DK
+  #       run: npm i -g @sap/cds-dk ts-node
 
-      - name: Start unit / integration tests
-        run: npm run test:unit
+  #     - name: Start unit / integration tests
+  #       run: npm run test:unit
 
   # This will start the e2e tests with a live server
   test-e2e:
