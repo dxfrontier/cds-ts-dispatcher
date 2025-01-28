@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.0] - 2025-01-28
+
+### 🐛 Bug Fixes
+
+- *(request)* According to cds-types v9 `TypedRequest` was renamed to `Request`
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+- *(workflows)* Small modifications to release and tests
+- *(test)* Updates tests after renaming `TypedRequest` to `Request`
+- *(readme)* Changed `TypedRequest` to only `Request`
+- *(workflow)* Commented unit testing
+
 ## [3.2.7] - 2025-01-14
 
 ### 🐛 Bug Fixes
