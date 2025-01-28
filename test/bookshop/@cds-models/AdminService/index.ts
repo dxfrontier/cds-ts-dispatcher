@@ -22,7 +22,7 @@ export function _UserActivityLogAspect<TBase extends new (...args: any[]) => obj
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<UserActivityLog>;
     declare static readonly elements: __.ElementsOf<UserActivityLog>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -54,7 +54,7 @@ export function _PromotionAspect<TBase extends new (...args: any[]) => object>(B
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Promotion>;
     declare static readonly elements: __.ElementsOf<Promotion>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 export class Promotion extends _PromotionAspect(__.Entity) {static drafts: __.DraftOf<Promotion>}
@@ -80,7 +80,7 @@ export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: 
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<User>;
     declare static readonly elements: __.ElementsOf<User>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -102,10 +102,10 @@ Object.defineProperty(Users, 'name', { value: 'AdminService.Users' })
 
 export declare const sendMail:  {
   // positional
-  (request: _.HelloRequest | null): Promise<_.HelloResponse | null> | _.HelloResponse | null
+  (request: _.HelloRequest | null): globalThis.Promise<_.HelloResponse | null> | _.HelloResponse | null
   // named
-  ({request}: {request?: _.HelloRequest | null}): Promise<_.HelloResponse | null> | _.HelloResponse | null
+  ({request}: {request?: _.HelloRequest | null}): globalThis.Promise<_.HelloResponse | null> | _.HelloResponse | null
   // metadata (do not use)
-  __parameters: {request?: _.HelloRequest | null}, __returns: Promise<_.HelloResponse | null> | _.HelloResponse | null
+  __parameters: {request?: _.HelloRequest | null}, __returns: globalThis.Promise<_.HelloResponse | null> | _.HelloResponse | null
   kind: 'action'
 }

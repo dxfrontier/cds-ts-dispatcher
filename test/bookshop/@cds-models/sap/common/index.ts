@@ -10,7 +10,7 @@ export function _CodeListAspect<TBase extends new (...args: any[]) => object>(Ba
     static readonly kind: 'entity' | 'type' | 'aspect' = 'aspect';
     declare static readonly keys: __.KeysOf<CodeList>;
     declare static readonly elements: __.ElementsOf<CodeList>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 /**
@@ -34,7 +34,7 @@ export function _TextsAspectAspect<TBase extends new (...args: any[]) => object>
     static readonly kind: 'entity' | 'type' | 'aspect' = 'aspect';
     declare static readonly keys: __.KeysOf<TextsAspect>;
     declare static readonly elements: __.ElementsOf<TextsAspect>;
-    declare static readonly actions: Record<never, never>;
+    declare static readonly actions: globalThis.Record<never, never>;
   };
 }
 export class TextsAspect extends _TextsAspectAspect(__.Entity) {}
@@ -44,10 +44,12 @@ export function _LanguageAspect<TBase extends new (...args: any[]) => object>(Ba
   return class Language extends _CodeListAspect(Base) {
     /** Type for a language code */
     declare code?: __.Key<Locale>
+    declare texts?: __.Composition.of.many<Languages.texts>
+    declare localized?: __.Association.to<Languages.text> | null
     static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Language>;
     declare static readonly elements: __.ElementsOf<Language>;
-    declare static readonly actions: typeof CodeList.actions & Record<never, never>;
+    declare static readonly actions: typeof CodeList.actions & globalThis.Record<never, never>;
   };
 }
 /**
@@ -69,10 +71,12 @@ Object.defineProperty(Languages, 'name', { value: 'sap.common.Languages' })
 export function _CountryAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Country extends _CodeListAspect(Base) {
     declare code?: __.Key<string>
+    declare texts?: __.Composition.of.many<Countries.texts>
+    declare localized?: __.Association.to<Countries.text> | null
     static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Country>;
     declare static readonly elements: __.ElementsOf<Country>;
-    declare static readonly actions: typeof CodeList.actions & Record<never, never>;
+    declare static readonly actions: typeof CodeList.actions & globalThis.Record<never, never>;
   };
 }
 /**
@@ -96,10 +100,12 @@ export function _CurrencyAspect<TBase extends new (...args: any[]) => object>(Ba
     declare code?: __.Key<string>
     declare symbol?: string | null
     declare minorUnit?: number | null
+    declare texts?: __.Composition.of.many<Currencies.texts>
+    declare localized?: __.Association.to<Currencies.text> | null
     static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Currency>;
     declare static readonly elements: __.ElementsOf<Currency>;
-    declare static readonly actions: typeof CodeList.actions & Record<never, never>;
+    declare static readonly actions: typeof CodeList.actions & globalThis.Record<never, never>;
   };
 }
 /**
@@ -121,10 +127,12 @@ Object.defineProperty(Currencies, 'name', { value: 'sap.common.Currencies' })
 export function _TimezoneAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Timezone extends _CodeListAspect(Base) {
     declare code?: __.Key<string>
+    declare texts?: __.Composition.of.many<Timezones.texts>
+    declare localized?: __.Association.to<Timezones.text> | null
     static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Timezone>;
     declare static readonly elements: __.ElementsOf<Timezone>;
-    declare static readonly actions: typeof CodeList.actions & Record<never, never>;
+    declare static readonly actions: typeof CodeList.actions & globalThis.Record<never, never>;
   };
 }
 /**
@@ -142,3 +150,81 @@ Object.defineProperty(Timezone, 'is_singular', { value: true })
 */
 export class Timezones extends Array<Timezone> {$count?: number}
 Object.defineProperty(Timezones, 'name', { value: 'sap.common.Timezones' })
+
+export namespace Languages {
+  export function _textAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+    return class text extends _TextsAspectAspect(Base) {
+      declare name?: string | null
+      declare descr?: string | null
+      /** Type for a language code */
+      declare code?: __.Key<Locale>
+      static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+      declare static readonly keys: __.KeysOf<text> & typeof TextsAspect.keys;
+      declare static readonly elements: __.ElementsOf<text>;
+      declare static readonly actions: typeof TextsAspect.actions & globalThis.Record<never, never>;
+    };
+  }
+  export class text extends _textAspect(__.Entity) {}
+  Object.defineProperty(text, 'name', { value: 'sap.common.Languages.texts' })
+  Object.defineProperty(text, 'is_singular', { value: true })
+  export class texts extends Array<text> {$count?: number}
+  Object.defineProperty(texts, 'name', { value: 'sap.common.Languages.texts' })
+  
+}
+export namespace Countries {
+  export function _textAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+    return class text extends _TextsAspectAspect(Base) {
+      declare name?: string | null
+      declare descr?: string | null
+      declare code?: __.Key<string>
+      static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+      declare static readonly keys: __.KeysOf<text> & typeof TextsAspect.keys;
+      declare static readonly elements: __.ElementsOf<text>;
+      declare static readonly actions: typeof TextsAspect.actions & globalThis.Record<never, never>;
+    };
+  }
+  export class text extends _textAspect(__.Entity) {}
+  Object.defineProperty(text, 'name', { value: 'sap.common.Countries.texts' })
+  Object.defineProperty(text, 'is_singular', { value: true })
+  export class texts extends Array<text> {$count?: number}
+  Object.defineProperty(texts, 'name', { value: 'sap.common.Countries.texts' })
+  
+}
+export namespace Currencies {
+  export function _textAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+    return class text extends _TextsAspectAspect(Base) {
+      declare name?: string | null
+      declare descr?: string | null
+      declare code?: __.Key<string>
+      static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+      declare static readonly keys: __.KeysOf<text> & typeof TextsAspect.keys;
+      declare static readonly elements: __.ElementsOf<text>;
+      declare static readonly actions: typeof TextsAspect.actions & globalThis.Record<never, never>;
+    };
+  }
+  export class text extends _textAspect(__.Entity) {}
+  Object.defineProperty(text, 'name', { value: 'sap.common.Currencies.texts' })
+  Object.defineProperty(text, 'is_singular', { value: true })
+  export class texts extends Array<text> {$count?: number}
+  Object.defineProperty(texts, 'name', { value: 'sap.common.Currencies.texts' })
+  
+}
+export namespace Timezones {
+  export function _textAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+    return class text extends _TextsAspectAspect(Base) {
+      declare name?: string | null
+      declare descr?: string | null
+      declare code?: __.Key<string>
+      static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+      declare static readonly keys: __.KeysOf<text> & typeof TextsAspect.keys;
+      declare static readonly elements: __.ElementsOf<text>;
+      declare static readonly actions: typeof TextsAspect.actions & globalThis.Record<never, never>;
+    };
+  }
+  export class text extends _textAspect(__.Entity) {}
+  Object.defineProperty(text, 'name', { value: 'sap.common.Timezones.texts' })
+  Object.defineProperty(text, 'is_singular', { value: true })
+  export class texts extends Array<text> {$count?: number}
+  Object.defineProperty(texts, 'name', { value: 'sap.common.Timezones.texts' })
+  
+}

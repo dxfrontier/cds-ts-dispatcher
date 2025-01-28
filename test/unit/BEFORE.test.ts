@@ -6,21 +6,21 @@ import { EntityHandler } from '../../lib/index';
 import { HandlerType } from '../../lib/types/enum';
 import { BookEvent } from '../bookshop/@cds-models/CatalogService';
 
-import type { CRUD_EVENTS, TypedRequest } from '../../lib/types/types';
+import type { CRUD_EVENTS, Request } from '../../lib/types/types';
 
 @EntityHandler(BookEvent)
 class BookEventHandler {
   @BeforeCreate()
-  public async beforeCreateMethod(req: TypedRequest<BookEvent>) {}
+  public async beforeCreateMethod(req: Request<BookEvent>) {}
 
   @BeforeRead()
-  public async beforeReadMethod(req: TypedRequest<BookEvent>) {}
+  public async beforeReadMethod(req: Request<BookEvent>) {}
 
   @BeforeUpdate()
-  public async beforeUpdateMethod(req: TypedRequest<BookEvent>) {}
+  public async beforeUpdateMethod(req: Request<BookEvent>) {}
 
   @BeforeDelete()
-  public async beforeDeleteMethod(req: TypedRequest<BookEvent>) {}
+  public async beforeDeleteMethod(req: Request<BookEvent>) {}
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

@@ -9,12 +9,11 @@ import {
   EntityHandler,
   Inject,
   Req,
-  Request,
   RequestResponse,
   Res,
   Service,
   SingleInstanceSwitch,
-  TypedRequest,
+  Request,
 } from '../../../../../../lib';
 import { Review } from '../../../../@cds-models/CatalogService';
 import ReviewService from '../../../service/ReviewService';
@@ -30,17 +29,17 @@ class ReviewHandler {
   }
 
   @BeforeCreate()
-  private async beforeCreate(@Req() req: TypedRequest<Review>) {
+  private async beforeCreate(@Req() req: Request<Review>) {
     this.reviewService.validateComment(req);
   }
 
   @BeforeRead()
-  private async beforeRead(@Req() req: TypedRequest<Review>, @SingleInstanceSwitch() isSingleInstance: boolean) {
+  private async beforeRead(@Req() req: Request<Review>, @SingleInstanceSwitch() isSingleInstance: boolean) {
     this.reviewService.notifyRead(req);
   }
 
   @BeforeUpdate()
-  private async beforeUpdate(@Req() req: TypedRequest<Review>) {
+  private async beforeUpdate(@Req() req: Request<Review>) {
     this.reviewService.validateComment(req);
   }
 

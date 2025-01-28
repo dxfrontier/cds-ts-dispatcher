@@ -22,7 +22,6 @@ import {
   Results,
   Service,
   SingleInstanceSwitch,
-  TypedRequest,
   Use,
   AfterReadEachInstance,
   Jwt,
@@ -85,7 +84,7 @@ class BookHandler {
 
   @BeforeRead()
   @Use(MiddlewareMethodBeforeRead)
-  private async beforeRead(@Req() req: TypedRequest<Book>): Promise<void> {
+  private async beforeRead(@Req() req: Request<Book>): Promise<void> {
     this.bookService.showConsoleLog();
   }
 
@@ -117,7 +116,7 @@ class BookHandler {
   }
 
   @AfterUpdate()
-  private async afterUpdate(@Result() result: Book, @Req() req: TypedRequest<Book>): Promise<void> {
+  private async afterUpdate(@Result() result: Book, @Req() req: Request<Book>): Promise<void> {
     await this.bookService.addDefaultTitleText(result, req);
   }
 

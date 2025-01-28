@@ -20,44 +20,44 @@ import { HandlerType } from '../../lib/types/enum';
 import { BaseHandler } from '../../lib/types/internalTypes';
 import { BookEvent } from '../bookshop/@cds-models/CatalogService';
 
-import type { CRUD_EVENTS, DRAFT_EVENTS, TypedRequest, Request } from '../../lib/types/types';
+import type { CRUD_EVENTS, DRAFT_EVENTS, Request } from '../../lib/types/types';
 @EntityHandler(BookEvent)
 class BookEventsHandler {
   @OnNewDraft()
   public async onNewDraftMethod(req: Request, next: Function) {}
 
   @OnCancelDraft()
-  public async onCancelDraft(req: TypedRequest<Request>, next: Function) {}
+  public async onCancelDraft(req: Request<Request>, next: Function) {}
 
   @OnEditDraft()
   public async onEditDraft(req: Request, next: Function) {}
 
   @OnSaveDraft()
-  public async onSaveDraft(req: TypedRequest<Request>, next: Function) {}
+  public async onSaveDraft(req: Request<Request>, next: Function) {}
 
   @BeforeNewDraft()
   public async beforeNewDraftMethod(req: Request) {}
 
   @BeforeCancelDraft()
-  public async beforeCancelDraft(req: TypedRequest<Request>) {}
+  public async beforeCancelDraft(req: Request<Request>) {}
 
   @BeforeEditDraft()
   public async beforeEditDraft(req: Request) {}
 
   @BeforeSaveDraft()
-  public async beforeSaveDraft(req: TypedRequest<Request>) {}
+  public async beforeSaveDraft(req: Request<Request>) {}
 
   @AfterNewDraft()
   public async afterNewDraftMethod(results: BookEvent, req: Request) {}
 
   @AfterCancelDraft()
-  public async afterCancelDraft(results: BookEvent, req: TypedRequest<Request>) {}
+  public async afterCancelDraft(results: BookEvent, req: Request<Request>) {}
 
   @AfterEditDraft()
   public async afterEditDraft(results: BookEvent, req: Request) {}
 
   @AfterSaveDraft()
-  public async afterSaveDraft(results: BookEvent, req: TypedRequest<Request>) {}
+  public async afterSaveDraft(results: BookEvent, req: Request<Request>) {}
 }
 
 const newBookEvents = (BookEvents: Constructable) => new BookEvents();
