@@ -165,7 +165,6 @@ npm install @dxfrontier/cds-ts-dispatcher
 ```json
 {
   "compilerOptions": {
-    /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": true,
@@ -176,10 +175,8 @@ npm install @dxfrontier/cds-ts-dispatcher
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
 
-    /* Strictness */
     "strict": true,
 
-    /* Decorators */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
@@ -257,7 +254,6 @@ tsc --init
 ```json
 {
   "compilerOptions": {
-    /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": true,
@@ -268,10 +264,8 @@ tsc --init
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
 
-    /* Strictness */
     "strict": true,
 
-    /* Decorators */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
@@ -583,21 +577,6 @@ export class BookHandler {
   // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
 }
 ```
-
-`Example 2` using `*` wildcard indicating that events will be triggered for all entities
-
-```typescript
-import { EntityHandler, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES) // or use the '*'
-export class BookHandler {
-  // ...
-  constructor() {}
-  // All events like @AfterRead, @BeforeRead, ... will be triggered on all entities using wildcard '*'
-}
-```
-
 > [!TIP]
 > After creation of `BookHandler` class, you can `import it` into the [CDSDispatcher](#cdsdispatcher).
 >
@@ -611,6 +590,33 @@ export class BookHandler {
 >   // ...
 > ]).initialize();
 > ```
+
+`Example 2` using `*` wildcard indicating that events will be triggered for all entities
+
+```typescript
+import { EntityHandler, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
+
+@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES) // or use the '*'
+export class AllEntities {
+  // ...
+  constructor() {}
+  // All events like @AfterRead, @BeforeRead, ... will be triggered on all entities using wildcard '*'
+}
+```
+> [!TIP]
+> After creation of `AllEntities` class, you can `import it` into the [CDSDispatcher](#cdsdispatcher).
+>
+> ```typescript
+> import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
+>
+> export = new CDSDispatcher([
+>   // Entities
+>   AllEntities,
+>   // Unbound actions
+>   // ...
+> ]).initialize();
+> ```
+
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
