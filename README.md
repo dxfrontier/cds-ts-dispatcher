@@ -25,12 +25,10 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
   - [`Option 1 :` Install CDS-TS-Dispatcher - `New project`](#option-1--install-cds-ts-dispatcher---new-project)
-    - [`Using:` @sap/cds `v8`](#using-sapcds-v8)
-    - [`Using:` @sap/cds `v7`](#using-sapcds-v7)
-    - [`Migration:` from @sap/cds `v7` to `v8`](#migration-from-sapcds-v7-to-v8)
   - [`Option 2 :` Install CDS-TS-Dispatcher - `Existing project`](#option-2--install-cds-ts-dispatcher---existing-project)
   - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
     - [`Important`](#important)
+  - [`Migration:` from @sap/cds `v7` to `v8`](#migration-from-sapcds-v7-to-v8)
 - [Usage](#usage)
   - [`Architecture`](#architecture)
   - [`CDSDispatcher`](#cdsdispatcher)
@@ -112,6 +110,8 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@FieldsFormatter](#fieldsformatter)
       - [@ExecutionAllowedForRole](#executionallowedforrole)
       - [@Use](#use-1)
+      - [@CatchAndSetErrorCode](#catchandseterrorcode)
+      - [@CatchAndSetErrorMessage](#catchandseterrormessage)
 - [`Deployment` to BTP using MTA](#deployment-to-btp-using-mta)
 - [`Best practices` \& `tips`](#best-practices--tips)
 - [`Samples`](#samples)
@@ -131,7 +131,7 @@ npm install -g @sap/cds-dk typescript ts-node
 
 ### `Option 1 :` Install CDS-TS-Dispatcher - `New project`
 
-#### `Using:` @sap/cds `v8`
+<!-- #### `Using:` @sap/cds `v8` -->
 
 Use the following steps if you want to create a new **SAP CAP project.**
 
@@ -212,166 +212,6 @@ cds-ts w
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Using:` @sap/cds `v7`
-
-Use the following steps if you want to create a new **SAP CAP project.**
-
-1. Create new folder :
-
-```bash
-mkdir new-sap-cap-project
-cd new-sap-cap-project
-```
-
-2. Initialize the CDS folder structure :
-
-```bash
-cds init
-```
-
-3. Add [CDS-Typer](#generate-cds-typed-entities) to your npm package.json:
-
-```bash
-cds add typer
-npm install
-```
-
-4. Add the the following NPM packages :
-
-```bash
-npm install @dxfrontier/cds-ts-dispatcher@2
-npm install --save-dev @types/node
-```
-
-5. Add a **tsconfig.json** :
-
-```bash
-tsc --init
-```
-
-6. It is recommended to use the following **tsconfig.json** properties:
-
-```json
-{
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowJs": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": false,
-    "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true,
-
-    "strict": true,
-
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-
-    "target": "ES2021",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-
-    "outDir": "./gen/srv",
-    "rootDir": ".",
-
-    "paths": {
-      "#cds-models/*": ["./@cds-models/*/index.ts"]
-    }
-  },
-  "include": ["./srv", "./@dispatcher"]
-}
-
-```
-
-7. Run the `CDS-TS` server
-
-```bash
-cds-ts watch
-```
-
-#### `Migration:` from @sap/cds `v7` to `v8`
-
-Use the following steps if you want to migrate from `@sap/cds@7` to `@sap/cds@8`:
-
-1. Verify you've installed the `cds@v8` globally by running the following command:
-
-```bash
-cds -v -i
-```
-
-| packages | version                        |
-| ---------------------- | ------------------------------------------------------------------------------ |
-| @cap-js/asyncapi       | 1.0.1                                                                          |
-| @cap-js/cds-typer      | 0.24.0                                                                         |
-| @cap-js/cds-types      | 0.6.4                                                                          |
-| @cap-js/openapi        | 1.0.4                                                                          |
-| @cap-js/sqlite         | 1.7.3                                                                          |
-| `@sap/cds`               | `8.1.0`                                                                          |
-| @sap/cds-compiler      | 5.1.2                                                                          |
-| `@sap/cds-dk (global)`   | `8.0.2`                                                                          |
-| @sap/cds-fiori         | 1.2.7                                                                          |
-| @sap/cds-foss          | 5.0.1                                                                          |
-| @sap/cds-lsp           | 8.0.0                                                                          |
-| @sap/cds-mtxs          | 1.18.2                                                                         |
-| @sap/eslint-plugin-cds | 3.0.4                                                                          |
-| Node.js                | v22.4.1                                                                        |
-
-> [!TIP]
-> If you see a smaller version than `@sap/cds-dk (global)` `8.0.2` run the following command :
->
-> ```bash
-> npm install -g @sap/cds-dk@latest
-> ```
-
-2. Run the following command inside of your project:
-
-```bash
-cds add typescript
-```
-
-> [!TIP]
-> Command above will add the following packages:
->
-> - `@types/node`
-> - `@cap-js/cds-types`
-> - `@cap-js/cds-typer`
-> - `typescript`
-
-3. After running command above the `package.json` will look similar to :
-
-```json
-{
-  "dependencies": {
-    "@dxfrontier/cds-ts-dispatcher": "^3.0.0",
-    "@dxfrontier/cds-ts-repository": "^1.1.3",
-    "@sap/cds": "^8.1.0",
-    "express": "^4.19.2"
-  },
-  "devDependencies": {
-    "@cap-js/sqlite": "^1.7.3",
-    "@cap-js/cds-types": "^0.6.4",
-    "typescript": "^5.5.4",
-    "@types/node": "^22.1.0",
-    "@cap-js/cds-typer": ">=0.24.0"
-  },
-  "scripts": {
-    "start": "cds-serve",
-    "watch": "cds-ts w",
-  },
-}
-```
-
-> [!IMPORTANT]
-> You might delete the `node_modules` folder and `package-lock.json` in case `npm run watch` fails working.
->
-> Re-run the following command :
->
-> ```bash
-> npm install
-> ```
-
 ### `Option 2 :` Install CDS-TS-Dispatcher - `Existing project`
 
 Use the following steps if you want to add only the **@dxfrontier/cds-ts-dispatcher to an existing project :**
@@ -385,7 +225,6 @@ It is recommended to use the following **tsconfig.json** properties:
 ```json
 {
   "compilerOptions": {
-    /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": true,
@@ -397,7 +236,6 @@ It is recommended to use the following **tsconfig.json** properties:
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
-    /* Allow decorators */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
@@ -482,6 +320,86 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 > - **`import { Book } from '#cds-models/CatalogService';`**
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+### `Migration:` from @sap/cds `v7` to `v8`
+
+Use the following steps if you want to migrate from `@sap/cds@7` to `@sap/cds@8`:
+
+1. Verify you've installed the `cds@v8` globally by running the following command:
+
+```bash
+cds -v -i
+```
+
+| packages | version                        |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| @cap-js/asyncapi       | 1.0.1                                                                          |
+| @cap-js/cds-typer      | 0.24.0                                                                         |
+| @cap-js/cds-types      | 0.6.4                                                                          |
+| @cap-js/openapi        | 1.0.4                                                                          |
+| @cap-js/sqlite         | 1.7.3                                                                          |
+| `@sap/cds`               | `8.1.0`                                                                          |
+| @sap/cds-compiler      | 5.1.2                                                                          |
+| `@sap/cds-dk (global)`   | `8.0.2`                                                                          |
+| @sap/cds-fiori         | 1.2.7                                                                          |
+| @sap/cds-foss          | 5.0.1                                                                          |
+| @sap/cds-lsp           | 8.0.0                                                                          |
+| @sap/cds-mtxs          | 1.18.2                                                                         |
+| @sap/eslint-plugin-cds | 3.0.4                                                                          |
+| Node.js                | v22.4.1                                                                        |
+
+> [!TIP]
+> If you see a smaller version than `@sap/cds-dk (global)` `8.0.2` run the following command :
+>
+> ```bash
+> npm install -g @sap/cds-dk@latest
+> ```
+
+2. Run the following command inside of your project:
+
+```bash
+cds add typescript
+```
+
+> [!TIP]
+> Command above will add the following packages:
+>
+> - `@types/node`
+> - `@cap-js/cds-types`
+> - `@cap-js/cds-typer`
+> - `typescript`
+
+3. After running command above the `package.json` will look similar to :
+
+```json
+{
+  "dependencies": {
+    "@dxfrontier/cds-ts-dispatcher": "^4.0.0",
+    "@dxfrontier/cds-ts-repository": "^5.1.6",
+    "@sap/cds": "^8.7.2"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1.8.0",
+    "@cap-js/cds-types": "^0.9.0",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.1.0",
+    "@cap-js/cds-typer": "0.33.0"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds-ts w",
+  },
+}
+```
+
+> [!IMPORTANT]
+> You might delete the `node_modules` folder and `package-lock.json` in case `npm run watch` fails working.
+>
+> Re-run the following command :
+>
+> ```bash
+> npm install
+> ```
 
 ## Usage
 
@@ -805,7 +723,7 @@ Middleware decorators can perform the following tasks:
 
 - `...Middleware[])`: Middleware classes to be injected.
 
-`Example:` middleware implementation
+`Example:` middleware implementation:
 
 ```typescript
 import type { MiddlewareImpl, NextMiddleware, Request } from '@dxfrontier/cds-ts-dispatcher';
@@ -819,7 +737,11 @@ export class MiddlewareClass implements MiddlewareImpl {
 }
 ```
 
-`Example` usage
+> [!TIP]
+>
+> Inside of the decorator `use` method you can use [@CatchAndSetErrorCode](#errorcode) and [@CatchAndSetErrorMessage](#errormessage) decorators.
+
+`Example` usage:
 
 ```typescript
 import { EntityHandler, Use, Inject, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
@@ -3378,7 +3300,7 @@ The `@Validate` decorator is useful when you need to `validate` the `Request`.`d
   - **`exposeValidatorResult`** (boolean):  
     Determines if the validator results are captured and passed to the method as parameters.
 
-    - If `true`, the validator results (e.g., `ValidatorFlags<'isBoolean' | 'equals'>`) will be available as a parameter in the method.
+    - If `true`, the validator results (e.g., `ValidatorFlags<'endsWith' | 'isEmail'>`) will be available as a parameter in the method.
     - To use this, apply the `@ValidationResults` decorator to the method parameter where you want the validator flags injected.
 
     **Default:** `false`
@@ -3387,12 +3309,17 @@ The `@Validate` decorator is useful when you need to `validate` the `Request`.`d
 
     ```typescript
     @Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
+    @Validate<MyEntity>({ action: 'isEmail', exposeValidatorResult: true }, 'description')
     public async beforeCreate(
       @Req() req: Request<MyEntity>,
-      @ValidationResults() validator: ValidatorFlags<'isBoolean' | 'equals'>,
+      @ValidationResults() validator: ValidatorFlags<'endsWith' | 'isEmail'>,
     ) {
-      if (validator.isBoolean) {
-        // logic based on validation result
+      if (validator.endsWith) {
+        // logic based on validation result endsWith
+      }
+
+      if (validator.isEmail) {
+        // logic based on validation result isEmail
       }
     }
     ```
@@ -3608,7 +3535,7 @@ class UnboundActionsHandler {
 
 **@FieldsFormatter\<T\>({ action, options? }, ...fields: Array\<keyof T>)**
 
-The `@FieldsFormatter` is used as a `method level` decorator to `modify`/`enhance` fields.
+The `@FieldsFormatter` is used as a `method` decorator to `modify`/`enhance` fields.
 
 The `@FieldsFormatter` decorator can be used on the following decorators :
 
@@ -3801,7 +3728,7 @@ class UnboundActionsHandler {
 
 **@ExecutionAllowedForRole(...roles: string[])**
 
-The `@ExecutionAllowedForRole` is used as a `method level` decorator and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
+The `@ExecutionAllowedForRole` is used as a `method` decorator and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
 
 It applies an logical `OR` on the specified **_roles_**, meaning it checks if at `least one` of the specified roles is assigned to the current request, then the execution will be allowed.
 
@@ -3843,7 +3770,7 @@ Middleware decorators can perform the following tasks:
 
 - `...Middleware[])`: Middleware classes to be injected.
 
-`Example:` middleware implementation
+`Example:` middleware implementation:
 
 ```typescript
 import type { MiddlewareImpl, NextMiddleware, Request } from '@dxfrontier/cds-ts-dispatcher';
@@ -3857,7 +3784,12 @@ export class MiddlewareClass implements MiddlewareImpl {
 }
 ```
 
-`Example` usage
+> [!TIP]
+>
+> Inside of the `use` method you can use [@CatchAndSetErrorCode](#errorcode) and [@CatchAndSetErrorMessage](#errormessage) decorators if you want to catch errors.
+
+
+`Example` usage:
 
 ```typescript
 import { EntityHandler, Use, Inject, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
@@ -3888,11 +3820,192 @@ export class CustomerHandler {
 > 1. Middlewares when applied with `@Use` are executed before the normal events.
 > 2. If you need to apply middleware to `class` you can have a look over class specific [@Use](#use) decorator .
 
+> 
 > [!WARNING]
 > If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @CatchAndSetErrorCode
+
+**@CatchAndSetErrorCode(newStatusCode: string)**
+
+The `@CatchAndSetErrorCode` decorator is a `method` decorator that automatically `catches errors` and assigns a new `status code` to the response. It eliminates the need for `explicit try-catch` blocks within the method, ensuring consistent error handling across your service.
+
+`Parameters`
+
+- `newStatusCode` - The status code to return when an error occurs, replacing the original error code.
+
+`Example 1`
+
+In the example below, we call a web service `(await axios.get('https://jsonplaceholder.typicode'))` which always throws a `500 Internal Server Error`, by using `@CatchAndSetErrorCode('BAD_REQUEST-400')`, we overwrite the default `500 Internal Server Error` with `400 Bad Request`.
+
+```typescript
+@AfterRead()
+@CatchAndSetErrorCode('BAD_REQUEST-400') // <== Catch all errors and overwrite with `BAD REQUEST 400`
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: Book[],
+): Promise<void> {
+
+  // No need to wrap the service with a try-catch
+  await axios.get('https://jsonplaceholder.typicode'); // <== Throw 500 Internal Server Error
+}
+```
+
+`Example 2`
+
+In the example below, we stack 2 decorators
+- `@CatchAndSetErrorCode`
+- `@CatchAndSetErrorMessage`
+
+as a result the second `@CatchAndSetErrorMessage` decorator will not be executed due to the stop of execution of the first `@CatchAndSetErrorCode` decorator
+
+
+
+
+```typescript
+@AfterRead()
+@CatchAndSetErrorCode('BAD_REQUEST-400') // <== Catch all errors and overwrite with `BAD REQUEST 400`
+@CatchAndSetErrorMessage('The new message of the error') // <== This will not be executed !!
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: Book[],
+): Promise<void> {
+
+  // No need to wrap the service with a try-catch.
+  await axios.get('https://jsonplaceholder.typicode'); // <== This service will throw a 500 Internal Server Error
+}
+```
+
+`Example 3`
+
+In this example we added `@CatchAndSetErrorCode` decorator to throw a new custom message to the [`use` method of @Use](#use-1) middleware.
+
+
+```typescript
+import { CatchAndSetErrorCode } from '@dxfrontier/cds-ts-dispatcher';
+import type { MiddlewareImpl, NextMiddleware, Request } from '@dxfrontier/cds-ts-dispatcher'
+
+import type { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+export class Middleware1 implements MiddlewareImpl {
+  @CatchAndSetErrorCode('New error message')
+  public async use(req: Request<MyEntity>, next: NextMiddleware): Promise<void> {
+    // ...
+    await next();
+  }
+}
+```
+then use it inside of `MyHandler` class
+
+```typescript
+import { EntityHandler, Use, AfterRead, Results, Req, Request} from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+import { Middleware1 } from 'YOUR_MIDDLEWARE_LOCATION';
+
+@EntityHandler(MyEntity)
+@Use(Middleware1) // <== Add Middleware1 
+export class MyHandler {
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  @Use(Middleware1) // <== Or use it as method middleware
+  private async aMethod(@Results() results: MyEntity[], @Req() req: Request) {
+    // ...
+  }
+}
+```
+
+> [!TIP]
+> Decorators [`@CatchAndSetErrorCode`](#errorcode) and [`@CatchAndSetErrorMessage`](#errormessage) can be used in [`use` method of @Use](#use-1) middleware and class [`use` method of @Use](#use) middleware.
+
+> [!TIP]
+> Always stack [`@CatchAndSetErrorCode`](#errorcode) and [`@CatchAndSetErrorMessage`](#errormessage) decorators `last` `(at the bottom of the of the method)` so that other decorators are executed. 
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @CatchAndSetErrorMessage
+
+
+**CatchAndSetErrorMessage(newMessage: string, newStatusCode?: keyof StatusCodeMapping)**
+
+The `@CatchAndSetErrorMessage` decorator is a `method` decorator that automatically `catches errors` and assigns a new `message` and a new `error code` to the response. It eliminates the need for `explicit try-catch` blocks within the method, ensuring consistent error handling across your service.
+
+`Parameters`
+
+- `newMessage` - The message to return when an error occurs, placing the original error message.
+- `newStatusCode?` `[optional]` - The status code to return when an error occurs, replacing the original error code.
+
+`Example 1`
+
+In this example, we fetch user data from an `external API`. If the API call fails, we replace the error message and return a `404 Not Found response`.
+
+```typescript
+import { Req, CatchAndSetErrorMessage, OnUpdate } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnUpdate()
+@CatchAndSetErrorMessage('User data could not be retrieved', 'NOT_FOUND-404') 
+private async onUpdate(@Req() req: Request<MyEntity>): Promise<MyEntity> {
+  const userId = req.data.ID;
+  
+  const response = await axios.get(`https://jsonplaceholder.typicode.com/users/${userId}`); // <=== No need to explicitly catch in a try-catch statement, @CatchAndSetErrorMessage will take care of that.
+}
+```
+
+`Example 2`
+
+In this example we added `@CatchAndSetErrorMessage` decorator to throw a new custom message to the [@Use - method](#use-1) of a middleware.
+
+
+```typescript
+import { CatchAndSetErrorMessage } from '@dxfrontier/cds-ts-dispatcher';
+import type { MiddlewareImpl, NextMiddleware, Request } from '@dxfrontier/cds-ts-dispatcher'
+
+import type { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+export class Middleware1 implements MiddlewareImpl {
+  @CatchAndSetErrorMessage('New error message')
+  public async use(req: Request<MyEntity>, next: NextMiddleware): Promise<void> {
+    // ...
+    await next();
+  }
+}
+```
+then use it inside of `MyHandler` class
+
+```typescript
+import { EntityHandler, Use, AfterRead, Results, Req, Request} from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+import { Middleware1 } from 'YOUR_MIDDLEWARE_LOCATION';
+
+@EntityHandler(MyEntity)
+@Use(Middleware1) // <== Add Middleware1 
+export class MyHandler {
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  @Use(Middleware1) // <== Or use it as method middleware
+  private async aMethod(@Results() results: MyEntity[], @Req() req: Request) {
+    // ...
+  }
+}
+```
+
+> [!TIP]
+> Always stack [`@CatchAndSetErrorCode`](#errorcode) and [`@CatchAndSetErrorMessage`](#errormessage) decorators `last` `(at the bottom of the of the method)` so that other decorators are executed. 
+
+> [!TIP]
+> Decorators [`@CatchAndSetErrorCode`](#errorcode) and [`@CatchAndSetErrorMessage`](#errormessage) can be used in [`use` method of @Use](#use-1) middleware and class [`use` method of @Use](#use) middleware.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -3910,20 +4023,20 @@ npm i -g mbt
 cds add mta
 ```
 
-2. Install `npm-run-all` package:
+2. Install `npm-run-all` and `rimraf` packages:
 
 ```bash
-npm install --save-dev npm-run-all
+npm install --save-dev npm-run-all rimraf
 ```
 
 3. Modify your `package.json` by adding the following `scripts`:
 
 ```json
-"build:cds": "echo 'STEP 1 : Build CDS' && cds build --production",
-"build:ts": "echo 'STEP 2 : Transpile TS => JS' && tsc",
-"build:srv:clean:ts": "echo 'Step 3: Clean TS files from srv folder' && find gen/srv/srv -type f -name '*.ts' -delete",
+"build:cds": "cds build --production",
+"build:ts": "tsc",
+"build:srv:clean:ts": "rimraf --glob 'gen/srv/srv/**/*.ts'",
 
-"build:production": "run-s build:cds build:ts build:srv:clean:ts"
+"build": "run-s build:cds build:ts build:srv:clean:ts"
 ```
 
 4. Modify `mta.yaml` as follows :
@@ -3932,14 +4045,14 @@ npm install --save-dev npm-run-all
 - builder: custom
   commands:
     - npm ci
-    - npm run build:production
+    - npm run build
     - npx @cap-js/cds-typer "*" --outputDirectory gen/srv/@cds-models
 ```
 
 `Steps` explained :
 
 - `npm ci` - Will do a clean install
-- `npm run build:production` - will run the package.json script command for CDS build and transpilation of TS to JS and clean the `TS files`.
+- `npm run build` - will run the package.json script command for CDS build and transpilation of TS to JS and clean the `TS files`.
 - `npx @cap-js/cds-typer "*" --outputDirectory gen/srv/@cds-models` - will make sure the @cds-models are generated.
 
 5. Install [**MTA Build tool**](https://cap.cloud.sap/docs/get-started/) globally:

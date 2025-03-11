@@ -24,7 +24,62 @@ import type {
 
 import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
-import type { Constructable, PrependBase, PrependBaseDraft } from '../types/internalTypes';
+import type { Constructable, PrependBase, PrependBaseDraft, StatusCodeMapping } from '../types/internalTypes';
+
+/**
+ * Use `CatchAndSetErrorCode` decorator to `catch errors` and assigns a `new status code` to the response.
+ * @param newStatusCode - The new status code to use when an error occurs.
+ * @example
+ * "CatchAndSetErrorCode('BAD_REQUEST-400')"
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#errorCode | CDS-TS-Dispatcher - @CatchAndSetErrorCode}
+ */
+function CatchAndSetErrorCode(newStatusCode: keyof StatusCodeMapping) {
+  return function (_: object, __: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (...args: any[]) {
+      const req = util.findRequest(args);
+
+      try {
+        return await decoratorsUtil.handleAsyncErrors(originalMethod.bind(this, ...args), req);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error: any) {
+        return decoratorsUtil.handleError({ req, code: newStatusCode });
+      }
+    };
+
+    return descriptor;
+  };
+}
+
+/**
+ * Use `CatchAndSetErrorMessage` to `catch errors` and to provide a `custom error message` along with an `optional` `status code`.
+ * @param newMessage - The custom error message to return.
+ * @param newStatusCode - (Optional) The new status code to use. If not provided, the original status code is retained.
+ * @example
+ * "CatchAndSetErrorMessage('Bad request of the call', 'BAD_REQUEST-400')"
+ * or
+ * "CatchAndSetErrorMessage('Bad request of the call')"
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#onerrormessage | CDS-TS-Dispatcher - @CatchAndSetErrorMessage}
+ */
+function CatchAndSetErrorMessage(newMessage: string, newStatusCode?: keyof StatusCodeMapping) {
+  return function (_: object, __: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (...args: any[]) {
+      const req = util.findRequest(args);
+
+      try {
+        return await decoratorsUtil.handleAsyncErrors(originalMethod.bind(this, ...args), req);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error: any) {
+        return decoratorsUtil.handleError({ req, message: newMessage, code: newStatusCode });
+      }
+    };
+
+    return descriptor;
+  };
+}
 
 /**
  * Use `@PrependDraft` decorator to register an event handler to run before existing ones.
@@ -894,6 +949,8 @@ export {
   SingleInstanceCapable,
   Validate,
   FieldsFormatter,
+  CatchAndSetErrorMessage,
+  CatchAndSetErrorCode,
   // ========================================================================================================================================================
   // BEFORE events - Active entity
   BeforeAll,

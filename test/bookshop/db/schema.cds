@@ -41,6 +41,8 @@ entity Books : managed {
       bookRecomanddations : Association to many BookRecommendations
                               on bookRecomanddations.book = $self;
 
+      series              : Association to BookSeries;
+
 }
 
 entity Publishers : managed {
@@ -103,6 +105,30 @@ entity BookSales : managed {
       // Associations
       book       : Association to Books;
       customer   : Association to Users;
+}
+
+entity Wishlists : managed {
+  key ID      : Integer;
+      user    : Association to Users; // Associated user
+      book    : Association to Books; // Book added to wishlist
+      addedAt : DateTime; // Timestamp when added
+}
+
+entity ShoppingCart : managed {
+  key ID       : Integer;
+      user     : Association to Users; // User who owns the cart
+      book     : Association to Books; // Book in cart
+      quantity : Integer @mandatory; // Quantity selected
+      addedAt  : DateTime; // When item was added
+      notes    : String(500); // Optional gift notes/special requests
+}
+
+entity BookSeries : managed {
+  key ID          : Integer;
+      name        : String(255) @mandatory; // Name of the series
+      description : String(1000);
+      books       : Association to many Books
+                      on books.series = $self;
 }
 
 

@@ -1,16 +1,14 @@
 // This is an automatically generated file. Please do not change its contents manually!
-import cds from '@sap/cds'
 import * as _ from './..';
 import * as __ from './../_';
 import * as _sap_capire_bookshop from './../sap/capire/bookshop';
 import * as _sap_common from './../sap/common';
 
-export class CatalogService extends cds.Service {
-  declare changeBookProperties: typeof changeBookProperties
-  declare submitOrder: typeof submitOrder
-  declare submitOrderFunction: typeof submitOrderFunction
+export default class {
+  declare static readonly changeBookProperties: typeof changeBookProperties;
+  declare static readonly submitOrder: typeof submitOrder;
+  declare static readonly submitOrderFunction: typeof submitOrderFunction;
 }
-export default CatalogService
 
 export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Book extends Base {
@@ -41,6 +39,8 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
     declare stats?: __.Association.to<BookStat> | null
     declare bookFormats?: __.Association.to.many<BookFormats>
     declare bookRecomanddations?: __.Association.to.many<BookRecommendations>
+    declare series?: __.Association.to<BookSery> | null
+    declare series_ID?: number | null
     declare texts?: __.Composition.of.many<Books.texts>
     declare localized?: __.Association.to<Books.text> | null
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
@@ -321,6 +321,114 @@ Object.defineProperty(BookSale, 'is_singular', { value: true })
 */
 export class BookSales extends Array<BookSale> {$count?: number}
 Object.defineProperty(BookSales, 'name', { value: 'CatalogService.BookSales' })
+
+export function _WishlistAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class Wishlist extends Base {
+    declare createdAt?: __.CdsTimestamp | null
+    /** Canonical user ID */
+    declare createdBy?: _.User | null
+    declare modifiedAt?: __.CdsTimestamp | null
+    /** Canonical user ID */
+    declare modifiedBy?: _.User | null
+    declare ID?: __.Key<number>
+    declare user?: __.Association.to<_sap_capire_bookshop.User> | null
+    declare user_ID?: number | null
+    declare book?: __.Association.to<Book> | null
+    declare book_ID?: number | null
+    declare addedAt?: __.CdsDateTime | null
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<Wishlist>;
+    declare static readonly elements: __.ElementsOf<Wishlist>;
+    declare static readonly actions: globalThis.Record<never, never>;
+  };
+}
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class Wishlist extends _WishlistAspect(__.Entity) {}
+Object.defineProperty(Wishlist, 'name', { value: 'CatalogService.Wishlists' })
+Object.defineProperty(Wishlist, 'is_singular', { value: true })
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class Wishlists extends Array<Wishlist> {$count?: number}
+Object.defineProperty(Wishlists, 'name', { value: 'CatalogService.Wishlists' })
+
+export function _ShoppingCartAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class ShoppingCart extends Base {
+    declare createdAt?: __.CdsTimestamp | null
+    /** Canonical user ID */
+    declare createdBy?: _.User | null
+    declare modifiedAt?: __.CdsTimestamp | null
+    /** Canonical user ID */
+    declare modifiedBy?: _.User | null
+    declare ID?: __.Key<number>
+    declare user?: __.Association.to<_sap_capire_bookshop.User> | null
+    declare user_ID?: number | null
+    declare book?: __.Association.to<Book> | null
+    declare book_ID?: number | null
+    declare quantity?: number | null
+    declare addedAt?: __.CdsDateTime | null
+    declare notes?: string | null
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<ShoppingCart>;
+    declare static readonly elements: __.ElementsOf<ShoppingCart>;
+    declare static readonly actions: globalThis.Record<never, never>;
+  };
+}
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class ShoppingCart extends _ShoppingCartAspect(__.Entity) {}
+Object.defineProperty(ShoppingCart, 'name', { value: 'CatalogService.ShoppingCart' })
+Object.defineProperty(ShoppingCart, 'is_singular', { value: true })
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class ShoppingCart_ extends Array<ShoppingCart> {$count?: number}
+Object.defineProperty(ShoppingCart_, 'name', { value: 'CatalogService.ShoppingCart' })
+
+export function _BookSeryAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class BookSery extends Base {
+    declare createdAt?: __.CdsTimestamp | null
+    /** Canonical user ID */
+    declare createdBy?: _.User | null
+    declare modifiedAt?: __.CdsTimestamp | null
+    /** Canonical user ID */
+    declare modifiedBy?: _.User | null
+    declare ID?: __.Key<number>
+    declare name?: string | null
+    declare description?: string | null
+    declare books?: __.Association.to.many<Books>
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<BookSery>;
+    declare static readonly elements: __.ElementsOf<BookSery>;
+    declare static readonly actions: globalThis.Record<never, never>;
+  };
+}
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class BookSery extends _BookSeryAspect(__.Entity) {}
+Object.defineProperty(BookSery, 'name', { value: 'CatalogService.BookSeries' })
+Object.defineProperty(BookSery, 'is_singular', { value: true })
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class BookSeries extends Array<BookSery> {$count?: number}
+Object.defineProperty(BookSeries, 'name', { value: 'CatalogService.BookSeries' })
 
 export function _BookEventAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class BookEvent extends Base {

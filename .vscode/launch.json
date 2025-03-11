@@ -5,6 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "NPM debug: test:e2e",
+      "request": "launch",
+      "runtimeArgs": ["run", "test:e2e"],
+      "runtimeExecutable": "npm",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
+    },
+    {
       "name": "NPM debug: start:bookshop",
       "request": "launch",
       "runtimeArgs": ["run", "start:bookshop"],

@@ -1,3 +1,4 @@
+import { ShoppingCart } from '#cds-models/CatalogService';
 import { CDSDispatcher } from '../../../../../lib';
 import AllEntities from '../shared-handlers/AllHandlers';
 import BookEventsHandler from './handler/BookEventsHandler';
@@ -6,10 +7,13 @@ import BookHandler from './handler/BookHandler';
 import BookOrdersHandler from './handler/BookOrdersHandler';
 import BookRecommendationsHandler from './handler/BookRecommendationsHandler';
 import BookSalesHandler from './handler/BookSalesHandler';
+import BookSeriesHandler from './handler/BookSeriesHandler';
 import BookStatsHandler from './handler/BookStatsHandler';
 import PublishersHandler from './handler/PublishersHandler';
 import ReviewHandler from './handler/ReviewHandler';
+import ShoppingCartHandler from './handler/ShoppingCart';
 import UnboundActionsHandler from './handler/UnboundActions';
+import WishlistsHandler from './handler/WishlistsHandler';
 
 export = new CDSDispatcher([
   // Entities
@@ -21,11 +25,13 @@ export = new CDSDispatcher([
   BookFormatsHandler,
   BookRecommendationsHandler,
   BookSalesHandler,
-
-  // // Draft
+  WishlistsHandler,
+  ShoppingCartHandler,
+  BookSeriesHandler,
+  // Draft
   BookEventsHandler,
 
-  // // Unbound actions
+  // Unbound actions
   UnboundActionsHandler,
 
   // All entities
