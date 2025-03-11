@@ -17,7 +17,7 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
     */
     declare currency?: _.Currency | null
     declare currency_code?: string | null
-    declare image?: Buffer | string | {value: import("stream").Readable, $mediaContentType: string, $mediaContentDispositionFilename?: string, $mediaContentDispositionType?: string} | null
+    declare image?: import("stream").Readable | null
     declare author?: __.Association.to<Author> | null
     declare author_ID?: number | null
     declare genre?: __.Association.to<Genre> | null
