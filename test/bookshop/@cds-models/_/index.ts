@@ -68,3 +68,5 @@ export type CdsTime = `${number}${number}:${number}${number}:${number}${number}`
  * @see {@link CdsDate}
  */
 export type CdsTimestamp = string;
+
+export type CdsMap = { [key: string]: unknown };

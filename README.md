@@ -739,7 +739,7 @@ export class MiddlewareClass implements MiddlewareImpl {
 
 > [!TIP]
 >
-> Inside of the decorator `use` method you can use [@CatchAndSetErrorCode](#errorcode) and [@CatchAndSetErrorMessage](#errormessage) decorators.
+> Inside of the decorator `use` method you can use [@CatchAndSetErrorCode](#catchandseterrorcode) and [@CatchAndSetErrorMessage](#catchandseterrormessage) decorators.
 
 `Example` usage:
 
@@ -3786,7 +3786,7 @@ export class MiddlewareClass implements MiddlewareImpl {
 
 > [!TIP]
 >
-> Inside of the `use` method you can use [@CatchAndSetErrorCode](#errorcode) and [@CatchAndSetErrorMessage](#errormessage) decorators if you want to catch errors.
+> Inside of the `use` method you can use [@CatchAndSetErrorCode](#catchandseterrorcode) and [@CatchAndSetErrorMessage](#catchandseterrormessage) decorators if you want to catch errors.
 
 
 `Example` usage:
@@ -3923,10 +3923,10 @@ export class MyHandler {
 ```
 
 > [!TIP]
-> Decorators [`@CatchAndSetErrorCode`](#errorcode) and [`@CatchAndSetErrorMessage`](#errormessage) can be used in [`use` method of @Use](#use-1) middleware and class [`use` method of @Use](#use) middleware.
+> Decorators [`@CatchAndSetErrorCode`](#catchandseterrorcode) and [`@CatchAndSetErrorMessage`](#catchandseterrormessage) can be used in [`use` method of @Use](#use-1) middleware and class [`use` method of @Use](#use) middleware.
 
 > [!TIP]
-> Always stack [`@CatchAndSetErrorCode`](#errorcode) and [`@CatchAndSetErrorMessage`](#errormessage) decorators `last` `(at the bottom of the of the method)` so that other decorators are executed. 
+> Always stack [`@CatchAndSetErrorCode`](#catchandseterrorcode) and [`@CatchAndSetErrorMessage`](#catchandseterrormessage) decorators `last` `(at the bottom of the of the method)` so that other decorators are executed. 
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -4002,10 +4002,10 @@ export class MyHandler {
 ```
 
 > [!TIP]
-> Always stack [`@CatchAndSetErrorCode`](#errorcode) and [`@CatchAndSetErrorMessage`](#errormessage) decorators `last` `(at the bottom of the of the method)` so that other decorators are executed. 
+> Always stack [`@CatchAndSetErrorCode`](#catchandseterrorcode) and [`@CatchAndSetErrorMessage`](#catchandseterrormessage) decorators `last` `(at the bottom of the of the method)` so that other decorators are executed. 
 
 > [!TIP]
-> Decorators [`@CatchAndSetErrorCode`](#errorcode) and [`@CatchAndSetErrorMessage`](#errormessage) can be used in [`use` method of @Use](#use-1) middleware and class [`use` method of @Use](#use) middleware.
+> Decorators [`@CatchAndSetErrorCode`](#catchandseterrorcode) and [`@CatchAndSetErrorMessage`](#catchandseterrormessage) can be used in [`use` method of @Use](#use-1) middleware and class [`use` method of @Use](#use) middleware.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
