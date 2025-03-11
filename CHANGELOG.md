@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.1] - 2025-03-11
+
+### 🚜 Refactor
+
+- *(cdsdispatcher)* Upgraded `inversify` to latest version
+
+### 📚 Documentation
+
+- *(decorators)* Small fixes for links of `@CatchAndSetErrorCode` and `@CatchAndSetErrorMessage`
+
+### 🧪 Testing
+
+- *(cds-models)* Updated tests
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+
 ## [4.1.0] - 2025-03-11
 
 ### 🚀 Features
