@@ -105,6 +105,24 @@
 			"enabled": true
 		},
 		{
+			"key": "wishlists",
+			"value": "Wishlists",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "shoppingCart",
+			"value": "ShoppingCart",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "bookSeries",
+			"value": "BookSeries",
+			"type": "default",
+			"enabled": true
+		},
+		{
 			"key": "--------------------------------",
 			"value": null,
 			"type": "default",
@@ -136,6 +154,6 @@
 		}
 	],
 	"_postman_variable_scope": "environment",
-	"_postman_exported_at": "2024-04-29T16:07:57.032Z",
-	"_postman_exported_using": "Postman/10.24.24"
+	"_postman_exported_at": "2025-03-11T09:53:37.621Z",
+	"_postman_exported_using": "Postman/11.35.0"
 }

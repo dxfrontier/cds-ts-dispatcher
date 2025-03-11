@@ -3909,6 +3909,132 @@
 									"response": []
 								}
 							]
+						},
+						{
+							"name": "@CatchAndSetErrorCode",
+							"item": [
+								{
+									"name": "Verify the response to contain code error",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 400\", function () {",
+													"    pm.expect(pm.response.code).to.equal(400);",
+													"});",
+													"",
+													"pm.test(\"Response message contains 'Bad Request'\", function () {",
+													"    var responseMessage = pm.response.json().error.message;",
+													"    pm.expect(responseMessage).to.include('Bad Request');",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{shoppingCart}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{shoppingCart}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "@CatchAndSetErrorMessage",
+							"item": [
+								{
+									"name": "@Use + @CatchAndSetErrorMessage",
+									"item": [
+										{
+											"name": "Verify the response to be 400 and to contain message",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Response status code is 400\", function () {",
+															"    pm.expect(pm.response.code).to.equal(400);",
+															"});",
+															"",
+															"pm.test(\"Verify that the message is 'A new error message from MiddlewareBookSeries2'\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData.error.message).to.equal('A new error message from MiddlewareBookSeries2');",
+															"});"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/{{catalogService}}/{{bookSeries}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"{{catalogService}}",
+														"{{bookSeries}}"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "Verify the response to contain message",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 400\", function () {",
+													"    pm.expect(pm.response.code).to.equal(400);",
+													"});",
+													"",
+													"pm.test(\"Verify that the response message is 'Error in after read'\", function () {",
+													"    var responseData = pm.response.json();",
+													"    pm.expect(responseData.error.message).to.equal('Error in after read');",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/{{catalogService}}/{{wishlists}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"{{catalogService}}",
+												"{{wishlists}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
 						}
 					],
 					"description": "All other decorators which are not SAP standard."

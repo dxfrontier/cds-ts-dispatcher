@@ -10,6 +10,9 @@ service CatalogService {
   entity BookRecommendations as projection on Base.BookRecommendations;
   entity BookFormats         as projection on Base.BookFormats;
   entity BookSales           as projection on Base.BookSales;
+  entity Wishlists           as projection on Base.Wishlists;
+  entity ShoppingCart        as projection on Base.ShoppingCart;
+  entity BookSeries          as projection on Base.BookSeries;
 
   @odata.draft.enabled: true
   entity BookEvents          as projection on Base.BookEvents;

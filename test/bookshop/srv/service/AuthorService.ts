@@ -8,6 +8,7 @@ import type { BookStat } from '../../@cds-models/CatalogService';
 class AuthorService {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(BookRepository) private readonly bookRepository: BookRepository;
+
   public async notifyAuthor(req: ActionRequest<typeof BookStat.actions.NotifyAuthor>) {
     // do something with data
     return true;

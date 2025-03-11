@@ -1,13 +1,11 @@
 // This is an automatically generated file. Please do not change its contents manually!
-import cds from '@sap/cds'
 import * as _ from './..';
 import * as __ from './../_';
 import * as _sap_capire_bookshop from './../sap/capire/bookshop';
 
-export class AdminService extends cds.Service {
-  declare sendMail: typeof sendMail
+export default class {
+  declare static readonly sendMail: typeof sendMail;
 }
-export default AdminService
 
 export function _UserActivityLogAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class UserActivityLog extends Base {

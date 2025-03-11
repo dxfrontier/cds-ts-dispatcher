@@ -26,6 +26,8 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
     declare stats?: __.Association.to<BookStat> | null
     declare bookFormats?: __.Association.to.many<BookFormats>
     declare bookRecomanddations?: __.Association.to.many<BookRecommendations>
+    declare series?: __.Association.to<BookSery> | null
+    declare series_ID?: number | null
     declare texts?: __.Composition.of.many<Books.texts>
     declare localized?: __.Association.to<Books.text> | null
     static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
@@ -254,6 +256,96 @@ Object.defineProperty(BookSale, 'is_singular', { value: true })
 */
 export class BookSales extends Array<BookSale> {$count?: number}
 Object.defineProperty(BookSales, 'name', { value: 'sap.capire.bookshop.BookSales' })
+
+export function _WishlistAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class Wishlist extends _._managedAspect(Base) {
+    declare ID?: __.Key<number>
+    declare user?: __.Association.to<User> | null
+    declare user_ID?: number | null
+    declare book?: __.Association.to<Book> | null
+    declare book_ID?: number | null
+    declare addedAt?: __.CdsDateTime | null
+    static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<Wishlist>;
+    declare static readonly elements: __.ElementsOf<Wishlist>;
+    declare static readonly actions: typeof _.managed.actions & globalThis.Record<never, never>;
+  };
+}
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class Wishlist extends _WishlistAspect(__.Entity) {}
+Object.defineProperty(Wishlist, 'name', { value: 'sap.capire.bookshop.Wishlists' })
+Object.defineProperty(Wishlist, 'is_singular', { value: true })
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class Wishlists extends Array<Wishlist> {$count?: number}
+Object.defineProperty(Wishlists, 'name', { value: 'sap.capire.bookshop.Wishlists' })
+
+export function _ShoppingCartAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class ShoppingCart extends _._managedAspect(Base) {
+    declare ID?: __.Key<number>
+    declare user?: __.Association.to<User> | null
+    declare user_ID?: number | null
+    declare book?: __.Association.to<Book> | null
+    declare book_ID?: number | null
+    declare quantity?: number | null
+    declare addedAt?: __.CdsDateTime | null
+    declare notes?: string | null
+    static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<ShoppingCart>;
+    declare static readonly elements: __.ElementsOf<ShoppingCart>;
+    declare static readonly actions: typeof _.managed.actions & globalThis.Record<never, never>;
+  };
+}
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class ShoppingCart extends _ShoppingCartAspect(__.Entity) {}
+Object.defineProperty(ShoppingCart, 'name', { value: 'sap.capire.bookshop.ShoppingCart' })
+Object.defineProperty(ShoppingCart, 'is_singular', { value: true })
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class ShoppingCart_ extends Array<ShoppingCart> {$count?: number}
+Object.defineProperty(ShoppingCart_, 'name', { value: 'sap.capire.bookshop.ShoppingCart' })
+
+export function _BookSeryAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class BookSery extends _._managedAspect(Base) {
+    declare ID?: __.Key<number>
+    declare name?: string | null
+    declare description?: string | null
+    declare books?: __.Association.to.many<Books>
+    static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<BookSery>;
+    declare static readonly elements: __.ElementsOf<BookSery>;
+    declare static readonly actions: typeof _.managed.actions & globalThis.Record<never, never>;
+  };
+}
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class BookSery extends _BookSeryAspect(__.Entity) {}
+Object.defineProperty(BookSery, 'name', { value: 'sap.capire.bookshop.BookSeries' })
+Object.defineProperty(BookSery, 'is_singular', { value: true })
+/**
+* Aspect to capture changes by user and name
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-managed
+*/
+export class BookSeries extends Array<BookSery> {$count?: number}
+Object.defineProperty(BookSeries, 'name', { value: 'sap.capire.bookshop.BookSeries' })
 
 export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class User extends _._managedAspect(Base) {
