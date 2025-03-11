@@ -1,4 +1,7 @@
 import type { MapPrepend, PrependBase, PrependBaseDraft } from '../../types/internalTypes';
+import type { Request } from '../../types/types';
+
+import { getReasonPhrase } from 'http-status-codes';
 
 const decoratorsUtil = {
   mapPrependEvent(options: PrependBase): MapPrepend {
@@ -81,6 +84,36 @@ const decoratorsUtil = {
     }
 
     return eventMap[options.eventDecorator]!;
+  },
+
+  handleError(options: { req: Request; message?: string; code?: string }): Error | undefined {
+    const { req, message, code } = options;
+
+    // Case 1: If only `code` is provided (CatchAndSetErrorCode decorator)
+    if (code && !message) {
+      const statusCode = code.split('-')[1];
+      return req.reject({ code: statusCode, message: getReasonPhrase(statusCode) });
+    }
+
+    // Case 2: If both `message` and `code` are provided (CatchAndSetErrorMessage decorator with status code)
+    if (code && message) {
+      const statusCode = code.split('-')[1];
+      return req.reject({ code: statusCode, message });
+    }
+
+    // Case 3: If only `message` is provided (CatchAndSetErrorMessage decorator without status code)
+    if (message) {
+      return req.reject(message);
+    }
+  },
+
+  async handleAsyncErrors(originalMethod: () => Promise<unknown>, req: Request): Promise<void> {
+    const result: [PromiseSettledResult<unknown>] = await Promise.allSettled([originalMethod()]);
+    const rejected: PromiseRejectedResult | undefined = result.find((response) => response.status === 'rejected');
+
+    if (rejected && (req as any).errors === undefined) {
+      throw rejected.reason;
+    }
   },
 };
 
