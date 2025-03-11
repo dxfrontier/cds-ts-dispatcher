@@ -30,10 +30,7 @@ class CDSDispatcher {
    * - Skip base class checks.
    * - Automatically bind injectable classes.
    */
-  private readonly container: Container = new Container({
-    skipBaseClassChecks: true,
-    autoBindInjectable: true,
-  });
+  private readonly container: Container = new Container({ autobind: true });
 
   /**
    * Creates an instance of `CDSDispatcher`.
@@ -451,7 +448,7 @@ class CDSDispatcher {
    * @returns The resolved entity instance.
    */
   private resolveDependencies(entity: Constructable): Constructable {
-    return this.container.resolve<typeof entity>(entity);
+    return this.container.get<typeof entity>(entity);
   }
 
   /**
