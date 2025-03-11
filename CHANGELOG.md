@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.0] - 2025-03-11
+
+### 🚀 Features
+
+- *(decorators)* New `@CatchAndSetErrorMessage`,`@CatchAndSetErrorCode` decorators to catch errors
+
+### 📚 Documentation
+
+- *(readme)* Created docu for `@CatchAndSetErrorMessage`, `@CatchAndSetErrorCode` decorators
+
+### 🧪 Testing
+
+- *(e2e)* Updated tests for `@CatchAndSetErrorCode` and `@CatchAndSetErrorMessage`
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+- *(vscode)* Added npm debug for e2e
+
 ## [4.0.1] - 2025-02-06
 
 ### ⚙️ Miscellaneous Tasks
