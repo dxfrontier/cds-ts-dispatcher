@@ -25,7 +25,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
   - [`Option 1 :` Install CDS-TS-Dispatcher - `New project`](#option-1--install-cds-ts-dispatcher---new-project)
-  - [`Option 2 :` Install CDS-TS-Dispatcher - `Existing project`](#option-2--install-cds-ts-dispatcher---existing-project)
+  - [`Option 2 :` Install CDS-TS-Dispatcher - `Existing TypeScript project`](#option-2--install-cds-ts-dispatcher---existing-typescript-project)
   - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
     - [`Important`](#important)
   - [`Migration:` from @sap/cds `v7` to `v8`](#migration-from-sapcds-v7-to-v8)
@@ -212,7 +212,7 @@ cds-ts w
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-### `Option 2 :` Install CDS-TS-Dispatcher - `Existing project`
+### `Option 2 :` Install CDS-TS-Dispatcher - `Existing TypeScript project`
 
 Use the following steps if you want to add only the **@dxfrontier/cds-ts-dispatcher to an existing project :**
 
@@ -239,7 +239,6 @@ It is recommended to use the following **tsconfig.json** properties:
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
-    /* Strictness */
     "strict": true,
 
     "lib": ["es2022"],
@@ -1883,17 +1882,28 @@ For draft entities, the @BeforeAll decorator will be triggered when at least __o
 
 **@BeforeAll**()
 
-`Example`
+`Example 1`
+
+In this example, the `@BeforeAll()` decorator of the `beforeAllEvents` method is executed before any CRUD operation `(CREATE, READ, UPDATE, DELETE, BOUND ACTIONS, BOUND FUNCTIONS))` on the `MyEntity` entity. 
+
+Since the class is annotated with `@EntityHandler(MyEntity)`, the decorator is scoped to this specific `entity`, meaning it will only be triggered for operations related to `MyEntity`.
 
 ```typescript
-import { BeforeAll } from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeAll, EntityHandler } from "@dxfrontier/cds-ts-dispatcher";
 import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-@BeforeAll()
-private async beforeAllEvents(@Req() req: Request<MyEntity>) {
+@EntityHandler(MyEntity)
+export class BookHandler {
   // ...
+  constructor() {}
+  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
+
+  @BeforeAll()
+  private async beforeAllEvents(@Req() req: Request<MyEntity>) {
+    // ...
+  }
 }
 ```
 
@@ -1901,6 +1911,39 @@ private async beforeAllEvents(@Req() req: Request<MyEntity>) {
 
 ```typescript
 this.before('*', MyEntity, async (req) => {
+  // ...
+});
+```
+
+`Example 2`
+
+In this example, the `@BeforeAll()` decorator is used in a more generic way. Unlike `Example 1`, where it applies only to `MyEntity`, this setup ensures that `beforeAllEvents` is triggered for `all entities`. 
+
+This means the method will execute before any CRUD operation on `any` `entity` handled within the class.
+
+```typescript
+import { BeforeAll, EntityHandler } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class BookHandler {
+  // ...
+  constructor() {}
+  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
+
+  @BeforeAll()
+  private async beforeAllEvents(@Req() req: Request<MyEntity>) {
+    // ...
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('*', '*', async (req) => {
   // ...
 });
 ```
@@ -2119,7 +2162,7 @@ The `@AfterAll` decorator is triggered whenever **_any CRUD (Create, Read, Updat
 
 `ACTIVE ENTITY`
 
-For active entities, the @BeforeAll decorator will be triggered when at least __one__ of the following events occurs:
+For active entities, the `@AfterAll` decorator will be triggered when at least __one__ of the following events occurs:
 
 - `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
@@ -2130,7 +2173,7 @@ For active entities, the @BeforeAll decorator will be triggered when at least __
 
 `DRAFT`
 
-For draft entities, the @BeforeAll decorator will be triggered when at least __one__ of the following events occurs:
+For draft entities, the `@AfterAll` decorator will be triggered when at least __one__ of the following events occurs:
 
 - `CREATE` [@BeforeNewDraft()](#beforenewdraft), [@AfterNewDraft()](#afternewdraft), [@OnNewDraft()](#onnewdraft)
 - `CANCEL` [@BeforeCancelDraft()](#beforecanceldraft), [@AfterCancelDraft()](#aftercanceldraft), [@OnCancelDraft()](#oncanceldraft)
@@ -2140,27 +2183,38 @@ For draft entities, the @BeforeAll decorator will be triggered when at least __o
 
 **@AfterAll**()
 
-`Example`
+`Example 1`
+
+In this example, the `@AfterAll()` decorator of the `afterAll` method is executed after any CRUD operation `(CREATE, READ, UPDATE, DELETE, BOUND ACTIONS, BOUND FUNCTIONS))` on the `MyEntity` entity. 
+
+Since the class is annotated with `@EntityHandler(MyEntity)`, the decorator is scoped to this specific `entity`, meaning it will only be triggered for operations related to `MyEntity`.
 
 ```typescript
-import { AfterAll} from "@dxfrontier/cds-ts-dispatcher";
+import { AfterAll, EntityHandler } from "@dxfrontier/cds-ts-dispatcher";
 import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-@AfterAll()
-private async afterAll(@Result() result: MyEntity | MyEntity[] | boolean, @Req() req: Request) {
-  if(Array.isArray(result)) {
-    // when after `READ` event was triggered
-  }
-  else if(typeof result === 'boolean' ) {
-    // when after `DELETE` event was triggered
-  }
-  else {
-    // when after `CREATE`, `UPDATE` was triggered
-  }
-
+@EntityHandler(MyEntity)
+export class BookHandler {
   // ...
+  constructor() {}
+  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
+
+  @AfterAll()
+  private async afterAll(@Result() result: MyEntity | MyEntity[] | boolean, @Req() req: Request) {
+    if(Array.isArray(result)) {
+      // when after `READ` event was triggered
+    }
+    else if(typeof result === 'boolean' ) {
+      // when after `DELETE` event was triggered
+    }
+    else {
+      // when after `CREATE`, `UPDATE` was triggered
+    }
+
+    // ...
+  }
 }
 ```
 
@@ -2172,11 +2226,54 @@ this.after('*', MyEntity, async (result, req) => {
 });
 ```
 
+`Example 2`
+
+In this example, the `@AfterAll()` decorator is used in a more generic way. Unlike `Example 1`, where it applies only to `MyEntity`, this setup ensures that `afterAll` is triggered for `all entities`. 
+
+This means the method will execute before any CRUD operation on `any` `entity` handled within the class.
+
+```typescript
+import { AfterAll, EntityHandler} from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)
+export class BookHandler {
+  // ...
+  constructor() {}
+  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
+
+  @AfterAll()
+  private async afterAll(@Result() result: MyEntity | MyEntity[] | boolean, @Req() req: Request) {
+    if(Array.isArray(result)) {
+      // when after `READ` event was triggered
+    }
+    else if(typeof result === 'boolean' ) {
+      // when after `DELETE` event was triggered
+    }
+    else {
+      // when after `CREATE`, `UPDATE` was triggered
+    }
+
+    // ...
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('*', '*', async (result, req) => {
+  // ...
+});
+```
+
 > [!IMPORTANT]
 > Decorator `@AfterAll()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
 
 > [!TIP]
-> If the entity has drafts enabled `@odata.draft.enabled: true`, the `@AfterAll` decorator will still be triggered for draft events.
+> If the entity has drafts enabled `@odata.draft.enabled: true`, the `@AfterAll` decorator will also be triggered for draft events.
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
@@ -2595,7 +2692,7 @@ The `@OnAll` decorator is triggered whenever **_any CRUD (Create, Read, Update, 
 
 `ACTIVE ENTITY`
 
-For active entities, the @BeforeAll decorator will be triggered when at least __one__ of the following events occurs:
+For active entities, the `@OnAll` decorator will be triggered when at least __one__ of the following events occurs:
 
 - `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
 - `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
@@ -2606,7 +2703,7 @@ For active entities, the @BeforeAll decorator will be triggered when at least __
   
 `DRAFT`
 
-For draft entities, the @BeforeAll decorator will be triggered when at least __one__ of the following events occurs:
+For draft entities, the `@OnAll` decorator will be triggered when at least __one__ of the following events occurs:
 
 - `CREATE` [@BeforeNewDraft()](#beforenewdraft), [@AfterNewDraft()](#afternewdraft), [@OnNewDraft()](#onnewdraft)
 - `CANCEL` [@BeforeCancelDraft()](#beforecanceldraft), [@AfterCancelDraft()](#aftercanceldraft), [@OnCancelDraft()](#oncanceldraft)
@@ -2617,18 +2714,29 @@ For draft entities, the @BeforeAll decorator will be triggered when at least __o
 > [!NOTE]
 > Exception will be the following decorators [@OnEvent()](#onevent), [@OnError()](#onerror) and `UNBOUND ACTIONS` [@OnAction()](#onaction), `UNBOUND FUNCTIONS` [@OnFunction()](#onfunction) as these are bound to the service itself and not to an entity.
 
-`Example`
+`Example 1`
+
+In this example, the `@OnAll()` decorator of the `onAll` method is executed after any CRUD operation `(CREATE, READ, UPDATE, DELETE, BOUND ACTIONS, BOUND FUNCTIONS)` on the `MyEntity` entity. 
+
+Since the class is annotated with `@EntityHandler(MyEntity)`, the decorator is scoped to this specific `entity`, meaning it will only be triggered for operations related to `MyEntity`.
 
 ```typescript
-import { OnAll, Next } from "@dxfrontier/cds-ts-dispatcher";
+import { OnAll, Next, EntityHandler } from "@dxfrontier/cds-ts-dispatcher";
 import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-@OnAll()
-private async onAll(@Req() req: Request, @Next() next: NextEvent) {
+@EntityHandler(MyEntity)
+export class BookHandler {
   // ...
-  return next();
+  constructor() {}
+  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
+
+  @OnAll()
+  private async onAll(@Req() req: Request, @Next() next: NextEvent) {
+    // ...
+    return next();
+  }
 }
 ```
 
@@ -2636,6 +2744,40 @@ private async onAll(@Req() req: Request, @Next() next: NextEvent) {
 
 ```typescript
 this.on('*', MyEntity, async (req, next) => {
+  // ...
+});
+```
+`Example 2`
+
+In this example, the `@OnAll()` decorator is used in a more generic way. Unlike `Example 1`, where it applies only to `MyEntity`, this setup ensures that `afterAll` is triggered for `all entities`. 
+
+This means the method will execute before any CRUD operation on `any` `entity` handled within the class.
+
+
+```typescript
+import { OnAll, Next, EntityHandler, CDS_DISPATCHER } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)
+export class BookHandler {
+  // ...
+  constructor() {}
+  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
+
+  @OnAll()
+  private async onAll(@Req() req: Request, @Next() next: NextEvent) {
+    // ...
+    return next();
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('*', '*', async (req, next) => {
   // ...
 });
 ```
