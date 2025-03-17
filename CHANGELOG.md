@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.2] - 2025-03-17
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+- *(readme)* Updated readme for `@OnAll`, `@AfterAll`, `@BeforeAll` decorators
+
 ## [4.1.1] - 2025-03-11
 
 ### 🚜 Refactor
