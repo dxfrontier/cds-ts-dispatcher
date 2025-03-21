@@ -1922,12 +1922,12 @@ In this example, the `@BeforeAll()` decorator is used in a more generic way. Unl
 This means the method will execute before any CRUD operation on `any` `entity` handled within the class.
 
 ```typescript
-import { BeforeAll, EntityHandler } from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeAll, EntityHandler, CDS_DISPATCHER } from "@dxfrontier/cds-ts-dispatcher";
 import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-@EntityHandler(MyEntity)
+@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)
 export class BookHandler {
   // ...
   constructor() {}
