@@ -11,4 +11,4 @@
 /package-lock.json linguist-vendored
 /package.json linguist-vendored
 /tsconfig.json linguist-vendored
-/lib/docs/* linguist-vendored
+/lib/docs/ linguist-vendored
