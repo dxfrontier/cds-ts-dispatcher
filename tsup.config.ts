@@ -13,9 +13,9 @@ export default defineConfig([
     entry: ['./postinstall/PostInstall.ts'],
     target: 'es2022',
     format: ['cjs', 'esm'],
-    splitting: true,
+    splitting: false,
     sourcemap: true,
-    dts: true,
+    dts: false,
     outDir: './postinstall',
   },
 ]);
