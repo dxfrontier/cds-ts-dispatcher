@@ -25,6 +25,7 @@
     "test:newman": "newman run ./test/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/e2e/environment.json --bail",
     "test:unit": "npm run build:entities:test --prefix ./test/bookshop && jest",
     "test:e2e": "start-server-and-test start:bookshop http://localhost:4004 test:newman",
+    "test:verifier": "ts-node ./test/postinstall/Verifier.ts",
     "test": "run-s test:unit test:e2e",
     "commit": "commit",
     "prepare": "husky",
@@ -38,8 +39,7 @@
     "build:clean": "echo 'Clean dist folder ...' && rm -rf ./dist/",
     "build:clean:postinstall": "echo 'Clean postinstall folder ...' && npx rimraf ./postinstall/PostInstall.js",
     "build:ts": "tsup",
-    "build": "run-s build:clean build:clean:postinstall build:message build:ts",
-    "test:verifier": "ts-node ./test/postinstall/Verifier.ts"
+    "build": "run-s build:clean build:clean:postinstall build:message build:ts"
   },
   "repository": {
     "type": "git",
@@ -94,11 +94,11 @@
     "@commitlint/prompt-cli": "^19.8.0",
     "@commitlint/types": "^19.8.0",
     "@swc/core": "^1.11.8",
+    "@types/cross-spawn": "^6.0.6",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.16",
     "@types/string-placeholder": "^1.0.3",
     "@types/validator": "^13.12.2",
-    "@types/cross-spawn": "^6.0.6",
     "eslint": "^9.22.0",
     "http-server": "^14.1.1",
     "husky": "^9.1.7",
