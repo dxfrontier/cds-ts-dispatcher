@@ -9,9 +9,6 @@
     "./dist",
     "./postinstall"
   ],
-  "workspaces": [
-    "test/bookshop"
-  ],
   "scripts": {
     "eslint:message": "echo 'Eslint started...'",
     "eslint": "npx eslint .",
@@ -21,11 +18,12 @@
     "prettier:fix": "npx prettier . --write",
     "check": "run-s eslint:message eslint prettier:message prettier",
     "fix": "run-s eslint:message eslint:fix prettier:message prettier:fix",
-    "start:bookshop": "npm run start --prefix ./test/bookshop",
-    "test:newman": "newman run ./test/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/e2e/environment.json --bail",
-    "test:unit": "npm run build:entities:test --prefix ./test/bookshop && jest",
+    "start:bookshop": "npm run start --prefix ./test/sample-project/bookshop",
+    "test:newman": "newman run ./test/__tests__/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/__tests__/e2e/environment.json --bail",
+    "test:unit": "npm run build:entities:test --prefix ./test/sample-project/bookshop && jest",
     "test:e2e": "start-server-and-test start:bookshop http://localhost:4004 test:newman",
     "test:verifier": "ts-node ./test/postinstall/Verifier.ts",
+    "test:verifier:monorepo": "ts-node ./test/postinstall/MonoRepoVerifier.ts",
     "test": "run-s test:unit test:e2e",
     "commit": "commit",
     "prepare": "husky",
@@ -107,6 +105,7 @@
     "newman": "^6.2.1",
     "npm-run-all": "^4.1.5",
     "open-cli": "^8.0.0",
+    "picocolors": "^1.1.1",
     "prettier": "3.5.3",
     "rimraf": "^6.0.1",
     "start-server-and-test": "^2.0.10",
