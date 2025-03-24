@@ -134,5 +134,6 @@ out
 .yarn/install-state.gz
 .pnp.*
 .npmrc
-@cds-models
-@dispatcher
+
+# This will overwrite the specific .gitignore in the workspace => ./test/sample-project/*
+!./test/sample-project/*/.gitignore

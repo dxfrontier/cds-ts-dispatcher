@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "strictPropertyInitialization": false,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strict": true,
+    "lib": [
+      "es2022"
+    ],
+    "rootDir": "../../../",
+    "baseUrl": ".",
+    "outDir": "./gen/srv"
+  },
+  "include": [
+    "./srv",
+    "./@dispatcher"
+  ]
+}

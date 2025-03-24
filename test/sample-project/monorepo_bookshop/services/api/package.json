@@ -1,0 +1,27 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^8",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1",
+    "@cap-js/cds-types": "^0.9.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5",
+    "@cap-js/cds-typer": ">=0.1"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds-tsx w",
+    "before:cds-watch": "cds-typer \"*\""
+  },
+  "imports": {
+    "#cds-models/*": "./@cds-models/*/index.js"
+  }
+}
