@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.3] - 2025-03-24
+
+### 🐛 Bug Fixes
+
+- *(workspaces)* Fixed the postinstall when project had `workspaces`
+
+### 🧪 Testing
+
+- *(test)* Updated tests
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+- *(tsup)* Removed 'splitting', and 'dts' from tsup of postinstall
+- *(package)* Small changes to scripts
+- *(readme)* Small fix to documentation of `BeforeAll` decorator
+- *(gitattributes)* Small change to the 'lib/docs' so it can be visible to github
+- *(postinstall)* Deleted PostInstall.mts and d.ts as it was not needed for postinstall
+- *(prettier)* Files formatted
+- *(test)* Updated tests for `monorepo` dispatcher
+- *(build)* Fix for test verifier scripts
+- *(test)* Small changes to the gitignore and dispatcher folder
+- *(gitignore)* Added dispatcher folder as ignore
+- *(gitignore)* Suppressing the workspace specific gitignore to be added to git
+
 ## [4.1.2] - 2025-03-17
 
 ### ⚙️ Miscellaneous Tasks
