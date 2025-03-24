@@ -1,10 +1,10 @@
-import { GenerateEnv } from './util/GenerateEnv';
+import { EnvGenerator } from './util/EnvGenerator';
 
 class PostInstall {
-  private readonly GenerateEnv: GenerateEnv;
+  private readonly GenerateEnv: EnvGenerator;
 
   public run() {
-    new GenerateEnv().run();
+    new EnvGenerator().run();
     // add more postinstall utils if needed ...
   }
 }

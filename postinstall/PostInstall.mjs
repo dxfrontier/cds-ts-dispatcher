@@ -1,123 +1,267 @@
 var __defProp = Object.defineProperty;
-var __name = (target, value) => __defProp(target, 'name', { value, configurable: true });
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// postinstall/util/GenerateEnv.ts
-import { sync } from 'cross-spawn';
-import { existsSync, appendFileSync, writeFileSync, mkdirSync, readFileSync } from 'fs';
-import * as path from 'path';
-import { json2ts } from 'json-ts';
-import { parse as parseJsonc } from 'jsonc-parser';
-var GenerateEnv = class {
+// postinstall/util/EnvGenerator.ts
+import { writeFileSync as writeFileSync2 } from "fs";
+import { json2ts } from "json-ts";
+
+// postinstall/util/FileManager.ts
+import path from "path";
+import { existsSync, appendFileSync, writeFileSync, mkdirSync, readFileSync } from "fs";
+import { parse as parseJsonc } from "jsonc-parser";
+var FileManager = class {
   static {
-    __name(this, 'GenerateEnv');
+    __name(this, "FileManager");
   }
-  dispatcherFolderPath;
-  envFilePath;
-  gitignoreFilePath;
-  packageJsonFilePath;
-  tsconfigFilePath;
-  clientCwd = process.env.INIT_CWD;
+  currentInstallDirectory = process.env.INIT_CWD;
+  dispatcherNecessaryFiles = {
+    packageJson: "package.json",
+    folder: "@dispatcher",
+    env: "index.ts",
+    gitIgnore: ".gitignore",
+    tsConfig: "tsconfig.json"
+  };
+  dispatcherExecutionPath = {
+    paths: []
+  };
   constructor() {
-    this.dispatcherFolderPath = path.join(this.clientCwd, '@dispatcher');
-    this.envFilePath = path.join(this.dispatcherFolderPath, 'index.ts');
-    this.gitignoreFilePath = path.join(this.clientCwd, '.gitignore');
-    this.packageJsonFilePath = path.join(this.clientCwd, 'package.json');
-    this.tsconfigFilePath = path.join(this.clientCwd, 'tsconfig.json');
+    this.run();
   }
-  prepareDispatcherFolder() {
-    this.createFolderIfAbsent(this.dispatcherFolderPath);
-    this.createFileIfAbsent(this.envFilePath);
-    this.createFileIfAbsent(this.gitignoreFilePath);
+  static joinPaths(...paths) {
+    return path.join(...paths);
+  }
+  getPackageJson() {
+    const parsedPackage = this.getParsedPackageJson();
+    return {
+      hasWorkspaces: /* @__PURE__ */ __name(() => (parsedPackage.workspaces?.length ?? 0) > 0, "hasWorkspaces"),
+      getWorkspaces: /* @__PURE__ */ __name(() => parsedPackage.workspaces, "getWorkspaces")
+    };
+  }
+  getParsedPackageJson(workspace) {
+    let packageJsonPath;
+    if (!workspace) {
+      packageJsonPath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.packageJson);
+    } else if (path.isAbsolute(workspace)) {
+      packageJsonPath = workspace;
+    } else {
+      packageJsonPath = this.joinPaths(this.currentInstallDirectory, workspace, this.dispatcherNecessaryFiles.packageJson);
+    }
+    return JSON.parse(readFileSync(packageJsonPath, "utf8"));
   }
   createFolderIfAbsent(folderPath) {
     if (!existsSync(folderPath)) {
       mkdirSync(folderPath, {
-        recursive: true,
+        recursive: true
       });
     }
   }
-  createFileIfAbsent(filePath, defaultContent = '') {
+  createFileIfAbsent(filePath, defaultContent = "") {
     if (!existsSync(filePath)) {
       writeFileSync(filePath, defaultContent);
     }
   }
-  generateEnvFile() {
-    const cdsEnvOutput = this.executeShellCommand('cds', ['env', 'get']);
-    const typeDefinitions = this.generateTypeDefinitions(cdsEnvOutput);
-    writeFileSync(
-      this.envFilePath,
-      `// Type definitions for envConfig
-export ${typeDefinitions}`,
-    );
+  joinPaths(...paths) {
+    return path.join(...paths);
   }
-  compileEnvFile() {
-    this.executeShellCommand('npx tsc', [this.envFilePath, '--outDir', this.dispatcherFolderPath]);
+  isDispatcherFound(dependencies) {
+    return dependencies && dependencies["@dxfrontier/cds-ts-dispatcher"] !== void 0;
   }
-  addToGitignore() {
-    this.appendLineIfAbsent(this.gitignoreFilePath, '@dispatcher');
+  appendLineIfAbsent(filePath, line) {
+    const content = readFileSync(filePath, "utf8");
+    if (!content.includes(line)) {
+      appendFileSync(filePath, `
+${line}
+`);
+    }
   }
-  updatePackageJsonImports() {
-    if (existsSync(this.packageJsonFilePath)) {
-      const packageJson = JSON.parse(readFileSync(this.packageJsonFilePath, 'utf8'));
+  updateGitIgnore(filePath) {
+    this.appendLineIfAbsent(filePath, this.dispatcherNecessaryFiles.folder);
+  }
+  updatePackageJsonImports(filePath) {
+    if (existsSync(filePath)) {
+      const packageJson = this.getParsedPackageJson(filePath);
       packageJson.imports = packageJson.imports || {};
-      if (!packageJson.imports['#dispatcher']) {
-        packageJson.imports['#dispatcher'] = './@dispatcher/index.js';
-        writeFileSync(this.packageJsonFilePath, JSON.stringify(packageJson, null, 2));
+      if (!packageJson.imports["#dispatcher"]) {
+        packageJson.imports["#dispatcher"] = "./@dispatcher/index.js";
+        writeFileSync(filePath, JSON.stringify(packageJson, null, 2));
       }
     }
   }
-  updateTsconfigInclude() {
-    if (existsSync(this.tsconfigFilePath)) {
-      const tsconfigContent = readFileSync(this.tsconfigFilePath, 'utf8');
+  updateTsconfigInclude(filePath) {
+    if (existsSync(filePath)) {
+      const tsconfigContent = readFileSync(filePath, "utf8");
       const errors = [];
       const tsconfig = parseJsonc(tsconfigContent, errors);
       if (errors.length > 0) {
-        throw new Error('tsconfig.json contains comments or invalid JSON format, which is not allowed.');
+        throw new Error("tsconfig.json contains comments or invalid JSON format !");
       }
       tsconfig.include = tsconfig.include || [];
-      if (!tsconfig.include.includes('./@dispatcher')) {
-        tsconfig.include.push('./@dispatcher');
-        writeFileSync(this.tsconfigFilePath, JSON.stringify(tsconfig, null, 2));
+      if (!tsconfig.include.includes("./@dispatcher")) {
+        tsconfig.include.push("./@dispatcher");
+        writeFileSync(filePath, JSON.stringify(tsconfig, null, 2));
       }
     }
   }
-  appendLineIfAbsent(filePath, line) {
-    const content = readFileSync(filePath, 'utf8');
-    if (!content.includes(line)) {
-      appendFileSync(
-        filePath,
-        `
-${line}
-`,
-      );
+  createOrUpdateConfigFiles(options) {
+    this.createFolderIfAbsent(options.dispatcherFolderPath);
+    this.createFileIfAbsent(options.envFilePath);
+    this.createFileIfAbsent(options.gitignoreFilePath);
+    this.updateGitIgnore(options.gitignoreFilePath);
+    this.updatePackageJsonImports(options.packageJsonPath);
+    this.updateTsconfigInclude(options.tsconfigPath);
+  }
+  // private processWorkspace(workspace: string) {
+  //   const workspacePath = this.joinPaths(this.currentInstallDirectory, workspace);
+  //   const dispatcherFolderPath = this.joinPaths(workspacePath, this.dispatcherNecessaryFiles.folder);
+  //   const packageJsonPath = this.joinPaths(workspacePath, this.dispatcherNecessaryFiles.packageJson);
+  //   const tsconfigPath = this.joinPaths(workspacePath, this.dispatcherNecessaryFiles.tsConfig);
+  //   const gitignoreFilePath = this.joinPaths(workspacePath, this.dispatcherNecessaryFiles.gitIgnore);
+  //   const envFilePath = this.joinPaths(dispatcherFolderPath, this.dispatcherNecessaryFiles.env);
+  //   this.createOrUpdateConfigFiles({
+  //     dispatcherFolderPath,
+  //     envFilePath,
+  //     gitignoreFilePath,
+  //     packageJsonPath,
+  //     tsconfigPath,
+  //   });
+  //   this.dispatcherExecutionPath.paths.push({
+  //     executedInstalledPath: workspacePath,
+  //     envFilePath,
+  //     dispatcherPath: dispatcherFolderPath,
+  //   });
+  // }
+  processWorkspaces() {
+    this.getPackageJson().getWorkspaces().forEach((workspace) => {
+      const packageJson = this.getParsedPackageJson(workspace);
+      if (this.isDispatcherFound(packageJson.dependencies)) {
+        this.processWorkspace(workspace);
+      }
+      if (this.isDispatcherFound(packageJson.devDependencies)) {
+        throw new Error("CDS-TS-Dispatcher should be installed in `dependencies` not in `devDependencies`!");
+      }
+    });
+  }
+  // private processRoot() {
+  //   const dispatcherFolderPath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.folder);
+  //   const packageJsonPath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.packageJson);
+  //   const tsconfigPath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.tsConfig);
+  //   const gitignoreFilePath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.gitIgnore);
+  //   const envFilePath = this.joinPaths(dispatcherFolderPath, this.dispatcherNecessaryFiles.env);
+  //   this.createOrUpdateConfigFiles({
+  //     dispatcherFolderPath,
+  //     envFilePath,
+  //     gitignoreFilePath,
+  //     packageJsonPath,
+  //     tsconfigPath,
+  //   });
+  //   this.dispatcherExecutionPath.paths.push({
+  //     executedInstalledPath: this.currentInstallDirectory,
+  //     envFilePath,
+  //     dispatcherPath: dispatcherFolderPath,
+  //   });
+  // }
+  processInstallation(targetDirectory) {
+    const dispatcherFolderPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.folder);
+    const packageJsonPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.packageJson);
+    const tsconfigPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.tsConfig);
+    const gitignoreFilePath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.gitIgnore);
+    const envFilePath = this.joinPaths(dispatcherFolderPath, this.dispatcherNecessaryFiles.env);
+    this.createOrUpdateConfigFiles({
+      dispatcherFolderPath,
+      envFilePath,
+      gitignoreFilePath,
+      packageJsonPath,
+      tsconfigPath
+    });
+    this.dispatcherExecutionPath.paths.push({
+      executedInstalledPath: targetDirectory,
+      envFilePath,
+      dispatcherPath: dispatcherFolderPath
+    });
+  }
+  processWorkspace(workspace) {
+    const workspacePath = this.joinPaths(this.currentInstallDirectory, workspace);
+    this.processInstallation(workspacePath);
+  }
+  processRoot() {
+    this.processInstallation(this.currentInstallDirectory);
+  }
+  run() {
+    if (this.getPackageJson().hasWorkspaces()) {
+      this.processWorkspaces();
+      return;
     }
+    this.processRoot();
   }
-  generateTypeDefinitions(jsonString) {
-    return json2ts(jsonString, {
-      rootName: 'CDS_ENV',
-      prefix: '',
-    });
+};
+
+// postinstall/util/ShellCommander.ts
+import { sync } from "cross-spawn";
+var ShellCommander = class {
+  static {
+    __name(this, "ShellCommander");
   }
-  executeShellCommand(command, args) {
+  constructor() {
+  }
+  executeCommand(command, args, currentExecutionPath) {
     const result = sync(command, args, {
-      encoding: 'utf8',
-      cwd: this.clientCwd,
+      encoding: "utf8",
+      cwd: currentExecutionPath
     });
-    if (result.stderr) {
-      console.error(result.stderr);
+    if (result.error && result.stderr) {
+      throw new Error(result.stderr);
     }
     return result.stdout;
   }
+  compileEnvFile(envFilePath, dispatcherFolderPath) {
+    this.executeCommand("npx tsc", [
+      envFilePath,
+      "--outDir",
+      dispatcherFolderPath
+    ]);
+  }
+};
+
+// postinstall/util/EnvGenerator.ts
+var EnvGenerator = class {
+  static {
+    __name(this, "EnvGenerator");
+  }
+  fileManager = new FileManager();
+  shellCommander = new ShellCommander();
+  generateTypeDefinitions(jsonString) {
+    return json2ts(jsonString, {
+      rootName: "CDS_ENV",
+      prefix: ""
+    });
+  }
+  getCdsEnvOutput(path2) {
+    return this.shellCommander.executeCommand("cds", [
+      "env",
+      "get"
+    ], path2);
+  }
+  createEnvFile(filePath, envConfig) {
+    const typeDefinitions = this.generateTypeDefinitions(envConfig);
+    const fileContent = `// Type definitions for envConfig
+export ${typeDefinitions}`;
+    writeFileSync2(filePath, fileContent);
+  }
+  compileEnvFile(envFilePath, dispatcherPath) {
+    this.shellCommander.compileEnvFile(envFilePath, dispatcherPath);
+  }
+  generateEnvFiles() {
+    this.fileManager.dispatcherExecutionPath.paths.forEach(({ executedInstalledPath, envFilePath, dispatcherPath }) => {
+      const output = this.getCdsEnvOutput(executedInstalledPath);
+      this.createEnvFile(envFilePath, output);
+      this.compileEnvFile(envFilePath, dispatcherPath);
+    });
+  }
   run() {
     try {
-      this.prepareDispatcherFolder();
-      this.generateEnvFile();
-      this.compileEnvFile();
-      this.addToGitignore();
-      this.updatePackageJsonImports();
-      this.updateTsconfigInclude();
+      this.generateEnvFiles();
     } catch (error) {
-      console.error('Error during post-install steps:', error);
+      console.error("Error generating environment files:", error);
       process.exit(1);
     }
   }
@@ -126,11 +270,11 @@ ${line}
 // postinstall/PostInstall.ts
 var PostInstall = class PostInstall2 {
   static {
-    __name(this, 'PostInstall');
+    __name(this, "PostInstall");
   }
   GenerateEnv;
   run() {
-    new GenerateEnv().run();
+    new EnvGenerator().run();
   }
 };
 new PostInstall().run();
