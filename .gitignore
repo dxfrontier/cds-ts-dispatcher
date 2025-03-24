@@ -134,5 +134,3 @@ out
 .yarn/install-state.gz
 .pnp.*
 .npmrc
-@cds-models
-@dispatcher
