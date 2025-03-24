@@ -1,0 +1,5 @@
+ID,book_ID,recommended_ID,rating,comment,description
+1,201,203,4,The best of the best brooooo ..., descriptio brooo
+2,252,251,5,Wouuwuwww, TODO
+3,252,201,3,Another best, A bad book
+4,203,201,2,Not that great, A good book
