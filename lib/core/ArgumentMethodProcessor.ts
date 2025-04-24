@@ -205,11 +205,12 @@ export class ArgumentMethodProcessor {
         /**
          * @Req(), @Res(), @Error(), @Next(), @Results(), @Result(), @Jwt, '@SingleInstanceSwitch' can be present only once per callback
          */
+        case 'MSG':
         case 'ERROR':
         case 'NEXT':
         case 'RESULTS':
         case 'REQ': {
-          let key = util.lodash.lowerCase(metadataKey) as 'req' | 'results' | 'next' | 'error';
+          let key = util.lodash.lowerCase(metadataKey) as 'req' | 'results' | 'next' | 'msg' | 'error';
           this.applySingleDecoratorByKey({ metadataKey, data: this.temporaryArgs[key] });
 
           break;

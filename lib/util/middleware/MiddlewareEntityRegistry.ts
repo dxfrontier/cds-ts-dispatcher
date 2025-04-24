@@ -75,9 +75,21 @@ export class MiddlewareEntityRegistry {
 
           break;
 
+        case 'MESSAGING_EVENT': {
+          const eventName: string = util.subtractLastDotString(handler.options.eventName as string);
+
+          this.srv.before(eventName, async (msg) => {
+            await this.executeMiddlewareChain(msg);
+          });
+
+          break;
+        }
+
         case 'EVENT':
           if (handler.type === 'EVENT') {
-            this.srv.before(handler.eventName, async (req) => {
+            const eventName: string = util.subtractLastDotString(handler.eventName);
+
+            this.srv.before(eventName, async (req) => {
               await this.executeMiddlewareChain(req);
             });
           }

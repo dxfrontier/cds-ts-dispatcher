@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import cds from '@sap/cds';
+
 import util from '../util/util';
 import CDS_DISPATCHER from '../constants/constants';
 
@@ -7,7 +9,13 @@ import { HandlerType } from '../types/enum';
 import { MiddlewareEntityRegistry } from '../util/middleware/MiddlewareEntityRegistry';
 import { MetadataDispatcher } from './MetadataDispatcher';
 
-import type { NonEmptyArray, BaseHandler, Constructable } from '../types/internalTypes';
+import type {
+  NonEmptyArray,
+  BaseHandler,
+  Constructable,
+  SubscriberType,
+  EventMessagingOptions,
+} from '../types/internalTypes';
 import type { Request, Service, ServiceImpl } from '../types/types';
 
 /**
@@ -91,8 +99,7 @@ class CDSDispatcher {
    */
   private async executeOnCallback(
     handlerAndEntity: [BaseHandler, Constructable],
-    req: Request,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+    req: Request | SubscriberType<any>,
     next: Function,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
@@ -189,11 +196,28 @@ class CDSDispatcher {
       return { actionName: _getDefaultAction() ?? _getPrependAction()?.actionName };
     };
 
+    const getMessagingEvent = () => {
+      if (handler.type === 'EVENT' && handler.event === 'MESSAGING_EVENT') {
+        if (util.lodash.isUndefined(handler.options.showReceiverMessage)) {
+          handler.options.showReceiverMessage = false;
+        }
+
+        if (util.lodash.isUndefined(handler.options.consoleStyle)) {
+          handler.options.consoleStyle = 'debug';
+        }
+
+        // Overwrite the eventName by extract string after last '.'
+        handler.options.eventName = util.subtractLastDotString(handler.options.eventName as string);
+
+        return { options: handler.options };
+      }
+    };
+
     const getEvent = () => {
       // PRIVATE routine for this func
       const _constructEventName = () => {
         const _getDefaultEvent = () => {
-          if (handler.type === 'EVENT') {
+          if (handler.type === 'EVENT' && handler.event !== 'MESSAGING_EVENT') {
             return handler.eventName;
           }
         };
@@ -221,7 +245,7 @@ class CDSDispatcher {
       return { eventKind };
     };
 
-    return { getDefault, getAction, getEvent, getPrepend };
+    return { getDefault, getAction, getEvent, getPrepend, getMessagingEvent };
   }
 
   /**
@@ -299,12 +323,53 @@ class CDSDispatcher {
     });
   }
 
+  private async registerMessagingEvent(message: {
+    options: EventMessagingOptions;
+    handlerAndEntity: [BaseHandler, Constructable];
+  }) {
+    const { showReceiverMessage, consoleStyle, type, eventName } = message.options;
+
+    const callback = async (req: Request | SubscriberType<any>, next: Function) => {
+      if (showReceiverMessage) {
+        if (consoleStyle === 'table') {
+          const text = `> received: ${eventName}`;
+
+          console.log(util.showGreenConsole(text));
+          console.table([req.data]);
+        } else {
+          const text = `> received: ${eventName}`;
+
+          console.debug(util.showGreenConsole(text), req.data);
+        }
+      }
+
+      return this.executeOnCallback(message.handlerAndEntity, req, next);
+    };
+
+    let eventSource: Service;
+
+    switch (type) {
+      case 'SAME_NODE_PROCESS':
+        eventSource = this.srv;
+        break;
+
+      case 'SAME_NODE_PROCESS_DIFFERENT_SERVICE':
+        eventSource = await cds.connect.to(message.options.externalServiceName);
+        break;
+
+      default: // 'MESSAGING'
+        eventSource = await cds.connect.to('messaging');
+    }
+
+    eventSource.on(eventName as string, callback);
+  }
+
   /**
    * Registers all `ON` event handlers.
    *
    * @param handlerAndEntity - A tuple containing the handler and entity.
    */
-  private registerOnHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
+  private async registerOnHandler(handlerAndEntity: [BaseHandler, Constructable]): Promise<void> {
     const getProps = this.getHandlerProps(...handlerAndEntity);
 
     const { event, entity } = getProps.getDefault();
@@ -320,6 +385,7 @@ class CDSDispatcher {
 
         break;
       }
+
       case 'BOUND_ACTION':
       case 'BOUND_FUNC': {
         this.srv.on(actionName!, entity!, async (req, next) => {
@@ -328,6 +394,18 @@ class CDSDispatcher {
 
         break;
       }
+
+      case 'MESSAGING_EVENT': {
+        const messagingProps = getProps.getMessagingEvent()!;
+
+        this.registerMessagingEvent({
+          options: messagingProps.options,
+          handlerAndEntity,
+        });
+
+        break;
+      }
+
       case 'EVENT': {
         this.srv.on(eventName!, async (req, next) => {
           return await this.executeOnCallback(handlerAndEntity, req, next);

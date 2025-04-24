@@ -3,6 +3,23 @@ import { ArgumentMethodProcessor } from '../core/ArgumentMethodProcessor';
 import type { PickQueryPropsByKey, CustomRequest, CRUDQueryKeys, PropertyStringPath } from '../types/internalTypes';
 
 /**
+ * Annotates a parameter of a method with the `Messaging` response.
+ * @example
+ * "@Msg() msg: SubscriberType<{ foo: number; bar: string }>"
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#messaging | CDS-TS-Dispatcher - @Msg}
+ */
+function Msg(): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'MSG',
+      target,
+      propertyKey: propertyKey!,
+      metadataFields: { type: 'INDEX_DECORATOR', parameterIndex },
+    });
+  };
+}
+
+/**
  * Annotates a parameter of a method to enable `switching` between `single instance` and `entity set` functionality in your method.
  * @example
  * "@SingleInstanceSwitch() isSingleInstance: boolean"
@@ -338,6 +355,7 @@ function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
 }
 
 export {
+  Msg,
   SingleInstanceSwitch,
   Error,
   Next,

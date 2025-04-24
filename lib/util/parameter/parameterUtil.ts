@@ -273,6 +273,10 @@ const parameterUtil = {
           temporaryArgs.next = arg;
           break;
 
+        case util.isMsgEvent(arg):
+          temporaryArgs.msg = arg;
+          break;
+
         case !util.lodash.isUndefined(this.findResults(arg)):
           temporaryArgs.results = arg;
           break;

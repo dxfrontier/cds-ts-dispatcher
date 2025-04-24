@@ -10,7 +10,7 @@ import type {
   RequestType,
   Request,
   NextEvent,
-  ON_EVENT,
+  // ON_EVENT,
   ACTION_EVENTS,
   FUNCTION_EVENTS,
   CRUD_EVENTS,
@@ -45,6 +45,7 @@ export type TemporaryArgs = {
   next: NextEvent;
   error: Error;
   results: unknown | unknown[];
+  msg: SubscriberType<any>;
 };
 
 export type NonEmptyArray<T> = [T, ...T[]];
@@ -57,11 +58,115 @@ export type ParameterDecorators = keyof typeof constants.DECORATOR.PARAMETER;
 
 export type EventKind = 'BEFORE' | 'AFTER' | 'AFTER_SINGLE' | 'ON';
 
+type MessagingTypes = {
+  SAME_NODE_PROCESS: {
+    /**
+     * Use when both `emitter` and `receiver` run in the same `CAP server instance` & `same service`.
+     *
+     * @example
+     * // Emitting event
+     * this.emit('NameOfTheEvent', { ID: '123', amount: 99.99 }); // where this is the service
+     *
+     * // Subscribing to event
+     * /@OnSubscribe({
+     *  eventName: 'NameOfTheEvent',
+     *  type: 'SAME_NODE_PROCESS',
+     * })
+     *
+     * */
+    type: 'SAME_NODE_PROCESS';
+  };
+  SAME_NODE_PROCESS_DIFFERENT_SERVICE: {
+    /**
+     * Use when `emitter` can be found in E.g. `Service A` and `receiver` can reside in E.g. `Service B`, having same `CAP server instance` & `different services`.
+     *
+     * @example
+     * // Emitting event from `Service A`
+     * const service = cds.connect.to('Service_A');
+     *       service.emit('NameOfTheEvent', { ID: '123', amount: 99.99 });
+     * // or use this.emit ... assuming `this` is the service `Service_A`
+     *
+     * // Subscribing to event from `Service B`
+     * /@OnSubscribe({
+     *  eventName: 'NameOfTheEvent',
+     *  type: 'SAME_NODE_PROCESS_DIFFERENT_SERVICE',
+     *  externalService: 'Service_A'
+     * })
+     * */
+    type: 'SAME_NODE_PROCESS_DIFFERENT_SERVICE';
+  };
+  MESSAGING: {
+    /**
+     * Recommended for production with external message brokers
+     *
+     * @example
+     * // Emitting event
+     * const msg = await cds.connect.to('messaging');
+     *       msg.emit('NameOfTheEvent', { foo: 11, bar: '22' });
+     *
+     * // Subscribing to event
+     * /@OnSubscribe({
+     *  eventName: 'NameOfTheEvent',
+     *  type: 'MESSAGE_BROKER',
+     * })
+     * */
+    type: 'MESSAGE_BROKER';
+  };
+};
+
+export type MessagingDifferentServices = {
+  /**
+   * Name of the external service to which you are subscribing to.
+   *
+   * @example
+   * ```ts
+   * service CatalogService {
+   *  // ... projections on entities
+   * }
+   * ```
+   */
+  externalServiceName: string;
+} & MessagingTypes['SAME_NODE_PROCESS_DIFFERENT_SERVICE'];
+
+export type EventMessagingOptions = {
+  /**
+   * Name of the event to subscribe to.
+   */
+  eventName: string | object;
+  /**
+   * When enabled, displays inbound message payloads in the specified format.
+   *
+   * @example // With showReceiverMessage: true
+   * > received: EventName { ID: '123', amount: 99.99 }
+   *
+   * @default false
+   */
+  showReceiverMessage?: boolean;
+
+  /**
+   * Specifies the log output format for received messages (when `showReceiverMessage` is true).
+   *
+   * - `'table'`: Displays data using `console.table()`, ideal for structured messages.
+   * - `'debug'`: Displays data using  `console.debug()`, ideal for nested or dynamic messages.
+   *
+   * @example
+   * // With consoleStyle: 'table'
+   * ┌─────────┬──────┬────────┐
+   * │ (index) │  ID  │ amount │
+   * ├─────────┼──────┼────────┤
+   * │    0    │ '123'│ 99.99  │
+   * └─────────┴──────┴────────┘
+   *
+   * @default 'debug'
+   */
+  consoleStyle?: 'table' | 'debug';
+} & (MessagingTypes['SAME_NODE_PROCESS'] | MessagingTypes['MESSAGING'] | MessagingDifferentServices);
+
 export type PrependHandler = {
   type: 'PREPEND';
   event: EVENTS;
   options: {
-    actionName?: CdsFunction;
+    actionName?: CdsFunction | string;
     eventName?: string;
   };
 };
@@ -69,12 +174,18 @@ export type PrependHandler = {
 export type OnHandler = {
   type: 'ACTION_FUNCTION';
   event: ACTION_EVENTS | FUNCTION_EVENTS;
-  actionName: CdsFunction;
+  actionName: CdsFunction | string;
+};
+
+export type EventMessagingHandler = {
+  type: 'EVENT';
+  event: 'MESSAGING_EVENT';
+  options: EventMessagingOptions;
 };
 
 export type EventHandler = {
   type: 'EVENT';
-  event: ON_EVENT;
+  event: 'EVENT';
   eventName: string;
 };
 
@@ -88,7 +199,7 @@ export type BaseHandler = {
   callback: RequestType;
   eventKind: EventKind;
   isDraft: boolean;
-} & (DefaultHandlers | OnHandler | EventHandler | PrependHandler);
+} & (DefaultHandlers | OnHandler | EventHandler | EventMessagingHandler | PrependHandler);
 
 // **************************************************************************************************************************
 // **************************************************************************************************************************
@@ -104,7 +215,7 @@ export type PrependEvent = {
 
 export type PrependAction = {
   eventDecorator: 'OnAction' | 'OnFunction' | 'OnBoundAction' | 'OnBoundFunction';
-  actionName: CdsFunction;
+  actionName: CdsFunction | string;
 };
 
 export type PrependDecorators = {
@@ -172,7 +283,12 @@ export type PrependDraftAction = {
 
 export type PrependBaseDraft = {} & (PrependDraftAction | PrependDraftDecorators);
 
-export type MapPrepend = { event: EVENTS; eventKind: EventKind; actionName?: CdsFunction; eventName?: CdsEvent };
+export type MapPrepend = {
+  event: EVENTS;
+  eventKind: EventKind;
+  actionName?: CdsFunction | string;
+  eventName?: CdsEvent;
+};
 
 // **************************************************************************************************************************
 // **************************************************************************************************************************
@@ -299,11 +415,25 @@ export type PropertyStringPath<T, Prefix = ''> = {
 // **************************************************************************************************************************
 
 // **************************************************************************************************************************
-// @@OnErrorMessage types
+// @OnErrorMessage types
 // **************************************************************************************************************************
 
 export type StatusCodeMapping = {
   [K in keyof typeof StatusCodes as `${K}-${Extract<(typeof StatusCodes)[K], number>}`]: (typeof StatusCodes)[K];
+};
+
+// **************************************************************************************************************************
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @OnSubscribe types
+// **************************************************************************************************************************
+
+export type SubscriberType<T> = {
+  data: T;
+  event: string;
+  headers: any;
+  inbound: boolean;
 };
 
 // **************************************************************************************************************************

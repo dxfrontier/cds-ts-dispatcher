@@ -8,6 +8,7 @@ import middlewareUtil from '../util/middleware/middlewareUtil';
 import parameterUtil from '../util/parameter/parameterUtil';
 import util from '../util/util';
 import validatorUtil from '../util/validation/validatorUtil';
+// import cds from '@sap/cds';
 
 import type {
   ACTION_EVENTS,
@@ -18,13 +19,20 @@ import type {
   ERROR_EVENT,
   FUNCTION_EVENTS,
   MiddlewareImpl,
+  ON_EVENT,
   Request,
   RequestType,
 } from '../types/types';
 
 import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
-import type { Constructable, PrependBase, PrependBaseDraft, StatusCodeMapping } from '../types/internalTypes';
+import type {
+  Constructable,
+  EventMessagingOptions,
+  PrependBase,
+  PrependBaseDraft,
+  StatusCodeMapping,
+} from '../types/internalTypes';
 
 /**
  * Use `CatchAndSetErrorCode` decorator to `catch errors` and assigns a `new status code` to the response.
@@ -415,7 +423,7 @@ function buildOnAction(options: {
   handlerType: HandlerType;
   isDraft: boolean;
 }) {
-  return function <Target extends object>(name: CdsFunction) {
+  return function <Target extends object>(name: CdsFunction | string) {
     return function (
       target: Target,
       propertyName: string | symbol,
@@ -452,7 +460,45 @@ function buildOnAction(options: {
   };
 }
 
-function buildOnEvent(options: { handlerType: HandlerType; isDraft: boolean }) {
+function buildOnMessagingEvent(params: { event: 'MESSAGING_EVENT'; handlerType: HandlerType; isDraft: boolean }) {
+  return function <Target extends object>(options: EventMessagingOptions) {
+    return function (
+      target: Target,
+      propertyName: string | symbol,
+      descriptor: TypedPropertyDescriptor<RequestType>,
+    ): void {
+      const method = descriptor.value!;
+
+      descriptor.value = async function (...args: any[]) {
+        new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        return await method.apply(this, args);
+      };
+
+      // ********************************************************************************************************************************
+      // Registration of events during start-up : @OnSubscribe
+      // Note: descriptor.value will contain the logic for @Req(), @Res(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
+      // ********************************************************************************************************************************
+
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+      const { handlerType, isDraft } = params;
+
+      metadataDispatcher.addMethodMetadata({
+        type: 'EVENT',
+        eventKind: 'ON',
+        event: params.event,
+        options,
+        handlerType,
+        callback: descriptor.value,
+        isDraft,
+      });
+
+      // ********************************************************************************************************************************
+      // ********************************************************************************************************************************
+    };
+  };
+}
+
+function buildOnEvent(options: { event: ON_EVENT; handlerType: HandlerType; isDraft: boolean }) {
   return function <Target extends object>(name: CdsEvent) {
     return function (
       target: Target,
@@ -477,10 +523,10 @@ function buildOnEvent(options: { handlerType: HandlerType; isDraft: boolean }) {
       metadataDispatcher.addMethodMetadata({
         type: 'EVENT',
         eventKind: 'ON',
-        event: 'EVENT',
+        event: options.event,
         handlerType,
         callback: descriptor.value,
-        eventName: name as unknown as string,
+        eventName: name as string,
         isDraft,
       });
 
@@ -808,45 +854,68 @@ const OnDeleteDraft = buildOnCRUD({ event: 'DELETE', handlerType: HandlerType.On
 
 /**
  * Use `@OnAction` decorator to execute custom logic when a custom action event is triggered.
+ * @param name CdsFunction - name of the action, which can be a `string` or a `@cds-model` event.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onaction | CDS-TS-Dispatcher - @OnAction}
  */
 const OnAction = buildOnAction({ event: 'ACTION', handlerType: HandlerType.On, isDraft: false });
 
 /**
  * Use `@OnBoundAction` decorator to execute custom logic when a custom bound action event is triggered.
+ * @param name CdsFunction - name of the action, which can be a `string` or a `@cds-model` event.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction | CDS-TS-Dispatcher - @OnBoundAction}
  */
 const OnBoundAction = buildOnAction({ event: 'BOUND_ACTION', handlerType: HandlerType.On, isDraft: false });
 
 /**
  * Use `@OnBoundActionDraft` decorator to execute custom logic when a custom bound action event is triggered on a DRAFT resource.
+ * @param name CdsFunction - name of the action, which can be a `string` or a `@cds-model` event.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction | CDS-TS-Dispatcher - @OnBoundActionDraft}
  */
 const OnBoundActionDraft = buildOnAction({ event: 'BOUND_ACTION', handlerType: HandlerType.On, isDraft: true });
 
 /**
  * Use `@OnBoundFunction` decorator to execute custom logic when a custom bound function event is triggered.
+ * @param name CdsFunction - name of the function, which can be a `string` or a `@cds-model` event.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction | CDS-TS-Dispatcher - @OnBoundFunction}
  */
 const OnBoundFunction = buildOnAction({ event: 'BOUND_FUNC', handlerType: HandlerType.On, isDraft: false });
 
 /**
  * Use `@OnBoundFunctionDraft` decorator to execute custom logic when a custom bound function event is triggered on a DRAFT resource.
+ * @param name CdsFunction - name of the function, which can be a `string` or a `@cds-model` event.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction | CDS-TS-Dispatcher - @OnBoundFunctionDraft}
  */
 const OnBoundFunctionDraft = buildOnAction({ event: 'BOUND_FUNC', handlerType: HandlerType.On, isDraft: true });
 
 /**
  * Use `@OnFunction` decorator to execute custom logic when a custom function event is triggered.
+ * @param name CdsFunction - name of the function, which can be a `string` or a `@cds-model` event.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onfunction | CDS-TS-Dispatcher - @OnFunction}
  */
 const OnFunction = buildOnAction({ event: 'FUNC', handlerType: HandlerType.On, isDraft: false });
 
 /**
  * Use `@OnEvent` decorator to execute custom logic when a custom event is triggered.
+ * @param name CdsEvent - name of the event, which can be a `string` or a `@cds-model` event.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onevent | CDS-TS-Dispatcher - @OnEvent}
  */
-const OnEvent = buildOnEvent({ handlerType: HandlerType.On, isDraft: false });
+const OnEvent = buildOnEvent({ event: 'EVENT', handlerType: HandlerType.On, isDraft: false });
+
+/**
+ *
+ * Use `@OnSubscribe` decorator to execute custom logic when a custom messaging event is triggered.
+ * - Executes custom logic when a specific messaging event is triggered
+ * - Built on CAP's intrinsic eventing system
+ * - Compatible with both in-process and external messaging
+ * @param options - The options object
+ * @param options.eventName string | object (@cds-model) - Name of the event, which can be a `string` or a `@cds-model` event.
+ * @param options.type `'SAME_NODE_PROCESS'` | `'SAME_NODE_PROCESS_DIFFERENT_SERVICE'` | `'MESSAGE_BROKER'` - Type of the subscriber
+ * @param options.externalServiceName string - Name of the external service - applicable only for `SAME_NODE_PROCESS_DIFFERENT_SERVICE`
+ * @param options.showReceiverMessage [optional] - When enabled, displays inbound message payloads in the specified format. (Default `false`)
+ * @param options.consoleStyle [optional] - 'table' : 'debug' - Specifies the log output format for received messages (when `showReceiverMessage` is true). (Default `'debug'`).
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onsubscribe | CDS-TS-Dispatcher - @OnSubscribe}
+ */
+const OnSubscribe = buildOnMessagingEvent({ event: 'MESSAGING_EVENT', handlerType: HandlerType.On, isDraft: false });
 
 /**
  * Use `@OnError` decorator to execute custom logic when an error occurs.
@@ -940,6 +1009,7 @@ const AfterSaveDraft = buildAfter({ event: 'SAVE', handlerType: HandlerType.Afte
 
 export {
   // Standalone events
+  OnSubscribe,
   Use,
   AfterReadSingleInstance,
   AfterReadDraftSingleInstance,
