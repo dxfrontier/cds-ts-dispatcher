@@ -137,3 +137,4 @@ out
 
 # This will overwrite the specific .gitignore in the workspace => ./test/sample-project/*
 !./test/sample-project/*/.gitignore
+@dispatcher
