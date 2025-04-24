@@ -123,3 +123,28 @@ export function _HelloResponseAspect<TBase extends new (...args: any[]) => objec
 export class HelloResponse extends _HelloResponseAspect(__.Entity) {}
 Object.defineProperty(HelloResponse, 'name', { value: 'HelloResponse' })
 Object.defineProperty(HelloResponse, 'is_singular', { value: true })
+
+export function _ProductsEntityAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class ProductsEntity extends _cuidAspect(Base) {
+    declare name?: string | null
+    static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<ProductsEntity> & typeof cuid.keys;
+    declare static readonly elements: __.ElementsOf<ProductsEntity>;
+    declare static readonly actions: typeof cuid.actions & globalThis.Record<never, never>;
+  };
+}
+/**
+* Aspect for entities with canonical universal IDs
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-cuid
+*/
+export class ProductsEntity extends _ProductsEntityAspect(__.Entity) {}
+Object.defineProperty(ProductsEntity, 'name', { value: 'ProductsEntity' })
+Object.defineProperty(ProductsEntity, 'is_singular', { value: true })
+/**
+* Aspect for entities with canonical universal IDs
+* 
+* See https://cap.cloud.sap/docs/cds/common#aspect-cuid
+*/
+export class ProductsEntity_ extends Array<ProductsEntity> {$count?: number}
+Object.defineProperty(ProductsEntity_, 'name', { value: 'ProductsEntity' })

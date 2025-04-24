@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "94d1e670-74b9-48eb-818c-a86b56190c85",
+		"_postman_id": "ae6c6413-f888-45b2-9cb3-bfcdd579b709",
 		"name": "CDS-TS-Dispatcher",
 		"description": "`SAP CAP` `NodeJS-based project` using TypesScript decorators for rapid development.\n\nThe goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -991,6 +991,98 @@
 													"path": [
 														"{{catalogService}}",
 														"{{booksEntity}}"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "@OnSubscribe",
+									"item": [
+										{
+											"name": "OnSubscribe triggered for 'event_1'",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"// Test to check if the response contains the CustomHeader with the value OnSubscribeTriggered_event_1",
+															"pm.test(\"CustomHeader contains OnSubscribeTriggered_event_1\", function() {",
+															"  pm.expect(pm.response.headers.get('CustomHeader')).to.include('OnSubscribeTriggered_event_1');",
+															"});",
+															"",
+															"pm.test(\"Status code is 201\", function () {",
+															"    pm.response.to.have.status(201);",
+															"});",
+															"",
+															"// Extract the ID from the response and store it in an environment variable",
+															"pm.environment.set(\"productID\", pm.response.json().ID);"
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"name\": \"blaaaa\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/products/Products",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"products",
+														"Products"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "OnSubscribe triggered when instance was deleted",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"// Test to verify that the CustomHeader from the headers contains OnSubscribeTriggered_event_3",
+															"pm.test(\"CustomHeader contains OnSubscribeTriggered_event_3\", function () {",
+															"    pm.expect(pm.response.headers.get('CustomHeader')).to.include('OnSubscribeTriggered_event_3');",
+															"});",
+															"",
+															"pm.test(\"Status code is 204\", function () {",
+															"   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+															"});",
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/products/Products(ID={{productID}})",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"products",
+														"Products(ID={{productID}})"
 													]
 												}
 											},
@@ -4103,6 +4195,35 @@
 				}
 			],
 			"description": "**Methods** **`.on`**,**`.before, .after`** refer to corresponding _phases_ during request processing:\n\n- **`.on`** handlers actually fulfill requests, e.g. by reading/writing data from/to databases\n- **`.before`** handlers run before the `.on` handlers, frequently for validating inbound data\n- **`.after`** handlers run after the `.on` handlers, frequently to enrich outbound data"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "productID",
+			"value": "",
+			"type": "string"
 		}
 	]
 }

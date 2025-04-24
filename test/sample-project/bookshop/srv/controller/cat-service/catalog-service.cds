@@ -3,7 +3,7 @@ using {sap.capire.bookshop as Base} from '../../../db/schema';
 service CatalogService {
 
   entity Books               as projection on Base.Books;
-  entity Authors             as projection on Base.Authors
+  entity Authors             as projection on Base.Authors;
   entity Reviews             as projection on Base.Reviews;
   entity Publishers          as projection on Base.Publishers;
   entity BookOrders          as projection on Base.BookOrders;
@@ -19,33 +19,38 @@ service CatalogService {
 
   entity BookStats           as projection on Base.BookStats
     actions { // Bound action / function
-      action   GenerateReport(ID : Books:ID) returns {
-        book : Books:title;
-        stats : BookStats:views;
-        rating : BookStats:averageRating
+      action   GenerateReport(ID : Books : ID) returns {
+        book                             : Books : title;
+        stats                            : BookStats : views;
+        rating                           : BookStats : averageRating
       };
-      function NotifyAuthor(ID : Authors:ID) returns Boolean;
+      function NotifyAuthor(ID : Authors : ID) returns Boolean;
     };
 
   // Unbound action
-  action   changeBookProperties(format : BookFormats:format, language : BookFormats:language) returns {
-    language : String;
-    format : BookFormats:format
+  action   changeBookProperties(format : BookFormats : format, language : BookFormats : language) returns {
+    language                                         : String;
+    format                                           : BookFormats : format
   };
 
   // Unbound action
-  action   submitOrder(book : Books:ID, quantity : Integer)                                   returns {
-    stock : Integer
+  action   submitOrder(book : Books : ID, quantity : Integer)                                     returns {
+    stock                           : Integer
   };
 
   // Unbound function
-  function submitOrderFunction(book : Books:ID, quantity : Integer)                           returns {
-    stock : Integer
+  function submitOrderFunction(book : Books : ID, quantity : Integer)                             returns {
+    stock                                   : Integer
   };
 
   event OrderedBook : {
-    book     : Books:ID;
+    book     : Books : ID;
     quantity : Integer;
     buyer    : String
   };
+
+  event event_2 : {
+    foo : Integer;
+    bar : String;
+  }
 }
