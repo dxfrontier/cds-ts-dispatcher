@@ -1,159 +1,159 @@
 {
-	"id": "19624c42-3288-4287-b227-0e3288a695ba",
-	"name": "Local - Testing",
-	"values": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:4004/odata/v4",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "-------------Services -----------",
-			"value": "",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "catalogService",
-			"value": "catalog",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "adminService",
-			"value": "admin",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "---------------------------------",
-			"value": "",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "------------- Entities ------------",
-			"value": "",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "booksEntity",
-			"value": "Books",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "reviewsEntity",
-			"value": "Reviews",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "bookStatsEntity",
-			"value": "BookStats",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "bookEventsEntity",
-			"value": "BookEvents",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "userActivityLogEntity",
-			"value": "UserActivityLog",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "promotionsEntity",
-			"value": "Promotions",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "publishersEntity",
-			"value": "Publishers",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "bookOrdersEntity",
-			"value": "BookOrders",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "bookFormatsEntity",
-			"value": "BookFormats",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "bookRecommendationsEntity",
-			"value": "BookRecommendations",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "bookSalesEntity",
-			"value": "BookSales",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "wishlists",
-			"value": "Wishlists",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "shoppingCart",
-			"value": "ShoppingCart",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "bookSeries",
-			"value": "BookSeries",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "--------------------------------",
-			"value": null,
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "draftUUIDInstance",
-			"value": "",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "--------------------------------",
-			"value": "",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "manager",
-			"value": "manager",
-			"type": "secret",
-			"enabled": true
-		},
-		{
-			"key": "user",
-			"value": "user",
-			"type": "secret",
-			"enabled": true
-		}
-	],
-	"_postman_variable_scope": "environment",
-	"_postman_exported_at": "2025-03-11T09:53:37.621Z",
-	"_postman_exported_using": "Postman/11.35.0"
+  "id": "19624c42-3288-4287-b227-0e3288a695ba",
+  "name": "Local - Testing",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4004/odata/v4",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "-------------Services -----------",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "catalogService",
+      "value": "catalog",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "adminService",
+      "value": "admin",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "---------------------------------",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "------------- Entities ------------",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "booksEntity",
+      "value": "Books",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "reviewsEntity",
+      "value": "Reviews",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookStatsEntity",
+      "value": "BookStats",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookEventsEntity",
+      "value": "BookEvents",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "userActivityLogEntity",
+      "value": "UserActivityLog",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "promotionsEntity",
+      "value": "Promotions",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "publishersEntity",
+      "value": "Publishers",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookOrdersEntity",
+      "value": "BookOrders",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookFormatsEntity",
+      "value": "BookFormats",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookRecommendationsEntity",
+      "value": "BookRecommendations",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookSalesEntity",
+      "value": "BookSales",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "wishlists",
+      "value": "Wishlists",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "shoppingCart",
+      "value": "ShoppingCart",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookSeries",
+      "value": "BookSeries",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "--------------------------------",
+      "value": null,
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "draftUUIDInstance",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "--------------------------------",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "manager",
+      "value": "manager",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "user",
+      "value": "user",
+      "type": "secret",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2025-03-11T09:53:37.621Z",
+  "_postman_exported_using": "Postman/11.35.0"
 }
