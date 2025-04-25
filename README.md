@@ -2622,9 +2622,6 @@ this.on('AEvent', async (req) => {
 > Decorator `@OnEvent` should be used inside [@UnboundActions](#unboundactions) class.
 
 > [!TIP]
-> More info can be found at <https://cap.cloud.sap/docs/guides/messaging/>
-
-> [!TIP]
 > An exended version of this event can be found [@OnSubscribe](#onsubscribe).
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
@@ -2756,7 +2753,7 @@ private async onSubscribe(@Req() req: Request<SendData>): Promise<void> {
 
 // same as
 
-@OnEvent('anEventName')
+@OnEvent(SendData)
 private async onEventMethod(@Req() req: Request<SendData>) {
   // ...
 }
@@ -2773,6 +2770,9 @@ this.on('SendData', async (msg) => {
   // ...
 });
 ```
+
+> [!NOTE] 
+> The `SendData` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 `Example 3` 
 
@@ -2910,7 +2910,7 @@ const Service_1 = cds.connect.to('Service_1');
 > You can find more info about SAP CAP messaging in the following url [SAP CAP Events and Messaging](https://cap.cloud.sap/docs/guides/messaging/).
 
 > [!IMPORTANT]  
-> Decorator `@OnSubscribe` should be used inside [@UnboundActions](#unboundactions) class.
+> Decorator `@OnSubscribe` should be used inside [@UnboundActions](#unboundactions) class, but not mandatory it can reside also in [@EntityHandler](#entityhandler) class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
