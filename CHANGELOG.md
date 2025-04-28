@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.2.0] - 2025-04-28
+
+### 🚀 Features
+
+- *(decorators)* New decorator `@Msg` and `@OnSubscribe` to catch event messaging
+
+### 🧪 Testing
+
+- *(e2e)* Updated tests for `@Msg` and `@OnSubscribe` decorators
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+- *(files)* Deleted `@dispatcher` folder as it was pushed by mistake
+- *(gitignore)* Added `@dispatcher` folder to gitignore
+- *(readme)* Updated readme for new decorators `@Msg` and `@OnSubscribe`
+- *(postinstall)* Removed some unused comments
+- *(prettier)* Pretty test folder
+- *(readme)* Small update to readme
+- *(readme)* Small updates to @OnSubscribe and @UnboundActions description
+
 ## [4.1.3] - 2025-03-24
 
 ### 🐛 Bug Fixes
