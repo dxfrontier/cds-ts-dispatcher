@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import lodash from 'lodash';
 import template from 'string-placeholder';
+import colors from 'picocolors';
 
 import { Request as RequestClass } from '@sap/cds';
 
@@ -9,12 +10,17 @@ import constants from '../constants/internalConstants';
 import type { NextEvent, Request, ValidatorField } from '../types/types';
 import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
+import { SubscriberType } from '../types/internalTypes';
 
 /**
  * This util contains common methods for reusable purposes.
  * Methods don't contain business logic.
  */
 const util = {
+  showGreenConsole: (text: string): string => {
+    return colors.green(text);
+  },
+
   /**
    * Single point of lodash.
    * @example
@@ -36,9 +42,23 @@ const util = {
    * @param str The input string.
    * @returns The last part of the string after the last dot.
    */
-  subtractLastDotString(str: string) {
+  subtractLastDotString(str: string): string {
     const lastDotIndex = str.lastIndexOf('.');
+
+    if (lastDotIndex === -1) {
+      return str;
+    }
+
     return str.substring(lastDotIndex + 1);
+  },
+
+  /**
+   * Type guard to check if an argument is a Msg function.
+   * @param arg The argument to check.
+   * @returns True if the argument is a Msg function, otherwise false.
+   */
+  isMsgEvent(arg: any): arg is SubscriberType<any> {
+    return typeof arg === 'object' && ['inbound', 'event', 'data', 'headers'].every((key: string) => key in arg);
   },
 
   /**

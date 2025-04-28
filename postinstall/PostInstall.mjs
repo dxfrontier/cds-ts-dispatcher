@@ -117,58 +117,10 @@ ${line}
     this.updatePackageJsonImports(options.packageJsonPath);
     this.updateTsconfigInclude(options.tsconfigPath);
   }
-  // private processWorkspace(workspace: string) {
-  //   const workspacePath = this.joinPaths(this.currentInstallDirectory, workspace);
-  //   const dispatcherFolderPath = this.joinPaths(workspacePath, this.dispatcherNecessaryFiles.folder);
-  //   const packageJsonPath = this.joinPaths(workspacePath, this.dispatcherNecessaryFiles.packageJson);
-  //   const tsconfigPath = this.joinPaths(workspacePath, this.dispatcherNecessaryFiles.tsConfig);
-  //   const gitignoreFilePath = this.joinPaths(workspacePath, this.dispatcherNecessaryFiles.gitIgnore);
-  //   const envFilePath = this.joinPaths(dispatcherFolderPath, this.dispatcherNecessaryFiles.env);
-  //   this.createOrUpdateConfigFiles({
-  //     dispatcherFolderPath,
-  //     envFilePath,
-  //     gitignoreFilePath,
-  //     packageJsonPath,
-  //     tsconfigPath,
-  //   });
-  //   this.dispatcherExecutionPath.paths.push({
-  //     executedInstalledPath: workspacePath,
-  //     envFilePath,
-  //     dispatcherPath: dispatcherFolderPath,
-  //   });
-  // }
-  processWorkspaces() {
-    this.getPackageJson()
-      .getWorkspaces()
-      .forEach((workspace) => {
-        const packageJson = this.getParsedPackageJson(workspace);
-        if (this.isDispatcherFound(packageJson.dependencies)) {
-          this.processWorkspace(workspace);
-        }
-        if (this.isDispatcherFound(packageJson.devDependencies)) {
-          throw new Error('CDS-TS-Dispatcher should be installed in `dependencies` not in `devDependencies`!');
-        }
-      });
+  processWorkspace(workspace) {
+    const workspacePath = this.joinPaths(this.currentInstallDirectory, workspace);
+    this.processInstallation(workspacePath);
   }
-  // private processRoot() {
-  //   const dispatcherFolderPath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.folder);
-  //   const packageJsonPath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.packageJson);
-  //   const tsconfigPath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.tsConfig);
-  //   const gitignoreFilePath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.gitIgnore);
-  //   const envFilePath = this.joinPaths(dispatcherFolderPath, this.dispatcherNecessaryFiles.env);
-  //   this.createOrUpdateConfigFiles({
-  //     dispatcherFolderPath,
-  //     envFilePath,
-  //     gitignoreFilePath,
-  //     packageJsonPath,
-  //     tsconfigPath,
-  //   });
-  //   this.dispatcherExecutionPath.paths.push({
-  //     executedInstalledPath: this.currentInstallDirectory,
-  //     envFilePath,
-  //     dispatcherPath: dispatcherFolderPath,
-  //   });
-  // }
   processInstallation(targetDirectory) {
     const dispatcherFolderPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.folder);
     const packageJsonPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.packageJson);
@@ -188,12 +140,21 @@ ${line}
       dispatcherPath: dispatcherFolderPath,
     });
   }
-  processWorkspace(workspace) {
-    const workspacePath = this.joinPaths(this.currentInstallDirectory, workspace);
-    this.processInstallation(workspacePath);
-  }
   processRoot() {
     this.processInstallation(this.currentInstallDirectory);
+  }
+  processWorkspaces() {
+    this.getPackageJson()
+      .getWorkspaces()
+      .forEach((workspace) => {
+        const packageJson = this.getParsedPackageJson(workspace);
+        if (this.isDispatcherFound(packageJson.dependencies)) {
+          this.processWorkspace(workspace);
+        }
+        if (this.isDispatcherFound(packageJson.devDependencies)) {
+          throw new Error('CDS-TS-Dispatcher should be installed in `dependencies` not in `devDependencies`!');
+        }
+      });
   }
   run() {
     if (this.getPackageJson().hasWorkspaces()) {

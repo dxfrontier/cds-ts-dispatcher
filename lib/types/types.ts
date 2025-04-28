@@ -8,7 +8,7 @@ import { Service, Request } from '@sap/cds';
 // Common types
 // **************************************************************************************************************************
 
-export type CdsEvent = object;
+export type CdsEvent = object | string;
 export type CDSTyperEntity<T> = Constructable<T>;
 export type RequestType = (...args: any[]) => Promise<any>;
 

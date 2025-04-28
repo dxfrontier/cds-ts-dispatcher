@@ -11,6 +11,7 @@
 ![NPM Downloads](https://img.shields.io/npm/dm/%40dxfrontier%2Fcds-ts-dispatcher?logo=npm)
 ![NPM Version](https://img.shields.io/npm/v/%40dxfrontier%2Fcds-ts-dispatcher?logo=npm)
 
+![Tests](https://img.shields.io/github/actions/workflow/status/dxfrontier/cds-ts-dispatcher/tests.yml?logo=git&label=test%20(unit%2C%20e2e%2C%20integration))
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/dxfrontier/cds-ts-dispatcher/deployment.yaml?logo=git)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/dxfrontier/cds-ts-dispatcher/main?logo=git)
 ![GitHub issues](https://img.shields.io/github/issues/dxfrontier/cds-ts-dispatcher?logo=git)
@@ -60,6 +61,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@ValidationResults](#validationresults)
       - [@Locale](#locale)
       - [@Env](#env)
+      - [@Msg](#msg)
     - [`Method`-`active entity`](#method-active-entity)
       - [`Before`](#before)
         - [@BeforeCreate](#beforecreate)
@@ -82,6 +84,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
         - [@OnAction](#onaction)
         - [@OnFunction](#onfunction)
         - [@OnEvent](#onevent)
+        - [@OnSubscribe](#onsubscribe)
         - [@OnError](#onerror)
         - [@OnBoundAction](#onboundaction)
         - [@OnBoundFunction](#onboundfunction)
@@ -640,11 +643,12 @@ The following decorators can be used inside of `@UnboundActions()` :
 - [@OnFunction()](#onfunction)
 - [@OnEvent()](#onevent)
 - [@OnError()](#onerror)
+- [@OnSubscribe()](#onsubscribe)
 
 `Example`
 
 ```typescript
-import { UnboundActions, OnAction, OnFunction, OnEvent, Req, Next, Error } from '@dxfrontier/cds-ts-dispatcher';
+import { UnboundActions, OnAction, OnFunction, OnEvent, Req, Next, Error, OnSubscribe } from '@dxfrontier/cds-ts-dispatcher';
 import { MyAction, MyFunction, MyEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 import type { ActionRequest, ActionReturn, Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
@@ -683,6 +687,15 @@ export class UnboundActionsHandler {
   @OnError()
   private onErrorMethod(@Error() err: Error, @Req() req: Request) {
     // ...
+  }
+
+  // Unbound event
+  @OnSubscribe({ 
+    eventName: 'event_name'
+    type: 'SAME_NODE_PROCESS' 
+  })
+  private async onSubscribe(@Req() req: Request<{foo: string, bar: number}>): Promise<void> {
+    // 
   }
 }
 ```
@@ -1697,6 +1710,50 @@ public async beforeCreate(
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+##### @Msg
+
+**@Msg()**
+
+The `@Msg` decorator is a parameter decorator used to inject response [Emitter](#https://cap.cloud.sap/docs/guides/messaging/#typical-emitter-and-receiver-roles) response object directly into a method parameter.
+
+`Parameters`
+
+`Return` :
+
+- The decorator returns an object of type : 
+
+```ts
+{
+  event: string,
+  data: any,
+  headers: any,
+  inbound: boolean
+}
+```
+
+`Example`
+
+```ts
+import { OnSubscribe, Messaging } from '@dxfrontier/cds-ts-dispatcher';  
+import type { SubscriberType } from '@dxfrontier/cds-ts-dispatcher';  
+
+@OnSubscribe({
+  eventName: 'AnEventName',
+  type: 'MESSAGE_BROKER',
+})
+public async onSubscribe(@Msg() msg: SubscriberType<{ foo: number; bar: string }>): Promise<void> {
+  // ...
+}
+```
+> [!IMPORTANT]
+> To have the `msg` typed you can use TypeScript type `SubscriberType<T>` where T can be a CDS event or any object
+
+> [!TIP]
+> Decorator `@Msg` should be used exclusively on decorator [@OnSubscribe](#onsubscribe).
+
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 #### `Method`-`active entity`
 
 ##### `Before`
@@ -2527,7 +2584,7 @@ this.on(AFunction, async (req) => {
 
 **@OnEvent**(`name` : CdsEvent)
 
-The `@OnEvent` decorator facilitates the listening of messages from a message broker.
+The `@OnEvent` decorator facilitates the listening of events when the [Emit](https://cap.cloud.sap/docs/guides/messaging/) and receiver are in the same `NODE JS PROCESS` and `SAME SERVICE`.
 
 This decorator is particularly useful in conjunction with the [Emit method](https://cap.cloud.sap/docs/guides/messaging/#emitting-events) to handle triggered events.
 
@@ -2538,12 +2595,22 @@ This decorator is particularly useful in conjunction with the [Emit method](http
 `Example`
 
 ```typescript
-import { OnEvent, Req } from "@dxfrontier/cds-ts-dispatcher";
+import { OnEvent, Req, OnSubscribe } from "@dxfrontier/cds-ts-dispatcher";
 import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 import { AEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 @OnEvent(AEvent)
+private async onEventMethod(@Req() req: Request<AEvent>) {
+  // ...
+}
+
+// same as
+
+@OnSubscribe({
+  eventName: AEvent,
+  type: 'SAME_NODE_PROCESS',
+})
 private async onEventMethod(@Req() req: Request<AEvent>) {
   // ...
 }
@@ -2557,13 +2624,302 @@ this.on('AEvent', async (req) => {
 });
 ```
 
-> [!NOTE] > **AEvent** was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> [!NOTE] 
+> The `AEvent` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
 
 > [!IMPORTANT]  
 > Decorator `@OnEvent` should be used inside [@UnboundActions](#unboundactions) class.
 
 > [!TIP]
-> More info can be found at <https://cap.cloud.sap/docs/guides/messaging/>
+> An exended version of this event can be found [@OnSubscribe](#onsubscribe).
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @OnSubscribe
+
+```ts
+@OnSubscribe(options : {
+  eventName: string | object,
+  type : 'SAME_NODE_PROCESS' | 'MESSAGE_BROKER' | 'SAME_NODE_PROCESS_DIFFERENT_SERVICE'
+  externalServiceName: string // applicable only for 'SAME_NODE_PROCESS_DIFFERENT_SERVICE'
+  showReceiverMessage?: boolean
+  consoleStyle?: 'table | 'debug'
+})
+```
+
+Use `@OnSubscribe` decorator enables execution of custom logic when messaging events (`event bus` / `publish subscribe`) are triggered in your SAP CAP application.
+
+This decorator is particularly useful in conjunction with the [Emit method](https://cap.cloud.sap/docs/guides/messaging/#emitting-events) to handle triggered events.
+
+`Parameters`
+
+- `options`:
+  - `name`: CdsEvent - The name of the event to subscribe to. This can be a `string` or a `CDS event` type imported from your `@cds-models` folder.
+  - `type`: Defines the messaging transport mechanism for SAP CAP applications.
+    - `'SAME_NODE_PROCESS'` - Use when both `emitter` and `receiver` run in the same `CAP server instance` & `same service`.
+    - `'SAME_NODE_PROCESS_DIFFERENT_SERVICE'` - Use when `emitter` can be found in E.g. `Service A` and `receiver` can reside in E.g. `Service B`, having same `CAP server instance` but `different services`.
+    - `'MESSAGE_BROKER'` - Recommended for production with external message brokers, different CAP Server instances, different services.
+  - `showReceiverMessage?` `[optional]`: **boolean** - When enabled, logs inbound message payloads in the specified `consoleStyle` format.
+  - `externalServiceName`: - The name of the external service to attach the subscribe decorator to. `[Applicable only when type is 'SAME_NODE_PROCESS_DIFFERENT_SERVICE' ]`
+  - `consoleStyle?` `[optional]` - Specifies the log output format for received messages (when `showReceiverMessage` is true).
+    - `'table'`: Displays data using `console.table()`, ideal for structured messages.
+    - `'debug'`: Displays data using  `console.debug()`, ideal for nested or dynamic messages.
+
+`Example 1`
+
+In this example we emit the event in same `node process` and `same service` and we subscribe to it.
+
+`Emitting and subscribing:`
+
+```ts
+import { OnSubscribe, Req, OnEvent } from '@dxfrontier/cds-ts-dispatcher';
+import type { SubscriberType, Request } from '@dxfrontier/cds-ts-dispatcher';
+
+// Emitting the event
+@AfterRead()
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: MyEntity[],
+): Promise<void> {
+  this.srv.emit('anEventName', { foo: 11, bar: '22' });
+}
+
+// Subscribing to the event
+@OnSubscribe({ 
+  eventName: 'anEventName'
+  type: 'SAME_NODE_PROCESS', 
+})
+private async onSubscribe(@Req() req: Request<{ foo: number, bar: string }>): Promise<void> {
+  // 
+}
+
+// same as
+
+@OnEvent('anEventName')
+private async onEventMethod(@Req() req: Request<{ foo: number, bar: string }>) {
+  // ...
+}
+
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('READ', MyEntity, async (req, res) => {
+  this.emit('anEventName', { foo: 11, bar: '22' });
+});
+
+this.on('anEventName', async (msg) => {
+  // ...
+});
+```
+
+`Example 2`
+
+In this example we emit the event in same `node process` and `same service` and we subscribe to it, the only difference, is in this case we get the Event from the `@cds-models` folder
+
+`Service Definition (CDS):`
+
+```yml
+// We declare an event into our Service
+service CatalogService {
+  event SendData : {
+    foo : Integer;
+    bar : String;
+  }
+}
+```
+
+`Emitting and subscribing:`
+
+```ts
+import { OnSubscribe, Req, AfterRead, Results, OnEvent } from '@dxfrontier/cds-ts-dispatcher';
+import type { SubscriberType } from '@dxfrontier/cds-ts-dispatcher';
+
+import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
+
+// Emitting the event
+@AfterRead()
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: MyEntity[],
+): Promise<void> {
+  this.srv.emit('SendData', { foo: 11, bar: '22' });
+}
+
+// Receiving the event + data
+@OnSubscribe({ 
+  eventName: SendData
+  type: 'SAME_NODE_PROCESS' 
+})
+private async onSubscribe(@Req() req: Request<SendData>): Promise<void> {
+  // 
+  // req.data.foo ...
+  // req.data.bar ...
+  // req.headers ...
+  // ...
+}
+
+// same as
+
+@OnEvent(SendData)
+private async onEventMethod(@Req() req: Request<SendData>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('READ', MyEntity, async (req, res) => {
+  this.emit('SendData', { foo: 11, bar: '22' });
+});
+
+this.on('SendData', async (msg) => {
+  // ...
+});
+```
+
+> [!NOTE] 
+> The `SendData` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Example 3` 
+
+
+In this example we assume we have `2 node instances` and `2 services` and we use external messaging `Cross-Instance Messaging (Message Broker)`
+
+`Emitter (Service 1 & node instance 1):`
+
+```ts
+import { Req, AfterRead, Results } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
+
+@AfterRead()
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: MyEntity[],
+): Promise<void> {
+
+  const messaging = await cds.connect.to('messaging');
+        messaging.emit('SendData', { foo: 11, bar: '22' });
+
+}
+```
+
+`Equivalent to 'JS'`
+
+```ts
+this.after('READ', MyEntity, async (req, res) => {
+  const messaging = await cds.connect.to('messaging');
+        messaging.emit('SendData', { foo: 11, bar: '22' });
+});
+```
+
+`Subscriber (Service 2 & Node instance 2):`
+
+```ts
+
+import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
+import { Messaging, OnSubscribe } from '@dxfrontier/cds-ts-dispatcher';
+import type { SubscriberType } from '@dxfrontier/cds-ts-dispatcher';
+
+// Receiving the event + data 
+@OnSubscribe({
+  eventName: SendData,
+  type: 'MESSAGE_BROKER' 
+})
+private async onSubscribe(@Msg() msg: SubscriberType<SendData>): Promise<void> {
+  // 
+  // req.data.foo ...
+  // req.data.bar ...
+  // req.headers ...
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```ts
+const messaging = await cds.connect.to('messaging');
+      messaging.on(SendData, async (msg) => {
+        // ...
+      });
+```
+
+> [!IMPORTANT]
+> To have the `msg` parameter typed you can use TypeScript type `SubscriberType<T>` where T can be a CDS event or any object
+
+> [!TIP]
+> When using `messaging (broker)` the decorator [@Msg](#msg) must be applied as the request is anonymous at this level.
+
+`Example 4`
+
+In this example we emit an event in `Service 1` & `node process 1`, and we attach from `Service 2` a subscribe to `Service 1` & `node process 1`, meaning that, when emit `SendData` the service `Service 2` will be notified and the `onSubscribe` method will be triggered which resides attached to `Service 1`.
+
+`Emitter (Service 1 & node process 1):`
+
+```ts
+import { Req, AfterRead, Results } from '@dxfrontier/cds-ts-dispatcher';
+import type { SubscriberType } from '@dxfrontier/cds-ts-dispatcher';
+
+import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
+
+// Emitting the event
+// This event resides in Service_1
+@AfterRead()
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: MyEntity[],
+): Promise<void> {
+  this.srv.emit('SendData', { foo: 11, bar: '22' });
+}
+```
+
+`Equivalent to 'JS'`
+
+```ts
+// This event resides in Service_1
+this.after('READ', MyEntity, async (req, res) => {
+  this.emit('SendData', { foo: 11, bar: '22' });
+});
+```
+
+`Subscriber (Service 2 & node process 1):`
+
+```ts
+
+import { OnSubscribe, Req } from '@dxfrontier/cds-ts-dispatcher';
+
+// Receiving the event + data
+// This event resides in Service_2 but the subscribe will be attached to Service_1
+ @OnSubscribe({
+  eventName: 'SendData',
+  type: 'SAME_NODE_PROCESS_DIFFERENT_SERVICE',
+  externalService: 'Service_1'
+})
+private async onSubscribe(@Req() req: Request<SendData>): Promise<void> {
+  // req.data.foo ...
+  // req.data.bar ...
+  // req.headers ...
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```ts
+// This code resides in Service_2 but it is subscribed to Service_1
+const Service_1 = cds.connect.to('Service_1');
+      Service_1.on('SendData', (msg) => {
+        //
+      });
+```
+
+> [!TIP]
+> You can find more info about SAP CAP messaging in the following url [SAP CAP Events and Messaging](https://cap.cloud.sap/docs/guides/messaging/).
+
+> [!IMPORTANT]  
+> Decorator `@OnSubscribe` should be used inside [@UnboundActions](#unboundactions) class, but not mandatory it can reside also in [@EntityHandler](#entityhandler) class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

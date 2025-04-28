@@ -21,6 +21,7 @@ export const constants = {
       VALIDATORS: Symbol('VALIDATORS'),
       LOCALE: Symbol('LOCALE'),
       ENV: Symbol('ENV'),
+      MSG: Symbol('MSG'),
     },
   },
 

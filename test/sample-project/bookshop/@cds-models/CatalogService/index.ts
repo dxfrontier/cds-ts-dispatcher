@@ -599,6 +599,11 @@ export declare class OrderedBook {
   declare quantity: number | null
   declare buyer: string | null
 }
+// event
+export declare class event_2 {
+  declare foo: number | null
+  declare bar: string | null
+}
 
 export declare const changeBookProperties:  {
   // positional
