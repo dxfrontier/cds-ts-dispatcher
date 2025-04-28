@@ -648,7 +648,7 @@ The following decorators can be used inside of `@UnboundActions()` :
 `Example`
 
 ```typescript
-import { UnboundActions, OnAction, OnFunction, OnEvent, Req, Next, Error } from '@dxfrontier/cds-ts-dispatcher';
+import { UnboundActions, OnAction, OnFunction, OnEvent, Req, Next, Error, OnSubscribe } from '@dxfrontier/cds-ts-dispatcher';
 import { MyAction, MyFunction, MyEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
 import type { ActionRequest, ActionReturn, Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
@@ -687,6 +687,15 @@ export class UnboundActionsHandler {
   @OnError()
   private onErrorMethod(@Error() err: Error, @Req() req: Request) {
     // ...
+  }
+
+  // Unbound event
+  @OnSubscribe({ 
+    eventName: 'event_name'
+    type: 'SAME_NODE_PROCESS' 
+  })
+  private async onSubscribe(@Req() req: Request<{foo: string, bar: number}>): Promise<void> {
+    // 
   }
 }
 ```
@@ -2845,7 +2854,7 @@ const messaging = await cds.connect.to('messaging');
 
 `Example 4`
 
-In this example we emit an event in `Service 1` & ` same node process `, and we attach from `Service 2` a subscribe to `Service 1` & `same node process`, meaning that, when emit `SendData` the service `Service 2` will be notified and the `onSubscribe` method will be triggered.
+In this example we emit an event in `Service 1` & `node process 1`, and we attach from `Service 2` a subscribe to `Service 1` & `node process 1`, meaning that, when emit `SendData` the service `Service 2` will be notified and the `onSubscribe` method will be triggered which resides attached to `Service 1`.
 
 `Emitter (Service 1 & node process 1):`
 
