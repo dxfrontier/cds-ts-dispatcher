@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.2.1] - 2025-05-06
+
+### 🐛 Bug Fixes
+
+- *(subscriberType)* Exported publicly the type to be used in projects
+
+### 🧪 Testing
+
+- *(e2e)* Fixed by adding `SubscriberType` to the UnboundActions
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+
 ## [4.2.0] - 2025-04-28
 
 ### 🚀 Features

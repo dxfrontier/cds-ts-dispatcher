@@ -9,14 +9,8 @@ import { HandlerType } from '../types/enum';
 import { MiddlewareEntityRegistry } from '../util/middleware/MiddlewareEntityRegistry';
 import { MetadataDispatcher } from './MetadataDispatcher';
 
-import type {
-  NonEmptyArray,
-  BaseHandler,
-  Constructable,
-  SubscriberType,
-  EventMessagingOptions,
-} from '../types/internalTypes';
-import type { Request, Service, ServiceImpl } from '../types/types';
+import type { NonEmptyArray, BaseHandler, Constructable, EventMessagingOptions } from '../types/internalTypes';
+import type { Request, Service, ServiceImpl, SubscriberType } from '../types/types';
 
 /**
  * `CDSDispatcher` is responsible for managing and registering event handlers for entities within the CDS framework.
