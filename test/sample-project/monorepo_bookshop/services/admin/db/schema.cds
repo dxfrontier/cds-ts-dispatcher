@@ -1,9 +1,4 @@
-using {
-  Currency,
-  managed,
-  sap,
-  cuid
-} from '@sap/cds/common';
+
 
 using {
   Roles,
