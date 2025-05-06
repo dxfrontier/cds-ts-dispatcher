@@ -10,7 +10,7 @@ import constants from '../constants/internalConstants';
 import type { NextEvent, Request, ValidatorField } from '../types/types';
 import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
-import { SubscriberType } from '../types/internalTypes';
+import { SubscriberType } from '../types/types';
 
 /**
  * This util contains common methods for reusable purposes.
