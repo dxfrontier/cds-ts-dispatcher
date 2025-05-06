@@ -35,7 +35,7 @@ import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
 
 import type { ExposeFields } from '../../../../../../../lib/types/validator';
-import { SubscriberType } from '../../../../../../../lib/types/internalTypes';
+import { SubscriberType } from '../../../../../../../lib';
 
 @UnboundActions()
 @Use(MiddlewareEntity1, MiddlewareEntity2)
