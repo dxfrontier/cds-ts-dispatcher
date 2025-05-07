@@ -1,9 +1,14 @@
-
-
 using {
   Roles,
   BookTypes
 } from './cds-types/types';
+
+using {
+  Currency,
+  managed,
+  sap,
+  cuid
+} from '@sap/cds/common';
 
 
 namespace sap.capire.bookshop;
