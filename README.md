@@ -1714,7 +1714,7 @@ public async beforeCreate(
 
 **@Msg()**
 
-The `@Msg` decorator is a parameter decorator used to inject response [Emitter](#https://cap.cloud.sap/docs/guides/messaging/#typical-emitter-and-receiver-roles) response object directly into a method parameter.
+The `@Msg` decorator is a parameter decorator used to inject response [Emitter](#https://cap.cloud.sap/docs/guides/messaging/#typical-emitter-and-receiver-roles) directly into a method parameter.
 
 `Parameters`
 
@@ -1725,7 +1725,7 @@ The `@Msg` decorator is a parameter decorator used to inject response [Emitter](
 ```ts
 {
   event: string,
-  data: any,
+  data: T,
   headers: any,
   inbound: boolean
 }
@@ -1746,7 +1746,7 @@ public async onSubscribe(@Msg() msg: SubscriberType<{ foo: number; bar: string }
 }
 ```
 > [!IMPORTANT]
-> To have the `msg` typed you can use TypeScript type `SubscriberType<T>` where T can be a CDS event or any object
+> To have the `msg` typed you can use type `SubscriberType<T>` where `T` can be a `CDS event` or a plain object.
 
 > [!TIP]
 > Decorator `@Msg` should be used exclusively on decorator [@OnSubscribe](#onsubscribe).

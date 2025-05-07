@@ -4,6 +4,7 @@ import { existsSync, appendFileSync, writeFileSync, mkdirSync, readFileSync } fr
 import { parse as parseJsonc, ParseError } from 'jsonc-parser';
 import { ExecutionPaths, PackageJson } from './types';
 
+import fg from 'fast-glob';
 export class FileManager {
   private readonly currentInstallDirectory = process.env.INIT_CWD!;
   private readonly dispatcherNecessaryFiles = {
@@ -26,34 +27,81 @@ export class FileManager {
     return path.join(...paths);
   }
 
-  private getPackageJson() {
-    const parsedPackage: PackageJson = this.getParsedPackageJson();
+  private readPackageJson(filePath: string): PackageJson {
+    return JSON.parse(readFileSync(filePath, 'utf8'));
+  }
+
+  private getRootPackageJson() {
+    const path = FileManager.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.packageJson);
+    const packageJson: PackageJson = this.readPackageJson(path);
 
     return {
-      hasWorkspaces: (): boolean => (parsedPackage.workspaces?.length ?? 0) > 0,
-      getWorkspaces: (): string[] => parsedPackage.workspaces!,
+      hasWorkspaces: (): boolean => (packageJson.workspaces?.length ?? 0) > 0,
+      getWorkspaces: (): string[] => packageJson.workspaces!,
     };
   }
 
-  private getParsedPackageJson(workspace?: string): PackageJson {
-    let packageJsonPath: string;
+  private isWorkspaceDynamicPattern(workspace: string): boolean {
+    return fg.isDynamicPattern(workspace) ? true : false;
+  }
 
-    if (!workspace) {
-      // Case 1: when it's a root
-      packageJsonPath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.packageJson);
-    } else if (path.isAbsolute(workspace)) {
-      // Case 3: when workspace is a full path
-      packageJsonPath = workspace;
-    } else {
-      // Case 2: when it's a workspace but just ./workspace/name/
-      packageJsonPath = this.joinPaths(
-        this.currentInstallDirectory,
-        workspace,
-        this.dispatcherNecessaryFiles.packageJson,
-      );
-    }
+  private getParsedPackageJson(workspace: string) {
+    // path join has an issue with '*' and I am replacing it with empty '' and adding later when is needed
+    const sanitizedWorkspace = workspace.replace('*', '');
+    const path = FileManager.joinPaths(this.currentInstallDirectory, sanitizedWorkspace);
 
-    return JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+    /**
+     * When the package.json is on the root level, meaning it doesn't have workspaces
+     */
+    const resolveRoot = (): string => {
+      return FileManager.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.packageJson);
+    };
+
+    /**
+     * When the package.json has workspaces with the '*'
+     * @example
+     * "workspaces": [
+     *   "./services/*"
+     * ]
+     */
+    const resolveDynamicPattern = (): PackageJson[] => {
+      const workspaces = fg.globSync(`${path}*/${this.dispatcherNecessaryFiles.packageJson}`, { dot: true });
+      const jsons: PackageJson[] = [];
+
+      workspaces.forEach((item, index) => {
+        const fields: PackageJson = {
+          path: item.replace('package.json', ''),
+          ...JSON.parse(readFileSync(workspaces[index], 'utf8')),
+        };
+
+        jsons.push(fields);
+      });
+
+      return jsons;
+    };
+
+    /**
+     * When the package.json has workspaces with the '*'
+     * @example
+     * "workspaces": [
+     *   "./services/admin",
+     *   "./services/api"
+     * ]
+     */
+    const resolveStaticWorkspaces = (): PackageJson[] => {
+      const fields: PackageJson = {
+        path,
+        ...JSON.parse(readFileSync(FileManager.joinPaths(path, this.dispatcherNecessaryFiles.packageJson), 'utf8')),
+      };
+
+      return [fields];
+    };
+
+    return {
+      resolveDynamicPattern,
+      resolveStaticWorkspaces,
+      resolveRoot,
+    };
   }
 
   private createFolderIfAbsent(folderPath: string) {
@@ -68,11 +116,7 @@ export class FileManager {
     }
   }
 
-  private joinPaths(...paths: string[]) {
-    return path.join(...paths);
-  }
-
-  private isDispatcherFound(dependencies: Record<string, string>): boolean {
+  private validateDispatcherDependency(dependencies: Record<string, string>): boolean {
     return dependencies && dependencies['@dxfrontier/cds-ts-dispatcher'] !== undefined;
   }
 
@@ -89,13 +133,13 @@ export class FileManager {
 
   private updatePackageJsonImports(filePath: string) {
     if (existsSync(filePath)) {
-      const packageJson = this.getParsedPackageJson(filePath);
+      const json: PackageJson = JSON.parse(readFileSync(filePath, 'utf8'));
 
-      packageJson.imports = packageJson.imports || {};
+      json.imports = json.imports || {};
 
-      if (!packageJson.imports['#dispatcher']) {
-        packageJson.imports['#dispatcher'] = './@dispatcher/index.js';
-        writeFileSync(filePath, JSON.stringify(packageJson, null, 2));
+      if (!json.imports['#dispatcher']) {
+        json.imports['#dispatcher'] = './@dispatcher/index.js';
+        writeFileSync(filePath, JSON.stringify(json, null, 2));
       }
     }
   }
@@ -140,17 +184,12 @@ export class FileManager {
     this.updateTsconfigInclude(options.tsconfigPath);
   }
 
-  private processWorkspace(workspace: string) {
-    const workspacePath = this.joinPaths(this.currentInstallDirectory, workspace);
-    this.processInstallation(workspacePath);
-  }
-
-  private processInstallation(targetDirectory: string) {
-    const dispatcherFolderPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.folder);
-    const packageJsonPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.packageJson);
-    const tsconfigPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.tsConfig);
-    const gitignoreFilePath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.gitIgnore);
-    const envFilePath = this.joinPaths(dispatcherFolderPath, this.dispatcherNecessaryFiles.env);
+  private processInstallation(directory: string) {
+    const dispatcherFolderPath = FileManager.joinPaths(directory, this.dispatcherNecessaryFiles.folder);
+    const packageJsonPath = FileManager.joinPaths(directory, this.dispatcherNecessaryFiles.packageJson);
+    const tsconfigPath = FileManager.joinPaths(directory, this.dispatcherNecessaryFiles.tsConfig);
+    const gitignoreFilePath = FileManager.joinPaths(directory, this.dispatcherNecessaryFiles.gitIgnore);
+    const envFilePath = FileManager.joinPaths(dispatcherFolderPath, this.dispatcherNecessaryFiles.env);
 
     this.createOrUpdateConfigFiles({
       dispatcherFolderPath,
@@ -161,7 +200,7 @@ export class FileManager {
     });
 
     this.dispatcherExecutionPath.paths.push({
-      executedInstalledPath: targetDirectory,
+      executedInstalledPath: directory,
       envFilePath,
       dispatcherPath: dispatcherFolderPath,
     });
@@ -172,23 +211,26 @@ export class FileManager {
   }
 
   private processWorkspaces() {
-    this.getPackageJson()
-      .getWorkspaces()
-      .forEach((workspace) => {
-        const packageJson: PackageJson = this.getParsedPackageJson(workspace);
+    const workspaces = this.getRootPackageJson().getWorkspaces();
 
-        if (this.isDispatcherFound(packageJson.dependencies)) {
-          this.processWorkspace(workspace);
-        }
+    workspaces.forEach((workspace) => {
+      const isDynamic = this.isWorkspaceDynamicPattern(workspace);
+      const packages = isDynamic
+        ? this.getParsedPackageJson(workspace).resolveDynamicPattern()
+        : this.getParsedPackageJson(workspace).resolveStaticWorkspaces();
 
-        if (this.isDispatcherFound(packageJson.devDependencies)) {
-          throw new Error('CDS-TS-Dispatcher should be installed in `dependencies` not in `devDependencies`!');
+      packages.forEach((pkg) => {
+        if (this.validateDispatcherDependency(pkg.dependencies)) {
+          isDynamic
+            ? this.processInstallation(pkg.path)
+            : this.processInstallation(FileManager.joinPaths(this.currentInstallDirectory, workspace));
         }
       });
+    });
   }
 
   private run(): void {
-    if (this.getPackageJson().hasWorkspaces()) {
+    if (this.getRootPackageJson().hasWorkspaces()) {
       this.processWorkspaces();
       return;
     }
