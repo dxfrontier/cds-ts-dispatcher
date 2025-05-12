@@ -2,10 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.2.2] - 2025-05-12
+
+### 🧪 Testing
+
+- *(sample-project)* Regenerated package.json
+- *(monorepo)* Regenerated cds-typer entities
+- *(sample-project)* Deps updated
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+- *(postinstall)* Prettier
+- *(readme)* Small corrections
+
 ## [4.2.1] - 2025-05-06
 
 ### 🐛 Bug Fixes
 
+- *(postinstall)* Fixed postinstall for wildcard `*` was used inside of workspaces from package.json
+- *(postinstall)* Added mjs.map for PostInstall for better debug
 - *(subscriberType)* Exported publicly the type to be used in projects
 
 ### 🧪 Testing
