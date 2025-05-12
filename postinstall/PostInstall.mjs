@@ -9,7 +9,8 @@ import { json2ts } from 'json-ts';
 import path from 'path';
 import { existsSync, appendFileSync, writeFileSync, mkdirSync, readFileSync } from 'fs';
 import { parse as parseJsonc } from 'jsonc-parser';
-var FileManager = class {
+import fg from 'fast-glob';
+var FileManager = class _FileManager {
   static {
     __name(this, 'FileManager');
   }
@@ -30,27 +31,52 @@ var FileManager = class {
   static joinPaths(...paths) {
     return path.join(...paths);
   }
-  getPackageJson() {
-    const parsedPackage = this.getParsedPackageJson();
+  readPackageJson(filePath) {
+    return JSON.parse(readFileSync(filePath, 'utf8'));
+  }
+  getRootPackageJson() {
+    const path2 = _FileManager.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.packageJson);
+    const packageJson = this.readPackageJson(path2);
     return {
-      hasWorkspaces: /* @__PURE__ */ __name(() => (parsedPackage.workspaces?.length ?? 0) > 0, 'hasWorkspaces'),
-      getWorkspaces: /* @__PURE__ */ __name(() => parsedPackage.workspaces, 'getWorkspaces'),
+      hasWorkspaces: /* @__PURE__ */ __name(() => (packageJson.workspaces?.length ?? 0) > 0, 'hasWorkspaces'),
+      getWorkspaces: /* @__PURE__ */ __name(() => packageJson.workspaces, 'getWorkspaces'),
     };
   }
+  isWorkspaceDynamicPattern(workspace) {
+    return fg.isDynamicPattern(workspace) ? true : false;
+  }
   getParsedPackageJson(workspace) {
-    let packageJsonPath;
-    if (!workspace) {
-      packageJsonPath = this.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.packageJson);
-    } else if (path.isAbsolute(workspace)) {
-      packageJsonPath = workspace;
-    } else {
-      packageJsonPath = this.joinPaths(
-        this.currentInstallDirectory,
-        workspace,
-        this.dispatcherNecessaryFiles.packageJson,
-      );
-    }
-    return JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+    const sanitizedWorkspace = workspace.replace('*', '');
+    const path2 = _FileManager.joinPaths(this.currentInstallDirectory, sanitizedWorkspace);
+    const resolveRoot = /* @__PURE__ */ __name(() => {
+      return _FileManager.joinPaths(this.currentInstallDirectory, this.dispatcherNecessaryFiles.packageJson);
+    }, 'resolveRoot');
+    const resolveDynamicPattern = /* @__PURE__ */ __name(() => {
+      const workspaces = fg.globSync(`${path2}*/${this.dispatcherNecessaryFiles.packageJson}`, {
+        dot: true,
+      });
+      const jsons = [];
+      workspaces.forEach((item, index) => {
+        const fields = {
+          path: item.replace('package.json', ''),
+          ...JSON.parse(readFileSync(workspaces[index], 'utf8')),
+        };
+        jsons.push(fields);
+      });
+      return jsons;
+    }, 'resolveDynamicPattern');
+    const resolveStaticWorkspaces = /* @__PURE__ */ __name(() => {
+      const fields = {
+        path: path2,
+        ...JSON.parse(readFileSync(_FileManager.joinPaths(path2, this.dispatcherNecessaryFiles.packageJson), 'utf8')),
+      };
+      return [fields];
+    }, 'resolveStaticWorkspaces');
+    return {
+      resolveDynamicPattern,
+      resolveStaticWorkspaces,
+      resolveRoot,
+    };
   }
   createFolderIfAbsent(folderPath) {
     if (!existsSync(folderPath)) {
@@ -64,10 +90,7 @@ var FileManager = class {
       writeFileSync(filePath, defaultContent);
     }
   }
-  joinPaths(...paths) {
-    return path.join(...paths);
-  }
-  isDispatcherFound(dependencies) {
+  validateDispatcherDependency(dependencies) {
     return dependencies && dependencies['@dxfrontier/cds-ts-dispatcher'] !== void 0;
   }
   appendLineIfAbsent(filePath, line) {
@@ -86,11 +109,11 @@ ${line}
   }
   updatePackageJsonImports(filePath) {
     if (existsSync(filePath)) {
-      const packageJson = this.getParsedPackageJson(filePath);
-      packageJson.imports = packageJson.imports || {};
-      if (!packageJson.imports['#dispatcher']) {
-        packageJson.imports['#dispatcher'] = './@dispatcher/index.js';
-        writeFileSync(filePath, JSON.stringify(packageJson, null, 2));
+      const json = JSON.parse(readFileSync(filePath, 'utf8'));
+      json.imports = json.imports || {};
+      if (!json.imports['#dispatcher']) {
+        json.imports['#dispatcher'] = './@dispatcher/index.js';
+        writeFileSync(filePath, JSON.stringify(json, null, 2));
       }
     }
   }
@@ -117,16 +140,12 @@ ${line}
     this.updatePackageJsonImports(options.packageJsonPath);
     this.updateTsconfigInclude(options.tsconfigPath);
   }
-  processWorkspace(workspace) {
-    const workspacePath = this.joinPaths(this.currentInstallDirectory, workspace);
-    this.processInstallation(workspacePath);
-  }
-  processInstallation(targetDirectory) {
-    const dispatcherFolderPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.folder);
-    const packageJsonPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.packageJson);
-    const tsconfigPath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.tsConfig);
-    const gitignoreFilePath = this.joinPaths(targetDirectory, this.dispatcherNecessaryFiles.gitIgnore);
-    const envFilePath = this.joinPaths(dispatcherFolderPath, this.dispatcherNecessaryFiles.env);
+  processInstallation(directory) {
+    const dispatcherFolderPath = _FileManager.joinPaths(directory, this.dispatcherNecessaryFiles.folder);
+    const packageJsonPath = _FileManager.joinPaths(directory, this.dispatcherNecessaryFiles.packageJson);
+    const tsconfigPath = _FileManager.joinPaths(directory, this.dispatcherNecessaryFiles.tsConfig);
+    const gitignoreFilePath = _FileManager.joinPaths(directory, this.dispatcherNecessaryFiles.gitIgnore);
+    const envFilePath = _FileManager.joinPaths(dispatcherFolderPath, this.dispatcherNecessaryFiles.env);
     this.createOrUpdateConfigFiles({
       dispatcherFolderPath,
       envFilePath,
@@ -135,7 +154,7 @@ ${line}
       tsconfigPath,
     });
     this.dispatcherExecutionPath.paths.push({
-      executedInstalledPath: targetDirectory,
+      executedInstalledPath: directory,
       envFilePath,
       dispatcherPath: dispatcherFolderPath,
     });
@@ -144,20 +163,23 @@ ${line}
     this.processInstallation(this.currentInstallDirectory);
   }
   processWorkspaces() {
-    this.getPackageJson()
-      .getWorkspaces()
-      .forEach((workspace) => {
-        const packageJson = this.getParsedPackageJson(workspace);
-        if (this.isDispatcherFound(packageJson.dependencies)) {
-          this.processWorkspace(workspace);
-        }
-        if (this.isDispatcherFound(packageJson.devDependencies)) {
-          throw new Error('CDS-TS-Dispatcher should be installed in `dependencies` not in `devDependencies`!');
+    const workspaces = this.getRootPackageJson().getWorkspaces();
+    workspaces.forEach((workspace) => {
+      const isDynamic = this.isWorkspaceDynamicPattern(workspace);
+      const packages = isDynamic
+        ? this.getParsedPackageJson(workspace).resolveDynamicPattern()
+        : this.getParsedPackageJson(workspace).resolveStaticWorkspaces();
+      packages.forEach((pkg) => {
+        if (this.validateDispatcherDependency(pkg.dependencies)) {
+          isDynamic
+            ? this.processInstallation(pkg.path)
+            : this.processInstallation(_FileManager.joinPaths(this.currentInstallDirectory, workspace));
         }
       });
+    });
   }
   run() {
-    if (this.getPackageJson().hasWorkspaces()) {
+    if (this.getRootPackageJson().hasWorkspaces()) {
       this.processWorkspaces();
       return;
     }
