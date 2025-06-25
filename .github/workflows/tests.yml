@@ -1,28 +1,27 @@
-# This will run unit / integration and e2e tests
-
 name: Tests (unit, e2e)
 
 on:
   pull_request:
     types: [opened, edited, synchronize]
-
   workflow_dispatch:
 
 jobs:
-  # This will start the e2e tests with a live server
   test-e2e:
     name: End-to-end (e2e)
-    # needs: test-unit
     strategy:
       matrix:
-        version: [20, 18]
+        version: [22, 20, 18]
         platform: [ubuntu-latest]
-
     runs-on: ${{ matrix.platform }}
 
     steps:
       - name: Get code
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.version }}
 
       - name: Install dependencies
         run: |
@@ -35,22 +34,15 @@ jobs:
       - name: Start server and start e2e tests
         run: npm run test:e2e
 
-  # This decorator is a special decorator which needs an extensive testing due to creation of:
-  # - @dispatcher folder
-  # - injection of @dispatcher folder inside of the package.json - imports
-  # - injection of @dispatcher folder inside of the tsconfig.json - include
-  # - injection of @dispatcher folder inside of the .gitignore
   test-env-decorator:
     name: Test @Env decorator
     strategy:
       matrix:
-        version: [20, 18]
+        version: [22, 20, 18]
         os: [ubuntu-latest, macos-latest, windows-latest]
-        # Include additional tests only for windows(2022, 2019) for Node 20
         include:
           - os: windows-2022
             version: 20
-
           - os: windows-2019
             version: 20
 
@@ -60,6 +52,11 @@ jobs:
       - name: Get code
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.version }}
+
       - name: Install dependencies
         run: |
           npm install -g @sap/cds-dk ts-node typescript
@@ -68,7 +65,6 @@ jobs:
       - name: Build project
         run: npm run build
 
-      # When postinstall is initialized into a single project
       - name: Verify @decorator folder, index.ts file, and content
         run: |
           cd ./test/sample-project/bookshop
@@ -76,7 +72,6 @@ jobs:
           cd ../../../
           npm run test:verifier
 
-      # When postinstall is initialized in a monorepo project
       - name: Verify @decorator folder, index.ts file, and content in monorepo projects
         run: |
           cd ./test/sample-project/monorepo_bookshop
