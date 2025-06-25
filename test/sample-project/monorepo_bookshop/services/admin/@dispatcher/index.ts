@@ -23,8 +23,6 @@ export interface CDS_ENV {
     cdsc: Cdsc;
     query: Query;
     plugins: Plugins;
-    typer: Typer;
-    schema: Schema;
     config: Config;
     '_home_cds-dk': string;
 }
@@ -36,7 +34,6 @@ interface _defined {
 interface Requires {
     middlewares: boolean;
     auth: Auth;
-    db: Db;
 }
 interface Auth {
     restrict_all_services: boolean;
@@ -96,14 +93,6 @@ interface T1 {
 }
 interface T2 {
     features: string;
-}
-interface Db {
-    impl: string;
-    credentials: Credentials;
-    kind: string;
-}
-interface Credentials {
-    url: string;
 }
 interface Server {
     shutdown_on_uncaught_errors: boolean;
@@ -278,107 +267,6 @@ interface Plugins {
         impl: string;
         packageJson: string;
     };
-    '@cap-js/sqlite': {
-        impl: string;
-        packageJson: string;
-    };
-    '@cap-js/cds-typer': {
-        impl: string;
-        packageJson: string;
-    };
-}
-interface Typer {
-    output_directory?: string;
-    inline_declarations?: string;
-    target_module_type?: string;
-    properties_optional?: boolean;
-    use_entities_proxy?: boolean;
-    build_task?: boolean;
-    type?: string;
-    description?: string;
-    properties?: Properties;
-}
-interface Schema {
-    buildTaskType: BuildTaskType;
-    cds: Cds;
-}
-interface BuildTaskType {
-    name: string;
-    description: string;
-}
-interface Cds {
-    typer: Typer;
-}
-interface Properties {
-    cache: Cache;
-    output_directory: Output_directory;
-    log_level: Log_level;
-    js_config_path: Js_config_path;
-    use_entities_proxy: Use_entities_proxy;
-    inline_declarations: Inline_declarations;
-    properties_optional: Properties_optional;
-    ieee754compatible: Ieee754compatible;
-    legacy_binary_types: Legacy_binary_types;
-    target_module_type: Target_module_type;
-    build_task: Build_task;
-}
-interface Cache {
-    type: string;
-    description: string;
-    'enum': string[];
-    'default': string;
-}
-interface Output_directory {
-    type: string;
-    description: string;
-    'default': string;
-}
-interface Log_level {
-    type: string;
-    description: string;
-    'enum': string[];
-    'default': string;
-}
-interface Js_config_path {
-    type: string;
-    description: string;
-}
-interface Use_entities_proxy {
-    type: string;
-    description: string;
-    'default': boolean;
-}
-interface Inline_declarations {
-    type: string;
-    description: string;
-    'enum': string[];
-    'default': string;
-}
-interface Properties_optional {
-    type: string;
-    description: string;
-    'default': boolean;
-}
-interface Ieee754compatible {
-    type: string;
-    description: string;
-    'default': boolean;
-}
-interface Legacy_binary_types {
-    type: string;
-    description: string;
-    'default': boolean;
-}
-interface Target_module_type {
-    type: string;
-    description: string;
-    'enum': string[];
-    'default': string;
-}
-interface Build_task {
-    type: string;
-    description: string;
-    'default': boolean;
 }
 interface Config {
     log: Log;

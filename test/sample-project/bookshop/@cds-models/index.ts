@@ -133,18 +133,8 @@ export function _ProductsEntityAspect<TBase extends new (...args: any[]) => obje
     declare static readonly actions: typeof cuid.actions & globalThis.Record<never, never>;
   };
 }
-/**
-* Aspect for entities with canonical universal IDs
-* 
-* See https://cap.cloud.sap/docs/cds/common#aspect-cuid
-*/
 export class ProductsEntity extends _ProductsEntityAspect(__.Entity) {}
 Object.defineProperty(ProductsEntity, 'name', { value: 'ProductsEntity' })
 Object.defineProperty(ProductsEntity, 'is_singular', { value: true })
-/**
-* Aspect for entities with canonical universal IDs
-* 
-* See https://cap.cloud.sap/docs/cds/common#aspect-cuid
-*/
 export class ProductsEntity_ extends Array<ProductsEntity> {$count?: number}
 Object.defineProperty(ProductsEntity_, 'name', { value: 'ProductsEntity' })

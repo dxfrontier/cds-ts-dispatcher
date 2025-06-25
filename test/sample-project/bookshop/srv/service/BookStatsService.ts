@@ -28,9 +28,18 @@ class BookStatsService {
   }
 
   public async handleReport(req: ActionRequest<typeof BookStat.actions.GenerateReport>) {
-    const statsID = req.params[0] as string;
-    const bookStats = await SELECT.one(BookStat).where({ ID: parseInt(statsID) });
+    const statsID = req.params[0];
+    const bookStats = await SELECT.one(BookStat).where(statsID);
+
+    if (bookStats === null) {
+      throw new Error('Book statistics not found');
+    }
+
     const book = await SELECT.one(Book).where({ ID: bookStats!.book_ID! });
+
+    if (book === null) {
+      throw new Error('Book not found');
+    }
 
     return {
       book: book!.title,

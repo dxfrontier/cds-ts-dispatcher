@@ -23,19 +23,9 @@ export function _UserActivityLogAspect<TBase extends new (...args: any[]) => obj
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
-* Aspect to capture changes by user and name
-* 
-* See https://cap.cloud.sap/docs/cds/common#aspect-managed
-*/
 export class UserActivityLog extends _UserActivityLogAspect(__.Entity) {static drafts: __.DraftOf<UserActivityLog>}
 Object.defineProperty(UserActivityLog, 'name', { value: 'AdminService.UserActivityLog' })
 Object.defineProperty(UserActivityLog, 'is_singular', { value: true })
-/**
-* Aspect to capture changes by user and name
-* 
-* See https://cap.cloud.sap/docs/cds/common#aspect-managed
-*/
 export class UserActivityLog_ extends Array<UserActivityLog> {static drafts: __.DraftsOf<UserActivityLog>
 $count?: number}
 Object.defineProperty(UserActivityLog_, 'name', { value: 'AdminService.UserActivityLog' })
@@ -48,7 +38,8 @@ export function _PromotionAspect<TBase extends new (...args: any[]) => object>(B
     declare startDate?: __.CdsDate | null
     declare endDate?: __.CdsDate | null
     declare discount?: number | null
-    declare books?: __.Association.to.many<_sap_capire_bookshop.Books>
+    declare books?: __.Association.to<_sap_capire_bookshop.Book> | null
+    declare books_ID?: number | null
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Promotion>;
     declare static readonly elements: __.ElementsOf<Promotion>;
@@ -81,19 +72,9 @@ export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: 
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
-* Aspect to capture changes by user and name
-* 
-* See https://cap.cloud.sap/docs/cds/common#aspect-managed
-*/
 export class User extends _UserAspect(__.Entity) {}
 Object.defineProperty(User, 'name', { value: 'AdminService.Users' })
 Object.defineProperty(User, 'is_singular', { value: true })
-/**
-* Aspect to capture changes by user and name
-* 
-* See https://cap.cloud.sap/docs/cds/common#aspect-managed
-*/
 export class Users extends Array<User> {$count?: number}
 Object.defineProperty(Users, 'name', { value: 'AdminService.Users' })
 
