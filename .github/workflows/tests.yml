@@ -10,7 +10,7 @@ jobs:
     name: End-to-end (e2e)
     strategy:
       matrix:
-        version: [22, 20]
+        version: [24, 22]
         platform: [ubuntu-latest]
 
     runs-on: ${{ matrix.platform }}
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.version }}
+          node-version: 22
 
       - name: Install dependencies
         run: |
@@ -39,9 +39,20 @@ jobs:
     name: Test @Env decorator
     strategy:
       matrix:
-        # Node 22
-        version: [22]
-        platform: [ubuntu-latest, macos-latest, windows-latest, windows-2022]
+        include:
+          # Node 22
+          - version: 22
+            platform: ubuntu-latest
+          # Node 24
+          - version: 24
+            platform: ubuntu-latest
+          # Node 22 on other platforms
+          - version: 22
+            platform: macos-latest
+          - version: 22
+            platform: windows-2022
+          - version: 22
+            platform: windows-2025
 
     runs-on: ${{ matrix.platform }}
 
