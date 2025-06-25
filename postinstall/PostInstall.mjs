@@ -188,8 +188,6 @@ var ShellCommander = class {
   static {
     __name(this, "ShellCommander");
   }
-  constructor() {
-  }
   executeCommand(command, args, currentExecutionPath) {
     const result = sync(command, args, {
       encoding: "utf8",
@@ -214,8 +212,12 @@ var EnvGenerator = class {
   static {
     __name(this, "EnvGenerator");
   }
-  fileManager = new FileManager();
-  shellCommander = new ShellCommander();
+  fileManager;
+  shellCommander;
+  constructor() {
+    this.fileManager = new FileManager();
+    this.shellCommander = new ShellCommander();
+  }
   generateTypeDefinitions(jsonString) {
     return json2ts(jsonString, {
       rootName: "CDS_ENV",
