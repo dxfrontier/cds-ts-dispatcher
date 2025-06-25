@@ -12,6 +12,7 @@ jobs:
       matrix:
         version: [22, 20]
         platform: [ubuntu-latest]
+
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -38,26 +39,11 @@ jobs:
     name: Test @Env decorator
     strategy:
       matrix:
-        include:
-          # Node 22 combinations
-          - version: 22
-            os: ubuntu-latest
-          - version: 22
-            os: macos-latest
+        # Node 22
+        version: [22]
+        platform: [ubuntu-latest, macos-latest, windows-latest, windows-2022]
 
-          # Node 20 combinations
-          - version: 20
-            os: ubuntu-latest
-          - version: 20
-            os: macos-latest
-          - version: 20
-            os: windows-latest
-          - version: 20
-            os: windows-2022
-          - version: 20
-            os: windows-2019
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.platform }}
 
     steps:
       - name: Get code
