@@ -212,7 +212,9 @@ cds-ts w
 ```
 
 > [!IMPORTANT]
-> CDS-TS-Dispatcher uses `@sap/cds`, `@sap/cds-dk` [version 9](https://cap.cloud.sap/docs/releases/may25), if you're using `@sap/cds`, `@sap/cds-dk` `version 8` then install `npm install @dxfrontier/cds-ts-dispatcher@8`
+> CDS-TS-Dispatcher uses `@sap/cds`, `@sap/cds-dk` [version 9](https://cap.cloud.sap/docs/releases/may25).
+> 
+> If you're using `@sap/cds`, `@sap/cds-dk` `version 8` then install `npm install @dxfrontier/cds-ts-dispatcher@4`.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
