@@ -1446,7 +1446,6 @@ The `@GetQuery` decorator is utilized at the `parameter level`. It allows you to
 
   <summary>INSERT</summary>
 
-  - @GetQuery(`'INSERT'`, `'as'`) as: `GetQueryType['as']`
   - @GetQuery(`'INSERT'`, `'columns'`) columns: `GetQueryType['columns']['forInsert']`
   - @GetQuery(`'INSERT'`, `'entries'`) entries: `GetQueryType['entries']`
   - @GetQuery(`'INSERT'`, `'into'`) into: `GetQueryType['into']`
