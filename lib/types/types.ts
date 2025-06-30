@@ -123,7 +123,6 @@ export class GetQueryType {
   orderBy: SELECT<any>['SELECT']['orderBy'];
   where: SELECT<any>['SELECT']['where'];
 
-  as: INSERT<any>['INSERT']['as'];
   entries: INSERT<any>['INSERT']['entries'];
   rows: INSERT<any>['INSERT']['rows'];
   values: INSERT<any>['INSERT']['values'];
