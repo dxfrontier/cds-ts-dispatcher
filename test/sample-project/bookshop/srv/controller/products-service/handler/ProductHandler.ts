@@ -13,8 +13,8 @@ import {
 } from '../../../../../../../lib';
 
 import type { Request } from '../../../../../../../lib';
-import cds from '@sap/cds';
 import { Product, Products } from '#cds-models/ProductsService';
+import cds from '@sap/cds';
 
 @EntityHandler(Products)
 class ProductHandler {

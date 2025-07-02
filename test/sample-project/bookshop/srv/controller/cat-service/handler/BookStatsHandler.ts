@@ -28,7 +28,7 @@ import {
   ValidationResults,
   ValidatorFlags,
 } from '../../../../../../../lib';
-import { BookRecommendation, BookStat, Publisher } from '../../../../@cds-models/CatalogService';
+import { BookStat } from '../../../../@cds-models/CatalogService';
 import AuthorService from '../../../service/AuthorService';
 import BookStatsService from '../../../service/BookStatsService';
 

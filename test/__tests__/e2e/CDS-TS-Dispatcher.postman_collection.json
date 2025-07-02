@@ -1,10 +1,11 @@
 {
   "info": {
-    "_postman_id": "ae6c6413-f888-45b2-9cb3-bfcdd579b709",
-    "name": "CDS-TS-Dispatcher",
+    "_postman_id": "e5cb4668-ab54-4dee-83e0-a900e99a31f6",
+    "name": "cds-ts-dispatcher",
     "description": "`SAP CAP` `NodeJS-based project` using TypesScript decorators for rapid development.\n\nThe goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "1369492"
+    "_exporter_id": "44876016",
+    "_collection_link": "https://dx-starter.postman.co/workspace/dx-starter-Workspace~1d9964b2-ed7e-411c-8b90-81bbf3029242/collection/44876016-e5cb4668-ab54-4dee-83e0-a900e99a31f6?action=share&source=collection_link&creator=44876016"
   },
   "item": [
     {
@@ -585,7 +586,13 @@
                       ],
                       "request": {
                         "method": "POST",
-                        "header": [],
+                        "header": [
+                          {
+                            "key": "Accept-Language",
+                            "value": "en",
+                            "type": "text"
+                          }
+                        ],
                         "body": {
                           "mode": "raw",
                           "raw": "{\n    \"ID\": 3,\n    \"views\": 234,\n    \"averageRating\": 222.33,\n    \"book_ID\": 203\n}",
@@ -1026,7 +1033,7 @@
                           "listen": "test",
                           "script": {
                             "exec": [
-                              "pm.test(\"Returned object should contain 'Jane Eyre', rating : 11 and stats : 4344\", function () {",
+                              "pm.test(\"Returned object should contain 'Jane Eyre', rating : 11 and stats : 444233\", function () {",
                               "    const response = pm.response.json();",
                               "",
                               "    pm.expect(response.book).to.equals(\"Jane Eyre\");",
@@ -1354,7 +1361,8 @@
                               "});",
                               ""
                             ],
-                            "type": "text/javascript"
+                            "type": "text/javascript",
+                            "packages": {}
                           }
                         }
                       ],
@@ -1363,7 +1371,7 @@
                         "header": [],
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n    \"name\": \"Summer Sale\",\n    \"description\": \"Get amazing discounts on selected books during the summer season.\",\n    \"startDate\": \"2023-06-01\",\n    \"endDate\": \"2023-08-31\",\n    \"discount\": 0.25 // 25% discount\n}",
+                          "raw": "{\n    \"name\": \"Summer Sale\",\n    \"description\": \"Get amazing discounts on selected books during the summer season.\",\n    \"startDate\": \"2023-06-01\",\n    \"endDate\": \"2023-08-31\",\n    \"discount\": 0.25\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -2294,7 +2302,13 @@
                   ]
                 },
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
                   "host": ["{{baseUrl}}"],
@@ -2377,7 +2391,13 @@
               ],
               "request": {
                 "method": "POST",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n    \"ID\": 4,\n    \"views\": 20,\n    \"averageRating\": 1.2,\n    \"book_ID\": 251\n}",
@@ -2415,7 +2435,13 @@
               ],
               "request": {
                 "method": "POST",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n    \"ID\": 5,\n    \"views\": 20,\n    \"averageRating\": 1.2,\n    \"book_ID\": 252\n}",

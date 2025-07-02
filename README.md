@@ -30,6 +30,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
   - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
     - [`Important`](#important)
   - [`Migration:` from @sap/cds `v7` to `v8`](#migration-from-sapcds-v7-to-v8)
+  - [`Migration:` from @sap/cds `v8` to `v9`](#migration-from-sapcds-v8-to-v9)
 - [Usage](#usage)
   - [`Architecture`](#architecture)
   - [`CDSDispatcher`](#cdsdispatcher)
@@ -211,7 +212,9 @@ cds-ts w
 ```
 
 > [!IMPORTANT]
-> CDS-TS-Dispatcher uses `@sap/cds`, `@sap/cds-dk` [version 8](https://cap.cloud.sap/docs/releases/jun24)
+> CDS-TS-Dispatcher uses `@sap/cds`, `@sap/cds-dk` [version 9](https://cap.cloud.sap/docs/releases/may25).
+> 
+> If you're using `@sap/cds`, `@sap/cds-dk` `version 8` then install `npm install @dxfrontier/cds-ts-dispatcher@4`.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -391,6 +394,102 @@ cds add typescript
     "start": "cds-serve",
     "watch": "cds-ts w",
   },
+}
+```
+
+> [!IMPORTANT]
+> You might delete the `node_modules` folder and `package-lock.json` in case `npm run watch` fails working.
+>
+> Re-run the following command :
+>
+> ```bash
+> npm install
+> ```
+
+### `Migration:` from @sap/cds `v8` to `v9`
+
+Use the following steps if you want to migrate from `@sap/cds@8` to `@sap/cds@9`:
+
+1. Verify you've installed the `cds@v9` globally by running the following command:
+
+```bash
+cds -v -i
+```
+
+| packages | version                        |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| @cap-js/asyncapi       | 1.0.3                                                                          |
+| @cap-js/cds-typer      | 0.35.0                                                                         |
+| @cap-js/cds-types      | 0.11.0                                                                         |
+| @cap-js/db-service     | 2.1.1                                                                          |
+| @cap-js/openapi        | 1.2.3                                                                          |
+| @cap-js/sqlite         | 2.0.1                                                                          |
+| `@sap/cds`             | `9.0.3`                                                                          |
+| @sap/cds-compiler      | 6.0.12                                                                         |
+| `@sap/cds-dk (local)`  | `9.0.4`                                                                          |
+| `@sap/cds-dk (global)` | `9.0.4`                                                                          |
+| @sap/cds-fiori         | 2.0.1                                                                          |
+| @sap/cds-mtxs          | 3.0.1                                                                          |
+| Node.js                | v22.14.0                                                                       |
+| home                   | /Users/dragolea/Developer/abs-projects/cds-ts-dispatcher/node_modules/@sap/cds |
+
+> [!TIP]
+> If you see a smaller version than `@sap/cds-dk (global)` `9.0.0` run the following command :
+>
+> ```bash
+> npm install -g @sap/cds-dk@latest
+> ```
+
+2. Run the following command inside of your project:
+
+```bash
+cds add typescript
+```
+
+> [!TIP]
+> Command above will add the following packages:
+>
+> - `@types/node`
+> - `@cap-js/cds-types`
+> - `@cap-js/cds-typer`
+> - `typescript`
+
+3. After running command above the `package.json` will look similar to :
+
+```json
+
+{
+  "dependencies": {
+    "@sap/cds": "^9",
+    "express": "^4"
+  },
+  "engines": {
+    "node": "^22"
+  },
+  "dependencies": {
+    "@dxfrontier/cds-ts-dispatcher": "^4.2.0",
+    "@dxfrontier/cds-ts-repository": "^5.2.0",
+    "@sap/cds": "^8.7.2",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/cds-test": "^0.4.0",
+    "@cap-js/cds-typer": ">=0.1",
+    "@cap-js/cds-types": "^0.10.0",
+    "@cap-js/sqlite": "^2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.0.0",
+    "jest": "^30.0.3",
+    "ts-jest": "^29.4.0",
+    "tsx": "^4",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "imports": {
+    "#cds-models/*": "./@cds-models/*/index.js"
+  }
 }
 ```
 
@@ -1347,7 +1446,6 @@ The `@GetQuery` decorator is utilized at the `parameter level`. It allows you to
 
   <summary>INSERT</summary>
 
-  - @GetQuery(`'INSERT'`, `'as'`) as: `GetQueryType['as']`
   - @GetQuery(`'INSERT'`, `'columns'`) columns: `GetQueryType['columns']['forInsert']`
   - @GetQuery(`'INSERT'`, `'entries'`) entries: `GetQueryType['entries']`
   - @GetQuery(`'INSERT'`, `'into'`) into: `GetQueryType['into']`

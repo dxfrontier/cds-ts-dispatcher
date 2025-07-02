@@ -9,24 +9,6 @@
     "./services/admin",
     "./services/api"
   ],
-  "scripts": {
-    "eslint:message": "echo 'ESLint started ...'",
-    "eslint": "eslint .",
-    "eslint:fix": "eslint . --fix",
-    "prettier:message": "echo 'Prettier started ...'",
-    "prettier": "prettier . --check",
-    "prettier:fix": "prettier . --write",
-    "format-cds:message": "echo 'Format-cds started ...'",
-    "format-cds": "format-cds",
-    "check": "run-s eslint:message eslint prettier:message prettier",
-    "fix": "run-s eslint:message eslint:fix prettier:message prettier:fix format-cds:message format-cds"
-  },
-  "devDependencies": {
-    "eslint": "^9.22.0",
-    "npm-run-all": "^4.1.5",
-    "prettier": "3.5.3",
-    "rimraf": "^6.0.1"
-  },
   "imports": {
     "#dispatcher": "./@dispatcher/index.js"
   }

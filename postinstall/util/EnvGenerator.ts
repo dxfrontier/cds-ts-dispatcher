@@ -5,8 +5,13 @@ import { FileManager } from './FileManager';
 import { ShellCommander } from './ShellCommander';
 
 export class EnvGenerator {
-  private readonly fileManager = new FileManager();
-  private readonly shellCommander = new ShellCommander();
+  private readonly fileManager: FileManager;
+  private readonly shellCommander: ShellCommander;
+
+  constructor() {
+    this.fileManager = new FileManager();
+    this.shellCommander = new ShellCommander();
+  }
 
   private generateTypeDefinitions(jsonString: string): string {
     return json2ts(jsonString, { rootName: 'CDS_ENV', prefix: '' });

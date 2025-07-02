@@ -41,6 +41,9 @@ entity Books : managed {
       bookRecomanddations : Association to many BookRecommendations
                               on bookRecomanddations.book = $self;
 
+      promotions          : Association to many Promotions
+                              on promotions.books = $self;
+
       series              : Association to BookSeries;
 
 }
@@ -159,7 +162,7 @@ entity Promotions {
       startDate   : Date        @mandatory;
       endDate     : Date        @mandatory;
       discount    : Decimal     @mandatory;
-      books       : Association to many Books;
+      books       : Association to Books;
 }
 
 entity BookOrders : managed {
