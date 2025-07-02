@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.1] - 2025-07-02
+
+### 🧪 Testing
+
+- *(pipeline)* Merged back the test env decorator test to tests pipeline
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+- *(readme)* Updated
+- *(tests)* Commented env tests for the moment
+
 ## [5.0.0] - 2025-07-02
 
 ### 🚀 Features
