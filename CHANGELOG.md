@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.0] - 2025-07-02
+
+### 🚀 Features
+
+- *(cds)* Upgraded cds core component to v9
+
+### 🐛 Bug Fixes
+
+- *(as)* Insert `as` was removed from cds@9
+
+### 🧪 Testing
+
+- *(tests)* Updated tests after increase of cds to v9
+- *(tests)* Refactored the matrix of the pipeline
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Updated CHANGELOG.md and bump version increased
+- *(readme)* Add migration guide for @sap/cds v8 to v9
+- *(build)* Project rebuilded
+- *(build)* Postinstall rebuilded
+- *(test)* Fixed pipeline to use node v22
+- *(test)* Fix by removing node 18 from testing
+- *(test)* Fix by changing the matrix run of the pipeline
+- *(test)* Removed node v 20 as it is not supported anymore by sap cap
+- *(build)* Rebuild the project
+- *(build)* Small refactoring of the private fields of class FileManager
+- *(test)* Verify the platform only for ubuntu 24 and 22
+- *(test)* Split the Env decorator into a new workflow
+- *(readme)* Made clear that dispatcher uses v9
+- *(readme)* Updated readme
+
 ## [4.2.2] - 2025-05-12
 
 ### 🧪 Testing
