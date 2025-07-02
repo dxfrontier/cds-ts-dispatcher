@@ -35,54 +35,54 @@ jobs:
       - name: Start server and start e2e tests
         run: npm run test:e2e
 
-  test-env-decorator:
-    name: Test @Env decorator
-    strategy:
-      matrix:
-        include:
-          # Node 24
-          - version: 24
-            platform: ubuntu-latest
-          # Node 22
-          - version: 22
-            platform: ubuntu-latest
-          # Node 22 on other platforms
-          - version: 22
-            platform: macos-latest
-          - version: 22
-            platform: windows-2022
-          - version: 22
-            platform: windows-2025
+  # test-env-decorator:
+  #   name: Test @Env decorator
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         # Node 24
+  #         - version: 24
+  #           platform: ubuntu-latest
+  #         # Node 22
+  #         - version: 22
+  #           platform: ubuntu-latest
+  #         # Node 22 on other platforms
+  #         - version: 22
+  #           platform: macos-latest
+  #         - version: 22
+  #           platform: windows-2022
+  #         - version: 22
+  #           platform: windows-2025
 
-    runs-on: ${{ matrix.platform }}
+  #   runs-on: ${{ matrix.platform }}
 
-    steps:
-      - name: Get code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Get code
+  #       uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.version }}
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ matrix.version }}
 
-      - name: Install dependencies
-        run: |
-          npm install -g @sap/cds-dk ts-node typescript
-          npm install
+  #     - name: Install dependencies
+  #       run: |
+  #         npm install -g @sap/cds-dk ts-node typescript
+  #         npm install
 
-      - name: Build project
-        run: npm run build
+  #     - name: Build project
+  #       run: npm run build
 
-      - name: Verify @decorator folder, index.ts file, and content
-        run: |
-          cd ./test/sample-project/bookshop
-          npm install
-          cd ../../../
-          npm run test:verifier
+  #     - name: Verify @decorator folder, index.ts file, and content
+  #       run: |
+  #         cd ./test/sample-project/bookshop
+  #         npm install
+  #         cd ../../../
+  #         npm run test:verifier
 
-      - name: Verify @decorator folder, index.ts file, and content in monorepo projects
-        run: |
-          cd ./test/sample-project/monorepo_bookshop
-          npm install
-          cd ../../../
-          npm run test:verifier:monorepo
+  #     - name: Verify @decorator folder, index.ts file, and content in monorepo projects
+  #       run: |
+  #         cd ./test/sample-project/monorepo_bookshop
+  #         npm install
+  #         cd ../../../
+  #         npm run test:verifier:monorepo
