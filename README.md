@@ -357,7 +357,7 @@ cds -v -i
 > If you see a smaller version than `@sap/cds-dk (global)` `8.0.2` run the following command :
 >
 > ```bash
-> npm install -g @sap/cds-dk@latest
+> npm install -g @sap/cds-dk@8
 > ```
 
 2. Run the following command inside of your project:
@@ -467,8 +467,8 @@ cds add typescript
     "node": "^22"
   },
   "dependencies": {
-    "@dxfrontier/cds-ts-dispatcher": "^4.2.0",
-    "@dxfrontier/cds-ts-repository": "^5.2.0",
+    "@dxfrontier/cds-ts-dispatcher": "^5.0.0",
+    "@dxfrontier/cds-ts-repository": "^6.0.0",
     "@sap/cds": "^8.7.2",
     "express": "^4"
   },
