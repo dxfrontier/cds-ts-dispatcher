@@ -5,9 +5,6 @@
   "repository": "<Add your repository here>",
   "license": "UNLICENSED",
   "private": true,
-  "dependencies": {
-    "@sap/cds": "^9"
-  },
   "scripts": {
     "start": "cds-serve",
     "watch": "cds-tsx watch",

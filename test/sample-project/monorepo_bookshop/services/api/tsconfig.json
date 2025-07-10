@@ -12,7 +12,7 @@
     "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "target": "ES2021",
+    "target": "esnext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "./gen/srv",

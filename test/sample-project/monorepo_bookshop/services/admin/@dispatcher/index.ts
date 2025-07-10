@@ -4,9 +4,9 @@ export interface CDS_ENV {
     _home: string;
     _sources: string[];
     _profiles: _profiles;
-    _better_sqlite: boolean;
     production: boolean;
     requires: Requires;
+    runtime: Runtime;
     server: Server;
     protocols: Protocols;
     features: Features;
@@ -19,10 +19,11 @@ export interface CDS_ENV {
     sql: Sql;
     hana: Hana;
     build: Build;
-    mtx: Mtx;
     cdsc: Cdsc;
     query: Query;
     plugins: Plugins;
+    typer: Typer;
+    schema: Schema;
     config: Config;
     '_home_cds-dk': string;
 }
@@ -33,7 +34,20 @@ interface _defined {
 }
 interface Requires {
     middlewares: boolean;
+    queue: Queue;
     auth: Auth;
+    db: Db;
+}
+interface Queue {
+    model: string;
+    maxAttempts: number;
+    chunkSize: number;
+    parallel: boolean;
+    storeLastError: boolean;
+    timeout: string;
+    legacyLocking: boolean;
+    ignoredContext: string[];
+    kind: string;
 }
 interface Auth {
     restrict_all_services: boolean;
@@ -94,8 +108,22 @@ interface T1 {
 interface T2 {
     features: string;
 }
+interface Db {
+    impl: string;
+    credentials: Credentials;
+    kind: string;
+}
+interface Credentials {
+    url: string;
+}
+interface Runtime {
+    patch_as_upsert: boolean;
+    put_as_upsert: boolean;
+    put_as_replace: boolean;
+}
 interface Server {
     shutdown_on_uncaught_errors: boolean;
+    exit_on_multi_install: boolean;
     force_exit_timeout: number;
     cors: boolean;
     index: boolean;
@@ -108,12 +136,8 @@ interface Protocols {
     'odata-v2': {
         path: string;
     };
-    okra: Okra;
     rest: Rest;
     hcql: Hcql;
-}
-interface Okra {
-    path: string;
 }
 interface Rest {
     path: string;
@@ -125,9 +149,6 @@ interface Features {
     folders: string;
     sql_simple_queries: number;
     pre_compile_edmxs: boolean;
-    odata_new_adapter: boolean;
-    odata_new_parser: boolean;
-    cds_validate: boolean;
     live_reload: boolean;
     in_memory_db: boolean;
     test_data: boolean;
@@ -138,6 +159,7 @@ interface Features {
     deploy_data_onconflict: string;
     assert_integrity: boolean;
     precise_timestamps: boolean;
+    consistent_params: boolean;
 }
 interface Fiori {
     preview: Preview;
@@ -192,8 +214,6 @@ interface I18n {
     languages: string;
     default_language: string;
     preserved_locales: string[];
-    for_sqlite: string[];
-    for_sql: string[];
     fallback_bundle: string;
     fatjson: boolean;
 }
@@ -236,22 +256,19 @@ interface Sql {
 interface Hana {
     'deploy-format': string;
     journal: Journal;
+    table_data: Table_data;
 }
 interface Journal {
     'change-mode': string;
 }
+interface Table_data {
+    column_mapping: Column_mapping;
+}
+interface Column_mapping {
+    LargeBinary: string;
+}
 interface Build {
     target: string;
-}
-interface Mtx {
-    api: Api;
-    domain: string;
-}
-interface Api {
-    model: boolean;
-    provisioning: boolean;
-    metadata: boolean;
-    diagnose: boolean;
 }
 interface Cdsc {
     moduleLookupDirectories: string[];
@@ -265,8 +282,106 @@ interface Limit {
 interface Plugins {
     '@sap/cds-fiori': {
         impl: string;
-        packageJson: string;
     };
+    '@cap-js/sqlite': {
+        impl: string;
+    };
+    '@cap-js/cds-typer': {
+        impl: string;
+    };
+}
+interface Typer {
+    output_directory?: string;
+    inline_declarations?: string;
+    target_module_type?: string;
+    properties_optional?: boolean;
+    use_entities_proxy?: boolean;
+    build_task?: boolean;
+    type?: string;
+    description?: string;
+    properties?: Properties;
+}
+interface Schema {
+    buildTaskType: BuildTaskType;
+    cds: Cds;
+}
+interface BuildTaskType {
+    name: string;
+    description: string;
+}
+interface Cds {
+    typer: Typer;
+}
+interface Properties {
+    cache: Cache;
+    output_directory: Output_directory;
+    log_level: Log_level;
+    js_config_path: Js_config_path;
+    use_entities_proxy: Use_entities_proxy;
+    inline_declarations: Inline_declarations;
+    properties_optional: Properties_optional;
+    ieee754compatible: Ieee754compatible;
+    legacy_binary_types: Legacy_binary_types;
+    target_module_type: Target_module_type;
+    build_task: Build_task;
+}
+interface Cache {
+    type: string;
+    description: string;
+    'enum': string[];
+    'default': string;
+}
+interface Output_directory {
+    type: string;
+    description: string;
+    'default': string;
+}
+interface Log_level {
+    type: string;
+    description: string;
+    'enum': string[];
+    'default': string;
+}
+interface Js_config_path {
+    type: string;
+    description: string;
+}
+interface Use_entities_proxy {
+    type: string;
+    description: string;
+    'default': boolean;
+}
+interface Inline_declarations {
+    type: string;
+    description: string;
+    'enum': string[];
+    'default': string;
+}
+interface Properties_optional {
+    type: string;
+    description: string;
+    'default': boolean;
+}
+interface Ieee754compatible {
+    type: string;
+    description: string;
+    'default': boolean;
+}
+interface Legacy_binary_types {
+    type: string;
+    description: string;
+    'default': boolean;
+}
+interface Target_module_type {
+    type: string;
+    description: string;
+    'enum': string[];
+    'default': string;
+}
+interface Build_task {
+    type: string;
+    description: string;
+    'default': boolean;
 }
 interface Config {
     log: Log;

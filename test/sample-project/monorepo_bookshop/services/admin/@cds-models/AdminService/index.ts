@@ -23,21 +23,11 @@ export function _UserActivityLogAspect<TBase extends new (...args: any[]) => obj
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class UserActivityLog extends _UserActivityLogAspect(__.Entity) {
   static drafts: __.DraftOf<UserActivityLog>;
 }
 Object.defineProperty(UserActivityLog, 'name', { value: 'AdminService.UserActivityLog' });
 Object.defineProperty(UserActivityLog, 'is_singular', { value: true });
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class UserActivityLog_ extends Array<UserActivityLog> {
   static drafts: __.DraftsOf<UserActivityLog>;
   $count?: number;
@@ -89,19 +79,9 @@ export function _UserAspect<TBase extends new (...args: any[]) => object>(Base: 
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class User extends _UserAspect(__.Entity) {}
 Object.defineProperty(User, 'name', { value: 'AdminService.Users' });
 Object.defineProperty(User, 'is_singular', { value: true });
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class Users extends Array<User> {
   $count?: number;
 }

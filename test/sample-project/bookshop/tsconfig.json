@@ -15,7 +15,11 @@
     "strict": true,
     "rootDir": "../../../",
     "baseUrl": ".",
-    "outDir": "./gen/srv"
+    "outDir": "./gen/srv",
+    "sourceMap": true,
+    "paths": {
+      "#cds-models/*": ["./@cds-models/*"]
+    }
   },
   "include": ["./srv", "./@dispatcher"]
 }

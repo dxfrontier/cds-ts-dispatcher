@@ -15,10 +15,16 @@
     "clean:js": "npx rimraf ./@cds-models/{*.js,**/*.js,**/**/*.js,**/**/**/*.js}"
   },
   "dependencies": {
-    "@dxfrontier/cds-ts-dispatcher": "^4.2.2"
+    "@dxfrontier/cds-ts-dispatcher": "^5.0.1",
+    "express": "^4"
   },
   "devDependencies": {
-    "@cap-js/cds-types": "^0.11.0"
+    "@cap-js/sqlite": "^2",
+    "@cap-js/cds-types": "^0.13",
+    "@types/node": "^22.16.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "@cap-js/cds-typer": ">=0.36.0"
   },
   "imports": {
     "#cds-models/*": "./@cds-models/*/index.js",
