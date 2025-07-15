@@ -9,6 +9,11 @@
     "./dist",
     "./postinstall"
   ],
+  "workspaces": [
+    "test/sample-project/bookshop",
+    "test/sample-project/monorepo_bookshop/services/api",
+    "test/sample-project/monorepo_bookshop/services/admin"
+  ],
   "scripts": {
     "eslint:message": "echo 'Eslint started...'",
     "eslint": "npx eslint .",
@@ -71,8 +76,8 @@
   "homepage": "https://github.com/dxfrontier/cds-ts-dispatcher#readme",
   "dependencies": {
     "@sap-cloud-sdk/connectivity": "^4.0.2",
-    "@sap/cds": "^9.0.4",
-    "@sap/cds-dk": "^9.0.6",
+    "@sap/cds": "^9.1.0",
+    "@sap/cds-dk": "^9.1.0",
     "cross-spawn": "^7.0.6",
     "fast-glob": "^3.3.3",
     "http-status-codes": "^2.3.0",
@@ -85,23 +90,21 @@
     "validator": "^13.15.15"
   },
   "devDependencies": {
-    "@cap-js/cds-typer": "0.35.0",
-    "@cap-js/cds-types": "^0.12.0",
-    "@cap-js/sqlite": "^2.0.1",
+    "@cap-js/cds-types": "^0.13.0",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@commitlint/prompt-cli": "^19.8.1",
     "@commitlint/types": "^19.8.1",
-    "@swc/core": "^1.12.7",
+    "@swc/core": "^1.12.11",
     "@types/cross-spawn": "^6.0.6",
     "@types/jest": "^30.0.0",
-    "@types/lodash": "^4.17.19",
+    "@types/lodash": "^4.17.20",
     "@types/string-placeholder": "^1.0.3",
     "@types/validator": "^13.15.2",
-    "eslint": "^9.29.0",
+    "eslint": "^9.30.1",
     "http-server": "^14.1.1",
     "husky": "^9.1.7",
-    "jest": "^30.0.3",
+    "jest": "^30.0.4",
     "lint-staged": "^16.1.2",
     "newman": "^6.2.1",
     "npm-run-all": "^4.1.5",
@@ -112,10 +115,9 @@
     "start-server-and-test": "^2.0.12",
     "ts-jest": "^29.4.0",
     "tsup": "^8.5.0",
-    "typedoc": "^0.28.6",
+    "typedoc": "^0.28.7",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.35.0",
-    "tsx": "^4.20.3"
+    "typescript-eslint": "^8.36.0"
   },
   "lint-staged": {
     "**/*.ts": [
@@ -123,8 +125,5 @@
       "npm run prettier:fix",
       "npm run test:unit --bail --findRelatedTests ./test"
     ]
-  },
-  "imports": {
-    "#dispatcher": "./@dispatcher/index.js"
   }
 }

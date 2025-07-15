@@ -1,11 +1,10 @@
 {
   "info": {
-    "_postman_id": "e5cb4668-ab54-4dee-83e0-a900e99a31f6",
+    "_postman_id": "37f91754-0e18-4339-89bd-6254cddab399",
     "name": "cds-ts-dispatcher",
     "description": "`SAP CAP` `NodeJS-based project` using TypesScript decorators for rapid development.\n\nThe goal of SAP CAP Nodejs Decorators is to significantly reduce the boilerplate code required to implement JS handlers provided by the SAP CAP framework.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "44876016",
-    "_collection_link": "https://dx-starter.postman.co/workspace/dx-starter-Workspace~1d9964b2-ed7e-411c-8b90-81bbf3029242/collection/44876016-e5cb4668-ab54-4dee-83e0-a900e99a31f6?action=share&source=collection_link&creator=44876016"
+    "_exporter_id": "44876016"
   },
   "item": [
     {
@@ -1847,7 +1846,15 @@
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
-                      "});"
+                      "});",
+                      "",
+                      "// Test if SAP messages header contains the message 'Manager'",
+                      "pm.test(\"SAP messages header contains 'Request' message for @Req decorator\", function () {",
+                      "    var sapMessages = pm.response.headers.get('sap-messages');",
+                      "    pm.expect(sapMessages).to.include('Request');",
+                      "});",
+                      "",
+                      ""
                     ],
                     "type": "text/javascript",
                     "packages": {}
@@ -1871,7 +1878,13 @@
                   ]
                 },
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
                   "host": ["{{baseUrl}}"],
@@ -1927,7 +1940,9 @@
                       "pm.test(\"Results should have more than 1 item\", function () {",
                       "    var jsonData = pm.response.json();",
                       "    pm.expect(jsonData.value.length).greaterThan(1)",
-                      "});"
+                      "});",
+                      "",
+                      ""
                     ],
                     "type": "text/javascript",
                     "packages": {}

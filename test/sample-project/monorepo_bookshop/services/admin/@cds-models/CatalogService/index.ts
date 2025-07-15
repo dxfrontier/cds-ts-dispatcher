@@ -49,19 +49,9 @@ export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: 
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class Book extends _BookAspect(__.Entity) {}
 Object.defineProperty(Book, 'name', { value: 'CatalogService.Books' });
 Object.defineProperty(Book, 'is_singular', { value: true });
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class Books extends Array<Book> {
   $count?: number;
 }
@@ -88,19 +78,9 @@ export function _AuthorAspect<TBase extends new (...args: any[]) => object>(Base
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class Author extends _AuthorAspect(__.Entity) {}
 Object.defineProperty(Author, 'name', { value: 'CatalogService.Authors' });
 Object.defineProperty(Author, 'is_singular', { value: true });
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class Authors extends Array<Author> {
   $count?: number;
 }
@@ -127,19 +107,9 @@ export function _ReviewAspect<TBase extends new (...args: any[]) => object>(Base
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class Review extends _ReviewAspect(__.Entity) {}
 Object.defineProperty(Review, 'name', { value: 'CatalogService.Reviews' });
 Object.defineProperty(Review, 'is_singular', { value: true });
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class Reviews extends Array<Review> {
   $count?: number;
 }
@@ -161,19 +131,9 @@ export function _PublisherAspect<TBase extends new (...args: any[]) => object>(B
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class Publisher extends _PublisherAspect(__.Entity) {}
 Object.defineProperty(Publisher, 'name', { value: 'CatalogService.Publishers' });
 Object.defineProperty(Publisher, 'is_singular', { value: true });
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class Publishers extends Array<Publisher> {
   $count?: number;
 }
@@ -200,19 +160,9 @@ export function _BookOrderAspect<TBase extends new (...args: any[]) => object>(B
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class BookOrder extends _BookOrderAspect(__.Entity) {}
 Object.defineProperty(BookOrder, 'name', { value: 'CatalogService.BookOrders' });
 Object.defineProperty(BookOrder, 'is_singular', { value: true });
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class BookOrders extends Array<BookOrder> {
   $count?: number;
 }
@@ -240,19 +190,9 @@ export function _BookRecommendationAspect<TBase extends new (...args: any[]) => 
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class BookRecommendation extends _BookRecommendationAspect(__.Entity) {}
 Object.defineProperty(BookRecommendation, 'name', { value: 'CatalogService.BookRecommendations' });
 Object.defineProperty(BookRecommendation, 'is_singular', { value: true });
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class BookRecommendations extends Array<BookRecommendation> {
   $count?: number;
 }
@@ -280,19 +220,9 @@ export function _BookFormatAspect<TBase extends new (...args: any[]) => object>(
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class BookFormat extends _BookFormatAspect(__.Entity) {}
 Object.defineProperty(BookFormat, 'name', { value: 'CatalogService.BookFormats' });
 Object.defineProperty(BookFormat, 'is_singular', { value: true });
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class BookFormats extends Array<BookFormat> {
   $count?: number;
 }
@@ -320,19 +250,9 @@ export function _BookSaleAspect<TBase extends new (...args: any[]) => object>(Ba
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect for entities with canonical universal IDs
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-cuid
- */
 export class BookSale extends _BookSaleAspect(__.Entity) {}
 Object.defineProperty(BookSale, 'name', { value: 'CatalogService.BookSales' });
 Object.defineProperty(BookSale, 'is_singular', { value: true });
-/**
- * Aspect for entities with canonical universal IDs
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-cuid
- */
 export class BookSales extends Array<BookSale> {
   $count?: number;
 }
@@ -355,21 +275,11 @@ export function _BookEventAspect<TBase extends new (...args: any[]) => object>(B
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect for entities with canonical universal IDs
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-cuid
- */
 export class BookEvent extends _BookEventAspect(__.Entity) {
   static drafts: __.DraftOf<BookEvent>;
 }
 Object.defineProperty(BookEvent, 'name', { value: 'CatalogService.BookEvents' });
 Object.defineProperty(BookEvent, 'is_singular', { value: true });
-/**
- * Aspect for entities with canonical universal IDs
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-cuid
- */
 export class BookEvents extends Array<BookEvent> {
   static drafts: __.DraftsOf<BookEvent>;
   $count?: number;
@@ -428,19 +338,9 @@ export function _BookStatAspect<TBase extends new (...args: any[]) => object>(Ba
     };
   };
 }
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class BookStat extends _BookStatAspect(__.Entity) {}
 Object.defineProperty(BookStat, 'name', { value: 'CatalogService.BookStats' });
 Object.defineProperty(BookStat, 'is_singular', { value: true });
-/**
- * Aspect to capture changes by user and name
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-managed
- */
 export class BookStats extends Array<BookStat> {
   $count?: number;
 }
@@ -495,19 +395,9 @@ export function _GenreAspect<TBase extends new (...args: any[]) => object>(Base:
     declare static readonly actions: globalThis.Record<never, never>;
   };
 }
-/**
- * Aspect for a code list with name and description
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-codelist
- */
 export class Genre extends _GenreAspect(__.Entity) {}
 Object.defineProperty(Genre, 'name', { value: 'CatalogService.Genres' });
 Object.defineProperty(Genre, 'is_singular', { value: true });
-/**
- * Aspect for a code list with name and description
- *
- * See https://cap.cloud.sap/docs/cds/common#aspect-codelist
- */
 export class Genres extends Array<Genre> {
   $count?: number;
 }

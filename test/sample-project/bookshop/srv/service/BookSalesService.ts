@@ -23,6 +23,9 @@ class BookSalesService {
     if (args.hasRoles) {
       args.req.notify('Manager');
     }
+    if (args.req) {
+      args.req.notify('Request');
+    }
     if (args.isSingleInstance) {
       args.req.notify('Single instance');
       return;

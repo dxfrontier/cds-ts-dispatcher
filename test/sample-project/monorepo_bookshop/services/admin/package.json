@@ -6,7 +6,16 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@dxfrontier/cds-ts-dispatcher": "^4.2.2"
+    "@dxfrontier/cds-ts-dispatcher": "^5.0.1",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^2",
+    "@cap-js/cds-types": "^0.13",
+    "@types/node": "^22.16.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "@cap-js/cds-typer": ">=0.36.0"
   },
   "scripts": {
     "start": "cds-serve",
