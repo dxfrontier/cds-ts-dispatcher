@@ -128,7 +128,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 Install [**@sap/cds-dk**](https://cap.cloud.sap/docs/get-started/), `typescript`, `ts-node` globally:
 
 ```bash
-npm install -g @sap/cds-dk typescript ts-node
+npm i -g @sap/cds-dk typescript ts-node tsx
 ```
 
 ## Installation
@@ -184,7 +184,7 @@ npm install @dxfrontier/cds-ts-dispatcher
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
-    "target": "ES2021",
+    "target": "esnext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
@@ -238,7 +238,7 @@ It is recommended to use the following **tsconfig.json** properties:
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "strictNullChecks": true,
-    "target": "ES2022",
+    "target": "esnext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
