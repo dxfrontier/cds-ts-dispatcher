@@ -1,136 +1,19 @@
 name: Release
-
 on:
   pull_request:
     branches:
       - main
     types:
       - closed
-
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   release:
-    name: Release New Version
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      # Check if PR contains version bump labels
-      - name: Check labels to proceed versioning
-        id: proceed-versioning
-        if: >
-          contains(github.event.pull_request.labels.*.name, 'patch') ||
-          contains(github.event.pull_request.labels.*.name, 'minor') ||
-          contains(github.event.pull_request.labels.*.name, 'major')
-        run: echo "Proceed versioning"
-
-      # Checkout the repository
-      - name: Checkout Repository
-        if: steps.proceed-versioning.outcome == 'success'
-        uses: actions/checkout@v4
+      - name: Bump version and create release
+        uses: dxfrontier/gh-action-release@main
         with:
-          fetch-depth: 0
-
-      # Set up Node.js
-      - name: Set Up Node.js
-        if: steps.proceed-versioning.outcome == 'success'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      # Determine version bump type
-      - name: Determine version bump type
-        if: steps.proceed-versioning.outcome == 'success'
-        env:
-          IS_PATCH_FOUND: "${{ contains(github.event.pull_request.labels.*.name, 'patch') }}"
-          IS_MINOR_FOUND: "${{ contains(github.event.pull_request.labels.*.name, 'minor') }}"
-          IS_MAJOR_FOUND: "${{ contains(github.event.pull_request.labels.*.name, 'major') }}"
-        run: |
-          if [ "${IS_PATCH_FOUND}" == "true" ]; then
-            echo "VERSION_BUMP=patch" >> $GITHUB_ENV
-            echo "Version: patch"
-          elif [ "${IS_MINOR_FOUND}" == "true" ]; then
-            echo "VERSION_BUMP=minor" >> $GITHUB_ENV
-            echo "Version: minor"
-          elif [ "${IS_MAJOR_FOUND}" == "true" ]; then
-            echo "VERSION_BUMP=major" >> $GITHUB_ENV
-            echo "Version: major"
-          else
-            exit 0
-          fi
-
-      # Update package version
-      - name: Update Package Version
-        if: steps.proceed-versioning.outcome == 'success'
-        run: npm version ${{ env.VERSION_BUMP }} --no-git-tag-version
-
-      # Retrieve updated npm version
-      - name: Retrieve updated npm version
-        if: steps.proceed-versioning.outcome == 'success'
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
-
-      # Push git created tag
-      - name: Push git tag
-        if: steps.proceed-versioning.outcome == 'success'
-        id: tag
-        uses: anothrNick/github-tag-action@v1
-        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: false
-          CUSTOM_TAG: ${{ steps.package-version.outputs.current-version }}
-          BRANCH_HISTORY: full
-
-      # Generate the changelog file using the configuration from cliff.toml.
-      - name: Generate CHANGELOG.md partial
-        if: steps.proceed-versioning.outcome == 'success'
-        id: git-cliff-partial
-        uses: orhun/git-cliff-action@v3
-        with:
-          config: cliff.toml
-          args: -vv --latest --strip header
-        env:
-          OUTPUT: CHANGELOG.md
-          GITHUB_REPO: ${{ github.repository }}
-
-      # Create a GitHub release using the generated changelog content.
-      - name: Publish GitHub Release
-        if: steps.proceed-versioning.outcome == 'success'
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          body: ${{ steps.git-cliff-partial.outputs.content }}
-          tag_name: ${{ steps.git-cliff-partial.outputs.version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: false
-          draft: false
-          make_latest: true
-
-      # Generate the changelog file based on the cliff.toml file
-      - name: Generate CHANGELOG.md
-        if: steps.proceed-versioning.outcome == 'success'
-        uses: orhun/git-cliff-action@v3
-        with:
-          config: cliff.toml
-          args: --verbose
-          OUTPUT: CHANGELOG.md
-          GITHUB_REPO: ${{ github.repository }}
-
-      # Move the generated changelog to the root folder and clean up.
-      - name: Move CHANGELOG.md to root directory
-        if: steps.proceed-versioning.outcome == 'success'
-        run: |
-          cp ./git-cliff/CHANGELOG.md ./
-          rm ./git-cliff/CHANGELOG.md
-          rmdir ./git-cliff/
-
-      - name: Create pull request
-        if: steps.proceed-versioning.outcome == 'success'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          commit-message: 'chore(release): updated CHANGELOG.md and bump version increased'
-          labels: deploy
+          BRANCH: main
