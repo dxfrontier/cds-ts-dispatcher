@@ -21,4 +21,4 @@ jobs:
         uses: yogevbd/enforce-label-action@2.2.2
         with:
           REQUIRED_LABELS_ANY: 'patch,minor,major,norelease'
-          REQUIRED_LABELS_ANY_DESCRIPTION: "Select at least one label ['patch', 'minor', 'major', 'norelease']"
+          REQUIRED_LABELS_ANY_DESCRIPTION: "Select at least one label ['version: patch', 'version: minor', 'version: major', 'norelease']"
