@@ -131,11 +131,13 @@ function PrependDraft(options: PrependBaseDraft) {
 }
 
 /**
- * Use `@Prepend` decorator to register an event handler to run before existing ones.
- * @param options - The options object.
- * @param options.eventDecorator - The event decorator name, example `BeforeCreate`, `AfterCreate`, `BeforeDelete`, etc.
- * @param [options.actionName] - `[Optional]` This option will appear when `eventDecorator` is `OnAction`, `OnFunction`, `OnBoundAction`, `OnBoundFunction`.
- * @param [options.eventName] - `[Optional]` This option will appear when `eventDecorator` is `OnEvent`.
+ * Use `@Prepend` decorator to register an event handler to be executed **before existing handlers**.
+ * @param options - Configuration options for the decorator.
+ * @param options.eventDecorator - The event decorator name (e.g., `BeforeCreate`, `AfterCreate`, `BeforeDelete`, etc.).
+ * @param [options.actionName] - (Optional) Applicable when `eventDecorator` is `OnAction`, `OnFunction`, `OnBoundAction`, or `OnBoundFunction`.
+ * @param [options.eventName] - (Optional) Applicable when `eventDecorator` is `OnEvent`.
+ *
+ * **Important:** When using `@Prepend` on decorators like [@OnCreate](#oncreate), [@OnRead](#onread), [@OnUpdate](#onupdate), [@OnDelete](#ondelete), [@OnAction](#onaction), [@OnFunction](#onfunction), [@OnEvent](#onevent), [@OnSubscribe](#onsubscribe), [@OnError](#onerror), [@OnBoundAction](#onboundaction), [@OnBoundFunction](#onboundfunction), [@OnAll](#onall) **calling** `return next()` **is mandatory** to ensure the actual action is executed.
  *
  * @example
  * "@Prepend({ eventDecoratorName: 'BeforeRead' })"
