@@ -3797,7 +3797,7 @@ private async afterReadSingleInstance(@Result() result: MyEntity, @Req() req: Re
 
 **@Prepend({ eventDecorator : string })**
 
-The `@Prepend` decorator is utilized as a `method-level` decorator to register an event handler to run before existing ones like [@BeforeCreate()](#beforecreate) [@AfterCreate()](#aftercreate) [@OnAction()](#onaction) ..., etc.
+The `@Prepend` decorator is a `method-level` decorator used to register an event handler that executes **before event handlers** such as [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnAction()](#onaction), etc.
 
 `Parameters`
 
@@ -3808,7 +3808,7 @@ The `@Prepend` decorator is utilized as a `method-level` decorator to register a
 - `actionName: (CDSFunction)` : Action name, applicable only for `OnAction`, `OnBoundAction`, `OnFunction`, `OnBoundFunction`.
 - `eventName: (CDSEvent)` : Event name, applicable only for `OnEvent`.
 
-`Example 1`
+`Example 1:` Prepending to `AfterRead` 
 
 ```typescript
 import { Prepend, AfterRead, Req, Results } from '@dxfrontier/cds-ts-dispatcher';
@@ -3832,7 +3832,28 @@ private async afterRead(MyEntity
 }
 ```
 
-`Example 2`
+`Example 2:` Prepending to `OnBoundAction`
+
+```typescript
+import { Prepend, OnBoundAction, Req, Next } from '@dxfrontier/cds-ts-dispatcher';
+import type { ActionRequest, NextEvent } from '@dxfrontier/cds-ts-dispatcher';  
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@Prepend({ eventDecorator: 'OnBoundAction', actionName: MyEntity.actions.AnAction })
+private async prepend(@Req() req: ActionRequest<typeof MyEntity.actions.AnAction>, @Next() next: NextEvent) {
+  req.locale = 'DE_de';
+  return next();
+}
+
+@OnBoundAction(MyEntity.actions.AnAction)
+private async onBoundAction(@Req() req: ActionRequest<typeof MyEntity.actions.AnAction>) {
+  // req.locale will have the value 'DE_de' ...
+  // ...
+}
+``` 
+
+`Example 3:` Prepending to `OnEvent`
 
 ```typescript
 import { Prepend, OnEvent, Req } from '@dxfrontier/cds-ts-dispatcher';
@@ -3852,11 +3873,14 @@ public async handleMyEvent(@Req() req: Request<MyEvent>) {
 }
 ```
 
+> [!IMPORTANT]
+> When using `@Prepend` on decorators like [@OnCreate](#oncreate), [@OnRead](#onread), [@OnUpdate](#onupdate), [@OnDelete](#ondelete), [@OnAction](#onaction), [@OnFunction](#onfunction), [@OnEvent](#onevent), [@OnSubscribe](#onsubscribe), [@OnError](#onerror), [@OnBoundAction](#onboundaction), [@OnBoundFunction](#onboundfunction), [@OnAll](#onall) **calling** `return next()` **is mandatory** to ensure the actual action is executed.
+
 > [!TIP]
-> The `@Prepend` decorator can be used for example :
+> Use `@Prepend` decorator to :
 >
-> - When you want to prepare various things `before` reaching the actual event.
-> - Making transformation on `Request`, `Result`, ... `before` reaching the actual event.
+> - Prepare data or perform transformations **before** reaching the actual event.
+> - Modify `Request` or `Result` objects **before** they are processed by the main handler.
 > - ...
 
 > [!TIP]
