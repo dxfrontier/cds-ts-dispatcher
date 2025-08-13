@@ -1,6 +1,6 @@
 import { CDS_DISPATCHER, Inject, Service, ServiceLogic } from '../../../../../../../lib';
 
-@ServiceLogic('Transient')
+@ServiceLogic('Singleton')
 export class SharedService {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
