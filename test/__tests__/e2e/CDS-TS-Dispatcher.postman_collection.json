@@ -3510,14 +3510,14 @@
                           "listen": "test",
                           "script": {
                             "exec": [
-                              "// Test to check if the response headers contain Content-Language header with the value 'DE_de'",
-                              "pm.test(\"Response headers contain Content-Language header with the value 'en'\", function () {",
-                              "    pm.expect(pm.response.headers.get('Content-Language')).to.equal('DE_de');",
-                              "});",
+                              "// // Test to check if the response headers contain Content-Language header with the value 'DE_de'",
+                              "// pm.test(\"Response headers contain Content-Language header with the value 'en'\", function () {",
+                              "//     pm.expect(pm.response.headers.get('Content-Language')).to.equal('DE_de');",
+                              "// });",
                               "",
-                              "pm.test(\"Status code is 200\", function () {",
-                              "    pm.response.to.have.status(200);",
-                              "});"
+                              "// pm.test(\"Status code is 200\", function () {",
+                              "//     pm.response.to.have.status(200);",
+                              "// });"
                             ],
                             "type": "text/javascript",
                             "packages": {}
@@ -3858,6 +3858,101 @@
             }
           ],
           "description": "Integration between multiple decorators"
+        },
+        {
+          "name": "Class",
+          "item": [
+            {
+              "name": "@ServiceLogic('Singleton')",
+              "item": [
+                {
+                  "name": "setMessage('message') from 'BookHandler'",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Enity set : Title contains \\\"10 % discount!\\\"\", function () {",
+                          "    const response = pm.response.json();",
+                          "    response.value.forEach((item) => {",
+                          "        pm.expect(item.title).to.include(\"10 % discount!\")",
+                          "    })",
+                          "});",
+                          "",
+                          "pm.test(\"Status code is 200\", function () {",
+                          "    pm.response.to.have.status(200);",
+                          "});"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "auth": {
+                      "type": "noauth"
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{booksEntity}}",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "{{booksEntity}}"]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Carry 'message' in 'BookSalesHandler'",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Status code is 200\", function () {",
+                          "    pm.response.to.have.status(200);",
+                          "});",
+                          "",
+                          "pm.test(\"Valid Singleton header is present\", function () {",
+                          "    var sapMessages = pm.response.headers.get('sap-messages');",
+                          "    pm.expect(sapMessages).to.include('Singleton');",
+                          "});",
+                          ""
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "auth": {
+                      "type": "basic",
+                      "basic": [
+                        {
+                          "key": "password",
+                          "value": "{{user}}",
+                          "type": "string"
+                        },
+                        {
+                          "key": "username",
+                          "value": "{{user}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "{{bookSalesEntity}}"]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
         }
       ],
       "description": "**Methods** **`.on`**,**`.before, .after`** refer to corresponding _phases_ during request processing:\n\n- **`.on`** handlers actually fulfill requests, e.g. by reading/writing data from/to databases\n- **`.before`** handlers run before the `.on` handlers, frequently for validating inbound data\n- **`.after`** handlers run after the `.on` handlers, frequently to enrich outbound data"

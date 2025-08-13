@@ -35,6 +35,7 @@ import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
 import BookService from '../../../service/BookService';
 import { CDS_ENV } from '#dispatcher';
+import { SharedService } from './SharedService';
 
 @EntityHandler(Book)
 @Use(MiddlewareEntity1, MiddlewareEntity2)
@@ -42,6 +43,7 @@ class BookHandler {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(CDS_DISPATCHER.OUTBOXED_SRV) private readonly outboxedSrv: Service;
   @Inject(BookService) private readonly bookService: BookService;
+  @Inject(SharedService) private readonly sharedService: SharedService;
 
   @Prepend({ eventDecorator: 'AfterReadSingleInstance' })
   public async prepend(@Req() req: Request): Promise<void> {
@@ -112,6 +114,8 @@ class BookHandler {
     @Jwt() jwt: string | undefined,
     @Env<CDS_ENV>('requires.auth.kind') env: CDS_ENV['requires']['auth']['kind'],
   ): Promise<void> {
+    this.sharedService.setMessage('message');
+
     await this.bookService.manageAfterReadMethods({ req, res, results, singleInstance, jwt, env });
   }
 

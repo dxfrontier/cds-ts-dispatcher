@@ -21,11 +21,14 @@ import {
 import BookSalesService from '../../../service/BookSalesService';
 
 import type { GetQueryType } from '../../../../../../../lib';
+import { SharedService } from './SharedService';
 
 @EntityHandler(BookSale)
 class BookSalesHandler {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(BookSalesService) private readonly bookSalesService: BookSalesService;
+
+  @Inject(SharedService) private readonly sharedService: SharedService;
 
   @AfterRead()
   @ExecutionAllowedForRole('Manager', 'User', 'CEO')
@@ -51,6 +54,8 @@ class BookSalesHandler {
 
     @Jwt() token: string | undefined,
   ): Promise<void> {
+    const message = this.sharedService.getMessage();
+
     this.bookSalesService.showAfterReadNotifies({
       req,
       hasRoles,
@@ -64,6 +69,7 @@ class BookSalesHandler {
       hasSaleDate,
       hasFrom,
       hasOrderBy,
+      message,
     });
   }
 }

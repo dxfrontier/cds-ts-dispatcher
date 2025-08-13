@@ -19,6 +19,7 @@ class BookSalesService {
     hasSaleDate: boolean;
     hasFrom: boolean;
     hasOrderBy: boolean;
+    message: string;
   }): void {
     if (args.hasRoles) {
       args.req.notify('Manager');
@@ -50,6 +51,10 @@ class BookSalesService {
     if (args.hasQuantity && args.hasSaleDate && args.hasFrom && args.hasOrderBy) {
       args.req.notify(`${args.hasQuantity && args.hasSaleDate && args.hasFrom && args.hasOrderBy}`);
     } else args.req.notify(`${args.hasQuantity && args.hasSaleDate}`);
+
+    if (args.message) {
+      args.req.notify('Singleton');
+    }
   }
 }
 

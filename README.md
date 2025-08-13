@@ -648,18 +648,69 @@ export class AllEntities {
 
 The `@ServiceLogic` decorator is utilized at the `class-level` to annotate a `class` as a specialized class containing only business logic.
 
-`Example`
+This decorator configures the dependency injection scope for the service class, allowing control over instance lifecycle and sharing across the application.
+
+`Parameters`
+
+- `scope` `[Optional]` - The dependency injection scope for the service class:
+  - `'Singleton'` - Single instance shared across the entire application
+  - `'Transient'` - New instance created for each injection (default)
+  
+  If not provided, defaults to `'Transient'` scope behavior.
+
+`Example 1` - Default Transient scope
 
 ```typescript
 import { ServiceLogic } from '@dxfrontier/cds-ts-dispatcher';
 
 @ServiceLogic()
 export class CustomerService {
-  // ...
+  private customerCount = 0;
+
   constructor() {}
-  // ...
+
+  public processCustomer(): void {
+    this.customerCount++;
+    console.log(`Processing customer #${this.customerCount}`);
+  }
+
+  public getCustomerCount(): number {
+    return this.customerCount;
+  }
 }
 ```
+
+`Example 2` - Singleton scope
+
+```typescript
+import { ServiceLogic } from '@dxfrontier/cds-ts-dispatcher';
+
+@ServiceLogic('Singleton')
+export class AnyService {
+  private message: string;
+
+  constructor() {}
+
+  public setMessage(message: string): void {
+    this.message = message;
+  }
+
+  public getMessage(): any {
+    return this.message;
+  }
+}
+```
+
+> [!IMPORTANT]
+> When using `@ServiceLogic('Singleton')`, the same instance is shared across the entire application. Any values set in the class properties (like `message` in the example above) will be **carried everywhere** and **persist** throughout the application lifecycle. 
+> 
+> This means:
+> 
+> - State modifications in one part of your application will be visible in all other parts
+> - Data stored in singleton services persists across multiple requests
+> - All classes that `@Inject` this singleton service will receive the exact same instance with the same state
+>
+> Use `'Singleton'` scope carefully and only when you need shared state across your application.
 
 > [!TIP]
 > When applying `@ServiceLogic()` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`.
