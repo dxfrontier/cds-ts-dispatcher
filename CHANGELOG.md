@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.1.0] - 2025-08-13
+
+### 🚀 Features
+
+- *(decorators)* New `@ServiceLogic('Singleton')`, container creates 1 instance for all lifecycle
+
+### 📚 Documentation
+
+- *(readme)* Updated with newly feature for `@ServiceLogic('Singleton')`
+
+### 🧪 Testing
+
+- *(e2e)* Updated for `@ServiceLogic('Singleton')`
+- *(sharedService)* Corrected to Singleton instead of Transient
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version, CHANGELOG.md generated
+- *(build)* Small refactoring on the enforce labeling
+
 ## [5.0.2] - 2025-08-11
 
 ### 📚 Documentation
