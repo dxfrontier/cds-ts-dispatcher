@@ -210,7 +210,16 @@ export class ArgumentMethodProcessor {
         case 'NEXT':
         case 'RESULTS':
         case 'REQ': {
-          let key = util.lodash.lowerCase(metadataKey) as 'req' | 'results' | 'next' | 'msg' | 'error';
+          // FIXME:
+          // TEMPORARLY until we fix this better
+          // so we need to remove the MSG as in the new version of CAP this doesn't reflect anymore and this can be req and the decorator @MSG can be deleted.
+          if (metadataKey === 'MSG') {
+            let key = 'req' as 'req' | 'results' | 'next' | 'error';
+            this.applySingleDecoratorByKey({ metadataKey, data: this.temporaryArgs[key] });
+            break;
+          }
+
+          let key = util.lodash.lowerCase(metadataKey) as 'req' | 'results' | 'next' | 'error';
           this.applySingleDecoratorByKey({ metadataKey, data: this.temporaryArgs[key] });
 
           break;

@@ -2,11 +2,18 @@ import { ArgumentMethodProcessor } from '../core/ArgumentMethodProcessor';
 
 import type { PickQueryPropsByKey, CustomRequest, CRUDQueryKeys, PropertyStringPath } from '../types/internalTypes';
 
+// TODO: to be removed in the future
 /**
+ *
  * Annotates a parameter of a method with the `Messaging` response.
  * @example
  * "@Msg() msg: SubscriberType<{ foo: number; bar: string }>"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#messaging | CDS-TS-Dispatcher - @Msg}
+ *
+ * @deprecated
+ *
+ * Use `@Req` instead of `@Msg`
+ *
  */
 function Msg(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
