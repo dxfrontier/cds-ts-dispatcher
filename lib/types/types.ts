@@ -8,6 +8,11 @@ import { Service, Request } from '@sap/cds';
 // @OnSubscribe types
 // **************************************************************************************************************************
 
+/**
+ * @deprecated
+ *
+ * Use CDS - Request instead.
+ */
 type SubscriberType<T> = {
   data: T;
   event: string;

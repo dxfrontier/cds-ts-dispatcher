@@ -158,14 +158,14 @@ const parameterUtil = {
           break;
         }
 
-        case 'as': {
-          if (parameter.key === 'INSERT') {
-            args[parameter.parameterIndex] =
-              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query[parameter.key]?.[queryOption];
-          }
+        // case 'as': {
+        //   if (parameter.key === 'INSERT') {
+        //     args[parameter.parameterIndex] =
+        //       type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query[parameter.key]?.[queryOption];
+        //   }
 
-          break;
-        }
+        //   break;
+        // }
 
         case 'rows':
         case 'values':
@@ -265,16 +265,12 @@ const parameterUtil = {
           temporaryArgs.error = arg;
           break;
 
-        case arg instanceof EventContext:
+        case arg instanceof EventContext || util.isMsgEvent(arg):
           temporaryArgs.req = arg as Request;
           break;
 
         case util.isNextEvent(arg):
           temporaryArgs.next = arg;
-          break;
-
-        case util.isMsgEvent(arg):
-          temporaryArgs.msg = arg;
           break;
 
         case !util.lodash.isUndefined(this.findResults(arg)):

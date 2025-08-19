@@ -77,8 +77,7 @@ interface Credentials {
 }
 interface Messaging {
     impl: string;
-    file: string;
-    outboxed: boolean;
+    local: boolean;
     kind: string;
 }
 interface Runtime {

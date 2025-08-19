@@ -62,7 +62,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@ValidationResults](#validationresults)
       - [@Locale](#locale)
       - [@Env](#env)
-      - [@Msg](#msg)
+      - [~~@Msg~~](#msg)
     - [`Method`-`active entity`](#method-active-entity)
       - [`Before`](#before)
         - [@BeforeCreate](#beforecreate)
@@ -1859,9 +1859,13 @@ public async beforeCreate(
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### @Msg
+##### ~~@Msg~~
 
 **@Msg()**
+
+> [!WARNING]
+> **DEPRECATED:** The `@Msg` decorator is deprecated and will be removed in a future version. Please use `@Req` decorator instead for handling message data in event subscribers.
+
 
 The `@Msg` decorator is a parameter decorator used to inject response [Emitter](#https://cap.cloud.sap/docs/guides/messaging/#typical-emitter-and-receiver-roles) directly into a method parameter.
 
@@ -2969,15 +2973,15 @@ this.after('READ', MyEntity, async (req, res) => {
 ```ts
 
 import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
-import { Messaging, OnSubscribe } from '@dxfrontier/cds-ts-dispatcher';
-import type { SubscriberType } from '@dxfrontier/cds-ts-dispatcher';
+import { Messaging, OnSubscribe, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 // Receiving the event + data 
 @OnSubscribe({
   eventName: SendData,
   type: 'MESSAGE_BROKER' 
 })
-private async onSubscribe(@Msg() msg: SubscriberType<SendData>): Promise<void> {
+private async onSubscribe(@Req() req: Request): Promise<void> {
   // 
   // req.data.foo ...
   // req.data.bar ...
@@ -2994,12 +2998,6 @@ const messaging = await cds.connect.to('messaging');
         // ...
       });
 ```
-
-> [!IMPORTANT]
-> To have the `msg` parameter typed you can use TypeScript type `SubscriberType<T>` where T can be a CDS event or any object
-
-> [!TIP]
-> When using `messaging (broker)` the decorator [@Msg](#msg) must be applied as the request is anonymous at this level.
 
 `Example 4`
 

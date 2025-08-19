@@ -33,7 +33,7 @@
   "cds": {
     "requires": {
       "messaging": {
-        "kind": "file-based-messaging"
+        "kind": "local-messaging"
       },
       "db": {
         "kind": "sql"
