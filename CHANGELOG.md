@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.1.1] - 2025-08-19
+
+### 🐛 Bug Fixes
+
+- *(msg)* Deprecated  in favor for  as currently SAP doesn't have a clear path for this
+
+### 📚 Documentation
+
+- *(readme)* Updated by making  decorator deprecated until sap defines a new type
+
+### 🧪 Testing
+
+- *(msg)* Removed msg and added req
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version, CHANGELOG.md generated
+
 ## [5.1.0] - 2025-08-13
 
 ### 🚀 Features
