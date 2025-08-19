@@ -114,8 +114,9 @@ class UnboundActionsHandler {
     type: 'MESSAGE_BROKER',
     showReceiverMessage: true,
   })
-  private async onProductMessaging(@Msg() msg: SubscriberType<{ foo: number; bar: string }>): Promise<void> {
-    const bla = msg.data;
+  // private async onProductMessaging(@Msg() msg: SubscriberType<{ foo: number; bar: string }>): Promise<void> {
+  private async onProductMessaging(@Req() req: Request): Promise<void> {
+    const bla = req.data;
     // TODO: how I can check if this was executed using POSTMAN
   }
 
@@ -145,7 +146,6 @@ class UnboundActionsHandler {
   @OnEvent('event_1')
   private async bla(@Req() req: SubscriberType<{ foo: number; bar: string }>): Promise<void> {
     const bla = req.data;
-    debugger;
   }
 }
 
