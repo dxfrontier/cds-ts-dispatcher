@@ -329,7 +329,7 @@ class CDSDispatcher {
           const text = `> received: ${eventName}`;
 
           console.log(util.showGreenConsole(text));
-          console.table([req.data]);
+          console.table(...[req.data]);
         } else {
           const text = `> received: ${eventName}`;
 
