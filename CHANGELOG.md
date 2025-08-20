@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.1.2] - 2025-08-20
+
+### 🐛 Bug Fixes
+
+- *(table)* Now outputs correctly the data
+
+### 🚜 Refactor
+
+- *(receiverMessage)* Removed testing object from the CDSDispatcher
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version, CHANGELOG.md generated
+
 ## [5.1.1] - 2025-08-19
 
 ### 🐛 Bug Fixes
