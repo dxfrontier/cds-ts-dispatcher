@@ -127,16 +127,12 @@ const util = {
   },
 
   /**
-   * Checks if a field is empty.
+   * Checks if a field is null or undefined.
    * @param value The field value to check.
-   * @returns True if the field is empty, otherwise false.
+   * @returns True if the field is null or undefined, otherwise false.
    */
   isFieldEmpty(value: ValidatorField): boolean {
-    // Convert non-string values to strings
-    const strValue = typeof value !== 'string' && !util.lodash.isUndefined(value) ? String(value) : value;
-
-    // Check if the value is undefined, null, or empty
-    return util.lodash.isUndefined(strValue) || util.lodash.isNull(strValue) || util.lodash.isEmpty(strValue);
+    return util.lodash.isNull(value) || util.lodash.isUndefined(value);
   },
 
   /**
