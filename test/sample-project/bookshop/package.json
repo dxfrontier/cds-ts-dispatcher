@@ -15,7 +15,8 @@
     "clean:js": "npx rimraf ./@cds-models/{*.js,**/*.js,**/**/*.js,**/**/**/*.js}"
   },
   "dependencies": {
-    "@dxfrontier/cds-ts-dispatcher": "^5.0.1",
+    "@sap/cds": "^9",
+    "@dxfrontier/cds-ts-dispatcher": "^5",
     "express": "^4"
   },
   "devDependencies": {
