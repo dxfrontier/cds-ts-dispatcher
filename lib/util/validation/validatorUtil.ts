@@ -27,14 +27,14 @@ const validatorUtil = {
     message?: string | null;
     req: Request;
   }) {
-    const message = `${
-      options.message ??
-      util.buildMessage(constants.MESSAGES.VALIDATOR_NOT_VALID, {
-        field: options.field,
-        input: options.input,
-        validator: options.validator,
-      })
-    }`;
+    const message =
+      options.message && options.message.trim() !== ''
+        ? options.message
+        : util.buildMessage(constants.MESSAGES.VALIDATOR_NOT_VALID, {
+            field: options.field,
+            input: options.input,
+            validator: options.validator,
+          });
 
     options.req.reject(StatusCodes.BAD_REQUEST, message);
   },

@@ -30,6 +30,7 @@ import {
   OrderedBook,
   submitOrder,
   submitOrderFunction,
+  submitQuantity,
 } from '../../../../@cds-models/CatalogService';
 import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
@@ -70,7 +71,22 @@ class UnboundActionsHandler {
     req.locale = 'DE_de';
   }
 
+  @OnAction(submitQuantity)
+  @Validate<ExposeFields<typeof submitQuantity>>({ action: 'isEmpty', mandatoryFieldValidation: true }, 'quantity')
+  public async submitQuantity(
+    @Req() req: ActionRequest<typeof submitQuantity>,
+    @Res() res: RequestResponse,
+    @GetRequest('locale') locale: Request['locale'],
+    @Next() next: NextEvent,
+  ): ActionReturn<typeof submitOrder> {
+    req.reject('It will not reach here, as Validate will be executed first !');
+  }
+
   @OnAction('submitOrder')
+  @Validate<ExposeFields<typeof submitOrder>>(
+    { action: 'equals', comparison: '3', mandatoryFieldValidation: true },
+    'quantity',
+  )
   public async submitOrder(
     @Req() req: ActionRequest<typeof submitOrder>,
     @Res() res: RequestResponse,
