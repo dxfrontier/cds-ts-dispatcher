@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.1.3] - 2025-08-22
+
+### 🐛 Bug Fixes
+
+- *(validate)* Now `@Validate` decorator is throwing correct message
+
+### 🧪 Testing
+
+- *(action)* Added a new action to test the `Validate` decorator better
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version, CHANGELOG.md generated
+- *(e2e)* Updated
+
 ## [5.1.2] - 2025-08-20
 
 ### 🐛 Bug Fixes
