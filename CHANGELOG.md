@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.1.4] - 2025-08-22
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version, CHANGELOG.md generated
+- *(prettier)* Prettied files
+- *(test)* Added cds as dependency
+
 ## [5.1.3] - 2025-08-22
 
 ### 🐛 Bug Fixes
