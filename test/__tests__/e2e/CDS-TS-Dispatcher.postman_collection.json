@@ -798,16 +798,22 @@
                           "listen": "test",
                           "script": {
                             "exec": [
+                              "pm.test(\"Status code is 200\", function () {",
+                              "    pm.response.to.have.status(200);",
+                              "});",
+                              "",
                               "// Test to check if the response headers contain Content-Language header with the value 'DE_de'",
                               "pm.test(\"Response headers contain Content-Language header with the value 'DE_de'\", function () {",
                               "    pm.expect(pm.response.headers.get('Content-Language')).to.equal('DE_de');",
                               "});",
                               "",
-                              "pm.test(\"Status code is 200\", function () {",
-                              "    pm.response.to.have.status(200);",
-                              "});",
+                              "var jsonData = pm.response.json();",
                               "",
-                              ""
+                              "// Test for response body structure and stock property",
+                              "pm.test(\"Response body contains property 'stock' and checks its value\", function () {",
+                              "    pm.expect(jsonData).to.have.property('stock');",
+                              "    pm.expect(jsonData.stock).to.equal(4);",
+                              "});"
                             ],
                             "type": "text/javascript",
                             "packages": {}
@@ -3175,7 +3181,7 @@
                       "name": "@OnAction",
                       "item": [
                         {
-                          "name": "Format field 'language' toLowerCase', 'ltrim' Copy",
+                          "name": "Format field 'language' toLowerCase', 'ltrim'",
                           "event": [
                             {
                               "listen": "test",
@@ -3217,7 +3223,7 @@
                           "response": []
                         },
                         {
-                          "name": "Execute submit order with null field",
+                          "name": "Execute submitQuantity with null field",
                           "event": [
                             {
                               "listen": "test",
@@ -3250,6 +3256,47 @@
                               "raw": "{{baseUrl}}/{{catalogService}}/submitQuantity",
                               "host": ["{{baseUrl}}"],
                               "path": ["{{catalogService}}", "submitQuantity"]
+                            }
+                          },
+                          "response": []
+                        },
+                        {
+                          "name": "Execute submitStock with customMessage",
+                          "event": [
+                            {
+                              "listen": "test",
+                              "script": {
+                                "exec": [
+                                  "pm.test(\"Response status code is 400\", function () {",
+                                  "    pm.expect(pm.response.code).to.equal(400);",
+                                  "});",
+                                  "",
+                                  "pm.test(\"Error message indicates body requirement\", function () {",
+                                  "    var responseJSON = pm.response.json();",
+                                  "    pm.expect(responseJSON.error).to.have.property('message').that.equals('submit order action must have body - quantity 3 and not 2');",
+                                  "});"
+                                ],
+                                "type": "text/javascript",
+                                "packages": {}
+                              }
+                            }
+                          ],
+                          "request": {
+                            "method": "POST",
+                            "header": [],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n    \"book\": 1,\n    \"quantity\" : 2\n}",
+                              "options": {
+                                "raw": {
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/{{catalogService}}/submitStock",
+                              "host": ["{{baseUrl}}"],
+                              "path": ["{{catalogService}}", "submitStock"]
                             }
                           },
                           "response": []

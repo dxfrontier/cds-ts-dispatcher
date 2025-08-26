@@ -38,6 +38,10 @@ service CatalogService {
     stock : Integer
   };
 
+  action   submitStock(book: Books:ID, quantity: Integer)                                   returns {
+    stock : Integer
+  };
+
   action   submitQuantity(quantity: Integer)                                                returns {
     stock : Integer
   };
