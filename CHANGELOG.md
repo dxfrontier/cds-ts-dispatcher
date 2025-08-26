@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.1.5] - 2025-08-26
+
+### 🐛 Bug Fixes
+
+- *(validate)* Decorator customMessage property is taken in consideration if it's used
+
+### 🧪 Testing
+
+- *(e2e)* Updated
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version, CHANGELOG.md generated
+- *(prettier)* Prettied files
+
 ## [5.1.4] - 2025-08-22
 
 ### ⚙️ Miscellaneous Tasks
