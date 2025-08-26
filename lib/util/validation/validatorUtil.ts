@@ -28,7 +28,7 @@ const validatorUtil = {
     req: Request;
   }) {
     const message =
-      options.message && options.message.trim() !== ''
+      options.message && options.message.trim() !== '' && options.message !== null
         ? options.message
         : util.buildMessage(constants.MESSAGES.VALIDATOR_NOT_VALID, {
             field: options.field,
@@ -49,7 +49,7 @@ const validatorUtil = {
   canValidate(req: Request, validator: Validators, field: string): boolean {
     const value = req.data[field];
 
-    if (util.isFieldEmpty(value) && validator.mandatoryFieldValidation) {
+    if (util.isFieldEmpty(value) && validator.mandatoryFieldValidation && !('customMessage' in validator)) {
       util.raiseBadRequestEmptyField(req, validator, field);
     }
 
@@ -167,7 +167,7 @@ const validatorUtil = {
 
     // Handle validation failure cases
     if (!isValid) {
-      const message = validator.exposeValidatorResult === false ? (validator.customMessage ?? null) : '';
+      const message = validator.customMessage ?? null;
       this.showNotValidMessage({
         field,
         input,
