@@ -647,10 +647,41 @@ type ValidatorBaseWithMessage = {
 };
 
 /**
- * This type must NOT have 'customMessage' when 'exposeValidatorResult' is true
+ * Base type for validators when exposeValidatorResult is true
  */
-type ValidatorBaseWithoutMessage = {
-  exposeValidatorResult?: true;
+type ValidatorBaseWithoutMessage = ValidatorBase & {
+  /**
+   * Determines if the validator results are captured and passed to the method as parameters.
+   *
+   * If set to `true`, the validator results (e.g., `ValidatorFlags<'isBoolean' | 'equals'>`) will be caught
+   * and made available as a parameter in the method where validation is applied.
+   *
+   * This option is useful when a method requires access to the validation outcomes to conditionally
+   * handle logic based on validator flags.
+   *
+   * **Note:** To access these results, apply the `@ValidationResults` decorator to the method `parameter` where
+   * the validator flags should be injected.
+   *
+   * **Important:** When `exposeValidatorResult` is `true`, the `customMessage` property is not available
+   * as validation errors are not thrown but instead captured for programmatic handling.
+   *
+   * Example usage:
+   * ```typescript
+   * /@Validate<MyEntity>({ action: 'startsWith', target: 'Comment:', exposeValidatorResult: true }, 'comment')
+   * /@Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
+   * public async beforeCreate(
+   *   /@Req() req: Request<BookRecommendation>,
+   *   /@ValidationResults() validator: ValidatorFlags<'endsWith' | 'startsWith'>,
+   * ) {
+   *   // validator will contain the results of 'isBoolean' and 'equals' validations
+   *   if (validator.endsWith) {
+   *     // handle logic based on the validation result
+   *   }
+   * }
+   * ```
+   */
+  exposeValidatorResult: true;
+  // Note: customMessage is intentionally excluded when exposeValidatorResult is true
 };
 
 export type ValidatorFlags<T extends Validators['action']> = Record<T, boolean>;

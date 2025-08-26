@@ -31,6 +31,7 @@ import {
   submitOrder,
   submitOrderFunction,
   submitQuantity,
+  submitStock,
 } from '../../../../@cds-models/CatalogService';
 import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
@@ -97,6 +98,28 @@ class UnboundActionsHandler {
 
     return {
       stock: req.data.quantity! + 1,
+    };
+  }
+
+  @OnAction('submitStock')
+  @Validate<ExposeFields<typeof submitStock>>(
+    {
+      action: 'equals',
+      comparison: '3',
+      customMessage: 'submit order action must have body - quantity 3 and not 2',
+    },
+    'quantity',
+  )
+  public async submitStock(
+    @Req() req: ActionRequest<typeof submitStock>,
+    @Res() res: RequestResponse,
+    @GetRequest('locale') locale: Request['locale'],
+    @Next() next: NextEvent,
+  ): ActionReturn<typeof submitStock> {
+    res.setHeader('Content-Language', locale);
+
+    return {
+      stock: req.data.quantity,
     };
   }
 

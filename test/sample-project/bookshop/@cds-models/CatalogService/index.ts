@@ -7,6 +7,7 @@ import * as _sap_common from './../sap/common';
 export default class {
   declare static readonly changeBookProperties: typeof changeBookProperties;
   declare static readonly submitOrder: typeof submitOrder;
+  declare static readonly submitStock: typeof submitStock;
   declare static readonly submitQuantity: typeof submitQuantity;
   declare static readonly submitOrderFunction: typeof submitOrderFunction;
 }
@@ -496,6 +497,28 @@ export declare const changeBookProperties:  {
 }
 
 export declare const submitOrder:  {
+  // positional
+  (book: __.Key<__.DeepRequired<Book>['ID']>, quantity: number | null): globalThis.Promise< {
+  stock?: number | null,
+} | null> |  {
+  stock?: number | null,
+} | null
+  // named
+  ({book, quantity}: {book?: __.Key<__.DeepRequired<Book>['ID']>, quantity?: number | null}): globalThis.Promise< {
+  stock?: number | null,
+} | null> |  {
+  stock?: number | null,
+} | null
+  // metadata (do not use)
+  __parameters: {book?: __.Key<__.DeepRequired<Book>['ID']>, quantity?: number | null}, __returns: globalThis.Promise< {
+  stock?: number | null,
+} | null> |  {
+  stock?: number | null,
+} | null
+  kind: 'action'
+}
+
+export declare const submitStock:  {
   // positional
   (book: __.Key<__.DeepRequired<Book>['ID']>, quantity: number | null): globalThis.Promise< {
   stock?: number | null,
