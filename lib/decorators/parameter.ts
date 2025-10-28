@@ -7,7 +7,7 @@ import type { PickQueryPropsByKey, CustomRequest, CRUDQueryKeys, PropertyStringP
  *
  * Annotates a parameter of a method with the `Messaging` response.
  * @example
- * "@Msg() msg: SubscriberType<{ foo: number; bar: string }>"
+ * "@Msg() msg: Request<{ foo: number; bar: string }>"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#messaging | CDS-TS-Dispatcher - @Msg}
  *
  * @deprecated

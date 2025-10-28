@@ -10,7 +10,6 @@ import constants from '../constants/internalConstants';
 import type { NextEvent, Request, ValidatorField } from '../types/types';
 import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
-import { SubscriberType } from '../types/types';
 
 /**
  * This util contains common methods for reusable purposes.
@@ -57,7 +56,7 @@ const util = {
    * @param arg The argument to check.
    * @returns True if the argument is a Msg function, otherwise false.
    */
-  isMsgEvent(arg: any): arg is SubscriberType<any> {
+  isMsgEvent(arg: any): arg is Request {
     return typeof arg === 'object' && ['inbound', 'event', 'data', 'headers'].every((key: string) => key in arg);
   },
 

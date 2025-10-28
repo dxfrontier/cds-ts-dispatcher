@@ -3,7 +3,6 @@ import type { Query } from '@sap/cds';
 import { StatusCodes } from 'http-status-codes';
 
 import type constants from '../constants/internalConstants';
-import { HandlerType } from './enum';
 
 import type {
   CdsFunction,
@@ -19,7 +18,6 @@ import type {
   EVENTS,
   CdsEvent,
   RequestResponse,
-  SubscriberType,
 } from './types';
 
 // **************************************************************************************************************************
@@ -46,7 +44,7 @@ export type TemporaryArgs = {
   next: NextEvent;
   error: Error;
   results: unknown | unknown[];
-  msg: SubscriberType<any>;
+  msg: Request;
 };
 
 export type NonEmptyArray<T> = [T, ...T[]];
@@ -57,7 +55,7 @@ export type ParameterDecorators = keyof typeof constants.DECORATOR.PARAMETER;
 // @AfterRead, @AfterCreate, @BeforeCreate, @BeforeUpdate, @OnRead, etc decorator types
 // **************************************************************************************************************************
 
-export type EventKind = 'BEFORE' | 'AFTER' | 'AFTER_SINGLE' | 'ON';
+export type EventKind = 'BEFORE' | 'AFTER' | 'AFTER_SINGLE' | 'ON' | 'PREPEND';
 
 type MessagingTypes = {
   SAME_NODE_PROCESS: {
@@ -196,7 +194,6 @@ export type DefaultHandlers = {
 };
 
 export type BaseHandler = {
-  handlerType: HandlerType;
   callback: RequestType;
   eventKind: EventKind;
   isDraft: boolean;
@@ -215,7 +212,21 @@ export type PrependEvent = {
 };
 
 export type PrependAction = {
-  eventDecorator: 'OnAction' | 'OnFunction' | 'OnBoundAction' | 'OnBoundFunction';
+  eventDecorator:
+    | 'OnAction'
+    | 'OnFunction'
+    | 'OnBoundAction'
+    | 'OnBoundFunction'
+    //
+    | 'BeforeAction'
+    | 'BeforeFunction'
+    | 'BeforeBoundAction'
+    | 'BeforeBoundFunction'
+    //
+    | 'AfterAction'
+    | 'AfterFunction'
+    | 'AfterBoundAction'
+    | 'AfterBoundFunction';
   actionName: CdsFunction | string;
 };
 

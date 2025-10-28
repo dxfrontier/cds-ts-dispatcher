@@ -132,6 +132,7 @@ interface Fiori {
     wrap_multiple_errors: boolean;
     draft_lock_timeout: boolean;
     draft_deletion_timeout: boolean;
+    draft_messages: boolean;
 }
 interface Preview {
     ui5: Ui5;
