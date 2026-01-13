@@ -3,10 +3,12 @@ import { ArgumentMethodProcessor } from '../core/ArgumentMethodProcessor';
 import { MetadataDispatcher } from '../core/MetadataDispatcher';
 import decoratorsUtil from '../util/decorators/decoratorsUtil';
 import formatterUtil from '../util/formatter/formatterUtil';
+import loggingUtil from '../util/logging/loggingUtil';
 import middlewareUtil from '../util/middleware/middlewareUtil';
 import parameterUtil from '../util/parameter/parameterUtil';
 import util from '../util/util';
 import validatorUtil from '../util/validation/validatorUtil';
+import transformersUtil from '../util/transformers/transformersUtil';
 // import cds from '@sap/cds';
 
 import type {
@@ -33,6 +35,7 @@ import type {
   PrependBaseDraft,
   StatusCodeMapping,
 } from '../types/internalTypes';
+import type { LogExecutionOptions, MaskOptions } from '../types/responseTransformers';
 
 /**
  * Use `CatchAndSetErrorCode` decorator to `catch errors` and assigns a `new status code` to the response.
@@ -284,6 +287,136 @@ function Validate<T>(validator: Validators, ...fields: (keyof T)[]) {
     };
   };
 }
+
+// ========================================================================================================================================================
+// Response Transformer Decorators (@Exclude, @Include, @Mask, @LogExecution)
+// ========================================================================================================================================================
+
+/**
+ * Use `@Exclude` decorator to remove specified fields from the response after a read operation.
+ * @param fields - The fields to exclude from the response.
+ * @example
+ * // Remove 'password' and 'ssn' fields from User response
+ * "@Exclude<User>('password', 'ssn')"
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#exclude | CDS-TS-Dispatcher - @Exclude}
+ */
+function Exclude<T>(...fields: (keyof T)[]) {
+  return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+    const originalMethod = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      const result = await originalMethod.apply(this, args);
+
+      const results = transformersUtil.findResults<T>(args);
+      transformersUtil.excludeFields(results, fields);
+
+      return result;
+    };
+  };
+}
+
+/**
+ * Use `@Include` decorator to keep only specified fields in the response after a read operation.
+ * All other fields will be removed.
+ * @param fields - The fields to include in the response.
+ * @example
+ * // Only include 'ID', 'name', and 'email' fields in User response
+ * "@Include<User>('ID', 'name', 'email')"
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#include | CDS-TS-Dispatcher - @Include}
+ */
+function Include<T>(...fields: (keyof T)[]) {
+  return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+    const originalMethod = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      const result = await originalMethod.apply(this, args);
+
+      const results = transformersUtil.findResults<T>(args);
+      transformersUtil.includeFields(results, fields);
+
+      return result;
+    };
+  };
+}
+
+/**
+ * Use `@Mask` decorator to partially hide sensitive field values in the response.
+ * @param fields - The fields to mask.
+ * @param options - Optional masking options (char, visibleStart, visibleEnd).
+ * @example
+ * // Mask 'creditCard' and 'phone' showing only last 4 characters
+ * "@Mask<User>(['creditCard', 'phone'])"
+ * // Mask with custom options: show first 2 and last 4 characters
+ * "@Mask<User>(['creditCard'], { char: 'X', visibleStart: 2, visibleEnd: 4 })"
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#mask | CDS-TS-Dispatcher - @Mask}
+ */
+function Mask<T>(fields: (keyof T)[], options?: MaskOptions) {
+  return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
+    const originalMethod = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      const result = await originalMethod.apply(this, args);
+
+      const results = transformersUtil.findResults<T>(args);
+      transformersUtil.maskFields(results, fields, options ?? {});
+
+      return result;
+    };
+  };
+}
+
+/**
+ * Use `@LogExecution` decorator to log method execution details including arguments, result, and duration.
+ * @param options - Optional logging options.
+ * @example
+ * // Log only execution duration
+ * "@LogExecution({ logDuration: true })"
+ * // Log arguments and duration
+ * "@LogExecution({ logArgs: true, logDuration: true })"
+ * // Log everything with custom prefix
+ * "@LogExecution({ logArgs: true, logResult: true, logDuration: true, prefix: '[DEBUG]' })"
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#logexecution | CDS-TS-Dispatcher - @LogExecution}
+ */
+function LogExecution(options?: LogExecutionOptions) {
+  return function <Target>(
+    target: Target,
+    propertyKey: string | symbol,
+    descriptor: TypedPropertyDescriptor<RequestType>,
+  ) {
+    const originalMethod = descriptor.value!;
+    const className = (target as any).constructor?.name ?? 'Unknown';
+    const methodName = String(propertyKey);
+    const resolvedOptions = loggingUtil.resolveOptions(options);
+
+    descriptor.value = async function (...args: any[]) {
+      const req = util.findRequest(args);
+
+      if (loggingUtil.shouldSkip(resolvedOptions, req)) {
+        return await originalMethod.apply(this, args);
+      }
+
+      const startTime = Date.now();
+      loggingUtil.logArgs(resolvedOptions, className, methodName, args);
+
+      try {
+        const result = await originalMethod.apply(this, args);
+        const duration = Date.now() - startTime;
+
+        loggingUtil.logResult(resolvedOptions, className, methodName, result);
+        loggingUtil.logDuration(resolvedOptions, className, methodName, duration);
+
+        return result;
+      } catch (error) {
+        loggingUtil.logError(resolvedOptions, className, methodName, Date.now() - startTime, error);
+        throw error;
+      }
+    };
+  };
+}
+
+// ========================================================================================================================================================
+// END Response Transformer Decorators
+// ========================================================================================================================================================
 
 /**
  * @deprecated
@@ -1106,6 +1239,11 @@ export {
   FieldsFormatter,
   CatchAndSetErrorMessage,
   CatchAndSetErrorCode,
+  // Response Transformer decorators
+  Exclude,
+  Include,
+  Mask,
+  LogExecution,
   // ========================================================================================================================================================
   // BEFORE events - Active entity
   BeforeAll,
