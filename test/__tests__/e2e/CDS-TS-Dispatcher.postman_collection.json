@@ -3309,6 +3309,127 @@
               "description": "_**@Validate**_ will be tested for all events `After`,`Before`, `On`"
             },
             {
+              "name": "@Exclude, @Mask, @LogExecution",
+              "item": [
+                {
+                  "name": "@AfterRead - BookOrders: createdAt and modifiedAt should be excluded, orderNumber should be masked",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Status code is 200\", function () {",
+                          "    pm.response.to.have.status(200);",
+                          "});",
+                          "",
+                          "pm.test(\"Response should NOT contain 'createdAt' field (excluded)\", function () {",
+                          "    const response = pm.response.json();",
+                          "    response.value.forEach(function(order) {",
+                          "        pm.expect(order).to.not.have.property('createdAt');",
+                          "    });",
+                          "});",
+                          "",
+                          "pm.test(\"Response should NOT contain 'modifiedAt' field (excluded)\", function () {",
+                          "    const response = pm.response.json();",
+                          "    response.value.forEach(function(order) {",
+                          "        pm.expect(order).to.not.have.property('modifiedAt');",
+                          "    });",
+                          "});",
+                          "",
+                          "pm.test(\"orderNumber should be masked with only last 4 chars visible\", function () {",
+                          "    const response = pm.response.json();",
+                          "    response.value.forEach(function(order) {",
+                          "        if (order.orderNumber) {",
+                          "            // Check that it contains asterisks (masked) and ends with 4 visible chars",
+                          "            pm.expect(order.orderNumber).to.include('*');",
+                          "            const maskedPart = order.orderNumber.slice(0, -4);",
+                          "            const allStars = maskedPart.split('').every(c => c === '*');",
+                          "            pm.expect(allStars).to.be.true;",
+                          "        }",
+                          "    });",
+                          "});"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{bookOrdersEntity}}",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "{{bookOrdersEntity}}"]
+                    }
+                  },
+                  "response": []
+                }
+              ],
+              "description": "_**@Exclude**_, _**@Mask**_, and _**@LogExecution**_ decorators for response transformation"
+            },
+            {
+              "name": "@Include",
+              "item": [
+                {
+                  "name": "@AfterRead - Authors: should only include ID and name",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Status code is 200\", function () {",
+                          "    pm.response.to.have.status(200);",
+                          "});",
+                          "",
+                          "pm.test(\"Response should contain 'ID' field\", function () {",
+                          "    const response = pm.response.json();",
+                          "    response.value.forEach(function(author) {",
+                          "        pm.expect(author).to.have.property('ID');",
+                          "    });",
+                          "});",
+                          "",
+                          "pm.test(\"Response should contain 'name' field\", function () {",
+                          "    const response = pm.response.json();",
+                          "    response.value.forEach(function(author) {",
+                          "        pm.expect(author).to.have.property('name');",
+                          "    });",
+                          "});",
+                          "",
+                          "pm.test(\"Response should NOT contain 'createdAt' field (not included)\", function () {",
+                          "    const response = pm.response.json();",
+                          "    response.value.forEach(function(author) {",
+                          "        pm.expect(author).to.not.have.property('createdAt');",
+                          "    });",
+                          "});",
+                          "",
+                          "pm.test(\"Response should NOT contain 'modifiedAt' field (not included)\", function () {",
+                          "    const response = pm.response.json();",
+                          "    response.value.forEach(function(author) {",
+                          "        pm.expect(author).to.not.have.property('modifiedAt');",
+                          "    });",
+                          "});"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{authorsEntity}}",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "{{authorsEntity}}"]
+                    }
+                  },
+                  "response": []
+                }
+              ],
+              "description": "_**@Include**_ decorator for response transformation - only specified fields are returned"
+            },
+            {
               "name": "@ExecutionAllowedForRoles",
               "item": [
                 {

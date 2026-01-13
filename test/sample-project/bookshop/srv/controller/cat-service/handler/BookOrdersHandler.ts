@@ -6,7 +6,10 @@ import {
   BeforeRead,
   CDS_DISPATCHER,
   EntityHandler,
+  Exclude,
   Inject,
+  LogExecution,
+  Mask,
   Req,
   Request,
   Results,
@@ -40,14 +43,26 @@ class BookOrdersHandler {
     this.bookOrdersService.showBeforeReadNotify();
   }
 
+  // Test: @Exclude decorator - removes 'createdAt' and 'modifiedAt' fields from response
+  // Test: @Mask decorator - masks 'orderNumber' showing only last 4 characters
+  // Test: @LogExecution decorator - logs execution duration
   @AfterRead()
-  @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2) // THIS IS OK
+  @Use(MiddlewareMethodAfterRead1, MiddlewareMethodAfterRead2)
+  @Exclude<BookOrder>('createdAt', 'modifiedAt')
+  @Mask<BookOrder>(['orderNumber'], { char: '*', visibleEnd: 4 })
+  @LogExecution({ logDuration: true, prefix: '[BookOrdersHandler]', logLevel: 'info', logResult: true })
   private async afterRead(
     @Results() results: BookOrder[],
     @Req() req: Request,
     @SingleInstanceSwitch() isSingleInstance: boolean,
-  ): Promise<void> {
+  ) {
     // Method implementation
+
+    // This blocks execution for 1000ms
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    console.log('After delay');
+    return results;
   }
 }
 

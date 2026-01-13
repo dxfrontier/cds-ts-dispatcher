@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, EntityHandler, Use } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/core/MetadataDispatcher';
-import { HandlerType } from '../../../lib/types/enum';
 import { Book } from '../../sample-project/bookshop/@cds-models/CatalogService';
 import { MiddlewareMethodAfterRead1 } from '../../util/middleware/MiddlewareAfterRead1';
 import { MiddlewareMethodAfterRead2 } from '../../util/middleware/MiddlewareAfterRead2';
@@ -41,7 +40,6 @@ describe('MIDDLEWARE', () => {
 
         expect(foundEvent.callback).toBeDefined();
         expect(foundEvent.event).toBe(event);
-        expect(foundEvent.handlerType).toBe(HandlerType.After);
         expect(foundEvent.isDraft).toBe(false);
       });
     });

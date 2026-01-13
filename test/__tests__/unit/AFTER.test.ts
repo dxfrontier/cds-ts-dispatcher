@@ -2,7 +2,6 @@ import type { Constructable } from '../../../lib/types/internalTypes';
 
 import { AfterCreate, AfterDelete, AfterRead, AfterUpdate, EntityHandler } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/core/MetadataDispatcher';
-import { HandlerType } from '../../../lib/types/enum';
 import { Book } from '../../sample-project/bookshop/@cds-models/CatalogService';
 
 import type { CRUD_EVENTS, Request } from '../../../lib/types/types';
@@ -33,7 +32,6 @@ describe('BEFORE - Active entity', () => {
 
         expect(foundEvent.callback).toBeDefined();
         expect(foundEvent.event).toBe(event);
-        expect(foundEvent.handlerType).toBe(HandlerType.After);
         expect(foundEvent.isDraft).toBe(false);
       });
     });

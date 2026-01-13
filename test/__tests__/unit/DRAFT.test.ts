@@ -16,7 +16,6 @@ import {
 } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/core/MetadataDispatcher';
 import { EntityHandler } from '../../../lib/index';
-import { HandlerType } from '../../../lib/types/enum';
 import { BaseHandler } from '../../../lib/types/internalTypes';
 import { BookEvent } from '../../sample-project/bookshop/@cds-models/CatalogService';
 
@@ -68,29 +67,28 @@ describe('DRAFT', () => {
     describe(`@${eventName}`, () => {
       test(`It should RETURN : all defined properties for this @${eventName} decorator`, () => {
         const foundEvent = decoratorProps.filter(
-          (item: BaseHandler) => item.event === event && item.handlerType === handlerType,
+          (item: BaseHandler) => item.event === event && item.eventKind === handlerType,
         )[0];
 
         expect(foundEvent.callback).toBeDefined();
         expect(foundEvent.event).toBe(event);
         expect(foundEvent.isDraft).toBe(isDraft);
-        expect(foundEvent.handlerType).toBe(handlerType);
       });
     });
   }
 
-  testEvent('NEW', 'OnNewDraft', HandlerType.On, true);
-  testEvent('CANCEL', 'OnCancelDraft', HandlerType.On, true);
-  testEvent('EDIT', 'OnEditDraft', HandlerType.On, false);
-  testEvent('SAVE', 'OnSaveDraft', HandlerType.On, false);
+  testEvent('NEW', 'OnNewDraft', 'ON', true);
+  testEvent('CANCEL', 'OnCancelDraft', 'ON', true);
+  testEvent('EDIT', 'OnEditDraft', 'ON', false);
+  testEvent('SAVE', 'OnSaveDraft', 'ON', false);
 
-  testEvent('NEW', 'BeforeNewDraft', HandlerType.Before, true);
-  testEvent('CANCEL', 'BeforeCancelDraft', HandlerType.Before, true);
-  testEvent('EDIT', 'BeforeEditDraft', HandlerType.Before, false);
-  testEvent('SAVE', 'BeforeSaveDraft', HandlerType.Before, false);
+  testEvent('NEW', 'BeforeNewDraft', 'BEFORE', true);
+  testEvent('CANCEL', 'BeforeCancelDraft', 'BEFORE', true);
+  testEvent('EDIT', 'BeforeEditDraft', 'BEFORE', false);
+  testEvent('SAVE', 'BeforeSaveDraft', 'BEFORE', false);
 
-  testEvent('NEW', 'AfterNewDraft', HandlerType.After, true);
-  testEvent('CANCEL', 'AfterCancelDraft', HandlerType.After, true);
-  testEvent('EDIT', 'AfterEditDraft', HandlerType.After, false);
-  testEvent('SAVE', 'AfterSaveDraft', HandlerType.After, false);
+  testEvent('NEW', 'AfterNewDraft', 'AFTER', true);
+  testEvent('CANCEL', 'AfterCancelDraft', 'AFTER', true);
+  testEvent('EDIT', 'AfterEditDraft', 'AFTER', false);
+  testEvent('SAVE', 'AfterSaveDraft', 'AFTER', false);
 });

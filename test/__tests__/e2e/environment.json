@@ -123,6 +123,12 @@
       "enabled": true
     },
     {
+      "key": "authorsEntity",
+      "value": "Authors",
+      "type": "default",
+      "enabled": true
+    },
+    {
       "key": "--------------------------------",
       "value": null,
       "type": "default",

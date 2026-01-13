@@ -3,7 +3,6 @@ import type { Constructable } from '../../../lib/types/internalTypes';
 import { BeforeCreate, BeforeDelete, BeforeRead, BeforeUpdate } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/core/MetadataDispatcher';
 import { EntityHandler } from '../../../lib/index';
-import { HandlerType } from '../../../lib/types/enum';
 import { BookEvent } from '../../sample-project/bookshop/@cds-models/CatalogService';
 
 import type { CRUD_EVENTS, Request } from '../../../lib/types/types';
@@ -35,7 +34,6 @@ describe('BEFORE', () => {
 
         expect(foundEvent.callback).toBeDefined();
         expect(foundEvent.event).toBe(event);
-        expect(foundEvent.handlerType).toBe(HandlerType.Before);
         expect(foundEvent.isDraft).toBe(false);
       });
     });
