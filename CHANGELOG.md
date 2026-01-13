@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.2.0] - 2026-01-13
+
+### 🚀 Features
+
+- *(actions)* Added  and  for  and  and removed SubscriberType
+- *(decorators)* New decorators added like ,  and many others
+
+### 📚 Documentation
+
+- *(readme)* Updated readme with new decorators
+
+### 🧪 Testing
+
+- *(tests)* Updated e2e tests and unit tests
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version, CHANGELOG.md generated
+- *(readme)* Updated with new actions
+
 ## [5.1.5] - 2025-08-26
 
 ### 🐛 Bug Fixes
