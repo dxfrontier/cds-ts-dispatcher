@@ -121,6 +121,10 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Use](#use-1)
       - [@CatchAndSetErrorCode](#catchandseterrorcode)
       - [@CatchAndSetErrorMessage](#catchandseterrormessage)
+      - [@Exclude](#exclude)
+      - [@Include](#include)
+      - [@Mask](#mask)
+      - [@LogExecution](#logexecution)
 - [`Deployment` to BTP using MTA](#deployment-to-btp-using-mta)
 - [`Best practices` \& `tips`](#best-practices--tips)
 - [`Samples`](#samples)
@@ -4946,10 +4950,214 @@ export class MyHandler {
 ```
 
 > [!TIP]
-> Always stack [`@CatchAndSetErrorCode`](#catchandseterrorcode) and [`@CatchAndSetErrorMessage`](#catchandseterrormessage) decorators `last` `(at the bottom of the of the method)` so that other decorators are executed. 
+> Always stack [`@CatchAndSetErrorCode`](#catchandseterrorcode) and [`@CatchAndSetErrorMessage`](#catchandseterrormessage) decorators `last` `(at the bottom of the of the method)` so that other decorators are executed.
 
 > [!TIP]
 > Decorators [`@CatchAndSetErrorCode`](#catchandseterrorcode) and [`@CatchAndSetErrorMessage`](#catchandseterrormessage) can be used in [`use` method of @Use](#use-1) middleware and class [`use` method of @Use](#use) middleware.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Exclude
+
+**@Exclude\<T\>(...fields: Array\<keyof T>)**
+
+The `@Exclude` decorator is used as a `method` decorator to automatically `remove` specified fields from the response data.
+
+The `@Exclude` decorator can be used on the following decorators:
+
+- `AFTER`
+  - [@AfterRead()](#afterread)
+  - [@AfterCreate()](#aftercreate)
+  - [@AfterUpdate()](#afterupdate)
+  - [@AfterAll()](#afterall)
+
+`Parameters`
+
+- `...fields`: Specify the fields of your entity that should be excluded from the response.
+
+`Example`
+
+```typescript
+import { EntityHandler, AfterRead, Exclude, Results, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class MyHandler {
+  constructor() {}
+
+  @AfterRead()
+  @Exclude<MyEntity>('createdAt', 'modifiedAt', 'internalField')
+  private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+    // The response will NOT contain 'createdAt', 'modifiedAt', 'internalField' fields
+  }
+}
+```
+
+> [!TIP]
+> Use `@Exclude` when you want to hide sensitive or internal fields from the API response, such as audit fields, internal IDs, or computed fields.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Include
+
+**@Include\<T\>(...fields: Array\<keyof T>)**
+
+The `@Include` decorator is used as a `method` decorator to automatically `keep only` the specified fields in the response data, removing all others.
+
+The `@Include` decorator can be used on the following decorators:
+
+- `AFTER`
+  - [@AfterRead()](#afterread)
+  - [@AfterCreate()](#aftercreate)
+  - [@AfterUpdate()](#afterupdate)
+  - [@AfterAll()](#afterall)
+
+`Parameters`
+
+- `...fields`: Specify the fields of your entity that should be included in the response (all other fields will be removed).
+
+`Example`
+
+```typescript
+import { EntityHandler, AfterRead, Include, Results, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class MyHandler {
+  constructor() {}
+
+  @AfterRead()
+  @Include<MyEntity>('ID', 'name', 'description')
+  private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+    // The response will ONLY contain 'ID', 'name', 'description' fields
+  }
+}
+```
+
+> [!TIP]
+> Use `@Include` when you want to create a minimal response with only specific fields, which is useful for list views or summary endpoints.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Mask
+
+**@Mask\<T\>(fields: Array\<keyof T>, options?: MaskOptions)**
+
+The `@Mask` decorator is used as a `method` decorator to automatically `mask` specified fields in the response data, useful for hiding sensitive information while still showing part of the value.
+
+The `@Mask` decorator can be used on the following decorators:
+
+- `AFTER`
+  - [@AfterRead()](#afterread)
+  - [@AfterCreate()](#aftercreate)
+  - [@AfterUpdate()](#afterupdate)
+  - [@AfterAll()](#afterall)
+
+`Parameters`
+
+- `fields`: An array of fields of your entity that should be masked.
+- `options?`: [Optional] Configuration options for the masking:
+  - `char?: string` - The character to use for masking (default: `'*'`)
+  - `visibleChars?: number` - Number of characters to leave visible at the end (default: `4`)
+
+`Example 1` - Default masking
+
+```typescript
+import { EntityHandler, AfterRead, Mask, Results, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class MyHandler {
+  constructor() {}
+
+  @AfterRead()
+  @Mask<MyEntity>(['creditCardNumber', 'socialSecurityNumber'])
+  private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+    // 'creditCardNumber': '1234567890123456' => '************3456'
+    // 'socialSecurityNumber': '123-45-6789' => '*******6789'
+  }
+}
+```
+
+`Example 2` - Custom masking options
+
+```typescript
+@AfterRead()
+@Mask<MyEntity>(['phoneNumber'], { char: '#', visibleChars: 2 })
+private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+  // 'phoneNumber': '+1234567890' => '#########90'
+}
+```
+
+> [!TIP]
+> Use `@Mask` for sensitive data like credit card numbers, phone numbers, social security numbers, or any field where you want to show a partial value.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @LogExecution
+
+**@LogExecution(options?: LogExecutionOptions)**
+
+The `@LogExecution` decorator is used as a `method` decorator to automatically `log` the execution of a handler method, including input arguments, return value, and execution duration.
+
+The `@LogExecution` decorator can be used on `all` method decorators.
+
+`Parameters`
+
+- `options?`: [Optional] Configuration options for logging:
+  - `logArgs?: boolean` - Whether to log the input arguments (default: `false`)
+  - `logResult?: boolean` - Whether to log the return value (default: `false`)
+  - `logDuration?: boolean` - Whether to log the execution duration (default: `true`)
+
+`Example 1` - Log duration (default)
+
+```typescript
+import { EntityHandler, AfterRead, LogExecution, Results, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class MyHandler {
+  constructor() {}
+
+  @AfterRead()
+  @LogExecution()
+  private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+    // Simulate some async work
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Logs: [LOG] MyHandler.afterRead - Duration: 100ms
+  }
+}
+```
+
+`Example 2` - Log everything
+
+```typescript
+@AfterRead()
+@LogExecution({ logArgs: true, logResult: true, logDuration: true })
+private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+  // Logs: [LOG] MyHandler.afterRead - Args: [...]
+  // Logs: [LOG] MyHandler.afterRead - Result: ...
+  // Logs: [LOG] MyHandler.afterRead - Duration: 5ms
+}
+```
+
+> [!IMPORTANT]
+> The `@LogExecution` decorator measures only the execution time of the **method body itself**, not the entire request lifecycle. This means:
+> - Middleware execution time (from `@Use`) is **not** included
+> - Other decorator transformations (like `@Exclude`, `@Mask`) are **not** included
+> - Database queries or network calls are only included if they are `awaited` inside the method body
+
+> [!TIP]
+> Use `@LogExecution` during development or debugging to trace method calls. Consider disabling `logArgs` and `logResult` in production if they contain sensitive data.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
