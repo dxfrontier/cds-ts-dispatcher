@@ -29,14 +29,36 @@ const decoratorsUtil = {
       OnError: { event: 'ERROR', eventKind: 'ON' },
     };
 
-    if (options.eventDecorator === 'OnAction' || options.eventDecorator === 'OnFunction') {
+    if (
+      options.eventDecorator === 'OnAction' ||
+      options.eventDecorator === 'OnFunction' ||
+      options.eventDecorator === 'OnBoundAction' ||
+      options.eventDecorator === 'OnBoundFunction' ||
+      //
+      options.eventDecorator === 'AfterAction' ||
+      options.eventDecorator === 'AfterFunction' ||
+      options.eventDecorator === 'AfterBoundAction' ||
+      options.eventDecorator === 'AfterBoundFunction' ||
+      //
+      options.eventDecorator === 'BeforeAction' ||
+      options.eventDecorator === 'BeforeFunction' ||
+      options.eventDecorator === 'BeforeBoundAction' ||
+      options.eventDecorator === 'BeforeBoundFunction'
+    ) {
       eventMap.OnAction = { event: 'ACTION', eventKind: 'ON', actionName: options.actionName };
       eventMap.OnBoundFunction = { event: 'FUNC', eventKind: 'ON', actionName: options.actionName };
-    }
-
-    if (options.eventDecorator === 'OnBoundAction' || options.eventDecorator === 'OnBoundFunction') {
       eventMap.OnBoundAction = { event: 'BOUND_ACTION', eventKind: 'ON', actionName: options.actionName };
       eventMap.OnBoundFunction = { event: 'BOUND_FUNC', eventKind: 'ON', actionName: options.actionName };
+      //
+      eventMap.BeforeAction = { event: 'ACTION', eventKind: 'BEFORE', actionName: options.actionName };
+      eventMap.BeforeFunction = { event: 'FUNC', eventKind: 'BEFORE', actionName: options.actionName };
+      eventMap.BeforeBoundAction = { event: 'BOUND_ACTION', eventKind: 'BEFORE', actionName: options.actionName };
+      eventMap.BeforeBoundFunction = { event: 'BOUND_FUNC', eventKind: 'BEFORE', actionName: options.actionName };
+      //
+      eventMap.AfterAction = { event: 'ACTION', eventKind: 'AFTER', actionName: options.actionName };
+      eventMap.AfterFunction = { event: 'FUNC', eventKind: 'AFTER', actionName: options.actionName };
+      eventMap.AfterBoundAction = { event: 'BOUND_ACTION', eventKind: 'AFTER', actionName: options.actionName };
+      eventMap.AfterBoundFunction = { event: 'BOUND_FUNC', eventKind: 'AFTER', actionName: options.actionName };
     }
 
     if (options.eventDecorator === 'OnEvent') {

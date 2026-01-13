@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
-import cds from '@sap/cds';
+import cds, { CdsFunction } from '@sap/cds';
 
 import util from '../util/util';
 import CDS_DISPATCHER from '../constants/constants';
 
 import { Container } from 'inversify';
-import { HandlerType } from '../types/enum';
 import { MiddlewareEntityRegistry } from '../util/middleware/MiddlewareEntityRegistry';
 import { MetadataDispatcher } from './MetadataDispatcher';
 
 import type { NonEmptyArray, BaseHandler, Constructable, EventMessagingOptions } from '../types/internalTypes';
-import type { Request, Service, ServiceImpl, SubscriberType } from '../types/types';
+import type { Request, Service, ServiceImpl } from '../types/types';
 
 /**
  * `CDSDispatcher` is responsible for managing and registering event handlers for entities within the CDS framework.
@@ -93,7 +92,7 @@ class CDSDispatcher {
    */
   private async executeOnCallback(
     handlerAndEntity: [BaseHandler, Constructable],
-    req: Request | SubscriberType<any>,
+    req: Request,
     next: Function,
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
@@ -297,24 +296,75 @@ class CDSDispatcher {
    * @param handlerAndEntity - A tuple containing the handler and entity.
    */
   private registerAfterHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
-    const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
+    const getProps = this.getHandlerProps(...handlerAndEntity);
 
-    this.srv.after(event, entity!, async (data, req) => {
-      return await this.executeAfterCallback(handlerAndEntity, req, data);
-    });
+    const { event, entity } = getProps.getDefault();
+    const { actionName } = getProps.getAction();
+
+    switch (event) {
+      case 'ACTION':
+      case 'FUNC': {
+        this.srv.after(actionName! as CdsFunction, async (data, req) => {
+          return await this.executeAfterCallback(handlerAndEntity, req, data);
+        });
+
+        break;
+      }
+
+      case 'BOUND_ACTION':
+      case 'BOUND_FUNC': {
+        this.srv.after(actionName as CdsFunction, entity as string, async (data, req) => {
+          return await this.executeAfterCallback(handlerAndEntity, req, data);
+        });
+
+        break;
+      }
+
+      // CRUD_EVENTS[NEW, CANCEL, CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
+      default: {
+        this.srv.after(event, entity!, async (data, req) => {
+          return await this.executeAfterCallback(handlerAndEntity, req, data);
+        });
+      }
+    }
   }
-
   /**
    * Registers all `BEFORE` event handlers.
    *
    * @param handlerAndEntity - A tuple containing the handler and entity.
    */
   private registerBeforeHandler(handlerAndEntity: [BaseHandler, Constructable]): void {
-    const { event, entity } = this.getHandlerProps(...handlerAndEntity).getDefault();
+    const getProps = this.getHandlerProps(...handlerAndEntity);
 
-    this.srv.before(event, entity!, async (req) => {
-      return await this.executeBeforeCallback(handlerAndEntity, req);
-    });
+    const { event, entity } = getProps.getDefault();
+    const { actionName } = getProps.getAction();
+
+    switch (event) {
+      case 'ACTION':
+      case 'FUNC': {
+        this.srv.before(actionName!, async (req) => {
+          return await this.executeBeforeCallback(handlerAndEntity, req);
+        });
+
+        break;
+      }
+
+      case 'BOUND_ACTION':
+      case 'BOUND_FUNC': {
+        this.srv.before(actionName!, entity!, async (req) => {
+          return await this.executeBeforeCallback(handlerAndEntity, req);
+        });
+
+        break;
+      }
+
+      // CRUD_EVENTS[NEW, CANCEL, CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
+      default: {
+        this.srv.before(event, entity!, async (req) => {
+          return await this.executeBeforeCallback(handlerAndEntity, req);
+        });
+      }
+    }
   }
 
   private async registerMessagingEvent(message: {
@@ -323,7 +373,7 @@ class CDSDispatcher {
   }) {
     const { showReceiverMessage, consoleStyle, type, eventName } = message.options;
 
-    const callback = async (req: Request | SubscriberType<any>, next: Function) => {
+    const callback = async (req: Request, next: Function) => {
       if (showReceiverMessage) {
         if (consoleStyle === 'table') {
           const text = `> received: ${eventName}`;
@@ -432,25 +482,25 @@ class CDSDispatcher {
   private buildHandlerBy(handlerAndEntity: [BaseHandler, Constructable]) {
     const [handler] = handlerAndEntity;
 
-    switch (handler.handlerType) {
-      case HandlerType.Before:
+    switch (handler.eventKind) {
+      case 'BEFORE':
         this.registerBeforeHandler(handlerAndEntity);
         break;
 
-      case HandlerType.After:
+      case 'AFTER':
         this.registerAfterHandler(handlerAndEntity);
         break;
 
-      case HandlerType.AfterSingleInstance: {
+      case 'AFTER_SINGLE': {
         this.registerAfterSingleInstanceHandler(handlerAndEntity);
         break;
       }
 
-      case HandlerType.On:
+      case 'ON':
         this.registerOnHandler(handlerAndEntity);
         break;
 
-      case HandlerType.Prepend: {
+      case 'PREPEND': {
         this.registerPrependHandler(handlerAndEntity);
         break;
       }
@@ -481,17 +531,19 @@ class CDSDispatcher {
 
     if (handlers?.length > 0) {
       return {
-        buildHandlers: () => {
+        buildHandlers: (): void => {
           handlers.forEach((handler) => {
             this.buildHandlerBy([handler, entityInstance]);
           });
         },
 
-        buildMiddlewares: () => {
+        buildMiddlewares: (): void => {
           this.buildMiddlewareBy(entityInstance);
         },
       };
     }
+
+    return undefined;
   }
 
   /**
@@ -530,9 +582,8 @@ class CDSDispatcher {
     this.entities.forEach((entity: Constructable) => {
       const createdEntity = this.resolveDependencies(entity);
       const entityHandlers = this.getHandlersBy(createdEntity);
-      const handlersFound = entityHandlers !== undefined;
 
-      if (handlersFound) {
+      if (entityHandlers) {
         entityHandlers.buildHandlers();
         entityHandlers.buildMiddlewares();
       }

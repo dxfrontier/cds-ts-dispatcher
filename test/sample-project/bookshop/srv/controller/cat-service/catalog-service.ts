@@ -1,6 +1,7 @@
 import { ShoppingCart } from '#cds-models/CatalogService';
 import { CDSDispatcher } from '../../../../../../lib';
 import AllEntities from '../shared-handlers/AllHandlers';
+import AuthorsHandler from './handler/AuthorsHandler';
 import BookEventsHandler from './handler/BookEventsHandler';
 import BookFormatsHandler from './handler/BookFormatsHandler';
 import BookHandler from './handler/BookHandler';
@@ -28,6 +29,7 @@ export = new CDSDispatcher([
   WishlistsHandler,
   ShoppingCartHandler,
   BookSeriesHandler,
+  AuthorsHandler,
   // Draft
   BookEventsHandler,
 

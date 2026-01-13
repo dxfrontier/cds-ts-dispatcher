@@ -69,6 +69,10 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
         - [@BeforeRead](#beforeread)
         - [@BeforeUpdate](#beforeupdate)
         - [@BeforeDelete](#beforedelete)
+        - [@BeforeAction](#beforeaction)
+        - [@BeforeBoundAction](#beforeboundaction)
+        - [@BeforeFunction](#beforefunction)
+        - [@BeforeBoundFunction](#beforeboundfunction)
         - [@BeforeAll](#beforeall)
       - [`After`](#after)
         - [@AfterCreate](#aftercreate)
@@ -76,6 +80,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
         - [@AfterReadEachInstance](#afterreadeachinstance)
         - [@AfterUpdate](#afterupdate)
         - [@AfterDelete](#afterdelete)
+        - [@AfterAction](#afteraction)
         - [@AfterAll](#afterall)
       - [`On`](#on)
         - [@OnCreate](#oncreate)
@@ -116,6 +121,10 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Use](#use-1)
       - [@CatchAndSetErrorCode](#catchandseterrorcode)
       - [@CatchAndSetErrorMessage](#catchandseterrormessage)
+      - [@Exclude](#exclude)
+      - [@Include](#include)
+      - [@Mask](#mask)
+      - [@LogExecution](#logexecution)
 - [`Deployment` to BTP using MTA](#deployment-to-btp-using-mta)
 - [`Best practices` \& `tips`](#best-practices--tips)
 - [`Samples`](#samples)
@@ -1887,22 +1896,22 @@ The `@Msg` decorator is a parameter decorator used to inject response [Emitter](
 `Example`
 
 ```ts
-import { OnSubscribe, Messaging } from '@dxfrontier/cds-ts-dispatcher';  
-import type { SubscriberType } from '@dxfrontier/cds-ts-dispatcher';  
+import { OnSubscribe, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 @OnSubscribe({
   eventName: 'AnEventName',
   type: 'MESSAGE_BROKER',
 })
-public async onSubscribe(@Msg() msg: SubscriberType<{ foo: number; bar: string }>): Promise<void> {
+public async onSubscribe(@Req() req: Request<{ foo: number; bar: string }>): Promise<void> {
   // ...
 }
 ```
 > [!IMPORTANT]
-> To have the `msg` typed you can use type `SubscriberType<T>` where `T` can be a `CDS event` or a plain object.
+> To have the `req` typed you can use type `Request<T>` where `T` can be a `CDS event` or a plain object.
 
 > [!TIP]
-> Decorator `@Msg` should be used exclusively on decorator [@OnSubscribe](#onsubscribe).
+> Decorator `@Req` should be used on decorator [@OnSubscribe](#onsubscribe).
 
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
@@ -2031,6 +2040,7 @@ this.before('UPDATE', MyEntity, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+
 ###### @BeforeDelete
 
 **@BeforeDelete**()
@@ -2062,6 +2072,213 @@ this.before('DELETE', MyEntity, async (req) => {
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @BeforeAction
+
+**@BeforeAction**(`name` : CdsAction)
+
+The `@BeforeAction` decorator is utilized as a `method-level` decorator to execute custom logic before an unbound action is triggered.
+
+This decorator allows you to run validation, authorization, or preparation logic before the actual action implementation is executed.
+
+`Parameters`
+
+- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`.
+
+`Example`
+
+```typescript
+import { BeforeAction, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { ActionRequest } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyAction } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeAction(MyAction)
+private async beforeMyAction(@Req() req: ActionRequest<typeof MyAction>): Promise<void> {
+  // Validate input parameters before action execution
+  if (!req.data.requiredParam) {
+    req.reject(400, 'Required parameter is missing');
+  }
+  
+  // Additional validation or preparation logic
+  console.log('Action validation completed');
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before(MyAction, async (req) => {
+  // ...
+});
+```
+
+> [!NOTE]
+> MyAction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+> [!IMPORTANT]  
+> Decorator `@BeforeAction` should be used inside [@UnboundActions()](#unboundactions) class.
+
+> [!TIP]
+> Use `@BeforeAction` to:
+> - Validate action parameters before execution
+> - Perform authorization checks
+> - Log action invocations
+> - Prepare or transform input data
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @BeforeBoundAction
+
+**@BeforeBoundAction**(`name` : CdsFunction | string)
+
+The `@BeforeBoundAction` decorator is utilized as a `method-level` decorator to execute custom logic before a bound action is triggered on an entity.
+
+This decorator allows you to run validation, authorization, or preparation logic before the actual bound action implementation is executed on a specific entity instance.
+
+`Parameters`
+
+- `name (CdsFunction | string)` : Representing the `CDS bound action` defined in the `CDS file` or the name of the action as string.
+
+`Example`
+
+```typescript
+import { BeforeBoundAction, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { ActionRequest } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeBoundAction(MyEntity.actions.approve)
+private async beforeApprove(@Req() req: ActionRequest<typeof MyEntity.actions.approve>) {
+  console.log('Bound action validation completed');
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before(MyEntity.actions.approve, MyEntity, async (req) => {
+  // ...
+});
+```
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+> [!IMPORTANT]  
+> Decorator `@BeforeBoundAction` should be used inside [@EntityHandler()](#entityhandler) class as it operates on a specific entity.
+
+> [!TIP]
+> Use `@BeforeBoundAction` to:
+> - Validate entity state before bound action execution
+> - Perform authorization checks on specific entity instances
+> - Log bound action invocations
+> - Prepare or transform entity data before processing
+> - Check business rules specific to the entity instance
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @BeforeFunction
+
+**@BeforeFunction**(`name` : CdsFunction | string)
+
+The `@BeforeFunction` decorator is utilized as a `method-level` decorator to execute custom logic before an unbound function is triggered.
+
+This decorator allows you to run validation, authorization, or preparation logic before the actual function implementation is executed.
+
+`Parameters`
+
+- `name (CdsFunction | string)` : Representing the `CDS function` defined in the `CDS file`.
+
+`Example`
+
+```typescript
+import { BeforeFunction, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request, ActionRequest } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyFunction } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeFunction(MyFunction)
+private async beforeMyFunction(@Req() req: ActionRequest<typeof MyFunction>): Promise<void> {
+  // Additional validation or preparation logic
+  console.log('Function validation completed');
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before(MyFunction, async (req) => {
+  // ...
+});
+```
+
+> [!NOTE]
+> MyFunction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+> [!IMPORTANT]  
+> Decorator `@BeforeFunction` should be used inside [@UnboundActions()](#unboundactions) class.
+
+> [!TIP]
+> Use `@BeforeFunction` to:
+> - Validate function parameters before execution
+> - Perform authorization checks
+> - Log function invocations
+> - Prepare or transform input data
+> - Check system prerequisites before function execution
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @BeforeBoundFunction
+
+**@BeforeBoundFunction**(`name` : CdsFunction | string)
+
+The `@BeforeBoundFunction` decorator is utilized as a `method-level` decorator to execute custom logic before a bound function is triggered on an entity.
+
+This decorator allows you to run validation, authorization, or preparation logic before the actual bound function implementation is executed on a specific entity instance.
+
+`Parameters`
+
+- `name (CdsFunction | string)` : Representing the `CDS bound function` defined in the `CDS file` or the name of the function as a string.
+
+`Example`
+
+```typescript
+import { BeforeBoundFunction, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeBoundFunction(MyEntity.actions.myFunction)
+private async someAction(@Req() req: ActionRequest<typeof MyEntity.actions.myFunction>) {
+  // Additional validation or preparation logic
+  console.log('Bound function validation completed');
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before(MyEntity.actions.myFunction, MyEntity, async (req) => {
+  // ...
+});
+```
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+> [!IMPORTANT]  
+> Decorator `@BeforeBoundFunction` should be used inside [@EntityHandler()](#entityhandler) class as it operates on a specific entity.
+
+> [!TIP]
+> Use `@BeforeBoundFunction` to:
+> - Validate entity state before bound function execution
+> - Perform authorization checks on specific entity instances
+> - Log bound function invocations
+> - Prepare or transform entity data before processing
+> - Check business rules specific to the entity instance
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -2366,6 +2583,68 @@ this.after('DELETE', MyEntity, async (deleted, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+###### @AfterAction
+
+**@AfterAction**(`name` : CdsAction)
+
+The `@AfterAction` decorator is utilized as a `method-level` decorator to execute custom logic after an unbound action has been executed.
+
+This decorator allows you to run post-processing logic, such as logging, data cleanup, or triggering subsequent operations after the actual action implementation has completed.
+
+`Parameters`
+
+- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`.
+
+`Example`
+
+```typescript
+import { AfterAction, Req, Result } from '@dxfrontier/cds-ts-dispatcher';
+import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyAction } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterAction(MyAction)
+private async afterMyAction(
+  @Result() result: ActionReturn<typeof MyAction>, 
+  @Req() req: ActionRequest<typeof MyAction>
+): Promise<void> {
+  // Post-processing logic after action execution
+  console.log('Action completed successfully');
+  
+  // Log the result or perform cleanup operations
+  if (result) {
+    console.log('Action result:', result);
+  }
+  
+  // Additional post-processing logic
+  await this.auditService.logActionExecution(req.user, 'MyAction', result);
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after(MyAction, async (result, req) => {
+  // ...
+});
+```
+
+> [!NOTE]
+> MyAction was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+> [!IMPORTANT]  
+> Decorator `@AfterAction` should be used inside [@UnboundActions()](#unboundactions) class.
+
+> [!TIP]
+> Use `@AfterAction` to:
+> - Log action execution results
+> - Perform cleanup operations
+> - Trigger subsequent business processes
+> - Send notifications based on action outcomes
+> - Update audit trails or analytics
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ###### @AfterAll
 
 The `@AfterAll` decorator is triggered whenever **_any CRUD (Create, Read, Update, Delete)_** event occurs, whether the entity is `active` or in `draft` mode.
@@ -2658,11 +2937,11 @@ this.on('DELETE', MyEntity, async (req, next) => {
 
 ###### @OnAction
 
-**@OnAction**(`name` : CdsAction)
+**@OnAction**(`name` : CdsFunction | string)
 
 `Parameters`
 
-- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`
+- `name (CdsFunction | string)` : Representing the `CDS action` defined in the `CDS file` or the action name as a string.
 
 `Example`
 
@@ -2826,7 +3105,7 @@ In this example we emit the event in same `node process` and `same service` and 
 
 ```ts
 import { OnSubscribe, Req, OnEvent } from '@dxfrontier/cds-ts-dispatcher';
-import type { SubscriberType, Request } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 // Emitting the event
 @AfterRead()
@@ -2838,12 +3117,12 @@ private async afterRead(
 }
 
 // Subscribing to the event
-@OnSubscribe({ 
+@OnSubscribe({
   eventName: 'anEventName'
-  type: 'SAME_NODE_PROCESS', 
+  type: 'SAME_NODE_PROCESS',
 })
 private async onSubscribe(@Req() req: Request<{ foo: number, bar: string }>): Promise<void> {
-  // 
+  //
 }
 
 // same as
@@ -2887,7 +3166,7 @@ service CatalogService {
 
 ```ts
 import { OnSubscribe, Req, AfterRead, Results, OnEvent } from '@dxfrontier/cds-ts-dispatcher';
-import type { SubscriberType } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
 
@@ -2901,12 +3180,12 @@ private async afterRead(
 }
 
 // Receiving the event + data
-@OnSubscribe({ 
+@OnSubscribe({
   eventName: SendData
-  type: 'SAME_NODE_PROCESS' 
+  type: 'SAME_NODE_PROCESS'
 })
 private async onSubscribe(@Req() req: Request<SendData>): Promise<void> {
-  // 
+  //
   // req.data.foo ...
   // req.data.bar ...
   // req.headers ...
@@ -3007,7 +3286,7 @@ In this example we emit an event in `Service 1` & `node process 1`, and we attac
 
 ```ts
 import { Req, AfterRead, Results } from '@dxfrontier/cds-ts-dispatcher';
-import type { SubscriberType } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
 
@@ -4671,10 +4950,214 @@ export class MyHandler {
 ```
 
 > [!TIP]
-> Always stack [`@CatchAndSetErrorCode`](#catchandseterrorcode) and [`@CatchAndSetErrorMessage`](#catchandseterrormessage) decorators `last` `(at the bottom of the of the method)` so that other decorators are executed. 
+> Always stack [`@CatchAndSetErrorCode`](#catchandseterrorcode) and [`@CatchAndSetErrorMessage`](#catchandseterrormessage) decorators `last` `(at the bottom of the of the method)` so that other decorators are executed.
 
 > [!TIP]
 > Decorators [`@CatchAndSetErrorCode`](#catchandseterrorcode) and [`@CatchAndSetErrorMessage`](#catchandseterrormessage) can be used in [`use` method of @Use](#use-1) middleware and class [`use` method of @Use](#use) middleware.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Exclude
+
+**@Exclude\<T\>(...fields: Array\<keyof T>)**
+
+The `@Exclude` decorator is used as a `method` decorator to automatically `remove` specified fields from the response data.
+
+The `@Exclude` decorator can be used on the following decorators:
+
+- `AFTER`
+  - [@AfterRead()](#afterread)
+  - [@AfterCreate()](#aftercreate)
+  - [@AfterUpdate()](#afterupdate)
+  - [@AfterAll()](#afterall)
+
+`Parameters`
+
+- `...fields`: Specify the fields of your entity that should be excluded from the response.
+
+`Example`
+
+```typescript
+import { EntityHandler, AfterRead, Exclude, Results, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class MyHandler {
+  constructor() {}
+
+  @AfterRead()
+  @Exclude<MyEntity>('createdAt', 'modifiedAt', 'internalField')
+  private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+    // The response will NOT contain 'createdAt', 'modifiedAt', 'internalField' fields
+  }
+}
+```
+
+> [!TIP]
+> Use `@Exclude` when you want to hide sensitive or internal fields from the API response, such as audit fields, internal IDs, or computed fields.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Include
+
+**@Include\<T\>(...fields: Array\<keyof T>)**
+
+The `@Include` decorator is used as a `method` decorator to automatically `keep only` the specified fields in the response data, removing all others.
+
+The `@Include` decorator can be used on the following decorators:
+
+- `AFTER`
+  - [@AfterRead()](#afterread)
+  - [@AfterCreate()](#aftercreate)
+  - [@AfterUpdate()](#afterupdate)
+  - [@AfterAll()](#afterall)
+
+`Parameters`
+
+- `...fields`: Specify the fields of your entity that should be included in the response (all other fields will be removed).
+
+`Example`
+
+```typescript
+import { EntityHandler, AfterRead, Include, Results, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class MyHandler {
+  constructor() {}
+
+  @AfterRead()
+  @Include<MyEntity>('ID', 'name', 'description')
+  private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+    // The response will ONLY contain 'ID', 'name', 'description' fields
+  }
+}
+```
+
+> [!TIP]
+> Use `@Include` when you want to create a minimal response with only specific fields, which is useful for list views or summary endpoints.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Mask
+
+**@Mask\<T\>(fields: Array\<keyof T>, options?: MaskOptions)**
+
+The `@Mask` decorator is used as a `method` decorator to automatically `mask` specified fields in the response data, useful for hiding sensitive information while still showing part of the value.
+
+The `@Mask` decorator can be used on the following decorators:
+
+- `AFTER`
+  - [@AfterRead()](#afterread)
+  - [@AfterCreate()](#aftercreate)
+  - [@AfterUpdate()](#afterupdate)
+  - [@AfterAll()](#afterall)
+
+`Parameters`
+
+- `fields`: An array of fields of your entity that should be masked.
+- `options?`: [Optional] Configuration options for the masking:
+  - `char?: string` - The character to use for masking (default: `'*'`)
+  - `visibleChars?: number` - Number of characters to leave visible at the end (default: `4`)
+
+`Example 1` - Default masking
+
+```typescript
+import { EntityHandler, AfterRead, Mask, Results, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class MyHandler {
+  constructor() {}
+
+  @AfterRead()
+  @Mask<MyEntity>(['creditCardNumber', 'socialSecurityNumber'])
+  private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+    // 'creditCardNumber': '1234567890123456' => '************3456'
+    // 'socialSecurityNumber': '123-45-6789' => '*******6789'
+  }
+}
+```
+
+`Example 2` - Custom masking options
+
+```typescript
+@AfterRead()
+@Mask<MyEntity>(['phoneNumber'], { char: '#', visibleChars: 2 })
+private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+  // 'phoneNumber': '+1234567890' => '#########90'
+}
+```
+
+> [!TIP]
+> Use `@Mask` for sensitive data like credit card numbers, phone numbers, social security numbers, or any field where you want to show a partial value.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @LogExecution
+
+**@LogExecution(options?: LogExecutionOptions)**
+
+The `@LogExecution` decorator is used as a `method` decorator to automatically `log` the execution of a handler method, including input arguments, return value, and execution duration.
+
+The `@LogExecution` decorator can be used on `all` method decorators.
+
+`Parameters`
+
+- `options?`: [Optional] Configuration options for logging:
+  - `logArgs?: boolean` - Whether to log the input arguments (default: `false`)
+  - `logResult?: boolean` - Whether to log the return value (default: `false`)
+  - `logDuration?: boolean` - Whether to log the execution duration (default: `true`)
+
+`Example 1` - Log duration (default)
+
+```typescript
+import { EntityHandler, AfterRead, LogExecution, Results, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class MyHandler {
+  constructor() {}
+
+  @AfterRead()
+  @LogExecution()
+  private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+    // Simulate some async work
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Logs: [LOG] MyHandler.afterRead - Duration: 100ms
+  }
+}
+```
+
+`Example 2` - Log everything
+
+```typescript
+@AfterRead()
+@LogExecution({ logArgs: true, logResult: true, logDuration: true })
+private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
+  // Logs: [LOG] MyHandler.afterRead - Args: [...]
+  // Logs: [LOG] MyHandler.afterRead - Result: ...
+  // Logs: [LOG] MyHandler.afterRead - Duration: 5ms
+}
+```
+
+> [!IMPORTANT]
+> The `@LogExecution` decorator measures only the execution time of the **method body itself**, not the entire request lifecycle. This means:
+> - Middleware execution time (from `@Use`) is **not** included
+> - Other decorator transformations (like `@Exclude`, `@Mask`) are **not** included
+> - Database queries or network calls are only included if they are `awaited` inside the method body
+
+> [!TIP]
+> Use `@LogExecution` during development or debugging to trace method calls. Consider disabling `logArgs` and `logResult` in production if they contain sensitive data.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

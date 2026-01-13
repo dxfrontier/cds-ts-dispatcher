@@ -1,2 +1,4 @@
 ID,orderNumber,orderDate,totalAmount,status,customer_ID
-1,5,2024-01-01,130,Shiped,2
+1,ORD-20240101-0001,2024-01-01,130,Shipped,2
+2,ORD-20240115-0002,2024-01-15,250,Pending,1
+3,ORD-20240201-0003,2024-02-01,75,Delivered,2

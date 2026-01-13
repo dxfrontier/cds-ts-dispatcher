@@ -16,7 +16,12 @@ const formatterUtil = {
    * @returns The found results or `undefined` if no results are found.
    */
   findResults<T>(args: any[]): T | T[] | undefined {
-    const req = util.findRequest(args) as ExtendedRequestWithResults;
+    const req = util.findRequest(args) as ExtendedRequestWithResults | undefined;
+
+    // If no request found, return undefined
+    if (util.lodash.isUndefined(req)) {
+      return undefined;
+    }
 
     // The 'results / result' property
     for (const arg of args) {

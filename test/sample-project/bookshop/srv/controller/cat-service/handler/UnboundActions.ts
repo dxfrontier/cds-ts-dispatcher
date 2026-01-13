@@ -23,6 +23,9 @@ import {
   Validate,
   OnSubscribe,
   Msg,
+  BeforeAction,
+  BeforeFunction,
+  AfterAction,
 } from '../../../../../../../lib';
 import {
   changeBookProperties,
@@ -37,7 +40,7 @@ import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
 
 import type { ExposeFields } from '../../../../../../../lib/types/validator';
-import { SubscriberType } from '../../../../../../../lib';
+import { Result, Results } from '@dxfrontier/cds-ts-dispatcher';
 
 @UnboundActions()
 @Use(MiddlewareEntity1, MiddlewareEntity2)
@@ -83,6 +86,20 @@ class UnboundActionsHandler {
     req.reject('It will not reach here, as Validate will be executed first !');
   }
 
+  @BeforeAction(submitOrder)
+  public async beforeSubmitOrder(@Req() req: ActionRequest<typeof submitOrder>): ActionReturn<typeof submitOrder> {
+    const bla = 13;
+    // TODO: add something
+  }
+
+  @AfterAction(submitOrder)
+  public async afterSubmitOrder(
+    @Req() req: ActionRequest<typeof submitOrder>,
+    @Results() result: any,
+  ): ActionReturn<typeof submitOrder> {
+    const bla = 13;
+    // TODO: add something
+  }
   @OnAction('submitOrder')
   @Validate<ExposeFields<typeof submitOrder>>(
     { action: 'equals', comparison: '3', mandatoryFieldValidation: true },
@@ -121,6 +138,13 @@ class UnboundActionsHandler {
     return {
       stock: req.data.quantity,
     };
+  }
+
+  @BeforeFunction(submitOrderFunction)
+  public async beforeSubmitOrderFunction(
+    @Req() req: ActionRequest<typeof submitOrderFunction>,
+  ): ActionReturn<typeof submitOrderFunction> {
+    const bla = 13;
   }
 
   @OnFunction('submitOrderFunction')
@@ -176,14 +200,14 @@ class UnboundActionsHandler {
     showReceiverMessage: true,
   })
   private async onProductMessaging3(
-    @Req() req: SubscriberType<{ foo: number; bar: string }>,
+    @Req() req: Request<{ foo: number; bar: string }>,
     @Res() res: RequestResponse,
   ): Promise<void> {
     res.setHeader('CustomHeader', 'OnSubscribeTriggered_event_3');
   }
 
   @OnEvent('event_1')
-  private async bla(@Req() req: SubscriberType<{ foo: number; bar: string }>): Promise<void> {
+  private async bla(@Req() req: Request<{ foo: number; bar: string }>): Promise<void> {
     const bla = req.data;
   }
 }

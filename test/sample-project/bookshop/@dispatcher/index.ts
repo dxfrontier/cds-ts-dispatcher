@@ -25,6 +25,7 @@ export interface CDS_ENV {
     typer: Typer;
     schema: Schema;
     config: Config;
+    appid: null;
     '_home_cds-dk': string;
 }
 interface _profiles {
@@ -70,10 +71,14 @@ interface Tenants {
 interface Db {
     impl: string;
     credentials: Credentials;
+    pool: Pool;
     kind: string;
 }
 interface Credentials {
     url: string;
+}
+interface Pool {
+    max: number;
 }
 interface Messaging {
     impl: string;
@@ -102,6 +107,7 @@ interface Protocols {
     };
     rest: Rest;
     hcql: Hcql;
+    'data.product': null;
 }
 interface Rest {
     path: string;
@@ -124,6 +130,9 @@ interface Features {
     assert_integrity: boolean;
     precise_timestamps: boolean;
     consistent_params: boolean;
+    compat_texts_entities: boolean;
+    annotate_for_flows: boolean;
+    history_for_flows: boolean;
 }
 interface Fiori {
     preview: Preview;
@@ -132,6 +141,8 @@ interface Fiori {
     wrap_multiple_errors: boolean;
     draft_lock_timeout: boolean;
     draft_deletion_timeout: boolean;
+    draft_messages: boolean;
+    direct_crud: boolean;
 }
 interface Preview {
     ui5: Ui5;
@@ -171,6 +182,7 @@ interface Folders {
     db: string;
     srv: string;
     app: string;
+    apps: string;
 }
 interface I18n {
     file: string;

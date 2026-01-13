@@ -15,7 +15,6 @@ import {
 import { MetadataDispatcher } from '../../../lib/core/MetadataDispatcher';
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { OnError } from '../../../lib/index';
-import { HandlerType } from '../../../lib/types/enum';
 import { Book, OrderedBook, submitOrder } from '../../sample-project/bookshop/@cds-models/CatalogService';
 
 import type { CRUD_EVENTS, EVENTS, Request } from '../../../lib/types/types';
@@ -64,7 +63,6 @@ describe('ON', () => {
 
         expect(foundEvent.callback).toBeDefined();
         expect(foundEvent.event).toBe(event);
-        expect(foundEvent.handlerType).toBe(HandlerType.On);
         expect(foundEvent.isDraft).toBe(false);
 
         if (foundEvent.event === 'EVENT' && foundEvent.type === 'EVENT') {

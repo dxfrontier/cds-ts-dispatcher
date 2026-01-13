@@ -9,6 +9,7 @@ export * from './constants/constants';
 export type * from './types/types';
 export type * from './types/validator';
 export type * from './types/formatter';
+export type * from './types/responseTransformers';
 
 // Exported to uppercase to be in guidance with other decorators.
 export { inject as Inject } from 'inversify';

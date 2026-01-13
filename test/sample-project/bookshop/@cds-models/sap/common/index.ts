@@ -1,5 +1,6 @@
 // This is an automatically generated file. Please do not change its contents manually!
 import * as __ from './../../_';
+import * as _ from './../..';
 
 export type Locale = string;
 // the following represents the CDS aspect 'CodeList'
@@ -40,6 +41,24 @@ export function _TextsAspectAspect<TBase extends new (...args: any[]) => object>
 export class TextsAspect extends _TextsAspectAspect(__.Entity) {}
 export class TextsAspect_ extends Array<TextsAspect> {$count?: number}
 Object.defineProperty(TextsAspect_, 'name', { value: 'sap.common.TextsAspect' })
+// the following represents the CDS aspect 'FlowHistory'
+export function _FlowHistoryAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class FlowHistory extends Base {
+    declare transitions_?: __.Composition.of.many<Array< {
+  timestamp?: __.Key<__.DeepRequired<_.managed>['createdAt']>,
+  user?: __.DeepRequired<_.managed>['createdBy'] | null,
+  status?: string | null,
+  comment?: string | null,
+}>>
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'aspect';
+    declare static readonly keys: __.KeysOf<FlowHistory>;
+    declare static readonly elements: __.ElementsOf<FlowHistory>;
+    declare static readonly actions: globalThis.Record<never, never>;
+  };
+}
+export class FlowHistory extends _FlowHistoryAspect(__.Entity) {}
+export class FlowHistory_ extends Array<FlowHistory> {$count?: number}
+Object.defineProperty(FlowHistory_, 'name', { value: 'sap.common.FlowHistory' })
 export function _LanguageAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
   return class Language extends _CodeListAspect(Base) {
     /** Type for a language code */
