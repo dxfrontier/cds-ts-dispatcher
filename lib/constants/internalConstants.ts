@@ -22,8 +22,19 @@ export const constants = {
       LOCALE: Symbol('LOCALE'),
       ENV: Symbol('ENV'),
       MSG: Symbol('MSG'),
+      SUBJECT: Symbol('SUBJECT'),
+      AFFECTED: Symbol('AFFECTED'),
     },
   },
+
+  /**
+   * Symbol key under which the `CDSDispatcher` stashes the database `affected` row count on the
+   * `Request` object of `@After*` `CREATE` / `UPDATE` / `DELETE` handlers (`@sap/cds` >= 10).
+   *
+   * A `Symbol` (not a string key) is used on purpose to avoid collisions with user data and to keep
+   * the value out of any JSON serialization of the request.
+   */
+  AFFECTED: Symbol('CDS_DISPATCHER_AFFECTED'),
 
   MESSAGES: {
     VALIDATOR_FIELD_NOT_EXISTS:

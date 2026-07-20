@@ -51,6 +51,17 @@ service CatalogService {
     stock : Integer
   };
 
+  // Unbound function - F5 @Stream : streams book rows as NDJSON to the HTTP response
+  function streamBooks()                                                                    returns LargeBinary;
+
+  // Unbound action - F6: Manager-only, guarded by the lib's @ExecutionAllowedForRole('Manager').
+  // `@requires: authenticated-user` rejects anonymous/invalid credentials at the framework level
+  // (401) before the handler (and therefore @ExecutionAllowedForRole) is ever reached.
+  @(requires: 'authenticated-user')
+  action   adminOnlyAction()                                                                returns {
+    message : String
+  };
+
   event OrderedBook : {
     book     : Books:ID;
     quantity : Integer;

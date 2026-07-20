@@ -26,7 +26,9 @@ import {
   BeforeAction,
   BeforeFunction,
   AfterAction,
+  Stream,
 } from '../../../../../../../lib';
+import { Readable } from 'node:stream';
 import {
   changeBookProperties,
   event_2,
@@ -155,6 +157,20 @@ class UnboundActionsHandler {
     return {
       stock: req.data.quantity! + 1,
     };
+  }
+
+  // F5: @Stream streams book rows (as NDJSON) straight to the HTTP response.
+  @OnFunction('streamBooks')
+  @Stream('application/json')
+  public async streamBooks(@Req() req: Request): Promise<Readable> {
+    const books: Array<{ ID: number; title: string }> = await SELECT.from('CatalogService.Books').columns(
+      'ID',
+      'title',
+    );
+
+    const ndjson = books.map((book) => JSON.stringify(book)).join('\n');
+
+    return Readable.from([ndjson]);
   }
 
   @OnEvent(OrderedBook)

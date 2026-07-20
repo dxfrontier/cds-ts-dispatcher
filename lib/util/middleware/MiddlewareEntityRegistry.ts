@@ -113,7 +113,7 @@ export class MiddlewareEntityRegistry {
    * Sorts the `before` events to ensure the '*' events are triggered first.
    */
   private sortBeforeEvents(): void {
-    (this.srv as unknown as ServiceBeforeHandlers)._handlers.before.sort(
+    (this.srv as unknown as ServiceBeforeHandlers).handlers.before.sort(
       (a: { before: string }, b: { before: string }) => {
         if (a.before < b.before) {
           return -1;

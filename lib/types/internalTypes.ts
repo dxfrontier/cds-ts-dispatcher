@@ -18,6 +18,7 @@ import type {
   EVENTS,
   CdsEvent,
   RequestResponse,
+  ScheduleOptions,
 } from './types';
 
 // **************************************************************************************************************************
@@ -29,7 +30,7 @@ export type Entity = { drafts: { name: string }; name: string };
 export type Constructable<T = any> = new (...args: any[]) => T;
 
 export type ServiceBeforeHandlers = {
-  _handlers: {
+  handlers: {
     before: any[];
   };
 };
@@ -193,11 +194,29 @@ export type DefaultHandlers = {
   event: CRUD_EVENTS | DRAFT_EVENTS | ERROR_EVENT;
 };
 
+export type ScheduledHandler = {
+  type: 'SCHEDULED';
+  event: 'SCHEDULED_EVENT';
+  taskName: string;
+  scheduleOptions?: ScheduleOptions;
+};
+
+/**
+ * Minimal shape of the `srv.schedule(...).every(...)` fluent builder that exposes `.as(name)`.
+ *
+ * `@sap/cds` 10's runtime builder (`cds.Service.prototype.schedule`) returns an object carrying
+ * `after` / `every` / `as` / `then`, but the bundled `FluentScheduling` type only declares
+ * `after` / `every`. This type recovers the missing `.as()` for the recurring-singleton call.
+ */
+export type ScheduleTaskBuilder = {
+  as: (name: string) => PromiseLike<unknown>;
+};
+
 export type BaseHandler = {
   callback: RequestType;
   eventKind: EventKind;
   isDraft: boolean;
-} & (DefaultHandlers | OnHandler | EventHandler | EventMessagingHandler | PrependHandler);
+} & (DefaultHandlers | OnHandler | EventHandler | EventMessagingHandler | PrependHandler | ScheduledHandler);
 
 // **************************************************************************************************************************
 // **************************************************************************************************************************
@@ -266,6 +285,8 @@ export type PrependDraftDecorators = {
     | 'AfterDeleteDraft'
     | 'AfterNewDraft'
     | 'AfterCancelDraft'
+    | 'AfterPatchDraft'
+    | 'AfterDiscardDraft'
     | 'AfterEditDraft'
     | 'AfterSaveDraft'
     //
@@ -275,6 +296,8 @@ export type PrependDraftDecorators = {
     | 'BeforeDeleteDraft'
     | 'BeforeNewDraft'
     | 'BeforeCancelDraft'
+    | 'BeforePatchDraft'
+    | 'BeforeDiscardDraft'
     | 'BeforeEditDraft'
     | 'BeforeSaveDraft'
     //
@@ -284,6 +307,8 @@ export type PrependDraftDecorators = {
     | 'OnDeleteDraft'
     | 'OnNewDraft'
     | 'OnCancelDraft'
+    | 'OnPatchDraft'
+    | 'OnDiscardDraft'
     | 'OnEditDraft'
     | 'OnSaveDraft';
 };

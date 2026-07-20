@@ -23,7 +23,7 @@ export type ON_EVENT = 'EVENT';
 export type ACTION_EVENTS = 'ACTION' | 'BOUND_ACTION';
 export type FUNCTION_EVENTS = 'FUNC' | 'BOUND_FUNC';
 export type CRUD_EVENTS = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | ALL_EVENTS | EACH_INSTANCE;
-export type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE';
+export type DRAFT_EVENTS = 'NEW' | 'CANCEL' | 'EDIT' | 'SAVE' | 'PATCH' | 'DISCARD';
 export type EVENTS = CRUD_EVENTS | ACTION_EVENTS | FUNCTION_EVENTS | ERROR_EVENT | ON_EVENT | DRAFT_EVENTS;
 
 export type ValidatorField = string | number | undefined | null | boolean;
@@ -75,6 +75,33 @@ export type ActionRequest<T extends CdsFunction> = Omit<Request, 'data'> & { dat
  * Use `ActionReturn` type to have the `return` of the `@OnAction`, `@OnBoundAction`, `@OnFunction`, `@OnBoundFunction` typed.
  */
 export type ActionReturn<T extends CdsFunction> = Promise<Exclude<T['__returns'], Promise<any>> | void | Error>;
+
+// **************************************************************************************************************************
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @Schedule decorator types
+// **************************************************************************************************************************
+
+/**
+ * Options for the `@Schedule` decorator (`@sap/cds` 10 event-queue scheduling).
+ */
+export type ScheduleOptions = {
+  /**
+   * The task name. Registered `verbatim` as the `srv.on(name)` handler and used as the singleton task
+   * identity via `.as(name)`, so re-scheduling on every boot `upserts` rather than duplicates.
+   */
+  name: string;
+  /**
+   * The recurrence. Accepts an `interval` string (e.g. `'10m'`) or a `cron` expression - passed through
+   * verbatim to CAP (`ms4` / `cron` parse it).
+   */
+  every: string;
+  /**
+   * `[Optional]` The payload delivered to the task handler on every run (as `req.data`).
+   */
+  data?: Record<string, unknown>;
+};
 
 // **************************************************************************************************************************
 // **************************************************************************************************************************

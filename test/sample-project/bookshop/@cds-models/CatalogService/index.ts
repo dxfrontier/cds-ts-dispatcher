@@ -10,6 +10,8 @@ export default class {
   declare static readonly submitStock: typeof submitStock;
   declare static readonly submitQuantity: typeof submitQuantity;
   declare static readonly submitOrderFunction: typeof submitOrderFunction;
+  declare static readonly streamBooks: typeof streamBooks;
+  declare static readonly adminOnlyAction: typeof adminOnlyAction;
 }
 
 export function _BookAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
@@ -582,6 +584,38 @@ export declare const submitOrderFunction:  {
   stock?: number | null,
 } | null
   kind: 'function'
+}
+
+export declare const streamBooks:  {
+  // positional
+  (): globalThis.Promise<import("stream").Readable | null> | import("stream").Readable | null
+  // named
+  ({}: globalThis.Record<never, never>): globalThis.Promise<import("stream").Readable | null> | import("stream").Readable | null
+  // metadata (do not use)
+  __parameters: globalThis.Record<never, never>, __returns: globalThis.Promise<import("stream").Readable | null> | import("stream").Readable | null
+  kind: 'function'
+}
+
+export declare const adminOnlyAction:  {
+  // positional
+  (): globalThis.Promise< {
+  message?: string | null,
+} | null> |  {
+  message?: string | null,
+} | null
+  // named
+  ({}: globalThis.Record<never, never>): globalThis.Promise< {
+  message?: string | null,
+} | null> |  {
+  message?: string | null,
+} | null
+  // metadata (do not use)
+  __parameters: globalThis.Record<never, never>, __returns: globalThis.Promise< {
+  message?: string | null,
+} | null> |  {
+  message?: string | null,
+} | null
+  kind: 'action'
 }
 export namespace Books {
   export function _textAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
