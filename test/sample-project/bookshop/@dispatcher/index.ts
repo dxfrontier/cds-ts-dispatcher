@@ -21,6 +21,7 @@ export interface CDS_ENV {
     build: Build;
     cdsc: Cdsc;
     query: Query;
+    remote: Remote;
     plugins: Plugins;
     typer: Typer;
     schema: Schema;
@@ -36,6 +37,7 @@ interface _defined {
 interface Requires {
     middlewares: boolean;
     queue: Queue;
+    scheduling: Scheduling;
     auth: Auth;
     db: Db;
     messaging: Messaging;
@@ -43,13 +45,20 @@ interface Requires {
 interface Queue {
     model: string;
     maxAttempts: number;
-    chunkSize: number;
-    parallel: boolean;
-    storeLastError: boolean;
     timeout: string;
     legacyLocking: boolean;
-    ignoredContext: string[];
+    chunkSize: number;
+    parallel: boolean;
+    _ignoredContext: string[];
     kind: string;
+}
+interface Scheduling {
+    impl: string;
+    queued: boolean;
+    silent: boolean;
+    markerInterval: string;
+    flushInterval: string;
+    _optimisticMarkers: boolean;
 }
 interface Auth {
     kind: string;
@@ -71,6 +80,7 @@ interface Tenants {
 interface Db {
     impl: string;
     credentials: Credentials;
+    data: string[];
     pool: Pool;
     kind: string;
 }
@@ -78,6 +88,8 @@ interface Credentials {
     url: string;
 }
 interface Pool {
+    evictionRunIntervalMillis: number;
+    min: number;
     max: number;
 }
 interface Messaging {
@@ -129,8 +141,13 @@ interface Features {
     deploy_data_onconflict: string;
     assert_integrity: boolean;
     precise_timestamps: boolean;
-    consistent_params: boolean;
+    ieee754compatible: boolean;
+    compat_clone_appends: boolean;
+    compat_srv_getters: boolean;
     compat_texts_entities: boolean;
+    legacy_srv_results: boolean;
+    legacy_db_results: boolean;
+    bulk_inserts_via_rest: boolean;
     annotate_for_flows: boolean;
     history_for_flows: boolean;
 }
@@ -142,7 +159,8 @@ interface Fiori {
     draft_lock_timeout: boolean;
     draft_deletion_timeout: boolean;
     draft_messages: boolean;
-    direct_crud: boolean;
+    draft_new_action: boolean;
+    bypass_draft: boolean;
 }
 interface Preview {
     ui5: Ui5;
@@ -198,6 +216,7 @@ interface Odata {
     version: string;
     context_with_columns: boolean;
     max_batch_header_size: string;
+    max_batch_parallelization: number;
 }
 interface Flavors {
     v2: V2;
@@ -254,6 +273,8 @@ interface Query {
 }
 interface Limit {
     max: number;
+}
+interface Remote {
 }
 interface Plugins {
     '@sap/cds-fiori': {

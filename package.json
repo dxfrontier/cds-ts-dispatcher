@@ -25,10 +25,13 @@
     "fix": "run-s eslint:message eslint:fix prettier:message prettier:fix",
     "start:bookshop": "npm run start --prefix ./test/sample-project/bookshop",
     "test:newman": "newman run ./test/__tests__/e2e/CDS-TS-Dispatcher.postman_collection.json --environment ./test/__tests__/e2e/environment.json --bail",
-    "test:unit": "npm run build:entities:test --prefix ./test/sample-project/bookshop && jest",
+    "build:entities:integration": "npm run build:entities --prefix ./test/sample-project/bookshop && node -e \"const{execFileSync}=require('child_process');const cli=require.resolve('@cap-js/cds-typer/lib/cli.js',{paths:['./test/sample-project/bookshop']});execFileSync(process.execPath,[cli,'*','--outputDirectory','./@cds-models','--logLevel','SILENT'],{cwd:'./test/sample-project/monorepo_bookshop/services/admin',stdio:'inherit'})\"",
+    "test:unit": "npm run build:entities:test --prefix ./test/sample-project/bookshop && jest --selectProjects unit",
+    "test:integration": "npm run build:entities:integration && jest --selectProjects integration",
+    "test:coverage": "npm run build:entities:integration && jest --coverage",
     "test:e2e": "start-server-and-test start:bookshop http://localhost:4004 test:newman",
-    "test:verifier": "ts-node ./test/postinstall/Verifier.ts",
-    "test:verifier:monorepo": "ts-node ./test/postinstall/MonoRepoVerifier.ts",
+    "test:verifier": "tsx ./test/postinstall/Verifier.ts",
+    "test:verifier:monorepo": "tsx ./test/postinstall/MonoRepoVerifier.ts",
     "test": "run-s test:e2e",
     "commit": "commit",
     "prepare": "husky",
@@ -42,7 +45,8 @@
     "build:clean": "echo 'Clean dist folder ...' && rm -rf ./dist/",
     "build:clean:postinstall": "echo 'Clean postinstall folder ...' && npx rimraf ./postinstall/PostInstall.js",
     "build:ts": "tsup",
-    "build": "run-s build:clean build:clean:postinstall build:message build:ts"
+    "build": "run-s build:clean build:clean:postinstall build:message build:ts",
+    "typecheck:native": "tsgo --noEmit -p tsconfig.json --moduleResolution bundler"
   },
   "repository": {
     "type": "git",
@@ -75,7 +79,7 @@
   },
   "homepage": "https://github.com/dxfrontier/cds-ts-dispatcher#readme",
   "peerDependencies": {
-    "@sap/cds": "^9"
+    "@sap/cds": "^10"
   },
   "peerDependenciesMeta": {
     "@sap/cds": {
@@ -96,19 +100,21 @@
     "validator": "^13.15.26"
   },
   "devDependencies": {
-    "@sap/cds": "^9.6.2",
-    "@sap/cds-dk": "^9.6.1",
-    "@cap-js/cds-types": "^0.15.0",
+    "@cap-js/cds-test": "^1.0.1",
+    "@cap-js/cds-types": "^0.18.0",
     "@commitlint/cli": "^20.3.1",
     "@commitlint/config-conventional": "^20.3.1",
     "@commitlint/prompt-cli": "^20.3.1",
     "@commitlint/types": "^20.3.1",
+    "@sap/cds": "^10.0.3",
+    "@sap/cds-dk": "^10.0.5",
     "@swc/core": "^1.15.8",
     "@types/cross-spawn": "^6.0.6",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.23",
     "@types/string-placeholder": "^1.0.3",
     "@types/validator": "^13.15.10",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2",
     "eslint": "^9.39.2",
     "http-server": "^14.1.1",
     "husky": "^9.1.7",
@@ -121,11 +127,11 @@
     "prettier": "3.7.4",
     "rimraf": "^6.1.2",
     "start-server-and-test": "^2.1.3",
-    "ts-jest": "^29.4.6",
+    "ts-jest": "^29.4.11",
     "tsup": "^8.5.1",
-    "typedoc": "^0.28.16",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.53.0"
+    "typedoc": "^0.28.20",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.64.0"
   },
   "lint-staged": {
     "**/*.ts": [

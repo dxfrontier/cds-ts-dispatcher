@@ -6,7 +6,7 @@
   "license": "ISC",
   "main": "index.js",
   "engines": {
-    "node": "^22"
+    "node": ">=22"
   },
   "scripts": {
     "start": "npm run build:entities && cds watch",
@@ -15,16 +15,16 @@
     "clean:js": "npx rimraf ./@cds-models/{*.js,**/*.js,**/**/*.js,**/**/**/*.js}"
   },
   "dependencies": {
-    "@sap/cds": "^9",
+    "@sap/cds": "^10",
     "@dxfrontier/cds-ts-dispatcher": "^5",
     "express": "^4"
   },
   "devDependencies": {
-    "@cap-js/sqlite": "^2",
-    "@cap-js/cds-types": "^0.13",
+    "@cap-js/sqlite": "^3",
+    "@cap-js/cds-types": "^0.18",
     "@types/node": "^22.16.0",
     "tsx": "^4.20.3",
-    "typescript": "^5.8.3",
+    "typescript": "^6.0.3",
     "@cap-js/cds-typer": ">=0.36.0"
   },
   "imports": {

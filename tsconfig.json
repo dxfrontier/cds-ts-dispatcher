@@ -16,9 +16,14 @@
     "target": "ES2021",
     "module": "CommonJS",
     "moduleResolution": "Node",
+    "ignoreDeprecations": "6.0",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "outDir": "./dist"
+    "rootDir": ".",
+    "outDir": "./dist",
+    "paths": {
+      "@sap/cds": ["./node_modules/@cap-js/cds-types"]
+    }
   },
   "typedocOptions": {
     "entryPoints": ["./lib/**"],

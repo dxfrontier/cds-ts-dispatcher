@@ -10,11 +10,11 @@
     "express": "^4"
   },
   "devDependencies": {
-    "@cap-js/sqlite": "^2",
-    "@cap-js/cds-types": "^0.13",
+    "@cap-js/sqlite": "^3",
+    "@cap-js/cds-types": "^0.18",
     "@types/node": "^22.16.0",
     "tsx": "^4.20.3",
-    "typescript": "^5.8.3",
+    "typescript": "^6.0.3",
     "@cap-js/cds-typer": ">=0.36.0"
   },
   "scripts": {
@@ -25,5 +25,12 @@
   "imports": {
     "#cds-models/*": "./@cds-models/*/index.js",
     "#dispatcher": "./@dispatcher/index.js"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sql"
+      }
+    }
   }
 }
