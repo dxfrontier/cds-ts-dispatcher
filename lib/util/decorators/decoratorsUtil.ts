@@ -46,7 +46,7 @@ const decoratorsUtil = {
       options.eventDecorator === 'BeforeBoundFunction'
     ) {
       eventMap.OnAction = { event: 'ACTION', eventKind: 'ON', actionName: options.actionName };
-      eventMap.OnBoundFunction = { event: 'FUNC', eventKind: 'ON', actionName: options.actionName };
+      eventMap.OnFunction = { event: 'FUNC', eventKind: 'ON', actionName: options.actionName };
       eventMap.OnBoundAction = { event: 'BOUND_ACTION', eventKind: 'ON', actionName: options.actionName };
       eventMap.OnBoundFunction = { event: 'BOUND_FUNC', eventKind: 'ON', actionName: options.actionName };
       //
@@ -78,6 +78,8 @@ const decoratorsUtil = {
       AfterDeleteDraft: { event: 'DELETE', eventKind: 'AFTER' },
       AfterNewDraft: { event: 'NEW', eventKind: 'AFTER' },
       AfterCancelDraft: { event: 'CANCEL', eventKind: 'AFTER' },
+      AfterPatchDraft: { event: 'PATCH', eventKind: 'AFTER' },
+      AfterDiscardDraft: { event: 'DISCARD', eventKind: 'AFTER' },
       AfterEditDraft: { event: 'EDIT', eventKind: 'AFTER' },
       AfterSaveDraft: { event: 'SAVE', eventKind: 'AFTER' },
       //
@@ -87,6 +89,8 @@ const decoratorsUtil = {
       BeforeDeleteDraft: { event: 'DELETE', eventKind: 'BEFORE' },
       BeforeNewDraft: { event: 'NEW', eventKind: 'BEFORE' },
       BeforeCancelDraft: { event: 'CANCEL', eventKind: 'BEFORE' },
+      BeforePatchDraft: { event: 'PATCH', eventKind: 'BEFORE' },
+      BeforeDiscardDraft: { event: 'DISCARD', eventKind: 'BEFORE' },
       BeforeEditDraft: { event: 'EDIT', eventKind: 'BEFORE' },
       BeforeSaveDraft: { event: 'SAVE', eventKind: 'BEFORE' },
       //
@@ -96,6 +100,8 @@ const decoratorsUtil = {
       OnDeleteDraft: { event: 'DELETE', eventKind: 'ON' },
       OnNewDraft: { event: 'NEW', eventKind: 'ON' },
       OnCancelDraft: { event: 'CANCEL', eventKind: 'ON' },
+      OnPatchDraft: { event: 'PATCH', eventKind: 'ON' },
+      OnDiscardDraft: { event: 'DISCARD', eventKind: 'ON' },
       OnEditDraft: { event: 'EDIT', eventKind: 'ON' },
       OnSaveDraft: { event: 'SAVE', eventKind: 'ON' },
     };
@@ -129,13 +135,18 @@ const decoratorsUtil = {
     }
   },
 
-  async handleAsyncErrors(originalMethod: () => Promise<unknown>, req: Request): Promise<void> {
+  async handleAsyncErrors(originalMethod: () => Promise<unknown>, req: Request): Promise<unknown> {
     const result: [PromiseSettledResult<unknown>] = await Promise.allSettled([originalMethod()]);
+    const [settled] = result;
     const rejected: PromiseRejectedResult | undefined = result.find((response) => response.status === 'rejected');
 
     if (rejected && (req as any).errors === undefined) {
       throw rejected.reason;
     }
+
+    // Success (or a rejection already communicated via req.reject()/req.errors, swallowed above):
+    // propagate the wrapped method's fulfilled value instead of discarding it.
+    return settled.status === 'fulfilled' ? settled.value : undefined;
   },
 };
 

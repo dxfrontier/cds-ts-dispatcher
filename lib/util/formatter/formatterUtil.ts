@@ -25,12 +25,23 @@ const formatterUtil = {
 
     // The 'results / result' property
     for (const arg of args) {
-      if (!util.lodash.isUndefined(req.results)) {
-        const argResults = Array.isArray(req.results) ? arg : arg[0];
+      if (util.lodash.isUndefined(req.results)) {
+        continue;
+      }
 
-        if (argResults === req.results) {
+      if (Array.isArray(req.results)) {
+        if (arg === req.results) {
           return arg;
         }
+
+        continue;
+      }
+
+      // req.results is a single (non-array) result: match either the bare object directly
+      // (e.g. AfterReadSingleInstance-style callbacks), or an array wrapping it (arg[0] === req.results),
+      // kept for backward compatibility with any caller relying on the wrapped shape.
+      if (arg === req.results || arg?.[0] === req.results) {
+        return arg;
       }
     }
 
