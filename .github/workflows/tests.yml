@@ -1,11 +1,87 @@
-name: Tests (unit, e2e)
+name: Tests (unit, integration, e2e)
 
 on:
   pull_request:
-    types: [opened, edited, synchronize]
+    types: [opened, reopened, synchronize]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  lint:
+    name: Lint (eslint, prettier)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (eslint, prettier)
+        run: npm run check
+
+  unit:
+    name: Unit & integration tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Run coverage (enforces thresholds)
+        run: npm run test:coverage
+
+  verifier:
+    name: Postinstall verifier
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Verify @dispatcher folder, index.ts file, and content
+        run: npm run test:verifier
+
+      - name: Verify @dispatcher folder, index.ts file, and content in monorepo projects
+        run: npm run test:verifier:monorepo
+
   test-e2e:
     name: End-to-end (e2e)
     strategy:
@@ -22,58 +98,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.version }}
+          cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          npm install -g @sap/cds-dk ts-node typescript
-          npm install
+        run: npm ci
 
       - name: Build project
         run: npm run build
 
       - name: Start server and start e2e tests
         run: npm run test:e2e
-
-  # test-env-decorator:
-  #   name: Test @Env decorator
-  #   strategy:
-  #     matrix:
-  #       include:
-  #         # Node 22
-  #         - version: 22
-  #           platform: ubuntu-latest
-  #         # Node 22 on other platforms
-  #         - version: 22
-  #           platform: macos-latest
-  #         - version: 22
-  #           platform: windows-2022
-  #         - version: 22
-  #           platform: windows-2025
-
-  #   runs-on: ${{ matrix.platform }}
-
-  #   steps:
-  #     - name: Get code
-  #       uses: actions/checkout@v4
-
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ matrix.version }}
-
-  #     - name: Install dependencies
-  #       run: |
-  #         npm install -g @sap/cds-dk ts-node typescript
-  #         npm install
-
-  #     - name: Build project
-  #       run: npm run build
-
-  #     - name: Verify @decorator folder, index.ts file, and content
-  #       run: |
-  #         npm run test:verifier
-
-  #     - name: Verify @decorator folder, index.ts file, and content in monorepo projects
-  #       run: |
-  #         npm run test:verifier:monorepo

@@ -4,8 +4,12 @@ on:
   pull_request:
     types: [opened, labeled]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
-  contents: write
+  contents: read
   pull-requests: read
 
 jobs:
