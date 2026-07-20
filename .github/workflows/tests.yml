@@ -9,6 +9,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# published dispatcher postinstall runs `cds env get` during npm ci; cds 10 emits a non-JSON inspect dump under GITHUB_ACTIONS unless NO_COLOR is set
+env:
+  NO_COLOR: "1"
+
 jobs:
   lint:
     name: Lint (eslint, prettier)

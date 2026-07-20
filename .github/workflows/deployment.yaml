@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+# published dispatcher postinstall runs `cds env get` during npm ci; cds 10 emits a non-JSON inspect dump under GITHUB_ACTIONS unless NO_COLOR is set
+env:
+  NO_COLOR: "1"
+
 jobs:
   # This will validate that the PR was actually merged (not just closed) and labeled 'deploy' - otherwise the release will not happen
   check_valid_deploy:
