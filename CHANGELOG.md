@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.0.0] - 2026-07-21
+
+### 🚀 Features
+
+- *(cds)* [**breaking**] Upgraded cds core to v10
+- *(decorators)* Added scheduling, streaming, subject, affected and draft patch/discard decorators
+
+### 🐛 Bug Fixes
+
+- *(decorators)* Fixed prepend OnFunction mapping, error wrapper return and single-result lookup
+- *(deps)* Synced package-lock for npm 11 peer resolution
+- *(postinstall)* Force `cds env get --json` and harden env generation
+- *(ci)* Set NO_COLOR for cds env json output during npm ci
+- *(postinstall)* Programmatic cds.env acquisition, never-break-install hardening
+- *(deps)* Restore cds-dk nested eslint lock entries pruned by npm 11
+
+### 📚 Documentation
+
+- *(readme)* Documented new decorators and the v9 to v10 migration guide
+
+### 🎨 Styling
+
+- *(ci)* Prettier quote style for workflow env values
+
+### 🧪 Testing
+
+- *(tests)* Added in-process integration layer, utility unit tests and hardened e2e
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version, CHANGELOG.md generated
+- *(workflows)* Fixed node matrix, added lint/unit/integration jobs and merged-gated releases
+- *(claude)* Added CLAUDE.md and shared claude project config
+- *(entities)* Regenerate monorepo admin @cds-models against cds 10
+
 ## [5.2.0] - 2026-01-13
 
 ### 🚀 Features
