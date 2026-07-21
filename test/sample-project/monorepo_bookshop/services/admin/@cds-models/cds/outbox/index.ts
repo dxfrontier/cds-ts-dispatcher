@@ -12,6 +12,8 @@ export function _MessageAspect<TBase extends new (...args: any[]) => object>(Bas
     declare lastError?: string | null
     declare lastAttemptTimestamp?: __.CdsTimestamp | null
     declare status?: string | null
+    declare task?: string | null
+    declare appid?: string | null
     static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
     declare static readonly keys: __.KeysOf<Message>;
     declare static readonly elements: __.ElementsOf<Message>;
