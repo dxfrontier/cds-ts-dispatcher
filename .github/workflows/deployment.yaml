@@ -58,7 +58,8 @@ jobs:
       - run: npm ci
       - run: npm run test:unit
       - run: npm run build
-      # npm provenance needs npm 9.5+ and a CI OIDC-compatible token; if the maintainer's npm_token is incompatible with provenance, drop the --provenance flag
+      # npm provenance needs npm 9.5+ and a CI OIDC-compatible token; if the org's NPM_ORG_TOKEN is incompatible with provenance, drop the --provenance flag
+      # repo-level NPM_TOKEN (classic token) was revoked in npm's Dec 2025 token purge; publishing auth lives in the org-level NPM_ORG_TOKEN granular token
       - run: npm publish --access public --provenance
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_ORG_TOKEN}}
