@@ -1897,7 +1897,7 @@ public async beforeCreate(
 > When you install cds-ts-dispatcher `(e.g. npm install @dxfrontier/cds-ts-dispatcher)` or run a general `npm install`, the following will be generated or updated :
 >
 > - New `@dispatcher` folder is generated at the project _**root**_.
-> This folder contains the `CDS ENV TS interfaces`, generated based on the structure of your current `cds.env` project specific configuration (retrieved from `cds env get` cli command).
+> This folder contains the `CDS ENV TS interfaces`, generated based on the structure of your current `cds.env` project specific configuration (read programmatically from your project's `@sap/cds`, equivalent to the `cds env get` cli command output).
 >
 > ```text
 > ...

@@ -1,149 +1,122 @@
 // Type definitions for envConfig
 export interface CDS_ENV {
-    _context: string;
-    _home: string;
-    _sources: string[];
-    _profiles: _profiles;
-    production: boolean;
-    requires: Requires;
-    runtime: Runtime;
-    server: Server;
-    protocols: Protocols;
-    features: Features;
-    fiori: Fiori;
-    ql: Ql;
-    log: Log;
-    folders: Folders;
-    i18n: I18n;
-    odata: Odata;
-    sql: Sql;
-    hana: Hana;
-    build: Build;
-    cdsc: Cdsc;
-    query: Query;
-    plugins: Plugins;
-    config: Config;
-    '_home_cds-dk': string;
-}
-interface _profiles {
-    _defined: _defined;
-}
-interface _defined {
-}
-interface Requires {
+  _context: string;
+  _home: string;
+  _sources: string[];
+  _profiles: {
+    _defined: {};
+  };
+  production: boolean;
+  requires: {
     middlewares: boolean;
-    queue: Queue;
-    auth: Auth;
-    db: Db;
-}
-interface Queue {
-    model: string;
-    maxAttempts: number;
-    chunkSize: number;
-    parallel: boolean;
-    storeLastError: boolean;
-    timeout: string;
-    legacyLocking: boolean;
-    ignoredContext: string[];
-    kind: string;
-}
-interface Auth {
-    restrict_all_services: boolean;
-    kind: string;
-    users: Users;
-    tenants: Tenants;
-}
-interface Users {
-    alice: Alice;
-    bob: Bob;
-    carol: Carol;
-    dave: Dave;
-    erin: Erin;
-    fred: Fred;
-    me: Me;
-    yves: Yves;
-    '*': boolean;
-}
-interface Alice {
-    tenant: string;
-    roles: string[];
-}
-interface Bob {
-    tenant: string;
-    roles: string[];
-}
-interface Carol {
-    tenant: string;
-    roles: string[];
-}
-interface Dave {
-    tenant: string;
-    roles: string[];
-    features: any[];
-}
-interface Erin {
-    tenant: string;
-    roles: string[];
-}
-interface Fred {
-    tenant: string;
-    features: string[];
-}
-interface Me {
-    tenant: string;
-    features: string[];
-}
-interface Yves {
-    roles: string[];
-}
-interface Tenants {
-    t1: T1;
-    t2: T2;
-}
-interface T1 {
-    features: string[];
-}
-interface T2 {
-    features: string;
-}
-interface Db {
-    impl: string;
-    credentials: Credentials;
-    kind: string;
-}
-interface Credentials {
-    url: string;
-}
-interface Runtime {
+    queue: {
+      model: string;
+      maxAttempts: number;
+      timeout: string;
+      legacyLocking: boolean;
+      chunkSize: number;
+      parallel: boolean;
+      _ignoredContext: string[];
+      kind: string;
+    };
+    scheduling: {
+      impl: string;
+      queued: boolean;
+      silent: boolean;
+      markerInterval: string;
+      flushInterval: string;
+      _optimisticMarkers: boolean;
+    };
+    auth: {
+      restrict_all_services: boolean;
+      kind: string;
+      users: {
+        alice: {
+          tenant: string;
+          roles: string[];
+        };
+        bob: {
+          tenant: string;
+          roles: string[];
+        };
+        carol: {
+          tenant: string;
+          roles: string[];
+        };
+        dave: {
+          tenant: string;
+          roles: string[];
+          features: unknown[];
+        };
+        erin: {
+          tenant: string;
+          roles: string[];
+        };
+        fred: {
+          tenant: string;
+          features: string[];
+        };
+        me: {
+          tenant: string;
+          features: string[];
+        };
+        yves: {
+          roles: string[];
+        };
+        '*': boolean;
+      };
+      tenants: {
+        t1: {
+          features: string[];
+        };
+        t2: {
+          features: string;
+        };
+      };
+    };
+    db: {
+      impl: string;
+      credentials: {
+        url: string;
+      };
+      data: string[];
+      pool: {
+        evictionRunIntervalMillis: number;
+        min: number;
+        max: number;
+      };
+      kind: string;
+    };
+  };
+  runtime: {
     patch_as_upsert: boolean;
     put_as_upsert: boolean;
     put_as_replace: boolean;
-}
-interface Server {
+  };
+  server: {
     shutdown_on_uncaught_errors: boolean;
     exit_on_multi_install: boolean;
     force_exit_timeout: number;
     cors: boolean;
     index: boolean;
     port: number;
-}
-interface Protocols {
+  };
+  protocols: {
     'odata-v4': {
-        path: string;
+      path: string;
     };
     'odata-v2': {
-        path: string;
+      path: string;
     };
-    rest: Rest;
-    hcql: Hcql;
-}
-interface Rest {
-    path: string;
-}
-interface Hcql {
-    path: string;
-}
-interface Features {
+    rest: {
+      path: string;
+    };
+    hcql: {
+      path: string;
+    };
+    'data.product': null;
+  };
+  features: {
     folders: string;
     sql_simple_queries: number;
     pre_compile_edmxs: boolean;
@@ -157,56 +130,62 @@ interface Features {
     deploy_data_onconflict: string;
     assert_integrity: boolean;
     precise_timestamps: boolean;
-    consistent_params: boolean;
-}
-interface Fiori {
-    preview: Preview;
+    ieee754compatible: boolean;
+    compat_clone_appends: boolean;
+    compat_srv_getters: boolean;
+    compat_texts_entities: boolean;
+    legacy_srv_results: boolean;
+    legacy_db_results: boolean;
+    bulk_inserts_via_rest: boolean;
+    annotate_for_flows: boolean;
+    history_for_flows: boolean;
+  };
+  fiori: {
+    preview: {
+      ui5: {
+        version: string;
+        theme: {
+          light: string;
+          dark: string;
+          switch: boolean;
+        };
+      };
+    };
     routes: boolean;
     lean_draft: boolean;
     wrap_multiple_errors: boolean;
     draft_lock_timeout: boolean;
     draft_deletion_timeout: boolean;
-}
-interface Preview {
-    ui5: Ui5;
-}
-interface Ui5 {
-    version: string;
-    theme: Theme;
-}
-interface Theme {
-    light: string;
-    dark: string;
-    'switch': boolean;
-}
-interface Ql {
-}
-interface Log {
-    levels?: Levels;
-    service?: boolean;
-    user?: boolean;
-    mask_headers?: string[];
-    aspects?: string[];
-    als_custom_fields?: Als_custom_fields;
-    cls_custom_fields?: string[];
+    draft_messages: boolean;
+    draft_new_action: boolean;
+    bypass_draft: boolean;
+  };
+  ql: {};
+  log: {
+    levels: {
+      compile: string;
+      cli: string;
+    };
+    service: boolean;
+    user: boolean;
+    mask_headers: string[];
+    aspects: string[];
+    als_custom_fields: {
+      query: number;
+      target: number;
+      details: number;
+      reason: number;
+    };
+    cls_custom_fields: string[];
     format: string;
-}
-interface Levels {
-    compile: string;
-    cli: string;
-}
-interface Als_custom_fields {
-    query: number;
-    target: number;
-    details: number;
-    reason: number;
-}
-interface Folders {
+  };
+  folders: {
     db: string;
     srv: string;
     app: string;
-}
-interface I18n {
+    apps: string;
+  };
+  i18n: {
     file: string;
     folders: string[];
     languages: string;
@@ -214,77 +193,69 @@ interface I18n {
     preserved_locales: string[];
     fallback_bundle: string;
     fatjson: boolean;
-}
-interface Odata {
-    flavors: Flavors;
+  };
+  odata: {
+    flavors: {
+      v2: {
+        version: string;
+      };
+      v4: {
+        version: string;
+      };
+      w4: {
+        version: string;
+        containment: boolean;
+        structs: boolean;
+        refs: boolean;
+        xrefs: boolean;
+      };
+      x4: {
+        version: string;
+        containment: boolean;
+        structs: boolean;
+        refs: boolean;
+        xrefs: boolean;
+      };
+    };
     version: string;
     context_with_columns: boolean;
     max_batch_header_size: string;
-}
-interface Flavors {
-    v2: V2;
-    v4: V4;
-    w4: W4;
-    x4: X4;
-}
-interface V2 {
-    version: string;
-}
-interface V4 {
-    version: string;
-}
-interface W4 {
-    version: string;
-    containment: boolean;
-    structs: boolean;
-    refs: boolean;
-    xrefs: boolean;
-}
-interface X4 {
-    version: string;
-    containment: boolean;
-    structs: boolean;
-    refs: boolean;
-    xrefs: boolean;
-}
-interface Sql {
+    max_batch_parallelization: number;
+  };
+  sql: {
     names: string;
     dialect: string;
-}
-interface Hana {
+  };
+  hana: {
     'deploy-format': string;
-    journal: Journal;
-    table_data: Table_data;
-}
-interface Journal {
-    'change-mode': string;
-}
-interface Table_data {
-    column_mapping: Column_mapping;
-}
-interface Column_mapping {
-    LargeBinary: string;
-}
-interface Build {
+    journal: {
+      'change-mode': string;
+    };
+    table_data: {
+      column_mapping: {
+        LargeBinary: string;
+      };
+    };
+  };
+  build: {
     target: string;
-}
-interface Cdsc {
+  };
+  cdsc: {
     moduleLookupDirectories: string[];
-}
-interface Query {
-    limit: Limit;
-}
-interface Limit {
-    max: number;
-}
-interface Plugins {
+  };
+  query: {
+    limit: {
+      max: number;
+    };
+  };
+  remote: {};
+  plugins: {
     '@sap/cds-fiori': {
-        impl: string;
+      impl: string;
     };
     '@cap-js/sqlite': {
-        impl: string;
+      impl: string;
     };
-}
-interface Config {
-    log: Log;
+  };
+  appid: null;
 }

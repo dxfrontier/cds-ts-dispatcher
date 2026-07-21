@@ -72,7 +72,12 @@ class MonorepoVerifier {
       throw new Error(colors.red('❌ CDS_ENV reference not found in @dispatcher/index.ts.'));
     }
 
-    console.log(colors.green('✅ @dispatcher folder and index.ts file are correctly set up.'));
+    const runtimeStubPath = decoratorIndexPath.replace(/index\.ts$/, 'index.js');
+    if (!existsSync(runtimeStubPath)) {
+      throw new Error(colors.red('❌ @dispatcher/index.js runtime stub is missing.'));
+    }
+
+    console.log(colors.green('✅ @dispatcher folder, index.ts and index.js files are correctly set up.'));
   }
 
   private verifyPackageJsonImports(packageJsonPath: string) {

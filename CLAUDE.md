@@ -12,8 +12,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Lint + format check: `npm run check` · autofix: `npm run fix`
 - Unit tests: `npm run test:unit` — first regenerates bookshop `@cds-models` via cds-typer, then runs jest (`test/__tests__/unit` + `test/__tests__/draft`)
 - Single unit test (entities must have been generated at least once): `npx jest test/__tests__/unit/AFTER.test.ts`
+- Integration tests: `npm run test:integration` — in-process CAP suites via `@cap-js/cds-test` (`test/__tests__/integration`)
 - E2E: `npm run test:e2e` — boots `test/sample-project/bookshop` on :4004 via start-server-and-test, runs the newman/Postman collection in `test/__tests__/e2e/`
-- Postinstall verifiers: `npm run test:verifier` and `npm run test:verifier:monorepo`
+- Postinstall verifiers: `npm run test:verifier` and `npm run test:verifier:monorepo` · docker consumer-install harness (needs a docker daemon): `npm run test:postinstall:docker`
 - Run the sample app alone: `npm run start:bookshop`
 - Commit: `npm run commit` — commitlint prompt; conventional commits are enforced (husky + lint-staged run eslint/prettier/related tests pre-commit)
 
@@ -28,7 +29,7 @@ Decorators never do work at decoration time — they only write metadata; all re
 5. `lib/core/ArgumentMethodProcessor.ts` — when an event fires, maps parameter-decorator metadata (`@Req`, `@Results`, `@Next`, `@Jwt`, `@Env`, …) to the actual argument list of the user's method.
 6. `lib/util/middleware/MiddlewareEntityRegistry.ts` — implements `@Use` middleware chains around entity handlers.
 
-Postinstall mechanism (ships with the package): `postinstall/PostInstall.ts` runs in the consumer's project after install — it executes `cds env get`, converts the JSON to TypeScript types (json-ts), and compiles an `@dispatcher/` folder into the consumer project. That folder backs the `#dispatcher` import alias and the typed `@Env` parameter decorator. `test/postinstall/Verifier.ts` / `MonoRepoVerifier.ts` assert this works for single-project and monorepo layouts.
+Postinstall mechanism (ships with the package): `postinstall/PostInstall.ts` runs in the consumer's project after install and scaffolds an `@dispatcher/` folder there — `index.ts` holding the generated `CDS_ENV` interface (in-house `TypeGenerator`, single interface with inline literal types) plus a comment-only `index.js` runtime stub; together they back the `#dispatcher` import alias and the typed `@Env` parameter decorator. Env acquisition is a ladder: primary spawns `process.execPath` to `JSON.stringify(require('@sap/cds').env)` through a transport file (no CLI dependency, immune to CI color/inspect rendering); fallback is sanitized `cds env get --json` with a logged notice; both are `JSON.parse`-gated. Hard policy: the postinstall must never abort or hang a consumer's install — every failure degrades to a skip-with-warning (60s SIGKILL spawn timeout; tsconfig edited via comment-preserving jsonc operations). `test/postinstall/Verifier.ts` / `MonoRepoVerifier.ts` assert the scaffold for single-project and monorepo layouts; `test/postinstall/docker/` installs the packed tarball into a linux container under `GITHUB_ACTIONS=true` as the regression gate for the CI-env incident.
 
 Tests and workspaces: the npm workspaces (`test/sample-project/bookshop`, `test/sample-project/monorepo_bookshop/services/{api,admin}`) are real CAP apps used as fixtures. Jest unit/draft tests import bookshop handler classes directly; e2e drives the running bookshop over OData. `@cds-models/` and `@dispatcher/` folders are generated artifacts — regenerate them, never hand-edit.
 

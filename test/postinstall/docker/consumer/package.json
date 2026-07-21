@@ -1,0 +1,14 @@
+{
+  "name": "dispatcher-docker-consumer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal consumer fixture used by test/postinstall/docker to reproduce a real `npm install` of the packed @dxfrontier/cds-ts-dispatcher tarball inside a Linux container.",
+  "dependencies": {
+    "@sap/cds": "^10",
+    "@dxfrontier/cds-ts-dispatcher": "file:cds-ts-dispatcher.tgz"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^10",
+    "typescript": "^5"
+  }
+}
