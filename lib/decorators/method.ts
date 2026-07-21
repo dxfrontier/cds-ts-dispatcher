@@ -9,7 +9,8 @@ import parameterUtil from '../util/parameter/parameterUtil';
 import util from '../util/util';
 import validatorUtil from '../util/validation/validatorUtil';
 import transformersUtil from '../util/transformers/transformersUtil';
-// import cds from '@sap/cds';
+import streamUtil from '../util/stream/streamUtil';
+import cds from '@sap/cds';
 
 import type {
   ACTION_EVENTS,
@@ -23,6 +24,7 @@ import type {
   ON_EVENT,
   Request,
   RequestType,
+  ScheduleOptions,
 } from '../types/types';
 
 import type { Validators } from '../types/validator';
@@ -1225,6 +1227,217 @@ const AfterEditDraft = buildAfter({ event: 'EDIT', eventKind: 'AFTER', isDraft: 
  */
 const AfterSaveDraft = buildAfter({ event: 'SAVE', eventKind: 'AFTER', isDraft: false });
 
+/**
+ * Use `@BeforePatchDraft` decorator to execute custom logic before a 'draft' field is patched.
+ *
+ * `PATCH` is CAP's canonical `field-level draft-edit` event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) - it is triggered on the draft entity `MyEntity.drafts` every time a field of an in-progress draft is changed.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforepatchdraft | CDS-TS-Dispatcher - @BeforePatchDraft}
+ */
+const BeforePatchDraft = buildBefore({ event: 'PATCH', eventKind: 'BEFORE', isDraft: true });
+
+/**
+ * Use `@BeforeDiscardDraft` decorator to execute custom logic before a 'draft' is discarded.
+ *
+ * `DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 - it is triggered on the draft entity `MyEntity.drafts` when an in-progress draft is discarded.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforediscarddraft | CDS-TS-Dispatcher - @BeforeDiscardDraft}
+ */
+const BeforeDiscardDraft = buildBefore({ event: 'DISCARD', eventKind: 'BEFORE', isDraft: true });
+
+/**
+ * Use `@AfterPatchDraft` decorator to execute custom logic after a 'draft' field is patched.
+ *
+ * `PATCH` is CAP's canonical `field-level draft-edit` event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) - it is triggered on the draft entity `MyEntity.drafts` every time a field of an in-progress draft is changed.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterpatchdraft | CDS-TS-Dispatcher - @AfterPatchDraft}
+ */
+const AfterPatchDraft = buildAfter({ event: 'PATCH', eventKind: 'AFTER', isDraft: true });
+
+/**
+ * Use `@AfterDiscardDraft` decorator to execute custom logic after a 'draft' is discarded.
+ *
+ * `DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 - it is triggered on the draft entity `MyEntity.drafts` when an in-progress draft is discarded.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterdiscarddraft | CDS-TS-Dispatcher - @AfterDiscardDraft}
+ */
+const AfterDiscardDraft = buildAfter({ event: 'DISCARD', eventKind: 'AFTER', isDraft: true });
+
+/**
+ * Use `@OnPatchDraft` decorator to execute custom logic when a 'draft' field is patched.
+ *
+ * `PATCH` is CAP's canonical `field-level draft-edit` event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) - it is triggered on the draft entity `MyEntity.drafts` every time a field of an in-progress draft is changed.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onpatchdraft | CDS-TS-Dispatcher - @OnPatchDraft}
+ */
+const OnPatchDraft = buildOnCRUD({ event: 'PATCH', eventKind: 'ON', isDraft: true });
+
+/**
+ * Use `@OnDiscardDraft` decorator to execute custom logic when a 'draft' is discarded.
+ *
+ * `DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 - it is triggered on the draft entity `MyEntity.drafts` when an in-progress draft is discarded.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#ondiscarddraft | CDS-TS-Dispatcher - @OnDiscardDraft}
+ */
+const OnDiscardDraft = buildOnCRUD({ event: 'DISCARD', eventKind: 'ON', isDraft: true });
+
+/**
+ * ####################################################################################################################
+ * Start `Scheduling` methods
+ * ####################################################################################################################
+ */
+
+/**
+ * Internal helper: wraps the method with the `ArgumentMethodProcessor` and records a `SCHEDULED` handler.
+ * @param target - The target object.
+ * @param propertyName - The name of the property.
+ * @param descriptor - The property descriptor.
+ * @param taskName - The task name, registered `verbatim` (dots are preserved).
+ * @param scheduleOptions - `[Optional]` The `@Schedule` options that also schedule the recurring task at bootstrap.
+ */
+function registerScheduledHandler(
+  target: object,
+  propertyName: string | symbol,
+  descriptor: TypedPropertyDescriptor<RequestType>,
+  taskName: string,
+  scheduleOptions?: ScheduleOptions,
+): void {
+  const method = descriptor.value!;
+
+  descriptor.value = async function (...args: any[]) {
+    new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+    return await method.apply(this, args);
+  };
+
+  const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+
+  metadataDispatcher.addMethodMetadata({
+    type: 'SCHEDULED',
+    eventKind: 'ON',
+    event: 'SCHEDULED_EVENT',
+    taskName,
+    scheduleOptions,
+    callback: descriptor.value,
+    isDraft: false,
+  });
+}
+
+/**
+ * Use `@OnScheduled` decorator to handle a `@sap/cds` 10 event-queue `scheduled task` by its name.
+ *
+ * It registers `srv.on(name, cb)` for the task - handling a scheduled task is just a normal `ON` handler on the
+ * (queued) app service. The `name` is registered `verbatim` (dots are **not** stripped), so fully-qualified task
+ * names like `'my.namespace.Task'` are matched exactly.
+ *
+ * `NOTE:` `@OnScheduled` only `handles` the task. To also `schedule` it recurrently at bootstrap use [@Schedule](#schedule).
+ *
+ * @param name - The task name to handle.
+ * @example
+ * ```typescript
+ * /@OnScheduled('cleanupExpiredCarts')
+ * public async cleanup(/@Req() req: Request) {
+ *   // ... runs whenever the 'cleanupExpiredCarts' task is dispatched
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onscheduled | CDS-TS-Dispatcher - @OnScheduled}
+ */
+function OnScheduled(name: string) {
+  return function <Target extends object>(
+    target: Target,
+    propertyName: string | symbol,
+    descriptor: TypedPropertyDescriptor<RequestType>,
+  ): void {
+    registerScheduledHandler(target, propertyName, descriptor, name);
+  };
+}
+
+/**
+ * Use `@Schedule` decorator to `handle` **and** recurrently `schedule` a `@sap/cds` 10 event-queue task.
+ *
+ * It does everything [@OnScheduled](#onscheduled) does (registers `srv.on(name, cb)`) **and** schedules the task as a
+ * `recurring singleton` at bootstrap via `srv.schedule(name, data).every(every).as(name)`. Because `.every().as(name)`
+ * makes the task a `named singleton`, re-scheduling on every boot `upserts` rather than duplicates it.
+ *
+ * `every` accepts an `interval` string (e.g. `'10m'`) or a `cron` expression - it is passed through verbatim (CAP's
+ * `ms4` / `cron` parse it).
+ *
+ * `NOTE:` `one-shot` scheduling (`.after`) is intentionally **not** a decorator - inject the service
+ * (`CDS_DISPATCHER.SRV`) and call `srv.schedule(name, data).after(delay).as(name)` programmatically when you need it.
+ *
+ * @param options - The schedule options.
+ * @param options.name - The task name (registered `verbatim` and used as the singleton identity).
+ * @param options.every - The recurrence as an `interval` string (`'10m'`) or a `cron` expression.
+ * @param [options.data] - `[Optional]` The payload delivered to the handler on every run (as `req.data`).
+ * @example
+ * ```typescript
+ * /@Schedule({ name: 'sendDailyDigest', every: '24h' })
+ * public async digest(/@Req() req: Request) {
+ *   // ... runs on bootstrap-scheduled recurrence
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#schedule | CDS-TS-Dispatcher - @Schedule}
+ */
+function Schedule(options: ScheduleOptions) {
+  return function <Target extends object>(
+    target: Target,
+    propertyName: string | symbol,
+    descriptor: TypedPropertyDescriptor<RequestType>,
+  ): void {
+    registerScheduledHandler(target, propertyName, descriptor, options.name, options);
+  };
+}
+
+/**
+ * ####################################################################################################################
+ * End `Scheduling` methods
+ * ####################################################################################################################
+ */
+
+/**
+ * Use `@Stream` decorator to stream a `@sap/cds` 10 streaming read (`SELECT.pipeline()`, `SELECT.foreach()`,
+ * `for-await` iteration) straight to the HTTP response from an `ON` handler ([@OnRead](#onread),
+ * [@OnFunction](#onfunction), [@OnBoundFunction](#onboundfunction)).
+ *
+ * If the decorated method returns a `Readable` (an object exposing a `.pipe` function), `@Stream` sets the response
+ * `Content-Type` (default `'application/octet-stream'`) and pipes the stream to the express response, destroying the
+ * response if the stream errors. Any `non-stream` return value is passed through unchanged.
+ *
+ * `NOTE:` place `@Stream` **directly on the method, below** the `ON` decorator so it wraps the returned value:
+ * ```typescript
+ * /@OnBoundFunction(Book.actions.download)
+ * /@Stream('application/json')
+ * public async download(/@Req() req: Request) {
+ *   return SELECT.from(Book).stream(); // a Readable
+ * }
+ * ```
+ *
+ * @param contentType - `[Optional]` The `Content-Type` header for the streamed response. Defaults to `'application/octet-stream'`.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#stream | CDS-TS-Dispatcher - @Stream}
+ */
+function Stream(contentType = 'application/octet-stream') {
+  return function <Target extends object>(
+    _: Target,
+    __: string | symbol,
+    descriptor: TypedPropertyDescriptor<RequestType>,
+  ): void {
+    const originalMethod = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      const result = await originalMethod.apply(this, args);
+
+      // Non-stream return values pass through unchanged.
+      if (!streamUtil.isReadableStream(result)) {
+        return result;
+      }
+
+      // Resolve the HTTP response from the current request context (robust to argument re-indexing).
+      const req = (cds.context as Request | undefined) ?? util.findRequest(args);
+      const res = req ? parameterUtil.retrieveResponse(req) : undefined;
+
+      // No HTTP response to pipe to (e.g. non-HTTP invocation) → passthrough.
+      if (!res) {
+        return result;
+      }
+
+      await streamUtil.pipeToResponse(res, result, contentType);
+    };
+  };
+}
+
 export {
   // Standalone events
   OnSubscribe,
@@ -1315,20 +1528,37 @@ export {
   // BEFORE events
   BeforeNewDraft,
   BeforeCancelDraft,
+  BeforePatchDraft,
+  BeforeDiscardDraft,
   BeforeEditDraft,
   BeforeSaveDraft,
 
   // AFTER events
   AfterNewDraft,
   AfterCancelDraft,
+  AfterPatchDraft,
+  AfterDiscardDraft,
   AfterEditDraft,
   AfterSaveDraft,
 
   // ACTION events
   OnNewDraft,
   OnCancelDraft,
+  OnPatchDraft,
+  OnDiscardDraft,
 
   // Triggered on active entity 'MyEntity'
   OnEditDraft,
   OnSaveDraft,
+  // ========================================================================================================================================================
+
+  // ========================================================================================================================================================
+  // SCHEDULING events (@sap/cds 10 event-queue)
+  OnScheduled,
+  Schedule,
+  // ========================================================================================================================================================
+
+  // ========================================================================================================================================================
+  // STREAMING
+  Stream,
 };

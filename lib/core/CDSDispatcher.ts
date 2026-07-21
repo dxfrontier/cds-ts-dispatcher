@@ -3,13 +3,20 @@ import cds, { CdsFunction } from '@sap/cds';
 
 import util from '../util/util';
 import CDS_DISPATCHER from '../constants/constants';
+import constants from '../constants/internalConstants';
 
 import { Container } from 'inversify';
 import { MiddlewareEntityRegistry } from '../util/middleware/MiddlewareEntityRegistry';
 import { MetadataDispatcher } from './MetadataDispatcher';
 
-import type { NonEmptyArray, BaseHandler, Constructable, EventMessagingOptions } from '../types/internalTypes';
-import type { Request, Service, ServiceImpl } from '../types/types';
+import type {
+  NonEmptyArray,
+  BaseHandler,
+  Constructable,
+  EventMessagingOptions,
+  ScheduleTaskBuilder,
+} from '../types/internalTypes';
+import type { Request, ScheduleOptions, Service, ServiceImpl } from '../types/types';
 
 /**
  * `CDSDispatcher` is responsible for managing and registering event handlers for entities within the CDS framework.
@@ -114,14 +121,25 @@ class CDSDispatcher {
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
 
-    // DELETE single request
-    if (!Array.isArray(results)) {
-      // private routine for this func
-      const _isDeleted = (result: unknown): boolean => result === 1;
+    // Capture the raw database `affected` row count and stash it on the request under a `Symbol`
+    // (see `@Affected` parameter decorator). Done BEFORE the normalization below, which discards it.
+    if (Array.isArray(results) && 'affected' in results) {
+      (req as unknown as Record<symbol, number | undefined>)[constants.AFFECTED] = (
+        results as { affected?: number }
+      ).affected;
+    } else if (!Array.isArray(results) && util.lodash.isNumber(results)) {
+      (req as unknown as Record<symbol, number | undefined>)[constants.AFFECTED] = results as number;
+    }
 
-      if (util.lodash.isNumber(results)) {
-        results = _isDeleted(results);
-      }
+    // `@sap/cds` >= 10: the generic CREATE/UPDATE/UPSERT/DELETE handlers return an array
+    // carrying an `.affected` property instead of `req.data` / the delete count. Restore the
+    // pre-cds-10 contract of the `@After*` decorators (DELETE -> boolean, CREATE/UPDATE -> data).
+    if (Array.isArray(results) && 'affected' in results) {
+      const { affected } = results as { affected?: number };
+      results = req.event === 'DELETE' ? affected === 1 : req.data;
+    } else if (!Array.isArray(results) && util.lodash.isNumber(results)) {
+      // `@sap/cds` 9: DELETE single request returned the affected row count as a number.
+      results = results === 1;
     }
 
     // READ entity set, CREATE, READ, UPDATE - single request, DELETE - single request
@@ -238,7 +256,16 @@ class CDSDispatcher {
       return { eventKind };
     };
 
-    return { getDefault, getAction, getEvent, getPrepend, getMessagingEvent };
+    // Get the verbatim task name and (optional) schedule options for '@OnScheduled' / '@Schedule'
+    const getScheduled = () => {
+      if (handler.type === 'SCHEDULED') {
+        return { taskName: handler.taskName, scheduleOptions: handler.scheduleOptions };
+      }
+
+      return { taskName: undefined, scheduleOptions: undefined };
+    };
+
+    return { getDefault, getAction, getEvent, getPrepend, getMessagingEvent, getScheduled };
   }
 
   /**
@@ -458,6 +485,23 @@ class CDSDispatcher {
         break;
       }
 
+      case 'SCHEDULED_EVENT': {
+        const { taskName, scheduleOptions } = getProps.getScheduled();
+
+        // Register the task handler `verbatim` - NO dot-stripping (unlike the 'EVENT' case), so
+        // fully-qualified task names survive intact.
+        this.srv.on(taskName!, async (req, next) => {
+          return await this.executeOnCallback(handlerAndEntity, req, next);
+        });
+
+        // '@Schedule' additionally schedules the recurring singleton task at bootstrap.
+        if (scheduleOptions) {
+          this.scheduleRecurringTask(scheduleOptions);
+        }
+
+        break;
+      }
+
       case 'ERROR':
         this.srv.on('error', (err, req) => {
           return this.executeOnErrorCallback(handlerAndEntity, err, req);
@@ -472,6 +516,37 @@ class CDSDispatcher {
         });
       }
     }
+  }
+
+  /**
+   * Schedules a `recurring singleton` task at bootstrap for a `@Schedule` handler.
+   *
+   * Deferred to `cds.once('served')` so the service, database and queue are ready. `.every(every).as(name)`
+   * makes the task a named singleton, so re-scheduling on every boot `upserts` rather than duplicates.
+   *
+   * Failures are logged `loudly` (naming the task) but never crash the consumer's boot - scheduling
+   * infrastructure (`db` + `queue`) may simply be missing in the current profile.
+   *
+   * @param options - The `@Schedule` options (task name, recurrence, optional payload).
+   */
+  private scheduleRecurringTask(options: ScheduleOptions): void {
+    const { name, every, data } = options;
+
+    cds.once('served', async () => {
+      try {
+        // `FluentScheduling` only types `after` / `every`; the runtime builder also exposes `.as(name)`.
+        await (this.srv.schedule(name, data).every(every) as unknown as ScheduleTaskBuilder).as(name);
+      } catch (error) {
+        console.error(
+          util.showRedConsole(
+            `[CDS-TS-Dispatcher] @Schedule failed to schedule task '${name}'. ` +
+              `The scheduling infrastructure (db + queue) may be missing or misconfigured in this profile. ` +
+              `The task handler is still registered and will run if the task is dispatched by other means.`,
+          ),
+          error,
+        );
+      }
+    });
   }
 
   /**

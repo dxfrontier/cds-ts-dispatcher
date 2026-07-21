@@ -23,12 +23,15 @@ import {
   Result,
   Service,
   SingleInstanceSwitch,
+  Subject,
   Request,
   Validate,
   ValidationResults,
   ValidatorFlags,
 } from '../../../../../../../lib';
 import { BookStat } from '../../../../@cds-models/CatalogService';
+
+import type { ref } from '@sap/cds';
 import AuthorService from '../../../service/AuthorService';
 import BookStatsService from '../../../service/BookStatsService';
 
@@ -117,7 +120,10 @@ class BookStatsHandler {
   public async notifyAuthor(
     @Req() req: ActionRequest<typeof BookStat.actions.NotifyAuthor>,
     @Next() next: NextEvent,
+    @Subject() subject: ref | undefined,
   ): ActionReturn<typeof BookStat.actions.NotifyAuthor> {
+    // F2: `req.subject` is the CQN ref identifying the bound-function target instance (cds 10).
+    console.log('[BookStatsHandler] NotifyAuthor subject:', subject?.ref);
     return await this.authorService.notifyAuthor(req);
   }
 }

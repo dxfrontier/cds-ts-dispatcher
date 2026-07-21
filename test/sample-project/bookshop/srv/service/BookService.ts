@@ -26,8 +26,8 @@ class BookService {
     this.enrichTitle(args.results);
   }
 
-  public notifyItemDeleted(req: Request, deleted: boolean) {
-    req.notify(`Item deleted : ${deleted}`);
+  public notifyItemDeleted(req: Request, deleted: boolean, affected?: number) {
+    req.notify(`Item deleted : ${deleted} | affected : ${affected}`);
   }
 
   public async emitOrderedBookData(req: Request) {

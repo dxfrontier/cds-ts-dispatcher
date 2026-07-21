@@ -2,16 +2,22 @@ import type { Constructable } from '../../../lib/types/internalTypes';
 
 import {
   AfterCancelDraft,
+  AfterDiscardDraft,
   AfterEditDraft,
   AfterNewDraft,
+  AfterPatchDraft,
   AfterSaveDraft,
   BeforeCancelDraft,
+  BeforeDiscardDraft,
   BeforeEditDraft,
   BeforeNewDraft,
+  BeforePatchDraft,
   BeforeSaveDraft,
   OnCancelDraft,
+  OnDiscardDraft,
   OnEditDraft,
   OnNewDraft,
+  OnPatchDraft,
   OnSaveDraft,
 } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/core/MetadataDispatcher';
@@ -57,6 +63,26 @@ class BookEventsHandler {
 
   @AfterSaveDraft()
   public async afterSaveDraft(results: BookEvent, req: Request<Request>) {}
+
+  // F1: PATCH draft (alias of UPDATE on '.drafts' since cds 10)
+  @OnPatchDraft()
+  public async onPatchDraft(req: Request, next: Function) {}
+
+  @BeforePatchDraft()
+  public async beforePatchDraft(req: Request) {}
+
+  @AfterPatchDraft()
+  public async afterPatchDraft(results: BookEvent, req: Request) {}
+
+  // F1: DISCARD draft (alias of CANCEL since cds 10)
+  @OnDiscardDraft()
+  public async onDiscardDraft(req: Request, next: Function) {}
+
+  @BeforeDiscardDraft()
+  public async beforeDiscardDraft(req: Request) {}
+
+  @AfterDiscardDraft()
+  public async afterDiscardDraft(results: BookEvent, req: Request) {}
 }
 
 const newBookEvents = (BookEvents: Constructable) => new BookEvents();
@@ -91,4 +117,14 @@ describe('DRAFT', () => {
   testEvent('CANCEL', 'AfterCancelDraft', 'AFTER', true);
   testEvent('EDIT', 'AfterEditDraft', 'AFTER', false);
   testEvent('SAVE', 'AfterSaveDraft', 'AFTER', false);
+
+  // F1: PATCH draft trio (isDraft: true, triggered on 'MyEntity.drafts')
+  testEvent('PATCH', 'BeforePatchDraft', 'BEFORE', true);
+  testEvent('PATCH', 'OnPatchDraft', 'ON', true);
+  testEvent('PATCH', 'AfterPatchDraft', 'AFTER', true);
+
+  // F1: DISCARD draft trio (isDraft: true, triggered on 'MyEntity.drafts')
+  testEvent('DISCARD', 'BeforeDiscardDraft', 'BEFORE', true);
+  testEvent('DISCARD', 'OnDiscardDraft', 'ON', true);
+  testEvent('DISCARD', 'AfterDiscardDraft', 'AFTER', true);
 });

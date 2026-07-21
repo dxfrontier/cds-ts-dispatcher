@@ -8,14 +8,17 @@ on:
       - closed
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+
+# published dispatcher postinstall runs `cds env get` during npm ci; cds 10 emits a non-JSON inspect dump under GITHUB_ACTIONS unless NO_COLOR is set
+env:
+  NO_COLOR: '1'
 
 jobs:
-  # This will validate to see if the labels contains 'none' which means that if 'none' was found the release will not happen
+  # This will validate that the PR was actually merged (not just closed) and labeled 'deploy' - otherwise the release will not happen
   check_valid_deploy:
     name: Validate deploy conditions
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'deploy') }}
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'deploy')
     runs-on: ubuntu-latest
     steps:
       - run: echo "Proceed valid"
@@ -27,7 +30,11 @@ jobs:
     needs: [check_valid_deploy]
     steps:
       - uses: actions/checkout@v4
-      - run: npm install
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+      - run: npm ci
       - run: npm run build
 
   # This will push the latest build of the project to npm
@@ -35,17 +42,23 @@ jobs:
     name: Publish to npm public
     needs: check_valid_build
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
+          cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
+      - run: npm run test:unit
       - run: npm run build
-      - run: npm publish --access public
+      # npm provenance needs npm 9.5+ and a CI OIDC-compatible token; if the maintainer's npm_token is incompatible with provenance, drop the --provenance flag
+      - run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}

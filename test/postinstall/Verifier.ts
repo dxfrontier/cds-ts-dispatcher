@@ -11,6 +11,9 @@ class Verifier {
   private decoratorIndexPath = path.resolve(
     process.env.INIT_CWD! + '/test/sample-project/bookshop/@dispatcher/index.ts',
   );
+  private decoratorRuntimeStubPath = path.resolve(
+    process.env.INIT_CWD! + '/test/sample-project/bookshop/@dispatcher/index.js',
+  );
   private gitignorePath = path.resolve(process.env.INIT_CWD! + '/test/sample-project/bookshop/.gitignore');
 
   verifyDecoratorFolder() {
@@ -25,7 +28,11 @@ class Verifier {
       throw new Error(colors.red('❌ CDS_ENV reference not found in @dispatcher/index.ts.'));
     }
 
-    console.log(colors.green('✅ @dispatcher folder and index.ts file are correctly set up.'));
+    if (!existsSync(this.decoratorRuntimeStubPath)) {
+      throw new Error(colors.red('❌ @dispatcher/index.js runtime stub is missing.'));
+    }
+
+    console.log(colors.green('✅ @dispatcher folder, index.ts and index.js files are correctly set up.'));
   }
 
   verifyPackageJsonImports() {

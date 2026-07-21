@@ -2,9 +2,11 @@ import { retrieveJwt } from '@sap-cloud-sdk/connectivity';
 import cds, { EventContext, Request as RequestClass } from '@sap/cds';
 
 import util from '../util';
+import constants from '../../constants/internalConstants';
 
 import type { MetadataFields, TemporaryArgs } from '../../types/internalTypes';
 import type { IncomingMessage, ServerResponse } from 'http';
+import type { ref } from '@sap/cds';
 import type { Request } from '../../types/types';
 
 /**
@@ -229,6 +231,24 @@ const parameterUtil = {
    */
   retrieveResponse(req: Request) {
     return req.http?.res as ServerResponse;
+  },
+
+  /**
+   * Retrieves the `req.subject` - the `CQN ref` identifying the request's target instance.
+   * @param req The request object.
+   * @returns The subject `ref` if present, otherwise undefined.
+   */
+  retrieveSubject(req: Request): ref | undefined {
+    return req.subject;
+  },
+
+  /**
+   * Retrieves the database `affected` row count stashed on the request by the `CDSDispatcher`.
+   * @param req The request object.
+   * @returns The affected row count for `CREATE` / `UPDATE` / `DELETE` after-handlers, otherwise undefined.
+   */
+  retrieveAffected(req: Request): number | undefined {
+    return (req as unknown as Record<symbol, number | undefined>)[constants.AFFECTED];
   },
 
   /**

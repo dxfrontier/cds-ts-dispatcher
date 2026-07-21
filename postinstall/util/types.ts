@@ -1,4 +1,5 @@
 export type PackageJson = {
+  name: string | undefined;
   workspaces: string[] | undefined;
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
@@ -9,5 +10,6 @@ export type PackageJson = {
 export type ExecutionPaths = {
   executedInstalledPath: string;
   envFilePath: string;
+  runtimeStubPath: string;
   dispatcherPath: string;
 }[];

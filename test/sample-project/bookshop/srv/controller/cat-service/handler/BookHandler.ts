@@ -1,4 +1,5 @@
 import {
+  Affected,
   AfterCreate,
   AfterDelete,
   AfterRead,
@@ -125,8 +126,12 @@ class BookHandler {
   }
 
   @AfterDelete()
-  private async afterDelete(@Result() deleted: boolean, @Req() req: Request): Promise<void> {
-    this.bookService.notifyItemDeleted(req, deleted);
+  private async afterDelete(
+    @Result() deleted: boolean,
+    @Req() req: Request,
+    @Affected() affected: number | undefined,
+  ): Promise<void> {
+    this.bookService.notifyItemDeleted(req, deleted, affected);
   }
 }
 

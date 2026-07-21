@@ -1,0 +1,5 @@
+# Keep the docker build context minimal and hermetic - never send a stray
+# local install (from running the fixture outside docker) into the image.
+consumer/node_modules/
+consumer/@dispatcher/
+consumer/package-lock.json

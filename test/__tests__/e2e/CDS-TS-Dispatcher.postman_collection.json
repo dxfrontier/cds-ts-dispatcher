@@ -76,6 +76,16 @@
                               "",
                               "pm.test(\"Status code is 200\", function () {",
                               "    pm.response.to.have.status(200);",
+                              "});",
+                              "",
+                              "pm.test(\"Structure: value is a non-empty array of { ID: number, title: string }\", function () {",
+                              "    const response = pm.response.json();",
+                              "    pm.expect(Array.isArray(response.value)).to.be.true;",
+                              "    pm.expect(response.value.length).to.be.above(0);",
+                              "    response.value.forEach((item) => {",
+                              "        pm.expect(item).to.have.property(\"ID\").that.is.a(\"number\");",
+                              "        pm.expect(item).to.have.property(\"title\").that.is.a(\"string\");",
+                              "    });",
                               "});"
                             ],
                             "type": "text/javascript",
@@ -197,14 +207,12 @@
                               "    pm.response.to.have.status(204);",
                               "});",
                               "",
-                              "pm.test(\"Delete an item returns text 'Item deleted : true'\", function () {",
+                              "pm.test(\"Delete surfaces 'Item deleted : true' and the @Affected row count\", function () {",
                               "    const headers = JSON.parse(pm.response.headers.get('sap-messages'));",
+                              "    const deletedMessage = headers.find((header) => header.message.includes('Item deleted : true'));",
                               "",
-                              "     headers.forEach((header) => {",
-                              "        if(header.message === 'Item deleted : true') {",
-                              "            pm.expect(header.message).to.contains('Item deleted : true')",
-                              "        }",
-                              "    })",
+                              "    pm.expect(deletedMessage, 'Item deleted message should be present').to.not.be.undefined;",
+                              "    pm.expect(deletedMessage.message).to.contains('affected : 1');",
                               "});"
                             ],
                             "type": "text/javascript",
@@ -635,7 +643,17 @@
                               "    })",
                               "});",
                               "",
-                              ""
+                              "",
+                              "",
+                              "pm.test(\"Structure: value is an array of { ID: number, views: number, averageRating: number }\", function () {",
+                              "    const response = pm.response.json();",
+                              "    pm.expect(Array.isArray(response.value)).to.be.true;",
+                              "    response.value.forEach((item) => {",
+                              "        pm.expect(item).to.have.property(\"ID\").that.is.a(\"number\");",
+                              "        pm.expect(item).to.have.property(\"views\").that.is.a(\"number\");",
+                              "        pm.expect(item).to.have.property(\"averageRating\").that.is.a(\"number\");",
+                              "    });",
+                              "});"
                             ],
                             "type": "text/javascript",
                             "packages": {}
@@ -813,6 +831,10 @@
                               "pm.test(\"Response body contains property 'stock' and checks its value\", function () {",
                               "    pm.expect(jsonData).to.have.property('stock');",
                               "    pm.expect(jsonData.stock).to.equal(4);",
+                              "});",
+                              "",
+                              "pm.test(\"Structure: stock is a number\", function () {",
+                              "    pm.expect(jsonData.stock).to.be.a(\"number\");",
                               "});"
                             ],
                             "type": "text/javascript",
@@ -872,6 +894,39 @@
                           "raw": "{{baseUrl}}/{{catalogService}}/submitOrderFunction(book=271,quantity=6)",
                           "host": ["{{baseUrl}}"],
                           "path": ["{{catalogService}}", "submitOrderFunction(book=271,quantity=6)"]
+                        }
+                      },
+                      "response": []
+                    },
+                    {
+                      "name": "@Stream streams book rows (NDJSON)",
+                      "event": [
+                        {
+                          "listen": "test",
+                          "script": {
+                            "exec": [
+                              "pm.test(\"streamBooks streams NDJSON rows via @Stream\", function () {",
+                              "    pm.response.to.have.status(200);",
+                              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                              "",
+                              "    const lines = pm.response.text().trim().split('\\n').filter((line) => line.length > 0);",
+                              "    pm.expect(lines.length, 'should stream more than one row').to.be.above(1);",
+                              "",
+                              "    const firstRow = JSON.parse(lines[0]);",
+                              "    pm.expect(firstRow).to.have.property('title');",
+                              "});"
+                            ],
+                            "type": "text/javascript"
+                          }
+                        }
+                      ],
+                      "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/{{catalogService}}/streamBooks()",
+                          "host": ["{{baseUrl}}"],
+                          "path": ["{{catalogService}}", "streamBooks()"]
                         }
                       },
                       "response": []
@@ -1048,6 +1103,15 @@
                               "",
                               "pm.test(\"Status code is 200\", function () {",
                               "   pm.expect(pm.response.code).to.be.oneOf([204, 201, 200]);",
+                              "});",
+                              "",
+                              "pm.test(\"Structure: response has exactly { book: string, stats: number, rating: number } (besides @odata.context)\", function () {",
+                              "    const response = pm.response.json();",
+                              "    const keys = Object.keys(response).filter((key) => key !== \"@odata.context\");",
+                              "    pm.expect(keys.sort()).to.eql([\"book\", \"rating\", \"stats\"]);",
+                              "    pm.expect(response.book).to.be.a(\"string\");",
+                              "    pm.expect(response.stats).to.be.a(\"number\");",
+                              "    pm.expect(response.rating).to.be.a(\"number\");",
                               "});"
                             ],
                             "type": "text/javascript",
@@ -1596,6 +1660,50 @@
                   "response": []
                 },
                 {
+                  "name": "@OnPatchDraft & @AfterPatchDraft",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Patching a draft field triggers @OnPatchDraft and @AfterPatchDraft\", function () {",
+                          "    const messages = JSON.parse(pm.response.headers.get('sap-messages')).map((item) => item.message);",
+                          "    pm.expect(messages).to.include('On patch draft');",
+                          "    pm.expect(messages).to.include('After patch draft');",
+                          "});",
+                          "",
+                          "pm.test(\"Status code is 200\", function () {",
+                          "    pm.response.to.have.status(200);",
+                          "});"
+                        ],
+                        "type": "text/javascript"
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "PATCH",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"name\" : \"Empire strikes again, volume III - patched\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+                      "host": ["{{baseUrl}}"],
+                      "path": [
+                        "{{catalogService}}",
+                        "{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
                   "name": "@OnSaveDraft",
                   "event": [
                     {
@@ -1721,6 +1829,160 @@
                       "path": [
                         "{{catalogService}}",
                         "{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "cds 10 bypass_draft matrix",
+              "description": "PATCHing a draft-enabled entity while addressing the ACTIVE instance directly (IsActiveEntity=true) must fire the ACTIVE-entity handlers (@BeforeUpdate/@OnUpdate/@AfterUpdate, added to BookEventsHandler.ts for this matrix) and NOT the '@...PatchDraft' handlers used by the draft-instance PATCH flow above.",
+              "item": [
+                {
+                  "name": "Pre-request: Create draft (seed for the bypass_draft matrix)",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Status code is 201\", function () {",
+                          "    pm.response.to.have.status(201);",
+                          "});",
+                          "",
+                          "pm.test(\"Response contains IsActiveEntity: false\", function () {",
+                          "    const jsonData = pm.response.json();",
+                          "    pm.expect(jsonData.IsActiveEntity).to.eql(false);",
+                          "",
+                          "    pm.environment.set(\"draftUUIDInstance\", jsonData.ID);",
+                          "});"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"name\": \"Bypass draft matrix seed\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "{{bookEventsEntity}}"]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Pre-request: Activate draft (creates the ACTIVE entity to PATCH directly)",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Status code is 201\", function () {",
+                          "    pm.response.to.have.status(201);",
+                          "});",
+                          "",
+                          "pm.test(\"Response contains IsActiveEntity: true\", function () {",
+                          "    const jsonData = pm.response.json();",
+                          "    pm.expect(jsonData.IsActiveEntity).to.eql(true);",
+                          "});"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)/CatalogService.draftActivate",
+                      "host": ["{{baseUrl}}"],
+                      "path": [
+                        "{{catalogService}}",
+                        "{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=false)",
+                        "CatalogService.draftActivate"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "PATCH the ACTIVE entity directly fires ACTIVE handlers, NOT the draft PATCH handlers",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Status code is 200\", function () {",
+                          "    pm.response.to.have.status(200);",
+                          "});",
+                          "",
+                          "pm.test(\"ACTIVE-entity handlers fired: Before/On/AfterUpdate ('*active' sap-messages)\", function () {",
+                          "    const messages = JSON.parse(pm.response.headers.get(\"sap-messages\")).map((item) => item.message);",
+                          "    pm.expect(messages).to.include(\"Before update active\");",
+                          "    pm.expect(messages).to.include(\"On update active\");",
+                          "    pm.expect(messages).to.include(\"After update active\");",
+                          "});",
+                          "",
+                          "pm.test(\"Draft PATCH handlers did NOT fire (bypass_draft: no '*patch draft' sap-messages)\", function () {",
+                          "    const messages = JSON.parse(pm.response.headers.get(\"sap-messages\")).map((item) => item.message);",
+                          "    pm.expect(messages).to.not.include(\"Before patch draft\");",
+                          "    pm.expect(messages).to.not.include(\"On patch draft\");",
+                          "    pm.expect(messages).to.not.include(\"After patch draft\");",
+                          "});",
+                          "",
+                          "pm.test(\"Response body reflects the active, non-draft entity\", function () {",
+                          "    const jsonData = pm.response.json();",
+                          "    pm.expect(jsonData).to.have.property(\"ID\").that.is.a(\"string\");",
+                          "    pm.expect(jsonData.name).to.eql(\"Patched via the active entity directly\");",
+                          "    pm.expect(jsonData.IsActiveEntity).to.eql(true);",
+                          "});"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "PATCH",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"name\": \"Patched via the active entity directly\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=true)",
+                      "host": ["{{baseUrl}}"],
+                      "path": [
+                        "{{catalogService}}",
+                        "{{bookEventsEntity}}(ID={{draftUUIDInstance}},IsActiveEntity=true)"
                       ]
                     }
                   },
@@ -3347,6 +3609,16 @@
                           "            pm.expect(allStars).to.be.true;",
                           "        }",
                           "    });",
+                          "});",
+                          "",
+                          "pm.test(\"Structure: value is an array; orderNumber/status are strings\", function () {",
+                          "    const response = pm.response.json();",
+                          "    pm.expect(Array.isArray(response.value)).to.be.true;",
+                          "    pm.expect(response.value.length).to.be.above(0);",
+                          "    response.value.forEach((order) => {",
+                          "        pm.expect(order.orderNumber).to.be.a(\"string\");",
+                          "        pm.expect(order.status).to.be.a(\"string\");",
+                          "    });",
                           "});"
                         ],
                         "type": "text/javascript",
@@ -3408,6 +3680,14 @@
                           "    response.value.forEach(function(author) {",
                           "        pm.expect(author).to.not.have.property('modifiedAt');",
                           "    });",
+                          "});",
+                          "",
+                          "pm.test(\"Structure: each author has EXACTLY the keys [ID, name] (nothing else)\", function () {",
+                          "    const response = pm.response.json();",
+                          "    pm.expect(response.value.length).to.be.above(0);",
+                          "    response.value.forEach((author) => {",
+                          "        pm.expect(Object.keys(author).sort()).to.eql([\"ID\", \"name\"]);",
+                          "    });",
                           "});"
                         ],
                         "type": "text/javascript",
@@ -3452,6 +3732,15 @@
                           "            });",
                           "        }",
                           "    });",
+                          "});",
+                          "",
+                          "pm.test(\"Structure: value is a well-formed array of { ID: number, quantity: number }\", function () {",
+                          "    const response = pm.response.json();",
+                          "    pm.expect(Array.isArray(response.value)).to.be.true;",
+                          "    response.value.forEach((sale) => {",
+                          "        pm.expect(sale).to.have.property(\"ID\").that.is.a(\"number\");",
+                          "        pm.expect(sale).to.have.property(\"quantity\").that.is.a(\"number\");",
+                          "    });",
                           "});"
                         ],
                         "type": "text/javascript",
@@ -3481,6 +3770,227 @@
                       "raw": "{{baseUrl}}/{{catalogService}}/{{bookSalesEntity}}",
                       "host": ["{{baseUrl}}"],
                       "path": ["{{catalogService}}", "{{bookSalesEntity}}"]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "@ExecutionAllowedForRole (denial paths)",
+              "description": "Denial-path coverage for `@ExecutionAllowedForRole('Manager')`, guarding the unbound action `adminOnlyAction` (F6, srv/controller/cat-service/handler/AdminOnlyActionHandler.ts). Status codes below were discovered empirically by running the action against a live server, not assumed.",
+              "item": [
+                {
+                  "name": "Manager can execute adminOnlyAction (200, allowed role)",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Status code is 200\", function () {",
+                          "    pm.response.to.have.status(200);",
+                          "});",
+                          "",
+                          "pm.test(\"Response body has the expected shape { message: string }\", function () {",
+                          "    const response = pm.response.json();",
+                          "    pm.expect(response).to.have.property(\"message\").that.is.a(\"string\");",
+                          "    pm.expect(response.message).to.eql(\"Manager-only action executed successfully\");",
+                          "});"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "auth": {
+                      "type": "basic",
+                      "basic": [
+                        {
+                          "key": "password",
+                          "value": "{{manager}}",
+                          "type": "string"
+                        },
+                        {
+                          "key": "username",
+                          "value": "{{manager}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/adminOnlyAction",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "adminOnlyAction"]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "User is denied (204 No Content, NOT a 4xx) - @ExecutionAllowedForRole has no req.reject on denial",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "// Empirically discovered (not assumed): lib/decorators/method.ts `ExecutionAllowedForRole`",
+                          "// returns early WITHOUT calling `req.reject(...)` when the role check fails, so the ON handler",
+                          "// resolves with no result. CAP responds 204 No Content for the action call - it is NOT a 401/403.",
+                          "pm.test(\"Status code is 204\", function () {",
+                          "    pm.response.to.have.status(204);",
+                          "});",
+                          "",
+                          "pm.test(\"Response body is empty\", function () {",
+                          "    pm.expect(pm.response.text()).to.eql(\"\");",
+                          "});"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "auth": {
+                      "type": "basic",
+                      "basic": [
+                        {
+                          "key": "password",
+                          "value": "{{user}}",
+                          "type": "string"
+                        },
+                        {
+                          "key": "username",
+                          "value": "{{user}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/adminOnlyAction",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "adminOnlyAction"]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "No credentials are rejected with 401 Unauthorized (framework-level, before the handler runs)",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "// `adminOnlyAction` is annotated `@(requires: 'authenticated-user')` in catalog-service.cds, so",
+                          "// basic-auth kind rejects anonymous calls before @ExecutionAllowedForRole ever runs.",
+                          "pm.test(\"Status code is 401\", function () {",
+                          "    pm.response.to.have.status(401);",
+                          "});",
+                          "",
+                          "pm.test(\"WWW-Authenticate header advertises Basic auth\", function () {",
+                          "    pm.expect(pm.response.headers.get(\"WWW-Authenticate\")).to.include(\"Basic\");",
+                          "});"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "auth": {
+                      "type": "noauth"
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/adminOnlyAction",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "adminOnlyAction"]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Invalid credentials are rejected with 401 Unauthorized",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "pm.test(\"Status code is 401\", function () {",
+                          "    pm.response.to.have.status(401);",
+                          "});",
+                          "",
+                          "pm.test(\"WWW-Authenticate header advertises Basic auth\", function () {",
+                          "    pm.expect(pm.response.headers.get(\"WWW-Authenticate\")).to.include(\"Basic\");",
+                          "});"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "auth": {
+                      "type": "basic",
+                      "basic": [
+                        {
+                          "key": "password",
+                          "value": "invalid-password",
+                          "type": "string"
+                        },
+                        {
+                          "key": "username",
+                          "value": "invalid-user",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/{{catalogService}}/adminOnlyAction",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["{{catalogService}}", "adminOnlyAction"]
                     }
                   },
                   "response": []

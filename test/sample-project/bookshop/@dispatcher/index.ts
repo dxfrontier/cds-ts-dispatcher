@@ -1,121 +1,92 @@
 // Type definitions for envConfig
 export interface CDS_ENV {
-    _context: string;
-    _home: string;
-    _sources: string[];
-    _profiles: _profiles;
-    production: boolean;
-    requires: Requires;
-    runtime: Runtime;
-    server: Server;
-    protocols: Protocols;
-    features: Features;
-    fiori: Fiori;
-    ql: Ql;
-    log: Log;
-    folders: Folders;
-    i18n: I18n;
-    odata: Odata;
-    sql: Sql;
-    hana: Hana;
-    build: Build;
-    cdsc: Cdsc;
-    query: Query;
-    plugins: Plugins;
-    typer: Typer;
-    schema: Schema;
-    config: Config;
-    appid: null;
-    '_home_cds-dk': string;
-}
-interface _profiles {
-    _defined: _defined;
-}
-interface _defined {
-}
-interface Requires {
+  _context: string;
+  _home: string;
+  _sources: string[];
+  _profiles: {
+    _defined: {};
+  };
+  production: boolean;
+  requires: {
     middlewares: boolean;
-    queue: Queue;
-    auth: Auth;
-    db: Db;
-    messaging: Messaging;
-}
-interface Queue {
-    model: string;
-    maxAttempts: number;
-    chunkSize: number;
-    parallel: boolean;
-    storeLastError: boolean;
-    timeout: string;
-    legacyLocking: boolean;
-    ignoredContext: string[];
-    kind: string;
-}
-interface Auth {
-    kind: string;
-    users: Users;
-    tenants: Tenants;
-}
-interface Users {
-    manager: Manager;
-    user: User;
-}
-interface Manager {
-    roles: string[];
-}
-interface User {
-    roles: string[];
-}
-interface Tenants {
-}
-interface Db {
-    impl: string;
-    credentials: Credentials;
-    pool: Pool;
-    kind: string;
-}
-interface Credentials {
-    url: string;
-}
-interface Pool {
-    max: number;
-}
-interface Messaging {
-    impl: string;
-    local: boolean;
-    kind: string;
-}
-interface Runtime {
+    queue: {
+      model: string;
+      maxAttempts: number;
+      timeout: string;
+      legacyLocking: boolean;
+      chunkSize: number;
+      parallel: boolean;
+      _ignoredContext: string[];
+      kind: string;
+    };
+    scheduling: {
+      impl: string;
+      queued: boolean;
+      silent: boolean;
+      markerInterval: string;
+      flushInterval: string;
+      _optimisticMarkers: boolean;
+    };
+    auth: {
+      kind: string;
+      users: {
+        manager: {
+          roles: string[];
+        };
+        user: {
+          roles: string[];
+        };
+      };
+      tenants: {};
+    };
+    db: {
+      impl: string;
+      credentials: {
+        url: string;
+      };
+      data: string[];
+      pool: {
+        evictionRunIntervalMillis: number;
+        min: number;
+        max: number;
+      };
+      kind: string;
+    };
+    messaging: {
+      impl: string;
+      local: boolean;
+      kind: string;
+    };
+  };
+  runtime: {
     patch_as_upsert: boolean;
     put_as_upsert: boolean;
     put_as_replace: boolean;
-}
-interface Server {
+  };
+  server: {
     shutdown_on_uncaught_errors: boolean;
     exit_on_multi_install: boolean;
     force_exit_timeout: number;
     cors: boolean;
     index: boolean;
     port: number;
-}
-interface Protocols {
+  };
+  protocols: {
     'odata-v4': {
-        path: string;
+      path: string;
     };
     'odata-v2': {
-        path: string;
+      path: string;
     };
-    rest: Rest;
-    hcql: Hcql;
+    rest: {
+      path: string;
+    };
+    hcql: {
+      path: string;
+    };
     'data.product': null;
-}
-interface Rest {
-    path: string;
-}
-interface Hcql {
-    path: string;
-}
-interface Features {
+  };
+  features: {
     folders: string;
     sql_simple_queries: number;
     pre_compile_edmxs: boolean;
@@ -129,62 +100,62 @@ interface Features {
     deploy_data_onconflict: string;
     assert_integrity: boolean;
     precise_timestamps: boolean;
-    consistent_params: boolean;
+    ieee754compatible: boolean;
+    compat_clone_appends: boolean;
+    compat_srv_getters: boolean;
     compat_texts_entities: boolean;
+    legacy_srv_results: boolean;
+    legacy_db_results: boolean;
+    bulk_inserts_via_rest: boolean;
     annotate_for_flows: boolean;
     history_for_flows: boolean;
-}
-interface Fiori {
-    preview: Preview;
+  };
+  fiori: {
+    preview: {
+      ui5: {
+        version: string;
+        theme: {
+          light: string;
+          dark: string;
+          switch: boolean;
+        };
+      };
+    };
     routes: boolean;
     lean_draft: boolean;
     wrap_multiple_errors: boolean;
     draft_lock_timeout: boolean;
     draft_deletion_timeout: boolean;
     draft_messages: boolean;
-    direct_crud: boolean;
-}
-interface Preview {
-    ui5: Ui5;
-}
-interface Ui5 {
-    version: string;
-    theme: Theme;
-}
-interface Theme {
-    light: string;
-    dark: string;
-    'switch': boolean;
-}
-interface Ql {
-}
-interface Log {
-    levels?: Levels;
-    service?: boolean;
-    user?: boolean;
-    mask_headers?: string[];
-    aspects?: string[];
-    als_custom_fields?: Als_custom_fields;
-    cls_custom_fields?: string[];
+    draft_new_action: boolean;
+    bypass_draft: boolean;
+  };
+  ql: {};
+  log: {
+    levels: {
+      compile: string;
+      cli: string;
+    };
+    service: boolean;
+    user: boolean;
+    mask_headers: string[];
+    aspects: string[];
+    als_custom_fields: {
+      query: number;
+      target: number;
+      details: number;
+      reason: number;
+    };
+    cls_custom_fields: string[];
     format: string;
-}
-interface Levels {
-    compile: string;
-    cli: string;
-}
-interface Als_custom_fields {
-    query: number;
-    target: number;
-    details: number;
-    reason: number;
-}
-interface Folders {
+  };
+  folders: {
     db: string;
     srv: string;
     app: string;
     apps: string;
-}
-interface I18n {
+  };
+  i18n: {
     file: string;
     folders: string[];
     languages: string;
@@ -192,173 +163,152 @@ interface I18n {
     preserved_locales: string[];
     fallback_bundle: string;
     fatjson: boolean;
-}
-interface Odata {
-    flavors: Flavors;
+  };
+  odata: {
+    flavors: {
+      v2: {
+        version: string;
+      };
+      v4: {
+        version: string;
+      };
+      w4: {
+        version: string;
+        containment: boolean;
+        structs: boolean;
+        refs: boolean;
+        xrefs: boolean;
+      };
+      x4: {
+        version: string;
+        containment: boolean;
+        structs: boolean;
+        refs: boolean;
+        xrefs: boolean;
+      };
+    };
     version: string;
     context_with_columns: boolean;
     max_batch_header_size: string;
-}
-interface Flavors {
-    v2: V2;
-    v4: V4;
-    w4: W4;
-    x4: X4;
-}
-interface V2 {
-    version: string;
-}
-interface V4 {
-    version: string;
-}
-interface W4 {
-    version: string;
-    containment: boolean;
-    structs: boolean;
-    refs: boolean;
-    xrefs: boolean;
-}
-interface X4 {
-    version: string;
-    containment: boolean;
-    structs: boolean;
-    refs: boolean;
-    xrefs: boolean;
-}
-interface Sql {
+    max_batch_parallelization: number;
+  };
+  sql: {
     names: string;
     dialect: string;
-}
-interface Hana {
+  };
+  hana: {
     'deploy-format': string;
-    journal: Journal;
-    table_data: Table_data;
-}
-interface Journal {
-    'change-mode': string;
-}
-interface Table_data {
-    column_mapping: Column_mapping;
-}
-interface Column_mapping {
-    LargeBinary: string;
-}
-interface Build {
+    journal: {
+      'change-mode': string;
+    };
+    table_data: {
+      column_mapping: {
+        LargeBinary: string;
+      };
+    };
+  };
+  build: {
     target: string;
-}
-interface Cdsc {
+  };
+  cdsc: {
     moduleLookupDirectories: string[];
-}
-interface Query {
-    limit: Limit;
-}
-interface Limit {
-    max: number;
-}
-interface Plugins {
+  };
+  query: {
+    limit: {
+      max: number;
+    };
+  };
+  remote: {};
+  plugins: {
     '@sap/cds-fiori': {
-        impl: string;
+      impl: string;
     };
     '@cap-js/sqlite': {
-        impl: string;
+      impl: string;
     };
     '@cap-js/cds-typer': {
-        impl: string;
+      impl: string;
     };
-}
-interface Typer {
-    output_directory?: string;
-    inline_declarations?: string;
-    target_module_type?: string;
-    properties_optional?: boolean;
-    use_entities_proxy?: boolean;
-    build_task?: boolean;
-    type?: string;
-    description?: string;
-    properties?: Properties;
-}
-interface Schema {
-    buildTaskType: BuildTaskType;
-    cds: Cds;
-}
-interface BuildTaskType {
-    name: string;
-    description: string;
-}
-interface Cds {
-    typer: Typer;
-}
-interface Properties {
-    cache: Cache;
-    output_directory: Output_directory;
-    log_level: Log_level;
-    js_config_path: Js_config_path;
-    use_entities_proxy: Use_entities_proxy;
-    inline_declarations: Inline_declarations;
-    properties_optional: Properties_optional;
-    ieee754compatible: Ieee754compatible;
-    legacy_binary_types: Legacy_binary_types;
-    target_module_type: Target_module_type;
-    build_task: Build_task;
-}
-interface Cache {
-    type: string;
-    description: string;
-    'enum': string[];
-    'default': string;
-}
-interface Output_directory {
-    type: string;
-    description: string;
-    'default': string;
-}
-interface Log_level {
-    type: string;
-    description: string;
-    'enum': string[];
-    'default': string;
-}
-interface Js_config_path {
-    type: string;
-    description: string;
-}
-interface Use_entities_proxy {
-    type: string;
-    description: string;
-    'default': boolean;
-}
-interface Inline_declarations {
-    type: string;
-    description: string;
-    'enum': string[];
-    'default': string;
-}
-interface Properties_optional {
-    type: string;
-    description: string;
-    'default': boolean;
-}
-interface Ieee754compatible {
-    type: string;
-    description: string;
-    'default': boolean;
-}
-interface Legacy_binary_types {
-    type: string;
-    description: string;
-    'default': boolean;
-}
-interface Target_module_type {
-    type: string;
-    description: string;
-    'enum': string[];
-    'default': string;
-}
-interface Build_task {
-    type: string;
-    description: string;
-    'default': boolean;
-}
-interface Config {
-    log: Log;
+  };
+  typer: {
+    output_directory: string;
+    inline_declarations: string;
+    target_module_type: string;
+    properties_optional: boolean;
+    use_entities_proxy: boolean;
+    build_task: boolean;
+  };
+  schema: {
+    buildTaskType: {
+      name: string;
+      description: string;
+    };
+    cds: {
+      typer: {
+        type: string;
+        description: string;
+        properties: {
+          cache: {
+            type: string;
+            description: string;
+            enum: string[];
+            default: string;
+          };
+          output_directory: {
+            type: string;
+            description: string;
+            default: string;
+          };
+          log_level: {
+            type: string;
+            description: string;
+            enum: string[];
+            default: string;
+          };
+          js_config_path: {
+            type: string;
+            description: string;
+          };
+          use_entities_proxy: {
+            type: string;
+            description: string;
+            default: boolean;
+          };
+          inline_declarations: {
+            type: string;
+            description: string;
+            enum: string[];
+            default: string;
+          };
+          properties_optional: {
+            type: string;
+            description: string;
+            default: boolean;
+          };
+          ieee754compatible: {
+            type: string;
+            description: string;
+            default: boolean;
+          };
+          legacy_binary_types: {
+            type: string;
+            description: string;
+            default: boolean;
+          };
+          target_module_type: {
+            type: string;
+            description: string;
+            enum: string[];
+            default: string;
+          };
+          build_task: {
+            type: string;
+            description: string;
+            default: boolean;
+          };
+        };
+      };
+    };
+  };
+  appid: null;
 }

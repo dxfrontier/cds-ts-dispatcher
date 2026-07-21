@@ -20,6 +20,10 @@ const util = {
     return colors.green(text);
   },
 
+  showRedConsole: (text: string): string => {
+    return colors.red(text);
+  },
+
   /**
    * Single point of lodash.
    * @example

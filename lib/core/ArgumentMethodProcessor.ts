@@ -261,6 +261,24 @@ export class ArgumentMethodProcessor {
           break;
         }
 
+        case 'SUBJECT': {
+          this.applySingleDecoratorByKey({
+            metadataKey,
+            data: parameterUtil.retrieveSubject(this.temporaryArgs.req),
+          });
+
+          break;
+        }
+
+        case 'AFFECTED': {
+          this.applySingleDecoratorByKey({
+            metadataKey,
+            data: parameterUtil.retrieveAffected(this.temporaryArgs.req),
+          });
+
+          break;
+        }
+
         /**
          * @IsColumnSupplied, @IsRole, @GetRequest, @GetQuery, @IsPresent, can be present multiple times per callback.
          */

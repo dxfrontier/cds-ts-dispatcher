@@ -361,6 +361,65 @@ function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
   };
 }
 
+/**
+ * Annotates a parameter of a method to inject `req.subject` - the `CQN ref` identifying the request's target instance.
+ *
+ * `NOTE:` `@Subject` is the sanctioned replacement for `req.query` on `bound actions / functions` since `@sap/cds` 10
+ * (`req.query` on bound operations is planned for removal in `@sap/cds` 11). Use it to reliably resolve the entity
+ * instance a bound `@OnBoundAction` / `@OnBoundFunction` was invoked on.
+ *
+ * @example
+ * ```typescript
+ * public async someBoundAction(
+ *   /@Req() req: Request<MyEntity>,
+ *   /@Subject() subject: ref
+ * ) {
+ *   const instance = await SELECT.one.from(subject);
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#subject | CDS-TS-Dispatcher - @Subject}
+ */
+function Subject(): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'SUBJECT',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'INDEX_DECORATOR', parameterIndex },
+    });
+  };
+}
+
+/**
+ * Annotates a parameter of a method to inject the database `affected` row count of the current request.
+ *
+ * `NOTE:` `@Affected` is defined for `CREATE` / `UPDATE` / `DELETE` `@After*` handlers under `@sap/cds` >= 10 and
+ * returns the row count as reported by the database. It is `undefined` for `READ`.
+ *
+ * @example
+ * ```typescript
+ * /@AfterDelete()
+ * public async afterDelete(
+ *   /@Req() req: Request<MyEntity>,
+ *   /@Affected() affected: number | undefined
+ * ) {
+ *   req.notify(`Deleted ${affected} row(s)`);
+ * }
+ * ```
+ * @returns number | undefined
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#affected | CDS-TS-Dispatcher - @Affected}
+ */
+function Affected(): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'AFFECTED',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'INDEX_DECORATOR', parameterIndex },
+    });
+  };
+}
+
 export {
   Msg,
   SingleInstanceSwitch,
@@ -379,4 +438,6 @@ export {
   ValidationResults,
   Locale,
   Env,
+  Subject,
+  Affected,
 };
