@@ -65,6 +65,11 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Env](#env)
       - [@Subject](#subject)
       - [@Affected](#affected)
+      - [@Data](#data)
+      - [@Param](#param)
+      - [@UserInfo](#userinfo)
+      - [@Tenant](#tenant)
+      - [@Diff](#diff)
       - [~~@Msg~~](#msg)
     - [`Method`-`active entity`](#method-active-entity)
       - [`Before`](#before)
@@ -98,6 +103,11 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
         - [@OnBoundAction](#onboundaction)
         - [@OnBoundFunction](#onboundfunction)
         - [@OnAll](#onall)
+      - [`Request Lifecycle`](#request-lifecycle)
+        - [@BeforeCommit](#beforecommit)
+        - [@AfterCommit](#aftercommit)
+        - [@AfterRollback](#afterrollback)
+        - [@OnRequestDone](#onrequestdone)
     - [`Method`-`draft entity`](#method-draft-entity)
       - [`Before`](#before-1)
         - [@BeforeNewDraft](#beforenewdraft)
@@ -124,6 +134,8 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
     - [`Scheduling`](#scheduling)
       - [@OnScheduled](#onscheduled)
       - [@Schedule](#schedule)
+      - [@OnScheduledSuccess](#onscheduledsuccess)
+      - [@OnScheduledFailure](#onscheduledfailure)
     - [`Streaming`](#streaming)
       - [@Stream](#stream)
     - [`Method`-`helpers`](#method-helpers)
@@ -2004,6 +2016,154 @@ public async afterDelete(@Req() req: Request<MyEntity>, @Affected() affected: nu
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+##### @Data
+
+**@Data**()
+
+The `@Data` decorator is utilized at the `parameter level`. It injects `req.data` — the payload of the current request — directly into a method parameter, typed.
+
+`Return`
+
+- `T` : The payload of the current request (`req.data`).
+
+`Example`
+
+```typescript
+import { OnCreate, Data } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnCreate()
+public async onCreate(@Data() data: MyEntity) {
+  // ... custom logic based on data
+}
+```
+
+> [!TIP]
+> `@Data` keeps handler signatures and unit tests simple — pass a plain object instead of mocking the whole `Request`.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Param
+
+**@Param\<T\>(field: keyof T)**
+
+The `@Param` decorator is utilized at the `parameter level`. It injects `req.data[field]` — a single field of the current request's payload — directly into a method parameter.
+
+`Parameters`
+
+- `field (keyof T)` : The name of the field to get within `req.data`.
+
+`Type Parameters`
+
+- `T` : The entity type the `field` is checked against, allowing TypeScript to enforce type safety.
+
+`Return`
+
+- The value of `req.data[field]`.
+
+`Example`
+
+```typescript
+import { OnCreate, Param } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnCreate()
+public async onCreate(@Param<MyEntity>('title') title: string, @Param<MyEntity>('stock') stock: number) {
+  // ... custom logic based on title and stock
+}
+```
+
+> [!TIP]
+> `@Param` is repeatable — decorate as many parameters as the fields you need from `req.data`.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @UserInfo
+
+**@UserInfo**()
+
+The `@UserInfo` decorator is utilized at the `parameter level`. It injects `req.user` — the authenticated user of the current request — directly into a method parameter.
+
+`Return`
+
+- `User` : The authenticated user of the current request.
+
+`Example`
+
+```typescript
+import { OnUpdate, UserInfo } from '@dxfrontier/cds-ts-dispatcher';
+import type { User } from '@sap/cds';
+
+@OnUpdate()
+public async onUpdate(@UserInfo() user: User) {
+  if (user.is('Manager')) {
+    // ... custom ownership / authorization logic
+  }
+}
+```
+
+> [!TIP]
+> Import the `User` type from `@sap/cds` to type the injected `user`.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Tenant
+
+**@Tenant**()
+
+The `@Tenant` decorator is utilized at the `parameter level`. It injects `req.tenant` — the tenant of the current request — directly into a method parameter.
+
+`Return`
+
+- `string | undefined` : The tenant of the current request.
+
+`Example`
+
+```typescript
+import { OnRead, Tenant } from '@dxfrontier/cds-ts-dispatcher';
+
+@OnRead()
+public async onRead(@Tenant() tenant: string | undefined) {
+  // ... custom logic based on tenant
+}
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Diff
+
+**@Diff**()
+
+The `@Diff` decorator is utilized at the `parameter level`. It injects `await req.diff()` — CAP's deep old-vs-new change-set of the current request against the current database state (`compositions` expanded, `draft`-aware) — directly into a method parameter.
+
+`Return`
+
+- `T` : The before/after delta of the request's target entity.
+
+`Example`
+
+```typescript
+import { BeforeUpdate, Diff } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeUpdate()
+public async beforeUpdate(@Req() req: Request<MyEntity>, @Diff() diff: MyEntity) {
+  // ... custom logic based on diff
+}
+```
+
+> [!IMPORTANT]
+> `@Diff` costs `one extra database read` (it re-reads the current state to compute the delta) and resolves `asynchronously` - the handler body starts a `microtask` later than sibling handlers on the same event. Do not rely on synchronous side-effect ordering against sibling handlers. `@Diff` is only supported on [@EntityHandler](#entityhandler) write events and is **not** supported on [@OnError](#onerror) (a decoration-time error).
+
+> [!NOTE]
+> `req.diff()` is a `semi-stable` `@sap/cds` API not documented in the current capire docs.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ##### ~~@Msg~~
 
 **@Msg()**
@@ -3717,6 +3877,187 @@ this.on('*', '*', async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+##### `Request Lifecycle`
+
+Use [@BeforeCommit()](#beforecommit), [@AfterCommit()](#aftercommit), [@AfterRollback()](#afterrollback), [@OnRequestDone()](#onrequestdone) to hook into the `commit` / `succeeded` / `failed` / `done` phases of the current `ROOT` request's transaction.
+
+The handlers receive one argument:
+
+- `req` of type `Request`
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @BeforeCommit
+
+**@BeforeCommit**()
+
+The `@BeforeCommit` decorator runs custom logic `inside` the transaction, `immediately before commit`, after `all` other handlers of the request (including handlers of other services touched by the same request) have run. Throwing an error here `vetoes` the commit — the transaction is rolled back and the error is returned to the client.
+
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
+
+`Example`
+
+```typescript
+import { BeforeCommit } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeCommit()
+private async beforeCommit(@Req() req: Request<MyEntity>) {
+  if (/* cross-entity invariant violated */ false) {
+    throw new Error('Total stock must stay non-negative'); // vetoes the commit
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('*', MyEntity, (req) => {
+  req.before('commit', async () => {
+    // ...
+  });
+});
+```
+
+> [!IMPORTANT]
+> The injected `req` is the `first sub-request` of the root request that reached the hook. Use `@BeforeCommit` for `cross-request` / `final-state` invariants that need to read the current database state, keep `per-operation` validation in your [Before](#before) / [On](#on) handlers.
+
+> [!NOTE]
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @AfterCommit
+
+**@AfterCommit**()
+
+The `@AfterCommit` decorator runs custom logic only `after` the transaction of the current request was durably `committed`, `outside` any transaction. Errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
+
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
+
+`Example`
+
+```typescript
+import { AfterCommit } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterCommit()
+private async afterCommit(@Req() req: Request<MyEntity>) {
+  await cds.tx(async () => {
+    // ... e.g. send a confirmation e-mail, invalidate a cache
+  });
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('*', MyEntity, (req) => {
+  req.on('succeeded', async () => {
+    // ...
+  });
+});
+```
+
+> [!IMPORTANT]
+> The request's transaction is already `closed` by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
+
+> [!NOTE]
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @AfterRollback
+
+**@AfterRollback**()
+
+The `@AfterRollback` decorator runs custom logic `after` the transaction of the current request was `rolled back`, `outside` any transaction. Errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
+
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
+
+`Example`
+
+```typescript
+import { AfterRollback } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterRollback()
+private async afterRollback(@Req() req: Request<MyEntity>) {
+  await cds.tx(async () => {
+    // ... e.g. release a reservation in a remote system, alert on the failure
+  });
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('*', MyEntity, (req) => {
+  req.on('failed', async () => {
+    // ...
+  });
+});
+```
+
+> [!IMPORTANT]
+> The request's transaction is already `closed` (rolled back) by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
+
+> [!NOTE]
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @OnRequestDone
+
+**@OnRequestDone**()
+
+The `@OnRequestDone` decorator runs custom logic when the current request is `done`, no matter if it `succeeded` or `failed` — `finally` semantics. It runs `outside` any transaction and errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
+
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
+
+`Example`
+
+```typescript
+import { OnRequestDone } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnRequestDone()
+private async requestDone(@Req() req: Request<MyEntity>) {
+  await cds.tx(async () => {
+    // ... e.g. release a lock, stop a timer, emit duration metrics
+  });
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('*', MyEntity, (req) => {
+  req.on('done', async () => {
+    // ...
+  });
+});
+```
+
+> [!IMPORTANT]
+> The request's transaction is already `closed` by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
+
+> [!NOTE]
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 #### `Method`-`draft entity`
 
 ##### `Before`
@@ -4528,6 +4869,82 @@ this.on('cleanupExpiredCarts', async (req) => {
 >   }
 > }
 > ```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnScheduledSuccess
+
+**@OnScheduledSuccess(name: string)**
+
+The `@OnScheduledSuccess` decorator is a `method-level` decorator that handles the `successful` outcome of a scheduled task. It registers `srv.after('<name>/#succeeded', cb)` — the handler receives the `result` returned by the task handler ([@OnScheduled](#onscheduled) / [@Schedule](#schedule)) via [@Result()](#results--result) and the `req`.
+
+`Parameters`
+
+- `name (string)` : The scheduled task name whose success to handle. The name is registered **verbatim** (dots are **not** stripped), so fully-qualified names like `'my.namespace.Task'` match exactly.
+
+`Example`
+
+```typescript
+import { OnScheduledSuccess, Result, Req, UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@UnboundActions()
+class ScheduledTasksHandler {
+  @OnScheduledSuccess('cleanupExpiredCarts')
+  public async succeeded(@Result() result: unknown, @Req() req: Request) {
+    // ... e.g. kick off follow-up work now that the task ran through
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('cleanupExpiredCarts/#succeeded', (result, req) => {
+  // ...
+});
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnScheduledFailure
+
+**@OnScheduledFailure(name: string)**
+
+The `@OnScheduledFailure` decorator is a `method-level` decorator that handles the `failed` outcome of a scheduled task, once its retries are exhausted. It registers `srv.after('<name>/#failed', cb)` — the handler receives the failure payload via [@Result()](#results--result) and the `req`.
+
+`Parameters`
+
+- `name (string)` : The scheduled task name whose failure to handle. The name is registered **verbatim** (dots are **not** stripped), so fully-qualified names like `'my.namespace.Task'` match exactly.
+
+`Example`
+
+```typescript
+import { OnScheduledFailure, Result, Req, UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@UnboundActions()
+class ScheduledTasksHandler {
+  @OnScheduledFailure('cleanupExpiredCarts')
+  public async failed(@Result() error: { name: string; message: string; stack: string; code: string }, @Req() req: Request) {
+    // ... e.g. alert ops
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('cleanupExpiredCarts/#failed', (error, req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> `@OnScheduledFailure` only fires once the task's `retries` are `exhausted` (event-queue `maxAttempts`, `10` by default) — not on every failed attempt.
+
+> [!IMPORTANT]
+> The failure payload is a `serialized plain object` (`{ name, message, stack, code }`), `NOT` an `Error` instance. Inject it with [@Result()](#results--result) — [@Error()](#error) will **not** populate here, as it only matches arguments that are `instanceof Error`.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

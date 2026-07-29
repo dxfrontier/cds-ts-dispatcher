@@ -16,13 +16,13 @@ Status values: `candidate` → `planned (#issue)` → `shipped (vX.Y.Z)` / `reje
 
 | # | Decorator | Tier | Wraps | Lives in | Extra dependency | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `@BeforeCommit` | 1 — runtime hooks | `req.before('commit')` | EntityHandler · UnboundActions (verified) | none | candidate |
-| 2 | `@AfterCommit` | 1 — runtime hooks | `req.on('succeeded')` | EntityHandler · UnboundActions (verified) | none | candidate |
-| 3 | `@AfterRollback` | 1 — runtime hooks | `req.on('failed')` | EntityHandler · UnboundActions (verified) | none | candidate |
-| 4 | `@OnRequestDone` | 1 — runtime hooks | `req.on('done')` | EntityHandler · UnboundActions (verified) | none | candidate |
-| 5 | `@OnScheduledSuccess` / `@OnScheduledFailure` | 1 — runtime hooks | `srv.after('<event>/#succeeded'\|'/#failed')` | UnboundActions (verified) | none | candidate |
+| 1 | `@BeforeCommit` | 1 — runtime hooks | `req.before('commit')` | EntityHandler · UnboundActions (verified) | none | planned (feature-tier1-decorators) |
+| 2 | `@AfterCommit` | 1 — runtime hooks | `req.on('succeeded')` | EntityHandler · UnboundActions (verified) | none | planned (feature-tier1-decorators) |
+| 3 | `@AfterRollback` | 1 — runtime hooks | `req.on('failed')` | EntityHandler · UnboundActions (verified) | none | planned (feature-tier1-decorators) |
+| 4 | `@OnRequestDone` | 1 — runtime hooks | `req.on('done')` | EntityHandler · UnboundActions (verified) | none | planned (feature-tier1-decorators) |
+| 5 | `@OnScheduledSuccess` / `@OnScheduledFailure` | 1 — runtime hooks | `srv.after('<event>/#succeeded'\|'/#failed')` | UnboundActions (verified) | none | planned (feature-tier1-decorators) |
 | 6 | `@Spawn` | 1 — runtime hooks | `cds.spawn` | any dispatcher class | none | deferred (2026-07) |
-| 7 | `@Data`, `@Param`, `@UserInfo`, `@Tenant`, `@Diff` | 1 — parameter injection | `req.data` / `req.user` / `req.tenant` / `req.diff()` | handler methods (EntityHandler · UnboundActions); `@Diff` EntityHandler-only (verified) | none | candidate |
+| 7 | `@Data`, `@Param`, `@UserInfo`, `@Tenant`, `@Diff` | 1 — parameter injection | `req.data` / `req.user` / `req.tenant` / `req.diff()` | handler methods (EntityHandler · UnboundActions); `@Diff` EntityHandler-only (verified) | none | planned (feature-tier1-decorators) |
 | 8 | `@Retry` | 2 — cross-cutting | own implementation | any dispatcher class | none | deferred (2026-07) |
 | 9 | `@Guard` | 2 — cross-cutting | own implementation over `req` | EntityHandler · UnboundActions | none | deferred (2026-07) |
 | 10 | `@Cached` / `@CacheEvict` | 2 — cross-cutting | own implementation | EntityHandler · UnboundActions | none | deferred (2026-07) |
