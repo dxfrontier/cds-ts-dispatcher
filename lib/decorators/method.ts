@@ -1294,6 +1294,29 @@ const OnFunction = buildAction({ event: 'FUNC', eventKind: 'ON', isDraft: false 
 const OnEvent = buildOnEvent({ event: 'EVENT', eventKind: 'ON', isDraft: false });
 
 /**
+ * Handles an incoming websocket operation/event by name (`@cap-js-community/websocket` services).
+ * Sugar for `@OnEvent(name)`; requires the websocket plugin in the consumer app and a
+ * `@protocol: 'websocket'` (or `@ws`) service whose impl hosts this `@UnboundActions` class.
+ * @param name string - name of the websocket operation, as sent in the `event` field of the wire payload.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketmessage | CDS-TS-Dispatcher - @OnWebSocketMessage}
+ */
+const OnWebSocketMessage = (name: string) => OnEvent(name);
+
+/**
+ * Fires when a websocket client connects. Sugar for `@OnEvent('wsConnect')`; the CDS service must
+ * model `action wsConnect();`.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketconnect | CDS-TS-Dispatcher - @OnWebSocketConnect}
+ */
+const OnWebSocketConnect = () => OnEvent('wsConnect');
+
+/**
+ * Fires when a websocket client disconnects. Sugar for `@OnEvent('wsDisconnect')`; model
+ * `action wsDisconnect(reason: String);` to receive the reason.
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketdisconnect | CDS-TS-Dispatcher - @OnWebSocketDisconnect}
+ */
+const OnWebSocketDisconnect = () => OnEvent('wsDisconnect');
+
+/**
  *
  * Use `@OnSubscribe` decorator to execute custom logic when a custom messaging event is triggered.
  * - Executes custom logic when a specific messaging event is triggered
@@ -2051,4 +2074,12 @@ export {
   OnServed,
   OnListening,
   OnShutdown,
+  // ========================================================================================================================================================
+
+  // ========================================================================================================================================================
+  // WebSocket (plugin: @cap-js-community/websocket)
+  OnWebSocketMessage,
+  OnWebSocketConnect,
+  OnWebSocketDisconnect,
+  // ========================================================================================================================================================
 };
