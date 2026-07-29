@@ -2160,7 +2160,7 @@ public async beforeUpdate(@Req() req: Request<MyEntity>, @Diff() diff: MyEntity)
 > `@Diff` costs `one extra database read` (it re-reads the current state to compute the delta) and resolves `asynchronously` - the handler body starts a `microtask` later than sibling handlers on the same event. Do not rely on synchronous side-effect ordering against sibling handlers. `@Diff` is only supported on [@EntityHandler](#entityhandler) write events and is **not** supported on [@OnError](#onerror) (a decoration-time error).
 
 > [!NOTE]
-> `req.diff()` is a `semi-stable` `@sap/cds` API not documented in the current capire docs.
+> `req.diff()` is a `semi-stable` `@sap/cds` API not documented in the current capire docs. Observed payload shape on `@sap/cds` 10 (pinned by the dispatcher's integration tests): for an `UPDATE` the top-level fields hold the `NEW` (incoming) values, the `OLD` (pre-update) values sit nested under `_old`, plus an `_op: 'update'` marker — unchanged fields are omitted entirely, key fields are always present. Do **not** assume `diff.<field>` is the old value.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
