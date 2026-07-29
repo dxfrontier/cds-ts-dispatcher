@@ -17,6 +17,7 @@ class BookParamsHandler {
   ) {
     // Observation only: proves @Data, @Param, @UserInfo, @Tenant and @Diff inject correctly without
     // mutating the request (existing e2e assertions must not shift).
+    console.log('[BookParams] diff', JSON.stringify({ title: (diff as any)?.title, ID: (diff as any)?.ID }));
   }
 }
 
