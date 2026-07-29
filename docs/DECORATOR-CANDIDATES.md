@@ -8,7 +8,7 @@ Each entry states where the decorator **lives**: the host class(es) it can be us
 
 **Verification note (2026-07-29):** placements and API facts for all active candidates were verified against the capire docs, the plugin READMEs/releases, and the installed `@sap/cds` **10.0.3** source. Each active entry carries a **Verified facts** block; anything the sources could not confirm is marked explicitly.
 
-Status values: `candidate` → `planned (#issue)` → `shipped (vX.Y.Z)` / `rejected` / `deferred` (parked by decision — stays in the list, revisit later).
+Status values: `candidate` → `planned (#issue)` → `implemented (branch/PR)` → `shipped (vX.Y.Z)` / `rejected` / `deferred` (parked by decision — stays in the list, revisit later). `implemented` = merged code on a feature branch/PR, awaiting the release that flips it to `shipped`.
 
 > **Selection 2026-07-29:** active batch = #1–#5, #7, #11, #13, #14, #15, #17, #18. Parked for now: #6 `@Spawn`, #8 `@Retry`, #9 `@Guard`, #10 `@Cached`/`@CacheEvict`, #12 `@Transactional`, #16 `@FeatureGated`.
 
@@ -16,13 +16,13 @@ Status values: `candidate` → `planned (#issue)` → `shipped (vX.Y.Z)` / `reje
 
 | # | Decorator | Tier | Wraps | Lives in | Extra dependency | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `@BeforeCommit` | 1 — runtime hooks | `req.before('commit')` | EntityHandler · UnboundActions (verified) | none | planned (feature-tier1-decorators) |
-| 2 | `@AfterCommit` | 1 — runtime hooks | `req.on('succeeded')` | EntityHandler · UnboundActions (verified) | none | planned (feature-tier1-decorators) |
-| 3 | `@AfterRollback` | 1 — runtime hooks | `req.on('failed')` | EntityHandler · UnboundActions (verified) | none | planned (feature-tier1-decorators) |
-| 4 | `@OnRequestDone` | 1 — runtime hooks | `req.on('done')` | EntityHandler · UnboundActions (verified) | none | planned (feature-tier1-decorators) |
-| 5 | `@OnScheduledSuccess` / `@OnScheduledFailure` | 1 — runtime hooks | `srv.after('<event>/#succeeded'\|'/#failed')` | UnboundActions (verified) | none | planned (feature-tier1-decorators) |
+| 1 | `@BeforeCommit` | 1 — runtime hooks | `req.before('commit')` | EntityHandler · UnboundActions (verified) | none | implemented (feature-tier1-decorators) |
+| 2 | `@AfterCommit` | 1 — runtime hooks | `req.on('succeeded')` | EntityHandler · UnboundActions (verified) | none | implemented (feature-tier1-decorators) |
+| 3 | `@AfterRollback` | 1 — runtime hooks | `req.on('failed')` | EntityHandler · UnboundActions (verified) | none | implemented (feature-tier1-decorators) |
+| 4 | `@OnRequestDone` | 1 — runtime hooks | `req.on('done')` | EntityHandler · UnboundActions (verified) | none | implemented (feature-tier1-decorators) |
+| 5 | `@OnScheduledSuccess` / `@OnScheduledFailure` | 1 — runtime hooks | `srv.after('<event>/#succeeded'\|'/#failed')` | UnboundActions (verified) | none | implemented (feature-tier1-decorators) |
 | 6 | `@Spawn` | 1 — runtime hooks | `cds.spawn` | any dispatcher class | none | deferred (2026-07) |
-| 7 | `@Data`, `@Param`, `@UserInfo`, `@Tenant`, `@Diff` | 1 — parameter injection | `req.data` / `req.user` / `req.tenant` / `req.diff()` | handler methods (EntityHandler · UnboundActions); `@Diff` EntityHandler-only (verified) | none | planned (feature-tier1-decorators) |
+| 7 | `@Data`, `@Param`, `@UserInfo`, `@Tenant`, `@Diff` | 1 — parameter injection | `req.data` / `req.user` / `req.tenant` / `req.diff()` | handler methods (EntityHandler · UnboundActions); `@Diff` EntityHandler-only (verified) | none | implemented (feature-tier1-decorators) |
 | 8 | `@Retry` | 2 — cross-cutting | own implementation | any dispatcher class | none | deferred (2026-07) |
 | 9 | `@Guard` | 2 — cross-cutting | own implementation over `req` | EntityHandler · UnboundActions | none | deferred (2026-07) |
 | 10 | `@Cached` / `@CacheEvict` | 2 — cross-cutting | own implementation | EntityHandler · UnboundActions | none | deferred (2026-07) |
@@ -76,6 +76,14 @@ Registers the method on `req.before('commit')`: it runs **inside the transaction
 - The hook is attachable from within any handler (before/on/after) during request processing — so the dispatcher can attach it lazily via a generic `srv.before` registration. Capire: "Use the `req.before('commit')` hook to perform final validation or bookkeeping before a transaction is finalized."
 - Fires once per **root** request: for OData `$batch` changesets, only after the entire changeset completes — document this for consumers expecting per-sub-request granularity.
 
+**Implemented (2026-07-29 — `feature-tier1-decorators`)**
+
+- As designed: metadata `type: 'REQUEST_LIFECYCLE'`, ONE prepended `srv.before('*'[, entity])` attach handler per host class, deduped once per root request via a `Symbol` stamped on the root context. Once-per-`$batch`-changeset semantics pinned by an integration test (two atomicity groups in ONE `$batch` call); the veto is also covered e2e (postman).
+- The callback receives the **first sub-request** of the root that reached the attach handler — documented guidance: use this hook for cross-request / final-state invariants (read DB state), keep per-operation validation in `@Before*`/`@On*`.
+- Draft-enabled entities: fires on draft **activation** only, not during the draft-editing roundtrip (documented).
+- Two hardening discoveries, both guarded in `CDSDispatcher` now: (a) the persistent event-queue's internal dispatches are real `cds.Request`s whose `context` is a JSON-deserialized **plain object** — attaching there crashed the queue; `attach` skips roots that cannot host the shared emitter (`_set`/`_emitter` capability check). (b) `@Use` middleware combined with any lifecycle/scheduled decorator crashed bootstrap in `MiddlewareEntityRegistry` — non-action handler types are skipped there now.
+- Ordering caveat (documented in README): across classes, `@BeforeCommit` callbacks run in `CDSDispatcher([...])` array order, the three post-tx hooks in reverse array order; within one class, declaration order always holds.
+
 **Benefits**
 
 - Only place to enforce cross-entity invariants over the *final* state of a request (e.g. "after this deep update, total stock must still be ≥ 0"). `@AfterUpdate` runs too early to see sibling changes.
@@ -100,6 +108,11 @@ Registers the method on `req.on('succeeded')`: it runs **only after the transact
 - The documented pattern for DB access inside the callback is a fresh transaction: `await cds.tx(async () => { await UPDATE… })`. The dispatcher docs/examples must show exactly this, or consumers will hit "transaction closed" errors.
 - Fires once per root request (changeset-level for `$batch`), same as #1.
 
+**Implemented (2026-07-29 — `feature-tier1-decorators`)**
+
+- Registration/dedup/host semantics shared with #1. The dispatcher **catches and logs** callback errors instead of rethrowing — source-verified necessity: a throw in a `'succeeded'` listener makes CAP emit `'failed'` and error the response *despite the durable commit* (`lib/srv/srv-tx.js`).
+- The mandated `await cds.tx(async () => …)` DB-access pattern is shown in README, JSDoc and the bookshop sample handler.
+
 **Benefits**
 
 - Fixes the most common CAP correctness bug: side effects written in `@AfterCreate`/`@AfterUpdate` (emails, webhooks, cache invalidation, external calls) fire *before* commit and also fire when the transaction later rolls back.
@@ -116,6 +129,8 @@ Registers the method on `req.on('failed')`: runs after the transaction rolled ba
 **Verified facts (2026-07-29)**
 
 - Same constraints as #2: runs outside any transaction; DB access requires `cds.tx`/`cds.spawn`; fires once per root request.
+
+**Implemented (2026-07-29 — `feature-tier1-decorators`)** — shares #1's registration and #2's catch-and-log shield; exercised end-to-end by the `@BeforeCommit` veto flows (integration + e2e), where it fires together with `@OnRequestDone` while `@AfterCommit` stays silent.
 
 **Benefits**
 
@@ -134,6 +149,8 @@ Registers the method on `req.on('done')`: runs when the request ends, success or
 
 - Same constraints as #2: outside any transaction; `cds.tx` for DB work (capire's own `done` example uses `cds.tx` to bump a counter); once per root request.
 
+**Implemented (2026-07-29 — `feature-tier1-decorators`)** — shares #1's registration and #2's shield; service-wide hosting proven in `@UnboundActions` (bookshop `UnboundActions.ts` + integration test), which is also what surfaced the event-queue guard described in #1.
+
 **Benefits**
 
 - `finally` semantics: release locks, stop timers, emit duration metrics, clean per-request temp state — without duplicating logic across a success hook and a failure hook.
@@ -144,7 +161,7 @@ Docs: <https://cap.cloud.sap/docs/node.js/events>
 
 ```ts
 @OnScheduledFailure('sendDailyDigest')
-public async alertOps(@Error() error: Error, @Req() req: Request) { ... }
+public async alertOps(@Result() failure: { name: string; message: string }, @Req() req: Request) { ... }
 ```
 
 Wraps CAP's scheduled/queued-event outcome callbacks: the runtime emits `<event>/#succeeded` after a queued event is processed and `<event>/#failed` once its retries are exhausted.
@@ -156,6 +173,13 @@ Wraps CAP's scheduled/queued-event outcome callbacks: the runtime emits `<event>
 - Exact mechanism (capire event-queues, verbatim): "Once a message is processed, the runtime emits `<event>/#succeeded`, and if retries are exhausted, it emits `<event>/#failed`." Registered as standard service handlers: `srv.after('BookingCreated/#succeeded', (result, req) => …)` / `srv.after('BookingCreated/#failed', (error, req) => …)` — so the dispatcher implementation is a plain `srv.after` with a suffixed event name; no new registration machinery.
 - Handler arguments differ per outcome: `#succeeded` receives the task's **result**, `#failed` receives the **error** — the parameter-injection design must account for both shapes.
 - `#failed` fires only after **final retry exhaustion** (queue retries up to `maxAttempts`, default 10) — not on each failed attempt. Important expectation to document.
+
+**Implemented (2026-07-29 — `feature-tier1-decorators`)**
+
+- Plain suffixed `srv.after('<task>/#succeeded' | '/#failed')` registrations as predicted; task names registered verbatim (dots preserved), same rule as `@OnScheduled`.
+- **Correction to the researched assumption** (and to this entry's original example, updated above): the `#failed` payload is **not** an `Error` instance — CAP serializes it (`_errorToObj` + outbox JSON round-trip, `libx/queue/`) into a plain `{ name, message, stack, code }` object. It must be injected with `@Result()`; `@Error()` stays `undefined` (it only matches `instanceof Error`). A naive `@Error()` fixture even crashed the app under real retry exhaustion (the resulting `TypeError` hits the queue's programming-error path → `cds.exit(1)`).
+- The callbacks bypass the dispatcher's cds-10 `affected` normalization so raw results survive (a numeric task result `1` would otherwise arrive as `true`).
+- `#succeeded` proven end-to-end through the real queue (integration); `#failed` registration + payload shape pinned at unit level — simulating 10-attempt retry exhaustion in-suite is impractical.
 
 **Benefits**
 
@@ -208,6 +232,13 @@ Ride the existing `ArgumentMethodProcessor`; each is a small, independent additi
 - `@Data`/`@Param`/`@UserInfo`/`@Tenant`: `req.data`, `req.user`, `req.tenant` are standard, documented `cds.Request` members — no constraints beyond handler context.
 - `@Diff`: **`req.diff()` exists in the installed `@sap/cds` 10.0.3** (`lib/req/request.js:176`, lazily loaded from `libx/_runtime/common/utils/differ.js`) but is **absent from current capire docs** — treat it as a semi-stable API. Source-verified behavior: reads the current DB state via a deep `SELECT` expanding compositions (recursion depth 4 by default, tunable via `cds.env.features.recursion_depth`), draft-column-aware. Implementation must pin its behavior with tests, and the decorator's README entry should note the one-extra-DB-read cost.
 - `@Diff` is async (`await req.diff()`), so `ArgumentMethodProcessor` must support awaited parameter resolution — a small but real processor change.
+
+**Implemented (2026-07-29 — `feature-tier1-decorators`)**
+
+- `@Data` / `@Param` (repeatable) / `@UserInfo` / `@Tenant` as designed, through `ArgumentMethodProcessor`.
+- `@Diff` made the processor async-capable: `applyDecorators()` now returns `void | Promise<void>` and the method wrappers await **conditionally** (`const applied = …; if (applied) await applied;`). An unconditional `await` broke `@Prepend`/sibling-handler ordering, because CAP runs same-phase handlers via `Promise.all` (`lib/srv/srv-dispatch.js`) — only **synchronous prefixes** are ordered between sibling handlers. Recorded as a hard design constraint for every future decorator that wraps handler methods.
+- `@Diff` costs one extra DB read, defers the handler body by one microtask (documented), and is rejected at **decoration time** on `@OnError` (error handlers are invoked synchronously; a floating `req.diff()` rejection could kill the process).
+- `req.diff()` payload shape pinned by integration tests on cds 10.0.3: top-level fields carry the **new** (incoming) values, old values nest under `_old`, `_op` marks the operation, unchanged fields are dropped, key fields always present.
 
 `@Data`/`@Param`/`@UserInfo` also close the only surface gap vs. `cds-routing-handlers` (`@Data`/`@Param`/`@User`), making migration from it frictionless.
 
