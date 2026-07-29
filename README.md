@@ -42,6 +42,7 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Repository](#repository)
         - [`[Optional]` - CDS-TS-Repository - BaseRepository](#optional---cds-ts-repository---baserepository)
       - [@UnboundActions](#unboundactions)
+      - [@ServerLifecycle](#serverlifecycle)
       - [@Use](#use)
     - [`Field`](#field)
       - [@Inject](#inject)
@@ -131,6 +132,10 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
         - [@OnEditDraft](#oneditdraft)
         - [@OnSaveDraft](#onsavedraft)
       - [`Other draft decorators`](#other-draft-decorators)
+    - [`Server Lifecycle`](#server-lifecycle)
+      - [@OnServed](#onserved)
+      - [@OnListening](#onlistening)
+      - [@OnShutdown](#onshutdown)
     - [`Scheduling`](#scheduling)
       - [@OnScheduled](#onscheduled)
       - [@Schedule](#schedule)
@@ -138,12 +143,17 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@OnScheduledFailure](#onscheduledfailure)
     - [`Streaming`](#streaming)
       - [@Stream](#stream)
+    - [`WebSocket`](#websocket)
+      - [@OnWebSocketConnect](#onwebsocketconnect)
+      - [@OnWebSocketDisconnect](#onwebsocketdisconnect)
+      - [@OnWebSocketMessage](#onwebsocketmessage)
     - [`Method`-`helpers`](#method-helpers)
       - [@AfterReadSingleInstance](#afterreadsingleinstance)
       - [@Prepend](#prepend)
       - [@Validate](#validate)
       - [@FieldsFormatter](#fieldsformatter)
       - [@ExecutionAllowedForRole](#executionallowedforrole)
+      - [@Throttle](#throttle)
       - [@Use](#use-1)
       - [@CatchAndSetErrorCode](#catchandseterrorcode)
       - [@CatchAndSetErrorMessage](#catchandseterrormessage)
@@ -956,6 +966,64 @@ export = new CDSDispatcher([ UnboundActionsHandler, ...])
 
 > [!NOTE]
 > The reason behind introducing a distinct decorator for `Unbound actions` stems from the fact that these actions are not associated with any specific `Entity` but instead these actions belongs to the Service itself.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @ServerLifecycle
+
+**@ServerLifecycle()**
+
+The `@ServerLifecycle` decorator is utilized at the `class-level` to annotate a class as the host for the `server lifecycle` method decorators. Unlike every other host class, it does not register against `srv` - the three decorators it hosts register against CAP's `process-global` `cds.on('served' | 'listening' | 'shutdown', ...)` events instead, because server lifecycle has nothing to do with "the unbound actions of this service".
+
+The following decorators can be used inside of `@ServerLifecycle()`:
+
+- [@OnServed()](#onserved)
+- [@OnListening()](#onlistening)
+- [@OnShutdown()](#onshutdown)
+
+`Example`
+
+```typescript
+import { ServerLifecycle, OnServed, OnListening, OnShutdown } from '@dxfrontier/cds-ts-dispatcher';
+
+@ServerLifecycle()
+export class Bootstrap {
+  @OnServed()
+  public async seed(services: object) {
+    // ... one-time startup work, may throw to abort the boot
+  }
+
+  @OnListening()
+  public logUrl(payload: { server: unknown; url: string }) {
+    console.log(`Listening on ${payload.url}`);
+  }
+
+  @OnShutdown()
+  public async cleanup(error: Error | null) {
+    // ... release resources, may run more than once
+  }
+}
+```
+
+`Imported it` in the [CDSDispatcher](#cdsdispatcher)
+
+```typescript
+import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
+
+export = new CDSDispatcher([Bootstrap, ...]).initialize();
+```
+
+> [!IMPORTANT]
+> A `@ServerLifecycle` class registers `once per process`, no matter how many `CDSDispatcher` instances (or bootstraps, e.g. in tests) list it - the `first` dispatcher to `initialize()` resolves the instance the callbacks stay bound to; later dispatchers do not re-register or re-bind.
+
+> [!NOTE]
+> That once-per-process guard lives in this package's own module scope, so it is `per loaded bundle` - a consumer that ends up loading **both** the `CJS` and `ESM` build of `@dxfrontier/cds-ts-dispatcher` in the same process (e.g. through a bundler that duplicates the dependency) would register a `@ServerLifecycle` class `twice`. Stick to a single resolved build of the package.
+
+> [!IMPORTANT]
+> [@Use](#use) middleware does `not` apply to `@ServerLifecycle` classes (lifecycle hooks are not request handlers) - stacking `@Use` on one `fails fast` at bootstrap.
+
+> [!NOTE]
+> A `@ServerLifecycle` class may only host [@OnServed()](#onserved), [@OnListening()](#onlistening), [@OnShutdown()](#onshutdown) - any other handler decorator on the class throws at bootstrap. Conversely, those three decorators throw at bootstrap if hosted outside a `@ServerLifecycle` class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -4766,6 +4834,120 @@ All active entity [On](#on), [Before](#before), [After](#after) events have also
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+#### `Server Lifecycle`
+
+Use [@OnServed()](#onserved), [@OnListening()](#onlistening), [@OnShutdown()](#onshutdown) - hosted in a [@ServerLifecycle](#serverlifecycle) class - to hook into the CAP server's `served` / `listening` / `shutdown` process lifecycle.
+
+> [!NOTE]
+> Unlike every other method decorator in this library, these three receive CAP's arguments `verbatim` - no [@Req()](#req)-style parameter decorator applies.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnServed
+
+**@OnServed()**
+
+The `@OnServed` decorator executes custom logic once, `right before` the CAP server starts `listening` for requests. The handler receives `cds.services` (the bootstrapped services) as its only argument. CAP `awaits` every `@OnServed` handler `sequentially` - in `declaration order` inside a class, and in `CDSDispatcher` array order across classes - before `app.listen` runs. A `thrown` error `fails` server startup.
+
+`Example`
+
+```typescript
+import { ServerLifecycle, OnServed } from '@dxfrontier/cds-ts-dispatcher';
+
+@ServerLifecycle()
+export class Bootstrap {
+  @OnServed()
+  public async seed(services: object) {
+    // ... one-time startup work, may throw to abort the boot
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+cds.on('served', async (services) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Must be hosted in a [@ServerLifecycle](#serverlifecycle) class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnListening
+
+**@OnListening()**
+
+The `@OnListening` decorator executes custom logic once the CAP server is `listening` for requests. The handler receives `{ server, url }`. CAP dispatches `@OnListening` `synchronously` - any return value (including a `Promise`) is `discarded`, so treat the handler as `fire-and-forget`.
+
+`Example`
+
+```typescript
+import { ServerLifecycle, OnListening } from '@dxfrontier/cds-ts-dispatcher';
+
+@ServerLifecycle()
+export class Bootstrap {
+  @OnListening()
+  public logUrl(payload: { server: unknown; url: string }) {
+    console.log(`Listening on ${payload.url}`);
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+cds.on('listening', ({ server, url }) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Must be hosted in a [@ServerLifecycle](#serverlifecycle) class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnShutdown
+
+**@OnShutdown()**
+
+The `@OnShutdown` decorator executes custom logic while the CAP server is shutting down. The handler receives `err: Error | null`. CAP runs `all` `@OnShutdown` handlers (of every class) `in parallel` and `awaits` them `before` the server closes.
+
+`Example`
+
+```typescript
+import { ServerLifecycle, OnShutdown } from '@dxfrontier/cds-ts-dispatcher';
+
+@ServerLifecycle()
+export class Bootstrap {
+  @OnShutdown()
+  public async cleanup(error: Error | null) {
+    // ... release resources, may run more than once
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+cds.on('shutdown', async (error) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Must be hosted in a [@ServerLifecycle](#serverlifecycle) class.
+
+> [!WARNING]
+> CAP has `NO once-guard` on `shutdown` - unlike `served` / `listening`, this callback `may fire more than once` per process. Make the handler `idempotent`.
+
+> [!WARNING]
+> Catch your own errors: a `rejected` `@OnShutdown` handler propagates out of CAP's shutdown dispatch, so `server.close` (and the force-exit fallback timer) never run - the process stays alive with an `unhandled rejection` instead of shutting down.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 #### `Scheduling`
 
 Use [@OnScheduled()](#onscheduled) and [@Schedule()](#schedule) to handle and register recurring background tasks on top of the `@sap/cds` 10 `event-queue`.
@@ -4987,6 +5169,157 @@ public async streamBooks(@Req() req: Request): Promise<Readable> {
 
 > [!TIP]
 > Real streaming reads via `SELECT.pipeline()`, `SELECT.foreach()`, or `for-await` iteration are the intended producers.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### `WebSocket`
+
+Use [@OnWebSocketConnect()](#onwebsocketconnect), [@OnWebSocketDisconnect()](#onwebsocketdisconnect), [@OnWebSocketMessage()](#onwebsocketmessage) to handle realtime operations of a CDS service exposed over the [`@cap-js-community/websocket`](https://github.com/cap-js-community/websocket) plugin - an `optional peer` the consumer app installs separately. They are pure `sugar` for [@OnEvent()](#onevent) - `@OnWebSocketConnect()` ≈ `@OnEvent('wsConnect')`, `@OnWebSocketDisconnect()` ≈ `@OnEvent('wsDisconnect')` - and register through the exact same [@UnboundActions](#unboundactions) host; there is no dedicated websocket host class, since a websocket service impl is just a regular CAP service impl (`module.exports = (srv) => ...`).
+
+The service is annotated `@protocol: 'websocket'` (or `@ws`):
+
+```cds
+@protocol: 'websocket'
+@path    : 'chat'
+service ChatService {
+  action wsConnect();
+  action wsDisconnect(reason : String);
+  action sendMessage(text : String) returns String;
+}
+```
+
+`Example`
+
+```typescript
+import { OnWebSocketConnect, OnWebSocketDisconnect, OnWebSocketMessage, Req, UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@UnboundActions() // bound as ChatService's impl via CDSDispatcher
+export class ChatHandler {
+  @OnWebSocketConnect()
+  public async onConnect(@Req() req: Request) {
+    console.log('[Chat] connect');
+  }
+
+  @OnWebSocketMessage('sendMessage')
+  public async onMessage(@Req() req: Request<{ text: string }>) {
+    console.log(`[Chat] message ${req.data.text}`);
+    return req.data.text;
+  }
+
+  @OnWebSocketDisconnect()
+  public async onDisconnect(@Req() req: Request<{ reason?: string }>) {
+    // Under kind 'ws' the plugin delivers the socket close CODE as a string (e.g. '1000'), not a phrase.
+    console.log(`[Chat] disconnect ${req.data?.reason ?? ''}`);
+  }
+}
+```
+
+`Wire format` - clients send plain JSON frames to `ws://host:port/ws/<path>` (`/ws/chat` for the example above):
+
+```json
+{ "event": "sendMessage", "data": { "text": "hello" } }
+```
+
+`event` is matched against the plain string passed to [@OnWebSocketMessage()](#onwebsocketmessage) (or the fixed `'wsConnect'` / `'wsDisconnect'` names); `data` becomes `req.data`.
+
+> [!IMPORTANT]
+> [@OnWebSocketConnect()](#onwebsocketconnect) / [@OnWebSocketDisconnect()](#onwebsocketdisconnect) only fire when `wsConnect()` / `wsDisconnect(reason)` are `modeled as actions` on the service, exactly as above - the plugin's adapter only calls modeled operations, it does not synthesize connect/disconnect events for services that omit them.
+
+> [!WARNING]
+> Observed on kind `'ws'` (plugin `1.11.x`): action `return` values are `not` echoed back as a reply frame - raw `ws` has no ack-callback channel (unlike `socket.io`), so whatever [@OnWebSocketMessage()](#onwebsocketmessage) returns is discarded on the wire. Use `srv.emit(...)` / `srv.broadcast(...)` from inside the handler if the client needs a message back.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnWebSocketConnect
+
+**@OnWebSocketConnect()**
+
+Fires when a websocket client connects. Sugar for [@OnEvent('wsConnect')](#onevent).
+
+`Example`
+
+```typescript
+@OnWebSocketConnect()
+public async onConnect(@Req() req: Request) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('wsConnect', async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> The service must model `action wsConnect();` - see the [WebSocket](#websocket) prerequisites above.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnWebSocketDisconnect
+
+**@OnWebSocketDisconnect()**
+
+Fires when a websocket client disconnects. Sugar for [@OnEvent('wsDisconnect')](#onevent).
+
+`Example`
+
+```typescript
+@OnWebSocketDisconnect()
+public async onDisconnect(@Req() req: Request<{ reason?: string }>) {
+  // Under kind 'ws' the plugin delivers the socket close CODE as a string (e.g. '1000'), not a phrase.
+  console.log(`[Chat] disconnect ${req.data?.reason ?? ''}`);
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('wsDisconnect', async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> The service must model `action wsDisconnect(reason: String);` to receive a disconnect detail in `req.data.reason` - see the [WebSocket](#websocket) prerequisites above.
+
+> [!WARNING]
+> Under the plugin's default `kind: 'ws'`, the delivered value is the socket `close code` as a `string` (e.g. `'1000'`, `'1005'`), **not** a reason phrase - raw `ws` passes `(code, reason)` and the plugin forwards only the first argument.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnWebSocketMessage
+
+**@OnWebSocketMessage(name: string)**
+
+Handles an incoming websocket operation/event by `name`. Sugar for [@OnEvent(name)](#onevent).
+
+`Parameters`
+
+- `name (string)` : the websocket operation name, matched against the `event` field of the wire payload (`{"event":"<name>","data":{...}}`) - a `plain string`, not a `@cds-model` action reference.
+
+> [!NOTE]
+> Like [@OnEvent()](#onevent), everything before the `last dot` is stripped at registration time - `'ChatService.sendMessage'` registers as `'sendMessage'`. Pass the `plain operation name`.
+
+`Example`
+
+```typescript
+@OnWebSocketMessage('sendMessage')
+public async onMessage(@Req() req: Request<{ text: string }>) {
+  // req.data.text
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('sendMessage', async (req) => {
+  // ...
+});
+```
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -5635,6 +5968,60 @@ private async afterRead(
   // Code will be executed only in case of User ( Manager, User and CEO )
 }
 ```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Throttle
+
+**@Throttle(options: { limit: number; window: number; by?: 'user' | 'tenant' })**
+
+The `@Throttle` decorator is a `method` decorator that rate-limits a handler with a `fixed window`, counted per `user` (default) or per `tenant`. Once the limit is exhausted inside the current window, the request is rejected with `HTTP 429` through `req.reject(...)` - the decorated method body never runs.
+
+It works on any handler decorator that receives a real `cds.Request` - CRUD ([@OnCreate()](#oncreate), [@BeforeUpdate()](#beforeupdate), ...), actions and functions ([@OnAction()](#onaction), [@OnBoundFunction()](#onboundfunction), ...) - hosted in either [@EntityHandler](#entityhandler) or [@UnboundActions](#unboundactions).
+
+`Parameters`
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `limit` | `number` | _(required)_ | Maximum number of invocations allowed per window. Must be `>= 1`. |
+| `window` | `number` (ms) | _(required)_ | Fixed window length in milliseconds. Must be `>= 1`. |
+| `by` | `'user' \| 'tenant'` | `'user'` | Counter key source: `'user'` keys by `req.user.id` (fallback `'anonymous'`), `'tenant'` keys by `req.tenant` (fallback `'no-tenant'`). |
+
+`Example`
+
+```typescript
+import { OnAction, Req, Throttle, UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
+import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+
+import { GenerateReport } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@UnboundActions()
+export class ReportHandler {
+  @OnAction(GenerateReport)
+  @Throttle({ limit: 10, window: 60_000 }) // 10 calls per minute, per user
+  public async generate(@Req() req: ActionRequest<typeof GenerateReport>): ActionReturn<typeof GenerateReport> {
+    // ...
+  }
+}
+```
+
+> [!IMPORTANT]
+> Stack `@Throttle` **directly below** the handler decorator (`@OnAction`, `@OnCreate`, ...), closer to the method - the same rule as [@ExecutionAllowedForRole](#executionallowedforrole). Decorators wrap `descriptor.value` bottom-up, so a wrapper placed **above** the handler decorator never becomes part of the registered callback - it silently does nothing. Keep a [@Req()](#req) parameter: the wrapper reads the current `cds.Request` off the handler arguments to resolve the counter key and to call `req.reject(...)`.
+
+> [!IMPORTANT]
+> `@Throttle` targets `request` handlers only. On messaging-event handlers ([@OnEvent()](#onevent) / [@OnSubscribe()](#onsubscribe)) there is no `cds.Request` among the arguments - every delivery fails loudly with a descriptive error instead of silently letting messages through unthrottled.
+
+> [!NOTE]
+> Counters are `fixed-window`, kept `in-memory`, `per app instance` **and** `per decorated method` - in a multi-instance deployment the limit is effectively `per pod`, not global. Each OData `$batch` sub-request invokes the handler (and therefore the counter) individually - there is no batch-level dedup like [@BeforeCommit](#beforecommit) has.
+
+> [!NOTE]
+> Over the limit, the rejection message has the shape: `Rate limit exceeded: max ${limit} requests per ${window} ms for this ${by}. Retry in ${retryAfter} ms.`
+
+> [!WARNING]
+> `@Throttle` cannot be combined with [@OnError()](#onerror) - stacking it under `@OnError` throws at `decoration time` (error handlers run synchronously while the transaction unwinds, which a throttling wrapper cannot honor).
+
+> [!TIP]
+> For a `service-global` (not per-handler) limit, use CAP's own extension point instead: `cds.middlewares.add(rateLimit(), { after: 'auth' })` in a custom `server.js`. `@Throttle` stays the per-handler tool.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

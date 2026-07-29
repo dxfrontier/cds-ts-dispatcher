@@ -26,35 +26,36 @@ Status values: `candidate` → `planned (#issue)` → `implemented (branch/PR)` 
 | 8 | `@Retry` | 2 — cross-cutting | own implementation | any dispatcher class | none | deferred (2026-07) |
 | 9 | `@Guard` | 2 — cross-cutting | own implementation over `req` | EntityHandler · UnboundActions | none | deferred (2026-07) |
 | 10 | `@Cached` / `@CacheEvict` | 2 — cross-cutting | own implementation | EntityHandler · UnboundActions | none | deferred (2026-07) |
-| 11 | `@Throttle` | 2 — cross-cutting | own implementation (no CAP-native hook — verified) | EntityHandler · UnboundActions | none | candidate |
+| 11 | `@Throttle` | 2 — cross-cutting | own implementation (no CAP-native hook — verified) | EntityHandler · UnboundActions | none | implemented (feature-batch2-decorators) |
 | 12 | `@Transactional` | 2 — cross-cutting | `cds.tx` | ServiceLogic · Repository | none | deferred (2026-07) |
-| 13 | `@Validate` v2 (negation, if/else) | 2 — cross-cutting | extends existing `@Validate` DSL (own code — verified: `cds.validate()` has no public API) | EntityHandler · UnboundActions | none | candidate (issues [#96](https://github.com/dxfrontier/cds-ts-dispatcher/issues/96), [#97](https://github.com/dxfrontier/cds-ts-dispatcher/issues/97)) |
+| 13 | `@Validate` v2 (negation, if/else) | 2 — cross-cutting | extends existing `@Validate` DSL (own code — verified: `cds.validate()` has no public API) | EntityHandler · UnboundActions | none | candidate (issues [#96](https://github.com/dxfrontier/cds-ts-dispatcher/issues/96), [#97](https://github.com/dxfrontier/cds-ts-dispatcher/issues/97)) (skipped from batch-2 by decision 2026-07-29) |
 | 14 | `@AuditLog` | 3 — plugin integration | `@cap-js/audit-logging` | EntityHandler · UnboundActions (verified) | optional peer | candidate |
 | 15 | `@Notify` | 3 — plugin integration | `@cap-js/notifications` | EntityHandler · UnboundActions (verified) | optional peer | candidate |
 | 16 | `@FeatureGated` | 3 — plugin integration | `@cap-js-community/feature-toggle-library` | EntityHandler · UnboundActions | optional peer | deferred (2026-07) |
-| 17 | `@OnWebSocketMessage` / `@OnWebSocketConnect` / `@OnWebSocketDisconnect` | 3 — plugin integration | `@cap-js-community/websocket` | UnboundActions (verified — ws services are regular CAP services); optional `@WebSocketHandler` alias | optional peer | candidate |
-| 18 | `@OnServed` / `@OnListening` / `@OnShutdown` | 3 — lifecycle | `cds.on(...)` | new `@ServerLifecycle` class or UnboundActions (design choice) | none | candidate |
+| 17 | `@OnWebSocketMessage` / `@OnWebSocketConnect` / `@OnWebSocketDisconnect` | 3 — plugin integration | `@cap-js-community/websocket` | UnboundActions (verified — ws services are regular CAP services); no `@WebSocketHandler` alias shipped | optional peer | implemented (feature-batch2-decorators) |
+| 18 | `@OnServed` / `@OnListening` / `@OnShutdown` | 3 — lifecycle | `cds.on(...)` | `@ServerLifecycle` class (decided, shipped) | none | implemented (feature-batch2-decorators) |
 
 Tier meaning: **1** — wraps a native CAP runtime capability we do not cover yet; no new dependencies; highest value-to-effort. **2** — cross-cutting utility decorators proven in other frameworks (Spring/NestJS); self-contained implementations. **3** — thin wrappers over the official CAP plugin ecosystem; each adds an optional peer dependency to test and maintain.
 
 ## Placement map — grouped by host
 
-**All active candidates fit into the four existing host classes.** After verification, only the lifecycle family (#18) still argues for a new host class — and even there `@UnboundActions` would work; the new class is a semantics choice, not a technical necessity. The earlier assumption that WebSocket handlers need a new host was **disproved** (see #17).
+**Active candidates fit into the four pre-existing host classes, plus one dedicated addition.** The earlier assumption that WebSocket handlers need a new host was **disproved** (see #17) — confirmed again at implementation time: no `@WebSocketHandler` alias shipped. The lifecycle family (#18) did get a dedicated host, `@ServerLifecycle` — a semantics choice, not a technical necessity, but it shipped that way in `feature-batch2-decorators`.
 
 | Host | Candidates that live there |
 | --- | --- |
 | **`@EntityHandler` + `@UnboundActions`** (dual home, like `@Prepend`/`@OnError` today) | `@BeforeCommit`, `@AfterCommit`, `@AfterRollback`, `@OnRequestDone` · `@Throttle`, `@Validate` v2 · `@AuditLog`, `@Notify` · params `@Data`/`@Param`/`@UserInfo`/`@Tenant` · deferred: `@Guard`, `@Cached`/`@CacheEvict`, `@FeatureGated` |
 | **`@UnboundActions` only** | `@OnScheduledSuccess` / `@OnScheduledFailure` (service-level `srv.after` handlers, next to `@Schedule`/`@OnScheduled`) · WebSocket family #17 (the class is bound as the ws service's impl) |
 | **`@EntityHandler` only** | `@Diff` (needs an entity write event to diff against) |
+| **`@ServerLifecycle`** (dedicated host — no other decorator lives here) | `@OnServed`, `@OnListening`, `@OnShutdown` (#18) |
 | **Any dispatcher class** (all four hosts) | deferred: `@Spawn`, `@Retry` — plain method wrappers, not handler registrations |
 | **`@ServiceLogic` + `@Repository` only** | deferred: `@Transactional` (handler methods already run inside the request's transaction) |
 
 ### New host class decorators
 
-1. **`@WebSocketHandler(service)` — NOT required (verified 2026-07-29).** The `@cap-js-community/websocket` README registers handlers via standard `srv.on(...)` inside a normal service impl (`module.exports = (srv) => ...`) on a service annotated `@protocol: 'websocket'`. A dispatcher consumer can therefore bind an `@UnboundActions` class as that service's impl today. A dedicated `@WebSocketHandler` alias remains an option purely for discoverability. Must be validated with a sample app during the design phase (see #17).
-2. **`@ServerLifecycle`** — for `@OnServed`/`@OnListening`/`@OnShutdown` (#18). They *could* be hosted in `@UnboundActions`, but server lifecycle has nothing to do with "unbound actions of this service" — a dedicated host keeps the semantics honest. Verified: `@OnBootstrap` cannot work at all (see #18).
+1. **`@WebSocketHandler(service)` — NOT required (verified 2026-07-29); final resolution: not shipped.** The `@cap-js-community/websocket` README registers handlers via standard `srv.on(...)` inside a normal service impl (`module.exports = (srv) => ...`) on a service annotated `@protocol: 'websocket'`. A dispatcher consumer can therefore bind an `@UnboundActions` class as that service's impl today. A dedicated `@WebSocketHandler` alias remained an option purely for discoverability, but the design phase dropped it outright (`docs/superpowers/specs/2026-07-29-decorator-batch2-design.md`) rather than deferring it — `feature-batch2-decorators` ships `@OnWebSocketConnect`/`@OnWebSocketDisconnect`/`@OnWebSocketMessage` as plain `@OnEvent` sugar hosted in ordinary `@UnboundActions` classes, with no dedicated websocket host class at all (see #17).
+2. **`@ServerLifecycle` — final resolution: shipped as recommended.** Hosts `@OnServed`/`@OnListening`/`@OnShutdown` (#18). They *could* have been hosted in `@UnboundActions`, but server lifecycle has nothing to do with "unbound actions of this service" — a dedicated host keeps the semantics honest, so it shipped that way in `feature-batch2-decorators`: `@ServerLifecycle` hosts *only* the three lifecycle decorators, registers once per process per class against `cds.on(...)`, and rejects `@Use` middleware and any other handler decorator at bootstrap. Verified: `@OnBootstrap` cannot work at all (see #18).
 
-Decision rule: **everything in the active batch slots into the existing architecture as-is** (method/parameter decorators registered through the same metadata → `CDSDispatcher` flow). The only open architectural choice is the host for the lifecycle family, decided in its design phase.
+Decision rule: **everything in the active batch slots into the existing architecture as-is** (method/parameter decorators registered through the same metadata → `CDSDispatcher` flow). The only open architectural choice was the host for the lifecycle family — resolved in `feature-batch2-decorators`: a dedicated `@ServerLifecycle` class, exactly as recommended.
 
 ---
 
@@ -306,6 +307,14 @@ Rate-limits actions/functions; over the limit → 429.
 - `@cap-js-community/event-queue`'s "load management" is concurrency balancing for queued events, **not** request rate limiting — no ecosystem overlap.
 - For service-global (not per-handler) limits, CAP's sanctioned extension point is `cds.middlewares.add(rateLimit(), { after: 'auth' })` in a custom `server.js` — worth mentioning in the README entry as the complementary approach; the decorator stays per-handler.
 
+**Implemented (2026-07-29 — `feature-batch2-decorators`)**
+
+- Shipped as a `descriptor`-wrapping decorator, following the exact `callback-capture` rule this repo already uses for `@ExecutionAllowedForRole`/`@CatchAndSetErrorCode`: the wrapper stores its own metadata at *its* decoration time and returns a new `descriptor.value` that the handler factory (`@OnAction`, `@OnCreate`, ...) captures when *it* runs. `@Throttle` must sit **below** the handler decorator, closer to the method — stacked **above** it, the wrapper never becomes part of the registered callback (dead code: no error, no throttling, no signal that anything is wrong).
+- Scope is broader than originally researched: `@Throttle` works on **any** handler that receives a real `cds.Request` — CRUD, actions, and functions, in both `@EntityHandler` and `@UnboundActions` — not just actions/functions. It does **not** work on messaging-event handlers (`@OnEvent` / `@OnSubscribe`): CAP delivers those with a `cds.Event`, not a `cds.Request` (`Request extends Event`, not the reverse — confirmed against the installed `@sap/cds` 10.0.3 source), so `util.findRequest`'s `instanceof` check never matches and every single delivery throws the descriptive `THROTTLE_NO_REQUEST` error instead of silently passing unthrottled.
+- Decoration-time guards added beyond the original design: `limit`/`window` are validated `>= 1` at decoration time (throws immediately, not on first call); stacking `@Throttle` under `@OnError()` throws at decoration time too — the marker `Symbol` (`THROTTLE_KEY`) set by `@Throttle` is read back by `buildOnError`'s own decoration-time guard, the same mechanism already used for the `@Diff`-on-`@OnError` guard.
+- Counters are a plain fixed-window `Map` closed over per decorated method (created once, at decorator-factory call time) — per app instance, per method, with lazy sweep of expired keys on every hit. No batch-level dedup: each OData `$batch` sub-request invokes the wrapped handler (and therefore the counter) individually.
+- Exercised end-to-end: unit (`throttleUtil` fixed-window/reset/sweep/isolation + decorator wiring, including the `@OnError` and no-`Request` failure paths), integration (bookshop `throttledPing` unbound action: per-user isolation, 429 message content), e2e (postman folder driving the real limit/window to a 429).
+
 **Benefits**
 
 - Protects expensive endpoints (report generation, mass actions) from runaway UIs and abuse.
@@ -433,7 +442,7 @@ export class ChatHandler {
 }
 ```
 
-**Lives in:** `@UnboundActions` — **verified, and this overturns the earlier assumption that a new host class is required.** The plugin's README declares websocket services with a `@protocol: 'websocket'` (or `@ws`) annotation and registers handlers as a **regular CAP service impl** with standard `srv.on(...)` calls (`module.exports = (srv) => { srv.on("sendMessage", …) }`). A dispatcher consumer can therefore use `CDSDispatcher` as the ws service's impl and host handlers in `@UnboundActions` today. The dedicated decorators are **sugar**: `@OnWebSocketConnect` ≈ `@OnEvent('wsConnect')`, `@OnWebSocketDisconnect` ≈ `@OnEvent('wsDisconnect')`; an optional `@WebSocketHandler` class alias would exist only for discoverability. Validate end-to-end with a sample app in the design phase.
+**Lives in:** `@UnboundActions` — **verified, and this overturns the earlier assumption that a new host class is required.** The plugin's README declares websocket services with a `@protocol: 'websocket'` (or `@ws`) annotation and registers handlers as a **regular CAP service impl** with standard `srv.on(...)` calls (`module.exports = (srv) => { srv.on("sendMessage", …) }`). A dispatcher consumer can therefore use `CDSDispatcher` as the ws service's impl and host handlers in `@UnboundActions` today. The dedicated decorators are **sugar**: `@OnWebSocketConnect` ≈ `@OnEvent('wsConnect')`, `@OnWebSocketDisconnect` ≈ `@OnEvent('wsDisconnect')`; an optional `@WebSocketHandler` class alias would exist only for discoverability. **Decided (2026-07-29): the `@WebSocketHandler` alias was not shipped** — validated end-to-end against the real plugin in `feature-batch2-decorators` (see Implemented below) using plain `@UnboundActions`.
 
 **Verified facts (2026-07-29)**
 
@@ -441,6 +450,16 @@ export class ChatHandler {
 - Broadcasting API on the service facade: `srv.emit(event, data)` (current socket), `srv.broadcast(event, data, headers?, filter?)` (all except sender), `srv.broadcastAll(...)` (all including sender); filters support `user`/`role`/`context`/`identifier` include/exclude. A parameter decorator injecting this facade is worth considering in the design.
 - Transactional safety exists: events can go through the CDS persistent queue so they broadcast "exactly once, when the primary transaction succeeds".
 - Version 1.11.1; **CDS 10 support explicitly confirmed** (v1.11.0 release notes). Actively maintained, Apache-2.0.
+
+**Implemented (2026-07-29 — `feature-batch2-decorators`)**
+
+- Shipped as pure sugar over the existing `buildOnEvent`/`@OnEvent` machinery — `OnWebSocketConnect()` ≈ `OnEvent('wsConnect')`, `OnWebSocketDisconnect()` ≈ `OnEvent('wsDisconnect')`, `OnWebSocketMessage(name)` ≈ `OnEvent(name)` verbatim, no new registration path. Unit-proven: an `@OnWebSocketConnect()` handler and an equivalent hand-written `@OnEvent('wsConnect')` handler produce byte-identical `EVENT` metadata (aside from the callback reference).
+- No dedicated host class shipped — the `@WebSocketHandler` alias floated during research was **dropped outright** during the design phase (not merely deferred): a websocket service impl is a regular CAP service impl, so the existing `@UnboundActions` host is sufficient and an extra decorator would only rename `@UnboundActions` for one protocol.
+- Confirmed the modeled-actions requirement empirically: `wsConnect()` / `wsDisconnect(reason: String)` only fire when declared as CDS `action`s on the `@protocol: 'websocket'` service (the bookshop `ChatService` fixture models both) — the plugin's adapter calls modeled operations only, it does not synthesize connect/disconnect events for services that omit them.
+- Two more wire-level corrections found during review, both now pinned in the `@OnWebSocketDisconnect`/`@OnWebSocketMessage` JSDoc and the README: (a) under the plugin's default `kind: 'ws'`, the value delivered to the modeled `wsDisconnect(reason: String)` is the socket **close code** as a string (e.g. `'1000'`, `'1005'`) — raw `ws` passes `(code, reason)` to its close handler and the plugin forwards only the first argument, so `req.data.reason` is **not** a human reason phrase; (b) `@OnWebSocketMessage(name)` strips everything before the last dot at registration, same as `@OnEvent` — `'ChatService.sendMessage'` registers as `'sendMessage'`, so consumers must pass the plain operation name.
+- Spike result (design-spec risk #2): `@cap-js-community/websocket` **does** attach correctly under `@cap-js/cds-test`'s real HTTP server on an ephemeral port — no fallback to a spawned `start-server-and-test` boot was needed for the integration suite; the `ws` root devDep connects straight to `client.url` with `http` swapped for `ws`.
+- Wire observation pinned by a real run against `@cap-js-community/websocket` `1.11.0` on kind `'ws'`: the server-side handler fires and its action resolves, but the return value is **not** echoed back as a reply frame — raw `ws` has no ack-callback channel (unlike `socket.io`), so the value is simply discarded. The e2e smoke script's pass criterion was relaxed accordingly (open + unthrown send = green, documented inline in `ws-smoke.js`); the README carries the same caveat.
+- Exercised end-to-end: unit (metadata sugar equivalence to `@OnEvent`), integration (real `ChatService` over a real `ws` client: connect/message/disconnect markers), e2e (smoke script chained after the newman collection against the real booted server).
 
 **Benefits**
 
@@ -453,12 +472,20 @@ Docs: <https://github.com/cap-js-community/websocket>
 
 Wrap the `cds.on(...)` server lifecycle events. No plugin dependency — listed in Tier 3 only because they sit outside per-request handling.
 
-**Lives in:** design choice — either a new `@ServerLifecycle` class decorator (recommended: server lifecycle has nothing to do with "unbound actions of this service") or `@UnboundActions`. Decide in the design phase.
+**Lives in:** a dedicated `@ServerLifecycle` class decorator — **decided and shipped** (2026-07-29, `feature-batch2-decorators`): server lifecycle has nothing to do with "unbound actions of this service", so a dedicated host keeps the semantics honest (see Implemented below).
 
 **Verified facts (2026-07-29)**
 
 - Full lifecycle order: `bootstrap` (express app created) → `loaded` (models compiled) → `served` (all services bootstrapped; receives the services object; async handlers allowed) → `listening` (HTTP server up) → `shutdown` (graceful shutdown, fires on SIGINT/SIGTERM, async handlers allowed).
 - Timing constraint confirmed: service impl functions run during `cds.serve()`, **after `bootstrap` and `loaded` have already fired**. From inside `CDSDispatcher.initialize()` the reliably subscribable events are exactly **`served`, `listening`, `shutdown`** — which is why `@OnBootstrap` was dropped from this family.
+
+**Implemented (2026-07-29 — `feature-batch2-decorators`)**
+
+- Shipped exactly as recommended: a dedicated `@ServerLifecycle` class decorator, hosting only `@OnServed` / `@OnListening` / `@OnShutdown`. The class is `injectable()` like every other host but also writes its own `SERVER_LIFECYCLE_NAME` class-metadata flag; `CDSDispatcher` reads it via `MetadataDispatcher.isServerLifecycle` and throws at bootstrap in both directions — lifecycle decorators found outside a `@ServerLifecycle` class, or any *other* handler decorator found inside one.
+- Registration bypasses `srv` entirely: CAP's `served`/`listening`/`shutdown` are `process-global` `cds.on(...)` events (pinned against the installed `@sap/cds` 10.0.3 source before implementation), not service-scoped, so `CDSDispatcher` dispatches straight to `cds.on(...)` instead of the usual `srv.before/on/after` path. `shutdown` in particular is **not** `emit`-based on CAP's side: it is dispatched as `await Promise.all(cds.listeners('shutdown').map(fn => fn(err)))`, with **no once-guard** — the callback can and does fire more than once per process, so `@OnShutdown` handlers must be idempotent (documented in the README).
+- `cds.on` is process-global infrastructure, so a class-level `WeakSet<Constructable>` (module scope) deduplicates registration `once per process per class`, independent of how many `CDSDispatcher` instances or bootstraps list it. Consequence pinned by a unit test: **first-dispatcher-wins** — the instance whose callbacks stay bound is the one resolved by the *first* `CDSDispatcher.initialize()` call to reach that class; a later dispatcher registering the same class skips silently (the already-registered check short-circuits before it resolves its own instance). Honesty caveat carried into the README: the guard is per **loaded bundle** — a consumer that ends up with both the CJS and the ESM build of this package loaded in one process would register a `@ServerLifecycle` class twice (two separate module scopes, two separate `WeakSet`s).
+- `@Use` stacked on a `@ServerLifecycle` class fails fast at bootstrap (`SERVER_LIFECYCLE_MIDDLEWARE`) — added after review as a companion to the "wrong host" / "foreign handlers" guards, since lifecycle hooks are not request handlers and middleware has nothing to wrap there.
+- Exercised end-to-end: unit (metadata shape/order, `cds.on` registration/dedup/binding/cross-class ordering, all four guard-throw paths, coexistence with a middleware-wrapped `@UnboundActions` class in the same dispatcher), integration (real bookshop boot: `@OnServed` seeds a row visible over OData before `listening` fires, `@OnListening` reports the real ephemeral port, `cds.shutdown()` triggers the marker), e2e (seeded row visible via the postman collection).
 
 **Benefits**
 
