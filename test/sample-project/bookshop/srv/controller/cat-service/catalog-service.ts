@@ -20,6 +20,7 @@ import ShoppingCartHandler from './handler/ShoppingCart';
 import ThrottledActionsHandler from './handler/ThrottledActionsHandler';
 import UnboundActionsHandler from './handler/UnboundActions';
 import WishlistsHandler from './handler/WishlistsHandler';
+import ServerLifecycleHandler from '../shared-handlers/ServerLifecycleHandler';
 
 export = new CDSDispatcher([
   // Entities
@@ -41,6 +42,9 @@ export = new CDSDispatcher([
 
   // Request lifecycle (per-root-request commit/succeeded/failed/done)
   BookLifecycleHandler,
+
+  // Server lifecycle (cds.on served/listening/shutdown)
+  ServerLifecycleHandler,
 
   // Unbound actions
   UnboundActionsHandler,
