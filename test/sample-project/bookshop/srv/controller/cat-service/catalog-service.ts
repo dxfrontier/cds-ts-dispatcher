@@ -17,6 +17,7 @@ import PublishersHandler from './handler/PublishersHandler';
 import ReviewHandler from './handler/ReviewHandler';
 import ScheduledTasksHandler from './handler/ScheduledTasksHandler';
 import ShoppingCartHandler from './handler/ShoppingCart';
+import ThrottledActionsHandler from './handler/ThrottledActionsHandler';
 import UnboundActionsHandler from './handler/UnboundActions';
 import WishlistsHandler from './handler/WishlistsHandler';
 
@@ -44,6 +45,7 @@ export = new CDSDispatcher([
   // Unbound actions
   UnboundActionsHandler,
   AdminOnlyActionHandler,
+  ThrottledActionsHandler,
 
   // Scheduled tasks (cds 10 event-queue)
   ScheduledTasksHandler,
