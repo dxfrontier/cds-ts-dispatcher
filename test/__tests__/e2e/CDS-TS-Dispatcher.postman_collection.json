@@ -4786,6 +4786,170 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Throttle - @Throttle 429",
+      "description": "Fixed window 10s, limit 3, anonymous user. Re-running within 10s of a previous run can shift which request sees the 429 - the folder is written to be idempotent per fresh server boot.",
+      "item": [
+        {
+          "name": "Throttled ping 1 of 3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('First call passes', function () { pm.expect(pm.response.code).to.equal(200); });"],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "content-type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{catalogService}}/throttledPing",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{catalogService}}", "throttledPing"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Throttled ping 2 of 3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Second call passes', function () { pm.expect(pm.response.code).to.equal(200); });"],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "content-type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{catalogService}}/throttledPing",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{catalogService}}", "throttledPing"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Throttled ping 3 of 3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Third call passes', function () { pm.expect(pm.response.code).to.equal(200); });"],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "content-type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{catalogService}}/throttledPing",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{catalogService}}", "throttledPing"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Throttled ping 4 gets 429",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Fourth call is throttled with 429', function () { pm.expect(pm.response.code).to.equal(429); });",
+                  "pm.test('Message names the limit', function () {",
+                  "    var message = pm.response.json().error.message;",
+                  "    pm.expect(message).to.include('max 3 requests');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "content-type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{catalogService}}/throttledPing",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{catalogService}}", "throttledPing"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "event": [
