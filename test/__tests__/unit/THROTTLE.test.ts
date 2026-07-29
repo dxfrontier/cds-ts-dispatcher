@@ -135,6 +135,29 @@ describe('THROTTLE', () => {
       expect((second as any).reject).toHaveBeenCalledWith(429, expect.stringContaining('1'));
     });
 
+    test('It should KEY : by tenant through the decorator - same tenant, different users share one window', async () => {
+      class TenantWrapped {
+        @Throttle({ limit: 1, window: 60_000, by: 'tenant' })
+        public async ping(req: Request) {
+          return 'pong';
+        }
+      }
+      const instance = new TenantWrapped();
+      const cds = require('@sap/cds');
+
+      const first = buildReq({ user: { id: 'alice' }, tenant: 'shared-tenant' });
+      Object.setPrototypeOf(first, cds.Request.prototype);
+      await expect(instance.ping(first as unknown as Request)).resolves.toBe('pong');
+
+      const second = buildReq({ user: { id: 'bob' }, tenant: 'shared-tenant' });
+      Object.setPrototypeOf(second, cds.Request.prototype);
+      (second as any).reject = jest.fn(() => {
+        throw new Error('429');
+      });
+      await expect(instance.ping(second as unknown as Request)).rejects.toThrow('429');
+      expect((second as any).reject).toHaveBeenCalledWith(429, expect.stringContaining('tenant'));
+    });
+
     test('It should THROW : a descriptive error when no cds.Request is among the arguments', async () => {
       class NoReq {
         @Throttle({ limit: 1, window: 1000 })

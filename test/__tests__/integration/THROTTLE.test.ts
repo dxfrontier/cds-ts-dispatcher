@@ -35,7 +35,7 @@ describe('INTEGRATION - @Throttle', () => {
       throw new Error('expected 429');
     } catch (error: any) {
       expect(error.status).toBe(429);
-      expect(String(error.message)).toContain('3');
+      expect(String(error.message)).toContain('max 3 requests');
       expect(String(error.message)).toContain('10000');
     }
   });
