@@ -103,7 +103,12 @@ function UnboundActions<Target extends new (...args: never) => unknown>() {
  * `@ServerLifecycle` classes host ONLY the three server lifecycle method decorators -
  * [@OnServed](#onserved), [@OnListening](#onlistening), [@OnShutdown](#onshutdown) - which register against
  * CAP's `process-global` `cds.on('served' | 'listening' | 'shutdown', ...)` events (NOT `srv.*`). Each class is
- * registered `once per process`, no matter how many `CDSDispatcher` instances (or bootstraps) list it.
+ * registered `once per process`, no matter how many `CDSDispatcher` instances (or bootstraps) list it - the
+ * `first` dispatcher to initialize resolves the instance the callbacks stay bound to; later dispatchers do not
+ * re-register or re-bind.
+ *
+ * `NOTE:` `@Use` middleware does not apply to `@ServerLifecycle` classes (lifecycle hooks are not request
+ * handlers) - stacking `@Use` on one fails fast at bootstrap.
  *
  * @returns A decorator function that applies the injectable configuration to the target class.
  *

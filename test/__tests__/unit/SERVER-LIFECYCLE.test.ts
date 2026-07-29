@@ -6,19 +6,20 @@ import cds from '@sap/cds';
 import {
   BeforeCommit,
   CDSDispatcher,
-  EntityHandler,
+  OnAction,
   OnListening,
   OnServed,
   OnShutdown,
+  Req,
   ServerLifecycle,
   Use,
   UnboundActions,
 } from '../../../lib';
 import { MetadataDispatcher } from '../../../lib/core/MetadataDispatcher';
-import { Book } from '../../sample-project/bookshop/@cds-models/CatalogService';
 import { MiddlewareEntity1 } from '../../util/middleware/MiddlewareEntity1';
 
 import type { BaseHandler, Constructable } from '../../../lib/types/internalTypes';
+import type { Request } from '../../../lib/types/types';
 
 const instanceOf = (Handler: Constructable) => new Handler();
 
@@ -171,18 +172,83 @@ describe('SERVER LIFECYCLE', () => {
       expect(() => bootstrap(ForeignHandlers)).toThrow(/non-lifecycle/);
     });
 
-    test('It should COEXIST : with an entity handler using @Use middleware in the same dispatcher', () => {
+    test('It should COEXIST : with a middleware-wrapped action handler in the same dispatcher', () => {
+      const onSpy = jest.spyOn(cds as any, 'on');
+
       @ServerLifecycle()
       class Lifecycle4 {
         @OnServed()
         public async seed() {}
       }
 
+      // The action handler makes buildMiddlewares actually construct MiddlewareEntityRegistry -
+      // an empty class would return before the registry runs and prove nothing.
       @Use(MiddlewareEntity1)
-      @EntityHandler(Book)
-      class BookWithMiddleware {}
+      @UnboundActions()
+      class ActionsWithMiddleware {
+        @OnAction('CatalogService.throttledPing')
+        public async ping(@Req() req: Request) {
+          return req;
+        }
+      }
 
-      expect(() => bootstrap(Lifecycle4, BookWithMiddleware)).not.toThrow();
+      expect(() => bootstrap(Lifecycle4, ActionsWithMiddleware)).not.toThrow();
+      expect(onSpy.mock.calls.filter((call) => call[0] === 'served')).toHaveLength(1);
+    });
+
+    test('It should THROW : when @Use middleware is stacked on a @ServerLifecycle class', () => {
+      @Use(MiddlewareEntity1)
+      @ServerLifecycle()
+      class MiddlewaredLifecycle {
+        @OnServed()
+        public async seed() {}
+      }
+
+      expect(() => bootstrap(MiddlewaredLifecycle)).toThrow(/middleware/i);
+    });
+
+    test('It should ORDER : cds.on registrations across classes by CDSDispatcher array order', async () => {
+      const onSpy = jest.spyOn(cds as any, 'on');
+      const ran: string[] = [];
+
+      @ServerLifecycle()
+      class OrderA {
+        @OnServed()
+        public async servedA() {
+          ran.push('A');
+        }
+      }
+
+      @ServerLifecycle()
+      class OrderB {
+        @OnServed()
+        public async servedB() {
+          ran.push('B');
+        }
+      }
+
+      bootstrap(OrderA, OrderB);
+
+      const servedCallbacks = onSpy.mock.calls
+        .filter((call) => call[0] === 'served')
+        .map((call) => call[1] as () => Promise<void>);
+      expect(servedCallbacks).toHaveLength(2);
+
+      for (const callback of servedCallbacks) {
+        await callback();
+      }
+
+      expect(ran).toEqual(['A', 'B']);
+    });
+
+    test('It should SKIP : an empty @ServerLifecycle class without throwing or registering', () => {
+      const onSpy = jest.spyOn(cds as any, 'on');
+
+      @ServerLifecycle()
+      class EmptyLifecycle {}
+
+      expect(() => bootstrap(EmptyLifecycle)).not.toThrow();
+      expect(onSpy).not.toHaveBeenCalled();
     });
   });
 });

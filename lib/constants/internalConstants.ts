@@ -59,6 +59,8 @@ export const constants = {
       "@ServerLifecycle class '${className}' contains non-lifecycle handler decorators. Only @OnServed / @OnListening / @OnShutdown are allowed here.",
     SERVER_LIFECYCLE_WRONG_HOST:
       "@OnServed / @OnListening / @OnShutdown found in '${className}', which is not decorated with @ServerLifecycle. Move them into a @ServerLifecycle class.",
+    SERVER_LIFECYCLE_MIDDLEWARE:
+      "@Use middleware found on @ServerLifecycle class '${className}'. Server lifecycle hooks are not request handlers - middleware does not apply here.",
   },
 
   ALL_EVENTS: '*' as const,

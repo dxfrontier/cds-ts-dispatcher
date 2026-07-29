@@ -1622,6 +1622,10 @@ const OnListening = buildServerLifecycle({ event: 'LISTENING' });
  * `NOTE:` CAP has `NO once-guard` on `shutdown` - unlike `served` / `listening`, this callback `may fire more than
  * once` per process. Make the handler idempotent.
  *
+ * `NOTE:` catch your own errors: a `rejected` `@OnShutdown` handler propagates out of CAP's shutdown dispatch,
+ * so `server.close` (and the force-exit fallback timer) never run - the process stays alive with an
+ * `unhandled rejection` instead of shutting down.
+ *
  * `NOTE:` these arguments come straight from `cds.on('shutdown', ...)` - no `@Req()`-style parameter decorator
  * applies, the callback is invoked with CAP's native arguments `verbatim`.
  * @example

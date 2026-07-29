@@ -837,6 +837,14 @@ class CDSDispatcher {
         );
       }
 
+      if ((MetadataDispatcher.getMiddlewares(entityInstance) ?? []).length > 0) {
+        util.throwErrorMessage(
+          util.buildMessage(constants.MESSAGES.SERVER_LIFECYCLE_MIDDLEWARE, {
+            className: entityInstance.constructor?.name ?? 'Unknown',
+          }),
+        );
+      }
+
       if (serverLifecycle.length === 0) {
         return undefined;
       }
