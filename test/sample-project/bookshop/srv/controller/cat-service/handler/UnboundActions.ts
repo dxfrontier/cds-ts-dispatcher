@@ -176,7 +176,11 @@ class UnboundActionsHandler {
 
   @OnEvent(OrderedBook)
   public async orderedBook(@Req() req: Request<OrderedBook>, @Res() res: RequestResponse): Promise<void> {
-    res.setHeader('Content-Language', 'DE_de');
+    // Guarded: this event is also emitted from Books after-read - inside a multi-group OData $batch the
+    // shared HTTP response is already streaming there (ERR_HTTP_HEADERS_SENT otherwise).
+    if (!res.headersSent) {
+      res.setHeader('Content-Language', 'DE_de');
+    }
     if (req.event !== 'OrderedBook') {
       req.reject(400, 'Not OrderedBook: check @OnEvent decorator');
     }

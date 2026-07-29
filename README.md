@@ -3885,6 +3885,9 @@ The handlers receive one argument:
 
 - `req` of type `Request`
 
+> [!NOTE]
+> Ordering across `multiple handler classes`: `@BeforeCommit` callbacks run in `CDSDispatcher([...])` array order, while `@AfterCommit` / `@AfterRollback` / `@OnRequestDone` callbacks run in `reverse` array order (within one class, declaration order always holds). With more than ~10 handler classes hooking the `same` lifecycle event, Node's default `MaxListenersExceededWarning` may appear for the shared root-context emitter — harmless log noise, not a leak.
+
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ###### @BeforeCommit

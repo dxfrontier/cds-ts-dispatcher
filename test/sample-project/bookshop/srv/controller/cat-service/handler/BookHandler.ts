@@ -77,7 +77,12 @@ class BookHandler {
       console.log('CREATE and UPDATE');
     }
 
-    res.setHeader('CustomHeader', 'AfterAllTriggered');
+    // Headers can only be set while unsent: inside an OData $batch envelope the shared HTTP response is
+    // already streaming when a SECOND atomicity group's sub-requests run - an unguarded setHeader there
+    // throws ERR_HTTP_HEADERS_SENT and rolls the whole group back.
+    if (!res.headersSent) {
+      res.setHeader('CustomHeader', 'AfterAllTriggered');
+    }
   }
 
   @AfterCreate()
@@ -98,7 +103,10 @@ class BookHandler {
     @Result() result: Book,
     @GetRequest('locale') locale: Request['locale'],
   ): Promise<void> {
-    res.setHeader('Accept-Language', locale);
+    // Same ERR_HTTP_HEADERS_SENT hazard as in afterAll: skip once the $batch envelope is streaming.
+    if (!res.headersSent) {
+      res.setHeader('Accept-Language', locale);
+    }
   }
 
   @AfterRead()

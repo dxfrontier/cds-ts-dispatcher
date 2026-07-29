@@ -20,16 +20,11 @@
  * cascaded into "no such table" failures across the whole lane. A green SCHEDULING.test.ts alongside this
  * file is that regression proof.
  *
- * `OBSERVED QUIRK` - the "twice" $batch counterpart below uses TWO SEPARATE `$batch` requests rather
- * than two atomicity groups inside ONE `$batch` call (both shapes are valid per the pin). Two
- * atomicity groups in a single call was tried first and is reproducible-but-broken independently of
- * this task's decorators: `BookHandler.afterAll` (a pre-existing, unrelated fixture handler that
- * unconditionally does `res.setHeader(...)`) throws `ERR_HTTP_HEADERS_SENT` on the SECOND atomicity
- * group's subrequest only (`@sap/cds/libx/odata/middleware/batch.js` processes atomicity groups
- * sequentially via an internal queue), rolling that group back with a 500. Neither `BookHandler.ts`
- * nor the batch middleware are owned by/in scope for this task, so two separate requests are used
- * instead - both are valid readings of "the same two updates as TWO separate atomicity groups (or two
- * batch requests)".
+ * `NOTE on multi-group $batch` - the "twice" counterpart uses two atomicity groups inside ONE `$batch`
+ * call. This requires the `headersSent` guards in `BookHandler` (`afterAll` / `afterReadSingleInstance`):
+ * CAP processes atomicity groups sequentially and the shared HTTP response is already streaming when
+ * the second group's sub-requests run - an unguarded `res.setHeader(...)` there throws
+ * `ERR_HTTP_HEADERS_SENT` and rolls the second group back with a 500.
  */
 import path from 'node:path';
 import cds from '@sap/cds';
@@ -202,10 +197,10 @@ describe('Request lifecycle hooks (@BeforeCommit / @AfterCommit / @AfterRollback
       expect(countOf(calls, REQUEST_DONE)).toBe(1);
     });
 
-    // Two SEPARATE $batch requests (rather than two atomicity groups inside one $batch call) -
-    // the brief allows either shape for the "twice" counterpart; see this suite's file-head comment
-    // for why two atomicity groups in a SINGLE $batch call is not used here.
-    test('It should FIRE the three markers TWICE for the same two updates split across TWO SEPARATE $batch requests', async () => {
+    // TWO atomicity groups inside ONE $batch call: each group is its own root transaction, so the
+    // hooks fire once PER GROUP. (Requires the `headersSent` guard in `BookHandler` - the shared
+    // HTTP response is already streaming when the second group's sub-requests run.)
+    test('It should FIRE the three markers TWICE for two updates in TWO atomicity groups of ONE $batch call', async () => {
       await client.POST(
         `${catalog}/Books`,
         { ID: 910005, title: 'Lifecycle Batch Group C', author_ID: 101, currency_code: 'USD' },
@@ -218,7 +213,7 @@ describe('Request lifecycle hooks (@BeforeCommit / @AfterCommit / @AfterRollback
       );
 
       const spy = jest.spyOn(console, 'log');
-      const batchOne = await client.POST(
+      const batch = await client.POST(
         `${catalog}/$batch`,
         {
           requests: [
@@ -228,29 +223,22 @@ describe('Request lifecycle hooks (@BeforeCommit / @AfterCommit / @AfterRollback
               url: 'Books(910005)',
               headers: { 'content-type': 'application/json' },
               body: { title: 'Lifecycle Batch Group C Updated' },
+              atomicityGroup: 'g1',
             },
-          ],
-        },
-        { auth },
-      );
-      const batchTwo = await client.POST(
-        `${catalog}/$batch`,
-        {
-          requests: [
             {
-              id: '1',
+              id: '2',
               method: 'PATCH',
               url: 'Books(910006)',
               headers: { 'content-type': 'application/json' },
               body: { title: 'Lifecycle Batch Group D Updated' },
+              atomicityGroup: 'g2',
             },
           ],
         },
         { auth },
       );
-      expect(batchOne.status).toBe(200);
-      expect(batchTwo.status).toBe(200);
-      const subStatuses = [...batchOne.data.responses, ...batchTwo.data.responses].map((r: any) => r.status);
+      expect(batch.status).toBe(200);
+      const subStatuses = batch.data.responses.map((r: any) => r.status);
       expect(subStatuses.every((s: number) => s >= 200 && s < 300)).toBe(true);
 
       const calls = await settle(spy, REQUEST_DONE, 2);
