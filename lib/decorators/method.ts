@@ -109,7 +109,8 @@ function PrependDraft(options: PrependBaseDraft) {
     const method = descriptor.value!;
 
     descriptor.value = async function (...args: any[]) {
-      new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+      const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+      if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
       return await method.apply(this, args);
     };
 
@@ -153,7 +154,8 @@ function Prepend(options: PrependBase) {
     const method = descriptor.value!;
 
     descriptor.value = async function (...args: any[]) {
-      new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+      const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+      if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
       return await method.apply(this, args);
     };
 
@@ -485,7 +487,8 @@ function buildAfter(options: {
       const method = descriptor.value!;
 
       descriptor.value = async function (...args: any[]) {
-        new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
         return await method.apply(this, args);
       };
 
@@ -525,7 +528,8 @@ function buildBefore(options: {
       const method = descriptor.value!;
 
       descriptor.value = async function (...args: any[]) {
-        new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
         return await method.apply(this, args);
       };
 
@@ -561,7 +565,8 @@ function buildAction(options: { event: ACTION_EVENTS | FUNCTION_EVENTS; eventKin
       const method = descriptor.value!;
 
       descriptor.value = async function (...args: any[]) {
-        new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
         return await method.apply(this, args);
       };
 
@@ -598,7 +603,8 @@ function buildOnMessagingEvent(params: { event: 'MESSAGING_EVENT'; eventKind: Ev
       const method = descriptor.value!;
 
       descriptor.value = async function (...args: any[]) {
-        new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
         return await method.apply(this, args);
       };
 
@@ -635,7 +641,8 @@ function buildOnEvent(options: { event: ON_EVENT; eventKind: EventKind; isDraft:
       const method = descriptor.value!;
 
       descriptor.value = async function (...args: any[]) {
-        new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
         return await method.apply(this, args);
       };
 
@@ -665,9 +672,26 @@ function buildOnEvent(options: { event: ON_EVENT; eventKind: EventKind; isDraft:
 function buildOnError(options: { eventKind: EventKind; isDraft: boolean }) {
   return function <Target extends object>() {
     return function (target: Target, propertyName: string | symbol, descriptor: TypedPropertyDescriptor<any>): void {
+      // Parameter decorators run before method decorators, so `@Diff` metadata (if any) is already present here.
+      // Fail fast at DECORATION time: `@OnError` never awaits `applyDecorators()` (see the NOTE below), so a
+      // `@Diff` there would both inject `undefined` silently AND float `applyDiffDecorator()`'s promise - an
+      // unhandled rejection from the real `req.diff()` call could crash the consumer's process.
+      const hasDiff = Reflect.getOwnMetadata(constants.DECORATOR.PARAMETER.DIFF, target, propertyName);
+
+      if (hasDiff) {
+        const className = (target as any).constructor?.name ?? 'Unknown';
+
+        util.throwErrorMessage(
+          `@Diff is not supported on @OnError (error handlers run synchronously while the transaction unwinds). Remove @Diff from ${className}.${String(propertyName)}.`,
+        );
+      }
+
       const method = descriptor.value!;
 
       descriptor.value = async function (...args: any[]) {
+        // NOTE: `applyDecorators()` is intentionally NOT awaited here - CAP invokes error handlers synchronously,
+        // and awaiting it (even `await undefined`) would defer this method to a microtask. This is why `@Diff` -
+        // the only asynchronous parameter decorator - is unsupported on `@OnError`.
         new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
         return method.apply(this, args);
       };
@@ -708,7 +732,8 @@ function buildOnCRUD<Target extends object>(options: {
       const method = descriptor.value!;
 
       descriptor.value = async function (...args: any[]) {
-        new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
         return await method.apply(this, args);
       };
 
@@ -1299,7 +1324,8 @@ function registerScheduledHandler(
   const method = descriptor.value!;
 
   descriptor.value = async function (...args: any[]) {
-    new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+    const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+    if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
     return await method.apply(this, args);
   };
 

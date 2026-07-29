@@ -420,6 +420,132 @@ function Affected(): ParameterDecorator {
   };
 }
 
+/**
+ * Annotates a parameter of a method to inject `req.data` - the payload of the current request.
+ *
+ * @example
+ * ```typescript
+ * public async someMethod(
+ *   /@Data() data: MyEntity
+ * ) {
+ *   // custom logic based on data
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#data | CDS-TS-Dispatcher - @Data}
+ */
+function Data(): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'DATA',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'INDEX_DECORATOR', parameterIndex },
+    });
+  };
+}
+
+/**
+ * Annotates a parameter of a method to inject `req.data[field]` - a single field of the current request's payload.
+ * @param field The name of the field to get within `req.data`.
+ *
+ * @example
+ * ```typescript
+ * public async someMethod(
+ *   /@Param<MyEntity>('title') title: string
+ * ) {
+ *   // custom logic based on title
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#param | CDS-TS-Dispatcher - @Param}
+ */
+function Param<T = Record<string, any>>(field: Extract<keyof T, string>): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'PARAM',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'DATA_PARAM', parameterIndex, property: field },
+    });
+  };
+}
+
+/**
+ * Annotates a parameter of a method to inject `req.user` - the authenticated user of the current request.
+ *
+ * @example
+ * ```typescript
+ * public async someMethod(
+ *   /@UserInfo() user: User
+ * ) {
+ *   if (user.is('Manager')) {
+ *     // custom logic
+ *   }
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#userinfo | CDS-TS-Dispatcher - @UserInfo}
+ */
+function UserInfo(): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'USER_INFO',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'INDEX_DECORATOR', parameterIndex },
+    });
+  };
+}
+
+/**
+ * Annotates a parameter of a method to inject `req.tenant` - the tenant of the current request.
+ *
+ * @example
+ * ```typescript
+ * public async someMethod(
+ *   /@Tenant() tenant: string | undefined
+ * ) {
+ *   // custom logic based on tenant
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#tenant | CDS-TS-Dispatcher - @Tenant}
+ */
+function Tenant(): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'TENANT',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'INDEX_DECORATOR', parameterIndex },
+    });
+  };
+}
+
+/**
+ * Annotates a parameter of a method to inject `await req.diff()` - the before/after change-set of the current request.
+ *
+ * `NOTE:` `@Diff` is the only `asynchronous` parameter decorator, therefore it is `unsupported` on `@OnError`
+ * (CAP invokes error handlers synchronously).
+ *
+ * @example
+ * ```typescript
+ * public async someMethod(
+ *   /@Diff() diff: MyEntity
+ * ) {
+ *   // custom logic based on diff
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#diff | CDS-TS-Dispatcher - @Diff}
+ */
+function Diff(): ParameterDecorator {
+  return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
+    ArgumentMethodProcessor.createMetadataBy({
+      metadataKey: 'DIFF',
+      propertyKey: propertyKey!,
+      target,
+      metadataFields: { type: 'INDEX_DECORATOR', parameterIndex },
+    });
+  };
+}
+
 export {
   Msg,
   SingleInstanceSwitch,
@@ -440,4 +566,9 @@ export {
   Env,
   Subject,
   Affected,
+  Data,
+  Param,
+  UserInfo,
+  Tenant,
+  Diff,
 };

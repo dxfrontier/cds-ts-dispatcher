@@ -24,6 +24,11 @@ export const constants = {
       MSG: Symbol('MSG'),
       SUBJECT: Symbol('SUBJECT'),
       AFFECTED: Symbol('AFFECTED'),
+      DATA: Symbol('DATA'),
+      PARAM: Symbol('PARAM'),
+      USER_INFO: Symbol('USER_INFO'),
+      TENANT: Symbol('TENANT'),
+      DIFF: Symbol('DIFF'),
     },
   },
 

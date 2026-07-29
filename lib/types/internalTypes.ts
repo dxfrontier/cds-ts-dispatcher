@@ -384,6 +384,11 @@ type EnvProperty = {
   property: string;
 };
 
+type DataParamProperty = {
+  type: 'DATA_PARAM';
+  property: string;
+};
+
 type OnlyParameterIndexDecorator = {
   type: 'INDEX_DECORATOR';
 };
@@ -418,6 +423,7 @@ export type MetadataFields = {
   | IsColumnValueSupplied
   | IsRoleProperties
   | EnvProperty
+  | DataParamProperty
 );
 
 export type MetadataInputs = {

@@ -7,6 +7,7 @@ import BookEventsHandler from './handler/BookEventsHandler';
 import BookFormatsHandler from './handler/BookFormatsHandler';
 import BookHandler from './handler/BookHandler';
 import BookOrdersHandler from './handler/BookOrdersHandler';
+import BookParamsHandler from './handler/BookParamsHandler';
 import BookRecommendationsHandler from './handler/BookRecommendationsHandler';
 import BookSalesHandler from './handler/BookSalesHandler';
 import BookSeriesHandler from './handler/BookSeriesHandler';
@@ -32,6 +33,7 @@ export = new CDSDispatcher([
   ShoppingCartHandler,
   BookSeriesHandler,
   AuthorsHandler,
+  BookParamsHandler,
   // Draft
   BookEventsHandler,
 
