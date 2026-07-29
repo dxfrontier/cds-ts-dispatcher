@@ -134,6 +134,12 @@ const findByEvent = (instance: Constructable, event: REQUEST_LIFECYCLE_EVENTS): 
 type CapturedListener = [string, (...args: any[]) => unknown];
 
 /**
+ * A `ROOT` event context able to host the shared emitter - `_set` mirrors `EventContext._set`, which
+ * `req.before` / `req.on` need to create `_emitter` on. A root WITHOUT it cannot host the hooks.
+ */
+const buildRoot = (): Record<string, unknown> => ({ _set: (_property: string, value: unknown) => value });
+
+/**
  * A request-like object recognized by `parameterUtil.extractArguments` (via the `isMsgEvent` keys), which
  * additionally captures the `req.before(...)` / `req.on(...)` registrations of the root event context.
  */
@@ -146,6 +152,7 @@ const buildReq = (root?: object) => {
     event: 'CREATE',
     data: {},
     headers: {},
+    ...buildRoot(),
     before: (event: string, listener: (...args: any[]) => unknown) => before.push([event, listener]),
     on: (event: string, listener: (...args: any[]) => unknown) => on.push([event, listener]),
   };
@@ -282,7 +289,7 @@ describe('REQUEST LIFECYCLE', () => {
 
     test('It should ATTACH ONCE : per root request context', () => {
       const { attach } = registerLifecycleOf(BookLifecycleHandler);
-      const root = {};
+      const root = buildRoot();
       const first = buildReq(root);
       const second = buildReq(root);
 
@@ -297,8 +304,8 @@ describe('REQUEST LIFECYCLE', () => {
 
     test('It should RE-ATTACH : for a request having a different root context', () => {
       const { attach } = registerLifecycleOf(BookLifecycleHandler);
-      const first = buildReq({});
-      const second = buildReq({});
+      const first = buildReq(buildRoot());
+      const second = buildReq(buildRoot());
 
       attach(first.req);
       attach(second.req);
@@ -348,6 +355,19 @@ describe('REQUEST LIFECYCLE', () => {
       const { attach } = registerLifecycleOf(BookLifecycleHandler);
 
       expect(() => attach({ inbound: {}, event: 'CREATE', data: {}, headers: {} })).not.toThrow();
+    });
+
+    test('It should SKIP : requests whose ROOT cannot host the emitter (event-queue internal dispatches)', () => {
+      const { attach } = registerLifecycleOf(BookLifecycleHandler);
+
+      // The queue dispatches its background processing with a REAL 'cds.Request' ('before' / 'on' are
+      // functions) whose 'context' is the JSON-deserialized, plain-object task context - no '_set', no
+      // '_emitter'. Attaching there throws 'this.context._set is not a function' inside cds.
+      const { req, before, on } = buildReq({ tenant: 'anonymous', user: { id: 'internal' } });
+
+      expect(() => attach(req)).not.toThrow();
+      expect(before).toHaveLength(0);
+      expect(on).toHaveLength(0);
     });
   });
 

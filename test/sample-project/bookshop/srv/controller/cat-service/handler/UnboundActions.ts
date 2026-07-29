@@ -12,6 +12,7 @@ import {
   OnError,
   OnEvent,
   OnFunction,
+  OnRequestDone,
   Prepend,
   Req,
   RequestResponse,
@@ -225,6 +226,13 @@ class UnboundActionsHandler {
   @OnEvent('event_1')
   private async bla(@Req() req: Request<{ foo: number; bar: string }>): Promise<void> {
     const bla = req.data;
+  }
+
+  // Service-wide request lifecycle: hosted on '@UnboundActions', so it fires once per ROOT request of
+  // the whole 'CatalogService', not only for requests targeting one entity.
+  @OnRequestDone()
+  public async requestDone(@Req() req: Request): Promise<void> {
+    console.log('[UnboundLifecycle] RequestDone');
   }
 }
 

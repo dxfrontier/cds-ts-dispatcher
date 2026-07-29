@@ -10,23 +10,15 @@
  * restoring would always see zero calls), and counted BETWEEN spy resets - never against a global
  * count, since other requests in this file/suite also trigger them.
  *
- * `NOT COVERED HERE` - proving a `REQUEST_LIFECYCLE` hook hosted service-wide (i.e. on `@UnboundActions`,
- * not on an `@EntityHandler`) end-to-end: `CatalogService` also hosts `ScheduledTasksHandler`'s
- * `@Schedule`/`@OnScheduled` tasks (see SCHEDULING.test.ts), which keeps `@sap/cds`'s persistent event
- * queue active for that service. Adding ANY `REQUEST_LIFECYCLE` decorator to the service's existing
- * `@UnboundActions` class (`UnboundActionsHandler`) makes `CDSDispatcher`'s generic `srv.before('*',
- * attach)` registration (lib/core/CDSDispatcher.ts, `registerRequestLifecycleHandlers`) also fire for
- * the queue's own internal background-processing dispatch. That dispatch has `.before`/`.on` functions
- * (so the existing hand-rolled-dispatch guard does not skip it) but an incomplete `.context`, and
- * calling `request.on(...)` on it throws `TypeError: this.context._set is not a function` deep inside
- * `@sap/cds/lib/req/context.js`, logged by the queue as "Programming error detected". Deterministically
- * (verified over multiple runs), this corrupts the shared in-memory sqlite instance for the rest of the
- * test file - every later request fails with "no such table: ...". Verified in isolation via
- * `git stash`: reverting the one added method/import restores a clean, all-green run; keeping it fails
- * 5 of 7 integration suites (24 of 32 tests), including SCHEDULING.test.ts and CRUD-CONTRACT.test.ts,
- * which do not otherwise touch this file. Since `lib/` is frozen and the existing suite must stay
- * green, this pin is intentionally omitted here rather than worked around; reported verbatim to the
- * task orchestrator instead of being papered over.
+ * `SERVICE-WIDE` - `UnboundActionsHandler` (`@UnboundActions`) hosts one `@OnRequestDone` emitting
+ * `[UnboundLifecycle] RequestDone`, pinned below for an unbound function call. That pin was impossible
+ * until `registerRequestLifecycleHandlers`' attach guard (lib/core/CDSDispatcher.ts) started skipping
+ * roots which cannot host the shared emitter: the service-wide `srv.before('*', attach)` also fires for
+ * the persistent event queue's internal background-processing dispatches (`CatalogService` keeps the
+ * queue active through `ScheduledTasksHandler`), and those carry a real `cds.Request` over a plain-object
+ * `.context`, which made `request.on(...)` throw `TypeError: this.context._set is not a function` and
+ * cascaded into "no such table" failures across the whole lane. A green SCHEDULING.test.ts alongside this
+ * file is that regression proof.
  *
  * `OBSERVED QUIRK` - the "twice" $batch counterpart below uses TWO SEPARATE `$batch` requests rather
  * than two atomicity groups inside ONE `$batch` call (both shapes are valid per the pin). Two
@@ -82,6 +74,7 @@ const BEFORE_COMMIT_READ = '[BookLifecycle] BeforeCommit READ';
 const AFTER_COMMIT = '[BookLifecycle] AfterCommit';
 const AFTER_ROLLBACK = '[BookLifecycle] AfterRollback';
 const REQUEST_DONE = '[BookLifecycle] RequestDone';
+const UNBOUND_REQUEST_DONE = '[UnboundLifecycle] RequestDone';
 
 describe('Request lifecycle hooks (@BeforeCommit / @AfterCommit / @AfterRollback / @OnRequestDone)', () => {
   test('It should FIRE BeforeCommit(UPDATE), AfterCommit and RequestDone exactly once for a plain UPDATE, with AfterRollback absent', async () => {
@@ -144,6 +137,20 @@ describe('Request lifecycle hooks (@BeforeCommit / @AfterCommit / @AfterRollback
 
     const after = await client.GET(`${catalog}/Books(910002)`, { auth });
     expect(after.data.title).not.toBe('VETO_COMMIT');
+  });
+
+  describe('service-wide (@UnboundActions)', () => {
+    test('It should FIRE the service-wide @OnRequestDone marker exactly once for an unbound function call', async () => {
+      const spy = jest.spyOn(console, 'log');
+      const called = await client.GET(`${catalog}/submitOrderFunction(book=271,quantity=6)`, { auth });
+      expect(called.status).toBe(200);
+
+      const calls = await settle(spy, UNBOUND_REQUEST_DONE);
+
+      expect(countOf(calls, UNBOUND_REQUEST_DONE)).toBe(1);
+      // The unbound function targets no entity, so the entity-scoped hooks of `BookLifecycleHandler` stay out.
+      expect(countOf(calls, REQUEST_DONE)).toBe(0);
+    });
   });
 
   describe('once per changeset ($batch)', () => {

@@ -30,6 +30,9 @@ type RequestLifecycleContext = {
   context?: RequestLifecycleContext;
   before: (event: string, listener: () => Promise<void>) => void;
   on: (event: string, listener: () => Promise<void>) => void;
+  /** `EventContext._set` / its lazily created `_emitter` - what the `emitter` getter of a ROOT context needs. */
+  _set?: (property: string, value: unknown) => unknown;
+  _emitter?: unknown;
   [marker: symbol]: unknown;
 };
 
@@ -479,58 +482,77 @@ class CDSDispatcher {
     const attached = Symbol('CDS_DISPATCHER_REQUEST_LIFECYCLE');
 
     const attach = (req: Request): void => {
-      const request = req as unknown as RequestLifecycleContext;
-      const root = request.context ?? request;
+      try {
+        const request = req as unknown as RequestLifecycleContext;
+        const root = request.context ?? request;
 
-      // Hand-rolled contexts (E.g. 'srv.dispatch({ event, data })' with a plain object) carry no emitter -
-      // there is no transaction to hook into, so the hooks are skipped instead of failing the request.
-      if (typeof request.before !== 'function' || typeof request.on !== 'function') {
-        return;
-      }
+        // Only a REAL event context can host the hooks: 'req.before' / 'req.on' write to the SHARED emitter
+        // of the root context ('this.context._emitter || this.context._set("_emitter", ...)'), so a root
+        // which can neither hold nor create it is skipped. Not hypothetical - the persistent event queue
+        // dispatches its background processing with a real 'cds.Request' (so 'before' / 'on' ARE functions)
+        // whose 'context' is the JSON-deserialized, PLAIN-OBJECT task context: attaching there throws
+        // 'this.context._set is not a function' inside cds and takes the queue (and the db) down. Those
+        // dispatches are queue INFRASTRUCTURE, not consumer requests - they have no lifecycle to hook into.
+        // ('root instanceof cds.EventContext' discriminates the same way - verified on the reproduction -
+        // but this capability check tests exactly what the emitter getter needs.)
+        const canHostHooks = typeof root._set === 'function' || Boolean(root._emitter);
+        const hasLifecycleApi = typeof request.before === 'function' && typeof request.on === 'function';
 
-      if (root[attached]) {
-        return;
-      }
-
-      root[attached] = true;
-
-      (Object.keys(lifecycleEvents) as REQUEST_LIFECYCLE_EVENTS[]).forEach((kind) => {
-        // One listener per event, so the callbacks of the class run sequentially in metadata (declaration)
-        // order - 'req.before' is a 'prependListener', which would reverse a per-callback attachment.
-        const callbacks = handlers.filter((handler) => handler.event === kind);
-
-        if (callbacks.length === 0) {
+        if (!hasLifecycleApi || !canHostHooks) {
           return;
         }
 
-        const { event, decorator } = lifecycleEvents[kind];
+        if (root[attached]) {
+          return;
+        }
 
-        // '@BeforeCommit' runs INSIDE the transaction and vetoes the request by throwing - errors propagate.
-        if (kind === 'BEFORE_COMMIT') {
-          request.before(event, async () => {
+        root[attached] = true;
+
+        (Object.keys(lifecycleEvents) as REQUEST_LIFECYCLE_EVENTS[]).forEach((kind) => {
+          // One listener per event, so the callbacks of the class run sequentially in metadata (declaration)
+          // order - 'req.before' is a 'prependListener', which would reverse a per-callback attachment.
+          const callbacks = handlers.filter((handler) => handler.event === kind);
+
+          if (callbacks.length === 0) {
+            return;
+          }
+
+          const { event, decorator } = lifecycleEvents[kind];
+
+          // '@BeforeCommit' runs INSIDE the transaction and vetoes the request by throwing - errors propagate.
+          if (kind === 'BEFORE_COMMIT') {
+            request.before(event, async () => {
+              for (const handler of callbacks) {
+                await handler.callback.call(entityInstance, req);
+              }
+            });
+
+            return;
+          }
+
+          // The other three run OUTSIDE any transaction, on an already closed one: an error thrown here would
+          // make CAP error the response of a durably committed request, so it is logged and NEVER rethrown.
+          request.on(event, async () => {
             for (const handler of callbacks) {
-              await handler.callback.call(entityInstance, req);
+              try {
+                await handler.callback.call(entityInstance, req);
+              } catch (error) {
+                console.error(
+                  util.showRedConsole(`[CDS-TS-Dispatcher] ${decorator} handler in '${className}' failed.`),
+                  error,
+                );
+              }
             }
           });
-
-          return;
-        }
-
-        // The other three run OUTSIDE any transaction, on an already closed one: an error thrown here would
-        // make CAP error the response of a durably committed request, so it is logged and NEVER rethrown.
-        request.on(event, async () => {
-          for (const handler of callbacks) {
-            try {
-              await handler.callback.call(entityInstance, req);
-            } catch (error) {
-              console.error(
-                util.showRedConsole(`[CDS-TS-Dispatcher] ${decorator} handler in '${className}' failed.`),
-                error,
-              );
-            }
-          }
         });
-      });
+      } catch (error) {
+        // Belt and braces: attaching runs in the 'before' phase of EVERY request, so a failure here must
+        // degrade to 'no lifecycle hooks for this dispatch' - never to a rejected request or a dead queue.
+        console.error(
+          util.showRedConsole(`[CDS-TS-Dispatcher] request-lifecycle attach skipped for '${className}'.`),
+          error,
+        );
+      }
     };
 
     void this.srv.prepend(() => {
