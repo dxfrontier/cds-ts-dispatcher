@@ -8,7 +8,7 @@ Three decorator families from the active backlog batch:
 
 1. **`@Throttle`** (backlog #11) — per-handler rate limiting.
 2. **`@ServerLifecycle`** class decorator hosting **`@OnServed` / `@OnListening` / `@OnShutdown`** (backlog #18) — server lifecycle hooks under DI.
-3. **WebSocket family** (backlog #17) — `@OnWebSocketConnect`, `@OnWebSocketDisconnect`, `@OnWebSocketMessage('<event>')`, plus `@WebSocketHandler` as a pure alias of `@UnboundActions`.
+3. **WebSocket family** (backlog #17) — `@OnWebSocketConnect`, `@OnWebSocketDisconnect`, `@OnWebSocketMessage('<event>')`, hosted in `@UnboundActions`.
 
 Deliverables per family: implementation, unit + integration + e2e coverage, README section(s), backlog status flip to `implemented` with as-built notes (Tier-1 style).
 
@@ -19,6 +19,7 @@ Deliverables per family: implementation, unit + integration + e2e coverage, READ
 - No sliding-window/token-bucket throttling — fixed window only.
 - No broadcast-facade parameter decorator for websockets (e.g. injecting `srv.broadcast`) — recorded as follow-up candidate.
 - No `wsContext` support — follow-up if demand appears.
+- **No `@WebSocketHandler` alias class (decision 2026-07-29):** it would carry zero behavioral delta over `@UnboundActions` (unlike `@ServerLifecycle`, which changes registration mechanics). One way to do it; if class-level ws semantics ever materialize (facade injection, `wsContext`), introduce the host then, with real behavior.
 - No distributed/shared throttle store — per-instance counters, documented honestly.
 
 ## Family 1 — `@Throttle({ limit, window, by? })`
@@ -95,7 +96,7 @@ export class Bootstrap {
 ```ts
 // CDS: @protocol: 'websocket' service ChatService { action sendMessage(text: String); event received { text: String } }
 
-@WebSocketHandler() // pure alias of @UnboundActions, for semantic honesty
+@UnboundActions() // bound as ChatService's impl via CDSDispatcher
 export class ChatHandler {
   @OnWebSocketConnect()          // ≈ srv.on('wsConnect', …)
   public async onConnect(@Req() req: Request) { ... }
@@ -112,7 +113,7 @@ export class ChatHandler {
 
 - **Pure sugar over the existing ON-event machinery** (`buildOnEvent`-family factory with fixed event names `wsConnect` / `wsDisconnect`, and the caller-supplied operation name for `@OnWebSocketMessage`). Standard `srv.on` registrations; `@Req` and the other parameter decorators work unchanged.
 - `@OnWebSocketMessage(event: string)` takes the operation/event name as a **plain string** (ws plugin operations are string-routed). Typed `CdsFunction` overloads are not part of this batch — modeled actions can keep using `@OnAction` today; a typed overload is a follow-up if demand appears.
-- `@WebSocketHandler()` is a **zero-machinery alias** of `@UnboundActions()` (verified: ws services are regular CAP services; the class is bound as the ws service's impl through `CDSDispatcher` exactly like any service).
+- Hosting: **`@UnboundActions` only** (verified: ws services are regular CAP services; the class is bound as the ws service's impl through `CDSDispatcher` exactly like any service). No alias class — see non-goals.
 - **No new library dependency:** the dispatcher never imports `@cap-js-community/websocket`. The plugin (1.11.1, CDS 10 support confirmed in its v1.11.0 release notes) is a **devDependency of the bookshop fixture only**. README states plainly: the decorators require the plugin in the consumer app and a `@protocol: 'websocket'` (or `@ws`) service.
 - Bookshop fixture gains a minimal `ChatService` (`@protocol: 'websocket'`, one action, one event) wired through `CDSDispatcher` — this is the end-to-end validation the backlog demanded before shipping.
 
@@ -133,7 +134,6 @@ export class ChatHandler {
 - Metadata records per new decorator (kind, event, draft-irrelevance).
 - `@Throttle` wrapper: limit/window/key logic with a fake `req` (user/tenant/anonymous), window reset, lazy cleanup, `@OnError` decoration-time throw.
 - `@ServerLifecycle` flag + method-decorator misuse errors + WeakSet dedup (two dispatcher initializations, one registration).
-- Alias identity: `@WebSocketHandler` behaves exactly as `@UnboundActions`.
 
 **Integration (`@cap-js/cds-test`, real HTTP server on an ephemeral port):**
 - Throttle: N requests pass, N+1 → 429, new window resets; `by: 'tenant'` vs `'user'` keying.
@@ -150,8 +150,8 @@ export class ChatHandler {
 
 ## Documentation & bookkeeping
 
-- README: three new sections (`@Throttle`, `@ServerLifecycle` family, WebSocket family incl. `@WebSocketHandler`), overview/placement tables updated, honesty notes (per-instance counters; plugin prerequisite; lifecycle ordering).
-- `docs/DECORATOR-CANDIDATES.md`: #11, #17, #18 → `implemented (feature-batch2-decorators)` with as-built notes; placement map updated (`@ServerLifecycle` becomes the fifth host class; #17's alias decision recorded).
+- README: three new sections (`@Throttle`, `@ServerLifecycle` family, WebSocket family hosted in `@UnboundActions`), overview/placement tables updated, honesty notes (per-instance counters; plugin prerequisite; lifecycle ordering).
+- `docs/DECORATOR-CANDIDATES.md`: #11, #17, #18 → `implemented (feature-batch2-decorators)` with as-built notes; placement map updated (`@ServerLifecycle` becomes the fifth host class; #17's no-alias decision recorded).
 - No `CHANGELOG.md` edits (git-cliff) and no version bump (release flow).
 
 ## Implementation constraints (inherited, non-negotiable)
