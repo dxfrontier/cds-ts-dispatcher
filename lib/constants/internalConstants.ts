@@ -4,6 +4,7 @@ export const constants = {
     MIDDLEWARE_NAME: 'MIDDLEWARE',
     ENTITY_HANDLER_NAME: 'ENTITY_NAME',
     METHOD_ACCUMULATOR_NAME: 'METHOD_ACCUMULATOR',
+    THROTTLE_KEY: Symbol('THROTTLE'),
 
     PARAMETER: {
       IS_ROLE: Symbol('IS_ROLE'),
@@ -48,6 +49,11 @@ export const constants = {
       "The Request object must contain the '.data' property and must not be empty when '${validator}' validator is used !",
     VALIDATOR_NOT_VALID: "{ ${field} : ${input} } does not meet the constraints of validator '${validator}' !",
     UNSUPPORTED_DECORATOR_ACTIONS: "@IsPresent() / @GetQuery does not support 'INSERT', 'DELETE', 'DROP', 'CREATE'",
+    THROTTLE_LIMIT_EXCEEDED:
+      'Rate limit exceeded: max ${limit} requests per ${window} ms for this ${by}. Retry in ${retryAfter} ms.',
+    THROTTLE_NO_REQUEST:
+      "@Throttle() could not find a 'Request' among the handler arguments of '${className}.${methodName}'. Place @Throttle() directly below the handler decorator and keep a @Req() parameter.",
+    THROTTLE_ON_ERROR: '@Throttle() cannot be used on @OnError handlers (error handlers are invoked synchronously).',
   },
 
   ALL_EVENTS: '*' as const,

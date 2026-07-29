@@ -6,10 +6,12 @@ import formatterUtil from '../util/formatter/formatterUtil';
 import loggingUtil from '../util/logging/loggingUtil';
 import middlewareUtil from '../util/middleware/middlewareUtil';
 import parameterUtil from '../util/parameter/parameterUtil';
+import throttleUtil from '../util/decorators/throttleUtil';
 import util from '../util/util';
 import validatorUtil from '../util/validation/validatorUtil';
 import transformersUtil from '../util/transformers/transformersUtil';
 import streamUtil from '../util/stream/streamUtil';
+import { StatusCodes } from 'http-status-codes';
 import cds from '@sap/cds';
 
 import type {
@@ -25,8 +27,10 @@ import type {
   Request,
   RequestType,
   ScheduleOptions,
+  ThrottleOptions,
 } from '../types/types';
 
+import type { ThrottleStore } from '../util/decorators/throttleUtil';
 import type { Validators } from '../types/validator';
 import type { Formatters } from '../types/formatter';
 import type {
@@ -199,6 +203,75 @@ function ExecutionAllowedForRole(...roles: string[]) {
 
       if (!found) {
         return;
+      }
+
+      return await originalMethod.apply(this, args);
+    };
+  };
+}
+
+/**
+ * Rate-limits the decorated handler with a fixed window, counted per user (default) or per tenant.
+ *
+ * Counters are per app instance and per decorated method (in-memory). Over the limit the request is
+ * rejected with HTTP 429. Place `@Throttle()` BELOW the handler decorator (closer to the method),
+ * like every wrapping decorator - otherwise it is not part of the registered callback.
+ *
+ * @example
+ * "@OnAction(GenerateReport)"
+ * "@Throttle({ limit: 10, window: 60_000 })"
+ * public async generate(@Req() req: Request) { ... }
+ */
+function Throttle(options: ThrottleOptions) {
+  if (!Number.isFinite(options.limit) || options.limit < 1) {
+    util.throwErrorMessage(`@Throttle() 'limit' must be a number >= 1, got '${options.limit}'`);
+  }
+
+  if (!Number.isFinite(options.window) || options.window < 1) {
+    util.throwErrorMessage(`@Throttle() 'window' must be a number (ms) >= 1, got '${options.window}'`);
+  }
+
+  const store: ThrottleStore = new Map();
+
+  return function <Target extends object>(
+    target: Target,
+    propertyName: string | symbol,
+    descriptor: TypedPropertyDescriptor<RequestType>,
+  ) {
+    Reflect.defineMetadata(
+      constants.DECORATOR.THROTTLE_KEY,
+      { limit: options.limit, window: options.window },
+      target,
+      propertyName,
+    );
+
+    const originalMethod = descriptor.value!;
+
+    descriptor.value = async function (...args: any[]) {
+      const req = util.findRequest(args);
+
+      if (!req) {
+        util.throwErrorMessage(
+          util.buildMessage(constants.MESSAGES.THROTTLE_NO_REQUEST, {
+            className: (target as any).constructor?.name ?? 'Unknown',
+            methodName: String(propertyName),
+          }),
+        );
+      }
+
+      const key = throttleUtil.resolveKey(req, options.by);
+      const outcome = throttleUtil.consume(store, key, options.limit, options.window, Date.now());
+
+      if (!outcome.allowed) {
+        req.reject(
+          StatusCodes.TOO_MANY_REQUESTS,
+          util.buildMessage(constants.MESSAGES.THROTTLE_LIMIT_EXCEEDED, {
+            limit: options.limit,
+            window: options.window,
+            by: options.by ?? 'user',
+            retryAfter: outcome.retryAfterMs,
+          }),
+        );
       }
 
       return await originalMethod.apply(this, args);
@@ -721,6 +794,14 @@ function buildOnError(options: { eventKind: EventKind; isDraft: boolean }) {
 
         util.throwErrorMessage(
           `@Diff is not supported on @OnError (error handlers run synchronously while the transaction unwinds). Remove @Diff from ${className}.${String(propertyName)}.`,
+        );
+      }
+
+      const throttled = Reflect.getOwnMetadata(constants.DECORATOR.THROTTLE_KEY, target, propertyName);
+
+      if (throttled) {
+        util.throwErrorMessage(
+          `${constants.MESSAGES.THROTTLE_ON_ERROR} [class: ${(target as any).constructor?.name ?? 'Unknown'}, method: ${String(propertyName)}]`,
         );
       }
 
@@ -1842,4 +1923,9 @@ export {
   // ========================================================================================================================================================
   // STREAMING
   Stream,
+  // ========================================================================================================================================================
+
+  // ========================================================================================================================================================
+  // Rate limiting
+  Throttle,
 };

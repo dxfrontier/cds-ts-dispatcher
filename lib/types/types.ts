@@ -103,6 +103,22 @@ export type ScheduleOptions = {
   data?: Record<string, unknown>;
 };
 
+/**
+ * Options for the `@Throttle` decorator.
+ */
+export type ThrottleOptions = {
+  /** Maximum number of invocations allowed per window. Must be >= 1. */
+  limit: number;
+  /** Fixed window length in milliseconds. Must be >= 1. */
+  window: number;
+  /**
+   * Counter key source: `'user'` keys by `req.user.id` (fallback `'anonymous'`),
+   * `'tenant'` keys by `req.tenant` (fallback `'no-tenant'`).
+   * @default 'user'
+   */
+  by?: 'user' | 'tenant';
+};
+
 // **************************************************************************************************************************
 // **************************************************************************************************************************
 
