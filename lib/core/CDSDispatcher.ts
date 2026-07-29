@@ -15,7 +15,6 @@ import type {
   Constructable,
   EventMessagingOptions,
   REQUEST_LIFECYCLE_EVENTS,
-  SERVER_LIFECYCLE_EVENTS,
   ScheduleTaskBuilder,
 } from '../types/internalTypes';
 import type { Request, ScheduleOptions, Service, ServiceImpl } from '../types/types';
@@ -39,13 +38,6 @@ type RequestLifecycleContext = {
 
 /** `cds.on` is process-global: a `@ServerLifecycle` class registers once, no matter how many dispatchers list it. */
 const registeredServerLifecycleClasses = new WeakSet<Constructable>();
-
-/** Maps a `SERVER_LIFECYCLE_EVENTS` member to the CAP `cds.on` event name it registers against. */
-const SERVER_LIFECYCLE_EVENT_NAMES: Record<SERVER_LIFECYCLE_EVENTS, string> = {
-  SERVED: 'served',
-  LISTENING: 'listening',
-  SHUTDOWN: 'shutdown',
-};
 
 /**
  * `CDSDispatcher` is responsible for managing and registering event handlers for entities within the CDS framework.
@@ -602,9 +594,23 @@ class CDSDispatcher {
         return;
       }
 
-      const eventName = SERVER_LIFECYCLE_EVENT_NAMES[handler.event];
+      const listener = (...args: unknown[]): unknown => handler.callback.call(entityInstance, ...args);
 
-      cds.on(eventName, (...args: unknown[]) => handler.callback.call(entityInstance, ...args));
+      // cds.on is typed with one overload per literal event name - an exhaustive switch keeps the
+      // literal types intact (a Record<..., string> lookup widens to string and breaks the dts build).
+      switch (handler.event) {
+        case 'SERVED':
+          cds.on('served', listener);
+          break;
+
+        case 'LISTENING':
+          cds.on('listening', listener);
+          break;
+
+        case 'SHUTDOWN':
+          cds.on('shutdown', listener);
+          break;
+      }
     });
   }
 
