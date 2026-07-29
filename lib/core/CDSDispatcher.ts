@@ -14,9 +14,24 @@ import type {
   BaseHandler,
   Constructable,
   EventMessagingOptions,
+  REQUEST_LIFECYCLE_EVENTS,
   ScheduleTaskBuilder,
 } from '../types/internalTypes';
 import type { Request, ScheduleOptions, Service, ServiceImpl } from '../types/types';
+
+/**
+ * Narrow view of the `request lifecycle` API of a CAP event context.
+ *
+ * `cds-types` types `before` / `on` only with their `literal` phases and does not declare `context` (the `root`
+ * event context) on `Request` at all, so the dispatcher casts to this local shape - same approach as
+ * `parameterUtil.retrieveAffected`. The `symbol` index carries the `attached once` marker of the root context.
+ */
+type RequestLifecycleContext = {
+  context?: RequestLifecycleContext;
+  before: (event: string, listener: () => Promise<void>) => void;
+  on: (event: string, listener: () => Promise<void>) => void;
+  [marker: symbol]: unknown;
+};
 
 /**
  * `CDSDispatcher` is responsible for managing and registering event handlers for entities within the CDS framework.
@@ -147,6 +162,27 @@ class CDSDispatcher {
   }
 
   /**
+   * Executes a `scheduled task outcome` event handler (`@OnScheduledSuccess`, `@OnScheduledFailure`).
+   *
+   * Deliberately `bypasses` `executeAfterCallback`: its cds-10 `affected` normalization would corrupt raw task
+   * results (a numeric result `1` would become `true`), so the task `result` / `error` is passed through untouched.
+   *
+   * @param handlerAndEntity - A tuple containing the handler and entity.
+   * @param req - The request object.
+   * @param data - The `result` of the task (`#succeeded`) or its `serialized` failure (`#failed`), which CAP
+   * delivers as a plain object (`{ name, message, stack, code, ... }`), NOT as an `Error` instance.
+   * @returns The result of the handler's callback.
+   */
+  private async executeScheduledOutcomeCallback(
+    handlerAndEntity: [BaseHandler, Constructable],
+    req: Request,
+    data: unknown,
+  ): Promise<unknown> {
+    const [handler, entity] = handlerAndEntity;
+    return await handler.callback.call(entity, data, req);
+  }
+
+  /**
    * Returns the active entity or the draft entity of the current handler class.
    *
    * @param handler - The handler instance.
@@ -256,10 +292,15 @@ class CDSDispatcher {
       return { eventKind };
     };
 
-    // Get the verbatim task name and (optional) schedule options for '@OnScheduled' / '@Schedule'
+    // Get the verbatim task name and (optional) schedule options for '@OnScheduled' / '@Schedule' and the
+    // verbatim task name for '@OnScheduledSuccess' / '@OnScheduledFailure'
     const getScheduled = () => {
       if (handler.type === 'SCHEDULED') {
         return { taskName: handler.taskName, scheduleOptions: handler.scheduleOptions };
+      }
+
+      if (handler.type === 'SCHEDULED_OUTCOME') {
+        return { taskName: handler.taskName, scheduleOptions: undefined };
       }
 
       return { taskName: undefined, scheduleOptions: undefined };
@@ -347,6 +388,19 @@ class CDSDispatcher {
         break;
       }
 
+      case 'SCHEDULED_SUCCESS':
+      case 'SCHEDULED_FAILURE': {
+        const { taskName } = getProps.getScheduled();
+        const outcome = event === 'SCHEDULED_SUCCESS' ? '#succeeded' : '#failed';
+
+        // The task name is composed `verbatim` (NO dot-stripping), like the '@OnScheduled' handler itself.
+        this.srv.after(`${taskName}/${outcome}`, async (data, req) => {
+          return await this.executeScheduledOutcomeCallback(handlerAndEntity, req, data);
+        });
+
+        break;
+      }
+
       // CRUD_EVENTS[NEW, CANCEL, CREATE, READ, UPDATE, DELETE, EDIT, SAVE]
       default: {
         this.srv.after(event, entity!, async (data, req) => {
@@ -392,6 +446,101 @@ class CDSDispatcher {
         });
       }
     }
+  }
+
+  /**
+   * Registers all `REQUEST_LIFECYCLE` event handlers (`@BeforeCommit`, `@AfterCommit`, `@AfterRollback`,
+   * `@OnRequestDone`) of a handler class.
+   *
+   * The hooks live on the `ROOT` event context of the request (`req.before('commit')` /
+   * `req.on('succeeded' | 'failed' | 'done')`), which CAP emits `once` per root request. They are attached by one
+   * generic `before` handler per class, registered through `prepend` so the hooks are in place before any consumer
+   * `before` handler can reject the request.
+   *
+   * @param handlers - The `REQUEST_LIFECYCLE` handlers of the class.
+   * @param entityInstance - The entity instance.
+   */
+  private registerRequestLifecycleHandlers(handlers: BaseHandler[], entityInstance: Constructable): void {
+    // The CAP root context events (+ decorator names, for logging) of the four request lifecycle events.
+    const lifecycleEvents = {
+      BEFORE_COMMIT: { event: 'commit', decorator: '@BeforeCommit' },
+      AFTER_COMMIT: { event: 'succeeded', decorator: '@AfterCommit' },
+      AFTER_ROLLBACK: { event: 'failed', decorator: '@AfterRollback' },
+      REQUEST_DONE: { event: 'done', decorator: '@OnRequestDone' },
+    } as const;
+
+    // 'undefined' for '@UnboundActions' classes (service-wide), '*' for 'ALL_ENTITIES' ones.
+    const entity = this.getActiveEntityOrDraft(handlers[0], entityInstance);
+    const className = entityInstance.constructor.name;
+
+    // Marker of this class registration: the generic 'before' handler below fires per SUB-request, while the
+    // hooks must be attached ONCE per ROOT request. Each '$batch' changeset is a new root context, so the
+    // hooks are attached again there - which is exactly the wanted 'once per changeset' semantic.
+    const attached = Symbol('CDS_DISPATCHER_REQUEST_LIFECYCLE');
+
+    const attach = (req: Request): void => {
+      const request = req as unknown as RequestLifecycleContext;
+      const root = request.context ?? request;
+
+      // Hand-rolled contexts (E.g. 'srv.dispatch({ event, data })' with a plain object) carry no emitter -
+      // there is no transaction to hook into, so the hooks are skipped instead of failing the request.
+      if (typeof request.before !== 'function' || typeof request.on !== 'function') {
+        return;
+      }
+
+      if (root[attached]) {
+        return;
+      }
+
+      root[attached] = true;
+
+      (Object.keys(lifecycleEvents) as REQUEST_LIFECYCLE_EVENTS[]).forEach((kind) => {
+        // One listener per event, so the callbacks of the class run sequentially in metadata (declaration)
+        // order - 'req.before' is a 'prependListener', which would reverse a per-callback attachment.
+        const callbacks = handlers.filter((handler) => handler.event === kind);
+
+        if (callbacks.length === 0) {
+          return;
+        }
+
+        const { event, decorator } = lifecycleEvents[kind];
+
+        // '@BeforeCommit' runs INSIDE the transaction and vetoes the request by throwing - errors propagate.
+        if (kind === 'BEFORE_COMMIT') {
+          request.before(event, async () => {
+            for (const handler of callbacks) {
+              await handler.callback.call(entityInstance, req);
+            }
+          });
+
+          return;
+        }
+
+        // The other three run OUTSIDE any transaction, on an already closed one: an error thrown here would
+        // make CAP error the response of a durably committed request, so it is logged and NEVER rethrown.
+        request.on(event, async () => {
+          for (const handler of callbacks) {
+            try {
+              await handler.callback.call(entityInstance, req);
+            } catch (error) {
+              console.error(
+                util.showRedConsole(`[CDS-TS-Dispatcher] ${decorator} handler in '${className}' failed.`),
+                error,
+              );
+            }
+          }
+        });
+      });
+    };
+
+    void this.srv.prepend(() => {
+      if (entity) {
+        this.srv.before('*', entity, attach);
+        return;
+      }
+
+      this.srv.before('*', attach);
+    });
   }
 
   private async registerMessagingEvent(message: {
@@ -607,9 +756,19 @@ class CDSDispatcher {
     if (handlers?.length > 0) {
       return {
         buildHandlers: (): void => {
-          handlers.forEach((handler) => {
-            this.buildHandlerBy([handler, entityInstance]);
-          });
+          // The 'REQUEST_LIFECYCLE' handlers share ONE generic attach handler and are therefore registered
+          // once for the whole class, all the other handlers are registered one by one.
+          const lifecycle = handlers.filter((handler) => handler.type === 'REQUEST_LIFECYCLE');
+
+          handlers
+            .filter((handler) => handler.type !== 'REQUEST_LIFECYCLE')
+            .forEach((handler) => {
+              this.buildHandlerBy([handler, entityInstance]);
+            });
+
+          if (lifecycle.length > 0) {
+            this.registerRequestLifecycleHandlers(lifecycle, entityInstance);
+          }
         },
 
         buildMiddlewares: (): void => {

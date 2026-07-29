@@ -9,6 +9,12 @@ import type { Service } from '@sap/cds';
 import type { Request } from '../../types/types';
 
 /**
+ * Handler types which are never `middleware-wrapped` by `@Use` - they carry neither an `entity` nor an `action`
+ * to hook a middleware chain on.
+ */
+const NON_ACTION_HANDLER_TYPES = ['REQUEST_LIFECYCLE', 'SCHEDULED_OUTCOME', 'SCHEDULED'];
+
+/**
  * This class registers the middleware classes for `@Use` decorator.
  */
 export class MiddlewareEntityRegistry {
@@ -64,6 +70,13 @@ export class MiddlewareEntityRegistry {
   private registerOnActions(): void {
     const handlers = MetadataDispatcher.getMetadataHandlers(this.entityInstance);
     handlers.forEach((handler) => {
+      // '@BeforeCommit' & co, '@OnScheduled' / '@Schedule' and the scheduled outcomes are NO action events:
+      // they hook the transaction of the current request, respectively a queued task, so there is no action
+      // to wrap a middleware chain around - they are skipped instead of running into the 'default' throw.
+      if (NON_ACTION_HANDLER_TYPES.includes(handler.type)) {
+        return;
+      }
+
       switch (handler.event) {
         case 'ACTION':
         case 'FUNC':

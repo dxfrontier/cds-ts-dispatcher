@@ -56,7 +56,7 @@ export type ParameterDecorators = keyof typeof constants.DECORATOR.PARAMETER;
 // @AfterRead, @AfterCreate, @BeforeCreate, @BeforeUpdate, @OnRead, etc decorator types
 // **************************************************************************************************************************
 
-export type EventKind = 'BEFORE' | 'AFTER' | 'AFTER_SINGLE' | 'ON' | 'PREPEND';
+export type EventKind = 'BEFORE' | 'AFTER' | 'AFTER_SINGLE' | 'ON' | 'PREPEND' | 'REQUEST_LIFECYCLE';
 
 type MessagingTypes = {
   SAME_NODE_PROCESS: {
@@ -201,6 +201,19 @@ export type ScheduledHandler = {
   scheduleOptions?: ScheduleOptions;
 };
 
+export type ScheduledOutcomeHandler = {
+  type: 'SCHEDULED_OUTCOME';
+  event: 'SCHEDULED_SUCCESS' | 'SCHEDULED_FAILURE';
+  taskName: string;
+};
+
+export type REQUEST_LIFECYCLE_EVENTS = 'BEFORE_COMMIT' | 'AFTER_COMMIT' | 'AFTER_ROLLBACK' | 'REQUEST_DONE';
+
+export type RequestLifecycleHandler = {
+  type: 'REQUEST_LIFECYCLE';
+  event: REQUEST_LIFECYCLE_EVENTS;
+};
+
 /**
  * Minimal shape of the `srv.schedule(...).every(...)` fluent builder that exposes `.as(name)`.
  *
@@ -216,7 +229,16 @@ export type BaseHandler = {
   callback: RequestType;
   eventKind: EventKind;
   isDraft: boolean;
-} & (DefaultHandlers | OnHandler | EventHandler | EventMessagingHandler | PrependHandler | ScheduledHandler);
+} & (
+  | DefaultHandlers
+  | OnHandler
+  | EventHandler
+  | EventMessagingHandler
+  | PrependHandler
+  | ScheduledHandler
+  | ScheduledOutcomeHandler
+  | RequestLifecycleHandler
+);
 
 // **************************************************************************************************************************
 // **************************************************************************************************************************

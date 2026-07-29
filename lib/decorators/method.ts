@@ -35,6 +35,7 @@ import type {
   EventMessagingOptions,
   PrependBase,
   PrependBaseDraft,
+  REQUEST_LIFECYCLE_EVENTS,
   StatusCodeMapping,
 } from '../types/internalTypes';
 import type { LogExecutionOptions, MaskOptions } from '../types/responseTransformers';
@@ -547,6 +548,43 @@ function buildBefore(options: {
         event,
         callback: descriptor.value,
         isDraft,
+      });
+
+      // ********************************************************************************************************************************
+      // ********************************************************************************************************************************
+    };
+  };
+}
+
+function buildRequestLifecycle(options: { event: REQUEST_LIFECYCLE_EVENTS }) {
+  return function <Target extends object>() {
+    return function (
+      target: Target,
+      propertyName: string | symbol,
+      descriptor: TypedPropertyDescriptor<RequestType>,
+    ): void {
+      const method = descriptor.value!;
+
+      descriptor.value = async function (...args: any[]) {
+        const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+        if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
+        return await method.apply(this, args);
+      };
+
+      // ********************************************************************************************************************************
+      // Registration of events during start-up : @BeforeCommit(), @AfterCommit(), @AfterRollback(), @OnRequestDone()
+      // Note: descriptor.value will contain the logic for @Req(), @Res(), @Results(), @Next(), @IsPresent(), @GetQuery() decorators
+      // ********************************************************************************************************************************
+
+      const { event } = options;
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+
+      metadataDispatcher.addMethodMetadata({
+        type: 'REQUEST_LIFECYCLE',
+        eventKind: 'REQUEST_LIFECYCLE',
+        event,
+        callback: descriptor.value,
+        isDraft: false,
       });
 
       // ********************************************************************************************************************************
@@ -1302,6 +1340,119 @@ const OnDiscardDraft = buildOnCRUD({ event: 'DISCARD', eventKind: 'ON', isDraft:
 
 /**
  * ####################################################################################################################
+ * Start `Request lifecycle` methods
+ * ####################################################################################################################
+ */
+
+/**
+ * Use `@BeforeCommit` decorator to execute custom logic `before` the database transaction of the current request is `committed`.
+ *
+ * It runs `once` per `ROOT` request (once per `$batch` changeset), `inside` the request transaction, so any database
+ * work joins the same transaction. Throwing here `vetoes` the request - the transaction is rolled back and the error
+ * is returned to the client.
+ *
+ * Hosted in an [@EntityHandler](#entityhandler) class it is scoped to the requests targeting that entity, hosted in an
+ * [@UnboundActions](#unboundactions) class it applies to every request of the service.
+ *
+ * `NOTE:` the hooks register on the `ACTIVE` entity only - for `@odata.draft.enabled` entities the draft-editing
+ * roundtrip (`NEW` / `PATCH` / `CANCEL` on `MyEntity.drafts`) does **not** fire them, they fire when the draft is
+ * `activated` (`CREATE` / `UPDATE` on the active entity).
+ *
+ * `NOTE:` the `req` handed over is the `FIRST` sub-request of the root request which reached this class - in a
+ * `$batch` changeset carrying several operations, `req.data` belongs to that `first` operation only. Validate
+ * `per operation` in [@BeforeCreate](#beforecreate) & co and keep `@BeforeCommit` for `cross-request` /
+ * `final state` invariants (read the database state, not `req.data`).
+ * @example
+ * ```typescript
+ * /@BeforeCommit()
+ * public async beforeCommit(/@Req() req: Request) {
+ *   // ... throw to veto the commit
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforecommit | CDS-TS-Dispatcher - @BeforeCommit}
+ */
+const BeforeCommit = buildRequestLifecycle({ event: 'BEFORE_COMMIT' });
+
+/**
+ * Use `@AfterCommit` decorator to execute custom logic `after` the database transaction of the current request was `committed`.
+ *
+ * It runs `once` per `ROOT` request (once per `$batch` changeset) and `OUTSIDE` any transaction - the commit is already
+ * durable, so database work needs its own transaction (`await cds.tx(async () => { ... })`). Errors `cannot` veto
+ * anything anymore, they are `caught` and `logged` by the dispatcher.
+ *
+ * Hosted in an [@EntityHandler](#entityhandler) class it is scoped to the requests targeting that entity, hosted in an
+ * [@UnboundActions](#unboundactions) class it applies to every request of the service.
+ *
+ * `NOTE:` the hooks register on the `ACTIVE` entity only - for `@odata.draft.enabled` entities the draft-editing
+ * roundtrip (`NEW` / `PATCH` / `CANCEL` on `MyEntity.drafts`) does **not** fire them, they fire when the draft is
+ * `activated` (`CREATE` / `UPDATE` on the active entity).
+ * @example
+ * ```typescript
+ * /@AfterCommit()
+ * public async afterCommit(/@Req() req: Request) {
+ *   await cds.tx(async () => { ... }); // needs its own transaction
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercommit | CDS-TS-Dispatcher - @AfterCommit}
+ */
+const AfterCommit = buildRequestLifecycle({ event: 'AFTER_COMMIT' });
+
+/**
+ * Use `@AfterRollback` decorator to execute custom logic `after` the database transaction of the current request was `rolled back`.
+ *
+ * It runs `once` per `ROOT` request (once per `$batch` changeset) and `OUTSIDE` any transaction - the failed one is
+ * gone, so database work needs its own transaction (`await cds.tx(async () => { ... })`). Errors `cannot` veto
+ * anything anymore, they are `caught` and `logged` by the dispatcher.
+ *
+ * Hosted in an [@EntityHandler](#entityhandler) class it is scoped to the requests targeting that entity, hosted in an
+ * [@UnboundActions](#unboundactions) class it applies to every request of the service.
+ *
+ * `NOTE:` the hooks register on the `ACTIVE` entity only - for `@odata.draft.enabled` entities the draft-editing
+ * roundtrip (`NEW` / `PATCH` / `CANCEL` on `MyEntity.drafts`) does **not** fire them, they fire when the draft is
+ * `activated` (`CREATE` / `UPDATE` on the active entity).
+ * @example
+ * ```typescript
+ * /@AfterRollback()
+ * public async afterRollback(/@Req() req: Request) {
+ *   // ... compensate the failed request
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterrollback | CDS-TS-Dispatcher - @AfterRollback}
+ */
+const AfterRollback = buildRequestLifecycle({ event: 'AFTER_ROLLBACK' });
+
+/**
+ * Use `@OnRequestDone` decorator to execute custom logic when the current request is `done`, no matter if it `succeeded` or `failed`.
+ *
+ * It runs `once` per `ROOT` request (once per `$batch` changeset) and `OUTSIDE` any transaction, so database work needs
+ * its own transaction (`await cds.tx(async () => { ... })`). Errors `cannot` veto anything anymore, they are `caught`
+ * and `logged` by the dispatcher.
+ *
+ * Hosted in an [@EntityHandler](#entityhandler) class it is scoped to the requests targeting that entity, hosted in an
+ * [@UnboundActions](#unboundactions) class it applies to every request of the service.
+ *
+ * `NOTE:` the hooks register on the `ACTIVE` entity only - for `@odata.draft.enabled` entities the draft-editing
+ * roundtrip (`NEW` / `PATCH` / `CANCEL` on `MyEntity.drafts`) does **not** fire them, they fire when the draft is
+ * `activated` (`CREATE` / `UPDATE` on the active entity).
+ * @example
+ * ```typescript
+ * /@OnRequestDone()
+ * public async requestDone(/@Req() req: Request) {
+ *   // ... cleanup, always runs
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onrequestdone | CDS-TS-Dispatcher - @OnRequestDone}
+ */
+const OnRequestDone = buildRequestLifecycle({ event: 'REQUEST_DONE' });
+
+/**
+ * ####################################################################################################################
+ * End `Request lifecycle` methods
+ * ####################################################################################################################
+ */
+
+/**
+ * ####################################################################################################################
  * Start `Scheduling` methods
  * ####################################################################################################################
  */
@@ -1337,6 +1488,41 @@ function registerScheduledHandler(
     event: 'SCHEDULED_EVENT',
     taskName,
     scheduleOptions,
+    callback: descriptor.value,
+    isDraft: false,
+  });
+}
+
+/**
+ * Internal helper: wraps the method with the `ArgumentMethodProcessor` and records a `SCHEDULED_OUTCOME` handler.
+ * @param target - The target object.
+ * @param propertyName - The name of the property.
+ * @param descriptor - The property descriptor.
+ * @param event - The outcome of the task to handle, `success` or `failure`.
+ * @param taskName - The task name, registered `verbatim` (dots are preserved).
+ */
+function registerScheduledOutcomeHandler(
+  target: object,
+  propertyName: string | symbol,
+  descriptor: TypedPropertyDescriptor<RequestType>,
+  event: 'SCHEDULED_SUCCESS' | 'SCHEDULED_FAILURE',
+  taskName: string,
+): void {
+  const method = descriptor.value!;
+
+  descriptor.value = async function (...args: any[]) {
+    const applied = new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+    if (applied) await applied; // only @Diff (async resolution) pays a microtask; all else stays synchronous
+    return await method.apply(this, args);
+  };
+
+  const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+
+  metadataDispatcher.addMethodMetadata({
+    type: 'SCHEDULED_OUTCOME',
+    eventKind: 'AFTER',
+    event,
+    taskName,
     callback: descriptor.value,
     isDraft: false,
   });
@@ -1404,6 +1590,65 @@ function Schedule(options: ScheduleOptions) {
     descriptor: TypedPropertyDescriptor<RequestType>,
   ): void {
     registerScheduledHandler(target, propertyName, descriptor, options.name, options);
+  };
+}
+
+/**
+ * Use `@OnScheduledSuccess` decorator to handle the `successful` outcome of a `@sap/cds` 10 event-queue `scheduled task`.
+ *
+ * It registers `srv.after('<name>/#succeeded', cb)` for the task - the handler receives the `result` returned by the
+ * task handler ([@OnScheduled](#onscheduled) / [@Schedule](#schedule)) and the request. The `name` is registered
+ * `verbatim` (dots are **not** stripped), so fully-qualified task names like `'my.namespace.Task'` are matched exactly.
+ *
+ * @param name - The task name whose success to handle.
+ * @example
+ * ```typescript
+ * /@OnScheduledSuccess('cleanupExpiredCarts')
+ * public async succeeded(/@Result() result: unknown, /@Req() req: Request) {
+ *   // ... runs after the task ran through
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onscheduledsuccess | CDS-TS-Dispatcher - @OnScheduledSuccess}
+ */
+function OnScheduledSuccess(name: string) {
+  return function <Target extends object>(
+    target: Target,
+    propertyName: string | symbol,
+    descriptor: TypedPropertyDescriptor<RequestType>,
+  ): void {
+    registerScheduledOutcomeHandler(target, propertyName, descriptor, 'SCHEDULED_SUCCESS', name);
+  };
+}
+
+/**
+ * Use `@OnScheduledFailure` decorator to handle the `failed` outcome of a `@sap/cds` 10 event-queue `scheduled task`.
+ *
+ * It registers `srv.after('<name>/#failed', cb)` for the task - the handler receives the `failure` and the request. It
+ * only fires once the `retries` of the task are `exhausted` (event-queue `maxAttempts`, `10` by default), not on every
+ * failed attempt. The `name` is registered `verbatim` (dots are **not** stripped), so fully-qualified task names like
+ * `'my.namespace.Task'` are matched exactly.
+ *
+ * `NOTE:` the failure is delivered as a `serialized plain object` (`{ name, message, stack, code, ... }`), **not** as
+ * an `Error` instance - CAP serializes it into the queued callback task, so it survives a `JSON` round-trip. Pick it
+ * up with [@Result](#result); [@Error](#error) will **not** populate here, as it only matches real `Error` instances.
+ *
+ * @param name - The task name whose failure to handle.
+ * @example
+ * ```typescript
+ * /@OnScheduledFailure('cleanupExpiredCarts')
+ * public async failed(/@Result() failure: { message?: string }, /@Req() req: Request) {
+ *   // ... runs after the last attempt failed
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onscheduledfailure | CDS-TS-Dispatcher - @OnScheduledFailure}
+ */
+function OnScheduledFailure(name: string) {
+  return function <Target extends object>(
+    target: Target,
+    propertyName: string | symbol,
+    descriptor: TypedPropertyDescriptor<RequestType>,
+  ): void {
+    registerScheduledOutcomeHandler(target, propertyName, descriptor, 'SCHEDULED_FAILURE', name);
   };
 }
 
@@ -1579,9 +1824,19 @@ export {
   // ========================================================================================================================================================
 
   // ========================================================================================================================================================
+  // REQUEST LIFECYCLE events (per-root-request commit/succeeded/failed/done)
+  BeforeCommit,
+  AfterCommit,
+  AfterRollback,
+  OnRequestDone,
+  // ========================================================================================================================================================
+
+  // ========================================================================================================================================================
   // SCHEDULING events (@sap/cds 10 event-queue)
   OnScheduled,
   Schedule,
+  OnScheduledSuccess,
+  OnScheduledFailure,
   // ========================================================================================================================================================
 
   // ========================================================================================================================================================

@@ -6,6 +6,7 @@ import AuthorsHandler from './handler/AuthorsHandler';
 import BookEventsHandler from './handler/BookEventsHandler';
 import BookFormatsHandler from './handler/BookFormatsHandler';
 import BookHandler from './handler/BookHandler';
+import BookLifecycleHandler from './handler/BookLifecycleHandler';
 import BookOrdersHandler from './handler/BookOrdersHandler';
 import BookParamsHandler from './handler/BookParamsHandler';
 import BookRecommendationsHandler from './handler/BookRecommendationsHandler';
@@ -36,6 +37,9 @@ export = new CDSDispatcher([
   BookParamsHandler,
   // Draft
   BookEventsHandler,
+
+  // Request lifecycle (per-root-request commit/succeeded/failed/done)
+  BookLifecycleHandler,
 
   // Unbound actions
   UnboundActionsHandler,
