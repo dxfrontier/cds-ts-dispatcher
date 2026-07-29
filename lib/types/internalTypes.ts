@@ -56,7 +56,14 @@ export type ParameterDecorators = keyof typeof constants.DECORATOR.PARAMETER;
 // @AfterRead, @AfterCreate, @BeforeCreate, @BeforeUpdate, @OnRead, etc decorator types
 // **************************************************************************************************************************
 
-export type EventKind = 'BEFORE' | 'AFTER' | 'AFTER_SINGLE' | 'ON' | 'PREPEND' | 'REQUEST_LIFECYCLE';
+export type EventKind =
+  | 'BEFORE'
+  | 'AFTER'
+  | 'AFTER_SINGLE'
+  | 'ON'
+  | 'PREPEND'
+  | 'REQUEST_LIFECYCLE'
+  | 'SERVER_LIFECYCLE';
 
 type MessagingTypes = {
   SAME_NODE_PROCESS: {
@@ -214,6 +221,13 @@ export type RequestLifecycleHandler = {
   event: REQUEST_LIFECYCLE_EVENTS;
 };
 
+export type SERVER_LIFECYCLE_EVENTS = 'SERVED' | 'LISTENING' | 'SHUTDOWN';
+
+export type ServerLifecycleHandler = {
+  type: 'SERVER_LIFECYCLE';
+  event: SERVER_LIFECYCLE_EVENTS;
+};
+
 /**
  * Minimal shape of the `srv.schedule(...).every(...)` fluent builder that exposes `.as(name)`.
  *
@@ -238,6 +252,7 @@ export type BaseHandler = {
   | ScheduledHandler
   | ScheduledOutcomeHandler
   | RequestLifecycleHandler
+  | ServerLifecycleHandler
 );
 
 // **************************************************************************************************************************

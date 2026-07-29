@@ -51,6 +51,15 @@ export class MetadataDispatcher {
   }
 
   /**
+   * Checks whether the given resolved instance belongs to a `@ServerLifecycle` class.
+   * @param entity - The entity constructor.
+   * @returns `true` if the class is decorated with `@ServerLifecycle`, `false` otherwise.
+   */
+  public static isServerLifecycle(entity: Constructable): boolean {
+    return Reflect.getMetadata(constants.DECORATOR.SERVER_LIFECYCLE_NAME, entity.constructor) === true;
+  }
+
+  /**
    * Retrieves the middlewares metadata for the given entity.
    * @param entity - The entity constructor.
    * @returns An array of middleware constructors.

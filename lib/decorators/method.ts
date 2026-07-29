@@ -40,6 +40,7 @@ import type {
   PrependBase,
   PrependBaseDraft,
   REQUEST_LIFECYCLE_EVENTS,
+  SERVER_LIFECYCLE_EVENTS,
   StatusCodeMapping,
 } from '../types/internalTypes';
 import type { LogExecutionOptions, MaskOptions } from '../types/responseTransformers';
@@ -662,6 +663,33 @@ function buildRequestLifecycle(options: { event: REQUEST_LIFECYCLE_EVENTS }) {
 
       // ********************************************************************************************************************************
       // ********************************************************************************************************************************
+    };
+  };
+}
+
+/**
+ * Internal factory for the `@ServerLifecycle` method decorators (`@OnServed`, `@OnListening`, `@OnShutdown`).
+ *
+ * Unlike every other handler factory in this file, the descriptor is recorded `as-is` - it is NOT wrapped with
+ * `ArgumentMethodProcessor`: these three events register against CAP's `process-global` `cds.on(...)` (not
+ * `srv.*`), so `@Req()`-style parameter decorators do not apply and CAP's native arguments pass through verbatim.
+ */
+function buildServerLifecycle(options: { event: SERVER_LIFECYCLE_EVENTS }) {
+  return function <Target extends object>() {
+    return function (
+      target: Target,
+      propertyName: string | symbol,
+      descriptor: TypedPropertyDescriptor<RequestType>,
+    ): void {
+      const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
+
+      metadataDispatcher.addMethodMetadata({
+        type: 'SERVER_LIFECYCLE',
+        eventKind: 'SERVER_LIFECYCLE',
+        event: options.event,
+        callback: descriptor.value!,
+        isDraft: false,
+      });
     };
   };
 }
@@ -1534,6 +1562,90 @@ const OnRequestDone = buildRequestLifecycle({ event: 'REQUEST_DONE' });
 
 /**
  * ####################################################################################################################
+ * Start `Server lifecycle` methods
+ * ####################################################################################################################
+ */
+
+/**
+ * Use `@OnServed` decorator to execute custom logic once, right before the CAP server starts `listening` for requests.
+ *
+ * Must be hosted in a [@ServerLifecycle](#serverlifecycle) class. The handler receives `cds.services` (the
+ * bootstrapped services) as its only argument. CAP `awaits` every `@OnServed` handler `sequentially` - in
+ * `declaration order` inside a class, and in `CDSDispatcher` array order across classes - `before` `app.listen`
+ * runs. A `thrown` error `fails` server startup.
+ *
+ * `NOTE:` these arguments come straight from `cds.on('served', ...)` - no `@Req()`-style parameter decorator
+ * applies, the callback is invoked with CAP's native arguments `verbatim`.
+ * @example
+ * ```typescript
+ * /@ServerLifecycle()
+ * export class Bootstrap {
+ *   /@OnServed()
+ *   public async seed(services: object) {
+ *     // ... one-time startup work, may throw to abort the boot
+ *   }
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onserved | CDS-TS-Dispatcher - @OnServed}
+ */
+const OnServed = buildServerLifecycle({ event: 'SERVED' });
+
+/**
+ * Use `@OnListening` decorator to execute custom logic once the CAP server is `listening` for requests.
+ *
+ * Must be hosted in a [@ServerLifecycle](#serverlifecycle) class. The handler receives `{ server, url }`. CAP
+ * dispatches `@OnListening` `synchronously` - any return value (including a `Promise`) is `discarded`, so treat
+ * the handler as `fire-and-forget`.
+ *
+ * `NOTE:` these arguments come straight from `cds.on('listening', ...)` - no `@Req()`-style parameter decorator
+ * applies, the callback is invoked with CAP's native arguments `verbatim`.
+ * @example
+ * ```typescript
+ * /@ServerLifecycle()
+ * export class Bootstrap {
+ *   /@OnListening()
+ *   public logUrl(payload: { server: unknown; url: string }) {
+ *     console.log(`Listening on ${payload.url}`);
+ *   }
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onlistening | CDS-TS-Dispatcher - @OnListening}
+ */
+const OnListening = buildServerLifecycle({ event: 'LISTENING' });
+
+/**
+ * Use `@OnShutdown` decorator to execute custom logic while the CAP server is shutting down.
+ *
+ * Must be hosted in a [@ServerLifecycle](#serverlifecycle) class. The handler receives `err: Error | null`. CAP
+ * runs `all` `@OnShutdown` handlers (of every class) `in parallel` and `awaits` them `before` the server closes.
+ *
+ * `NOTE:` CAP has `NO once-guard` on `shutdown` - unlike `served` / `listening`, this callback `may fire more than
+ * once` per process. Make the handler idempotent.
+ *
+ * `NOTE:` these arguments come straight from `cds.on('shutdown', ...)` - no `@Req()`-style parameter decorator
+ * applies, the callback is invoked with CAP's native arguments `verbatim`.
+ * @example
+ * ```typescript
+ * /@ServerLifecycle()
+ * export class Bootstrap {
+ *   /@OnShutdown()
+ *   public async cleanup(err: Error | null) {
+ *     // ... release resources, may run more than once
+ *   }
+ * }
+ * ```
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onshutdown | CDS-TS-Dispatcher - @OnShutdown}
+ */
+const OnShutdown = buildServerLifecycle({ event: 'SHUTDOWN' });
+
+/**
+ * ####################################################################################################################
+ * End `Server lifecycle` methods
+ * ####################################################################################################################
+ */
+
+/**
+ * ####################################################################################################################
  * Start `Scheduling` methods
  * ####################################################################################################################
  */
@@ -1928,4 +2040,11 @@ export {
   // ========================================================================================================================================================
   // Rate limiting
   Throttle,
+  // ========================================================================================================================================================
+
+  // ========================================================================================================================================================
+  // Server lifecycle (cds.on 'served' / 'listening' / 'shutdown', hosted by @ServerLifecycle)
+  OnServed,
+  OnListening,
+  OnShutdown,
 };

@@ -5,6 +5,7 @@ export const constants = {
     ENTITY_HANDLER_NAME: 'ENTITY_NAME',
     METHOD_ACCUMULATOR_NAME: 'METHOD_ACCUMULATOR',
     THROTTLE_KEY: Symbol('THROTTLE'),
+    SERVER_LIFECYCLE_NAME: 'SERVER_LIFECYCLE',
 
     PARAMETER: {
       IS_ROLE: Symbol('IS_ROLE'),
@@ -54,6 +55,10 @@ export const constants = {
     THROTTLE_NO_REQUEST:
       "@Throttle() could not find a 'Request' among the handler arguments of '${className}.${methodName}'. Place @Throttle() directly below the handler decorator and keep a @Req() parameter.",
     THROTTLE_ON_ERROR: '@Throttle() cannot be used on @OnError handlers (error handlers are invoked synchronously).',
+    SERVER_LIFECYCLE_FOREIGN_HANDLERS:
+      "@ServerLifecycle class '${className}' contains non-lifecycle handler decorators. Only @OnServed / @OnListening / @OnShutdown are allowed here.",
+    SERVER_LIFECYCLE_WRONG_HOST:
+      "@OnServed / @OnListening / @OnShutdown found in '${className}', which is not decorated with @ServerLifecycle. Move them into a @ServerLifecycle class.",
   },
 
   ALL_EVENTS: '*' as const,

@@ -97,4 +97,24 @@ function UnboundActions<Target extends new (...args: never) => unknown>() {
   };
 }
 
-export { EntityHandler, Repository, ServiceLogic, UnboundActions };
+/**
+ * Marks a class as a `server lifecycle` host and makes it injectable for dependency injection.
+ *
+ * `@ServerLifecycle` classes host ONLY the three server lifecycle method decorators -
+ * [@OnServed](#onserved), [@OnListening](#onlistening), [@OnShutdown](#onshutdown) - which register against
+ * CAP's `process-global` `cds.on('served' | 'listening' | 'shutdown', ...)` events (NOT `srv.*`). Each class is
+ * registered `once per process`, no matter how many `CDSDispatcher` instances (or bootstraps) list it.
+ *
+ * @returns A decorator function that applies the injectable configuration to the target class.
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#serverlifecycle | CDS-TS-Dispatcher - @ServerLifecycle}
+ */
+function ServerLifecycle<Target extends new (...args: never) => unknown>() {
+  return function (target: Target) {
+    Reflect.defineMetadata(constants.DECORATOR.SERVER_LIFECYCLE_NAME, true, target);
+
+    injectable()(target);
+  };
+}
+
+export { EntityHandler, Repository, ServerLifecycle, ServiceLogic, UnboundActions };
