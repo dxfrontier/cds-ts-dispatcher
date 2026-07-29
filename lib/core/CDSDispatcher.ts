@@ -15,6 +15,7 @@ import type {
   Constructable,
   EventMessagingOptions,
   REQUEST_LIFECYCLE_EVENTS,
+  SERVER_LIFECYCLE_EVENTS,
   ScheduleTaskBuilder,
 } from '../types/internalTypes';
 import type { Request, ScheduleOptions, Service, ServiceImpl } from '../types/types';
@@ -34,6 +35,16 @@ type RequestLifecycleContext = {
   _set?: (property: string, value: unknown) => unknown;
   _emitter?: unknown;
   [marker: symbol]: unknown;
+};
+
+/** `cds.on` is process-global: a `@ServerLifecycle` class registers once, no matter how many dispatchers list it. */
+const registeredServerLifecycleClasses = new WeakSet<Constructable>();
+
+/** Maps a `SERVER_LIFECYCLE_EVENTS` member to the CAP `cds.on` event name it registers against. */
+const SERVER_LIFECYCLE_EVENT_NAMES: Record<SERVER_LIFECYCLE_EVENTS, string> = {
+  SERVED: 'served',
+  LISTENING: 'listening',
+  SHUTDOWN: 'shutdown',
 };
 
 /**
@@ -565,6 +576,38 @@ class CDSDispatcher {
     });
   }
 
+  /**
+   * Registers all `SERVER_LIFECYCLE` event handlers (`@OnServed`, `@OnListening`, `@OnShutdown`) of a
+   * `@ServerLifecycle` class against CAP's `process-global` `cds.on('served' | 'listening' | 'shutdown', ...)`.
+   *
+   * `cds.on` is process-global infrastructure, not `srv`-scoped: a class is registered `once per process`, no
+   * matter how many `CDSDispatcher` instances (or bootstraps, e.g. in tests) list it - tracked with a
+   * module-level `WeakSet` keyed on the class constructor.
+   *
+   * @param handlers - The `SERVER_LIFECYCLE` handlers of the class.
+   * @param entityInstance - The resolved instance hosting the handlers - `handler.callback` is bound to it, so
+   * `this` inside the decorated method is the real (DI-resolved) instance.
+   */
+  private registerServerLifecycleHandlers(handlers: BaseHandler[], entityInstance: Constructable): void {
+    const targetClass = entityInstance.constructor as unknown as Constructable;
+
+    if (registeredServerLifecycleClasses.has(targetClass)) {
+      return;
+    }
+
+    registeredServerLifecycleClasses.add(targetClass);
+
+    handlers.forEach((handler) => {
+      if (handler.type !== 'SERVER_LIFECYCLE') {
+        return;
+      }
+
+      const eventName = SERVER_LIFECYCLE_EVENT_NAMES[handler.event];
+
+      cds.on(eventName, (...args: unknown[]) => handler.callback.call(entityInstance, ...args));
+    });
+  }
+
   private async registerMessagingEvent(message: {
     options: EventMessagingOptions;
     handlerAndEntity: [BaseHandler, Constructable];
@@ -774,6 +817,39 @@ class CDSDispatcher {
    */
   private getHandlersBy(entityInstance: Constructable) {
     const handlers = MetadataDispatcher.getMetadataHandlers(entityInstance);
+    const isServerLifecycleClass = MetadataDispatcher.isServerLifecycle(entityInstance);
+    const serverLifecycle = (handlers ?? []).filter((handler) => handler.type === 'SERVER_LIFECYCLE');
+
+    if (!isServerLifecycleClass && serverLifecycle.length > 0) {
+      util.throwErrorMessage(
+        util.buildMessage(constants.MESSAGES.SERVER_LIFECYCLE_WRONG_HOST, {
+          className: entityInstance.constructor?.name ?? 'Unknown',
+        }),
+      );
+    }
+
+    if (isServerLifecycleClass) {
+      if ((handlers ?? []).some((handler) => handler.type !== 'SERVER_LIFECYCLE')) {
+        util.throwErrorMessage(
+          util.buildMessage(constants.MESSAGES.SERVER_LIFECYCLE_FOREIGN_HANDLERS, {
+            className: entityInstance.constructor?.name ?? 'Unknown',
+          }),
+        );
+      }
+
+      if (serverLifecycle.length === 0) {
+        return undefined;
+      }
+
+      return {
+        buildHandlers: (): void => {
+          this.registerServerLifecycleHandlers(serverLifecycle, entityInstance);
+        },
+        buildMiddlewares: (): void => {
+          // '@ServerLifecycle' classes host no request handlers - nothing to middleware-wrap.
+        },
+      };
+    }
 
     if (handlers?.length > 0) {
       return {

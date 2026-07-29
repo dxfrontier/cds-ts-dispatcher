@@ -12,7 +12,7 @@ import type { Request } from '../../types/types';
  * Handler types which are never `middleware-wrapped` by `@Use` - they carry neither an `entity` nor an `action`
  * to hook a middleware chain on.
  */
-const NON_ACTION_HANDLER_TYPES = ['REQUEST_LIFECYCLE', 'SCHEDULED_OUTCOME', 'SCHEDULED'];
+const NON_ACTION_HANDLER_TYPES = ['REQUEST_LIFECYCLE', 'SCHEDULED_OUTCOME', 'SCHEDULED', 'SERVER_LIFECYCLE'];
 
 /**
  * This class registers the middleware classes for `@Use` decorator.
