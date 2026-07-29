@@ -22,7 +22,8 @@ class ChatHandler {
 
   @OnWebSocketDisconnect()
   public async onDisconnect(@Req() req: Request<{ reason?: string }>) {
-    console.log('[Chat] disconnect');
+    // Under kind 'ws' the plugin delivers the socket close CODE as a string (e.g. '1000'), not a phrase.
+    console.log(`[Chat] disconnect ${req.data?.reason ?? ''}`);
   }
 }
 

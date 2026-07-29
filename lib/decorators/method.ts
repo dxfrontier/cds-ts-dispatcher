@@ -1298,6 +1298,9 @@ const OnEvent = buildOnEvent({ event: 'EVENT', eventKind: 'ON', isDraft: false }
  * Sugar for `@OnEvent(name)`; requires the websocket plugin in the consumer app and a
  * `@protocol: 'websocket'` (or `@ws`) service whose impl hosts this `@UnboundActions` class.
  * @param name string - name of the websocket operation, as sent in the `event` field of the wire payload.
+ * `NOTE:` like `@OnEvent`, everything before the last dot is stripped at registration time
+ * (`'ChatService.sendMessage'` registers as `'sendMessage'`) - the ws plugin routes by the local
+ * operation name, so pass the plain name.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketmessage | CDS-TS-Dispatcher - @OnWebSocketMessage}
  */
 const OnWebSocketMessage = (name: string) => OnEvent(name);
@@ -1311,7 +1314,10 @@ const OnWebSocketConnect = () => OnEvent('wsConnect');
 
 /**
  * Fires when a websocket client disconnects. Sugar for `@OnEvent('wsDisconnect')`; model
- * `action wsDisconnect(reason: String);` to receive the reason.
+ * `action wsDisconnect(reason: String);` to receive a disconnect detail in `req.data.reason`.
+ * `NOTE:` under the plugin's default `kind: 'ws'` the delivered value is the socket `close code` as a
+ * string (e.g. `'1000'`, `'1005'`), not a reason phrase - raw `ws` passes `(code, reason)` and the
+ * plugin forwards the first argument.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketdisconnect | CDS-TS-Dispatcher - @OnWebSocketDisconnect}
  */
 const OnWebSocketDisconnect = () => OnEvent('wsDisconnect');

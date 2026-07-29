@@ -27,7 +27,10 @@ socket.on('open', () => {
   // ChatHandler.onMessage fires (`[Chat] message e2e-smoke` in the server log) and the action resolves,
   // but no reply frame is echoed back on the socket - raw `ws` has no ack-callback channel (unlike
   // socket.io), so `srv.send(...)`'s return value is simply discarded. `socket.on('message', ...)`
-  // never fires. The pass criterion is relaxed accordingly: open + an unthrown send is a green smoke.
+  // never fires. The effective pass criterion is therefore the successful UPGRADE: the plugin answers
+  // unknown /ws paths with `404` and destroys the socket, so reaching 'open' proves the ChatService ws
+  // route exists and accepted the handshake. The send is best-effort (ws reports send failures
+  // asynchronously; they cannot fail this script).
   // Stricter variant kept for a future plugin version that starts acking action results over kind 'ws':
   //
   // socket.on('message', (raw) => {

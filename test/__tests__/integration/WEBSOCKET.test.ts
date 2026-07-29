@@ -30,20 +30,29 @@ const connect = (): Promise<WebSocket> =>
 describe('INTEGRATION - websocket decorators', () => {
   test('It should FIRE : @OnWebSocketConnect on connect', async () => {
     const socket = await connect();
-    expect(await waitFor(() => markersOf().some((m) => m.includes('[Chat] connect')))).toBe(true);
-    socket.close();
-  });
+    try {
+      expect(await waitFor(() => markersOf().some((m) => m.includes('[Chat] connect')))).toBe(true);
+    } finally {
+      socket.close();
+    }
+  }, 15_000);
 
   test('It should FIRE : @OnWebSocketMessage with the payload of sendMessage', async () => {
     const socket = await connect();
-    socket.send(JSON.stringify({ event: 'sendMessage', data: { text: 'hello-ws' } }));
-    expect(await waitFor(() => markersOf().some((m) => m.includes('[Chat] message hello-ws')))).toBe(true);
-    socket.close();
-  });
+    try {
+      socket.send(JSON.stringify({ event: 'sendMessage', data: { text: 'hello-ws' } }));
+      expect(await waitFor(() => markersOf().some((m) => m.includes('[Chat] message hello-ws')))).toBe(true);
+    } finally {
+      socket.close();
+    }
+  }, 15_000);
 
-  test('It should FIRE : @OnWebSocketDisconnect on close', async () => {
+  test('It should FIRE : @OnWebSocketDisconnect with the close code of THIS socket', async () => {
     const socket = await connect();
-    socket.close();
-    expect(await waitFor(() => markersOf().some((m) => m.includes('[Chat] disconnect')))).toBe(true);
-  });
+    // Stale '[Chat] disconnect' markers from the earlier tests would satisfy a bare include-check -
+    // clear the spy so only this socket's close (explicit code 1000) can produce the marker.
+    logSpy.mockClear();
+    socket.close(1000, 'bye');
+    expect(await waitFor(() => markersOf().some((m) => m.includes('[Chat] disconnect 1000')))).toBe(true);
+  }, 15_000);
 });
