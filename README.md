@@ -22,21 +22,20 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-  - [`Option 1 :` Install CDS-TS-Dispatcher - `New project`](#option-1--install-cds-ts-dispatcher---new-project)
-  - [`Option 2 :` Install CDS-TS-Dispatcher - `Existing TypeScript project`](#option-2--install-cds-ts-dispatcher---existing-typescript-project)
-  - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
-    - [`Important`](#important)
-  - [`Migration:` from @sap/cds `v7` to `v8`](#migration-from-sapcds-v7-to-v8)
-  - [`Migration:` from @sap/cds `v8` to `v9`](#migration-from-sapcds-v8-to-v9)
-  - [`Migration:` from @sap/cds `v9` to `v10`](#migration-from-sapcds-v9-to-v10)
+  - [Option 1 : Install CDS-TS-Dispatcher - New project](#option-1--install-cds-ts-dispatcher---new-project)
+  - [Option 2 : Install CDS-TS-Dispatcher - Existing TypeScript project](#option-2--install-cds-ts-dispatcher---existing-typescript-project)
+  - [Generate CDS Typed entities](#generate-cds-typed-entities)
+- [Migration guides](#migration-guides)
+  - [From @sap/cds v7 to v8](#migration-from-sapcds-v7-to-v8)
+  - [From @sap/cds v8 to v9](#migration-from-sapcds-v8-to-v9)
+  - [From @sap/cds v9 to v10](#migration-from-sapcds-v9-to-v10)
 - [Usage](#usage)
-  - [`Architecture`](#architecture)
-  - [`CDSDispatcher`](#cdsdispatcher)
-  - [`Decorators`](#decorators)
-    - [`Class`](#class)
+  - [Architecture](#architecture)
+  - [CDSDispatcher](#cdsdispatcher)
+  - [Decorators](#decorators)
+    - [Class](#class)
       - [@EntityHandler](#entityhandler)
       - [@ServiceLogic](#servicelogic)
       - [@Repository](#repository)
@@ -44,11 +43,11 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@UnboundActions](#unboundactions)
       - [@ServerLifecycle](#serverlifecycle)
       - [@Use](#use)
-    - [`Field`](#field)
+    - [Field](#field)
       - [@Inject](#inject)
-      - [@Inject(`CDS_DISPATCHER.SRV`)](#injectcds_dispatchersrv)
-      - [@Inject(CDS\_DISPATCHER.OUTBOXED\_SRV)](#injectcds_dispatcheroutboxed_srv)
-    - [`Parameter`](#parameter)
+      - [@Inject(CDS_DISPATCHER.SRV)](#injectcds_dispatchersrv)
+      - [@Inject(CDS_DISPATCHER.OUTBOXED_SRV)](#injectcds_dispatcheroutboxed_srv)
+    - [Parameter](#parameter)
       - [@Req](#req)
       - [@Res](#res)
       - [@Results / @Result](#results--result)
@@ -72,98 +71,57 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Tenant](#tenant)
       - [@Diff](#diff)
       - [~~@Msg~~](#msg)
-    - [`Method`-`active entity`](#method-active-entity)
-      - [`Before`](#before)
-        - [@BeforeCreate](#beforecreate)
-        - [@BeforeRead](#beforeread)
-        - [@BeforeUpdate](#beforeupdate)
-        - [@BeforeDelete](#beforedelete)
-        - [@BeforeAction](#beforeaction)
-        - [@BeforeBoundAction](#beforeboundaction)
-        - [@BeforeFunction](#beforefunction)
-        - [@BeforeBoundFunction](#beforeboundfunction)
-        - [@BeforeAll](#beforeall)
-      - [`After`](#after)
-        - [@AfterCreate](#aftercreate)
-        - [@AfterRead](#afterread)
-        - [@AfterReadEachInstance](#afterreadeachinstance)
-        - [@AfterUpdate](#afterupdate)
-        - [@AfterDelete](#afterdelete)
-        - [@AfterAction](#afteraction)
-        - [@AfterAll](#afterall)
-      - [`On`](#on)
-        - [@OnCreate](#oncreate)
-        - [@OnRead](#onread)
-        - [@OnUpdate](#onupdate)
-        - [@OnDelete](#ondelete)
-        - [@OnAction](#onaction)
-        - [@OnFunction](#onfunction)
-        - [@OnEvent](#onevent)
-        - [@OnSubscribe](#onsubscribe)
-        - [@OnError](#onerror)
-        - [@OnBoundAction](#onboundaction)
-        - [@OnBoundFunction](#onboundfunction)
-        - [@OnAll](#onall)
-      - [`Request Lifecycle`](#request-lifecycle)
-        - [@BeforeCommit](#beforecommit)
-        - [@AfterCommit](#aftercommit)
-        - [@AfterRollback](#afterrollback)
-        - [@OnRequestDone](#onrequestdone)
-    - [`Method`-`draft entity`](#method-draft-entity)
-      - [`Before`](#before-1)
-        - [@BeforeNewDraft](#beforenewdraft)
-        - [@BeforeCancelDraft](#beforecanceldraft)
-        - [@BeforePatchDraft](#beforepatchdraft)
-        - [@BeforeDiscardDraft](#beforediscarddraft)
-        - [@BeforeEditDraft](#beforeeditdraft)
-        - [@BeforeSaveDraft](#beforesavedraft)
-      - [`After`](#after-1)
-        - [@AfterNewDraft](#afternewdraft)
-        - [@AfterCancelDraft](#aftercanceldraft)
-        - [@AfterPatchDraft](#afterpatchdraft)
-        - [@AfterDiscardDraft](#afterdiscarddraft)
-        - [@AfterEditDraft](#aftereditdraft)
-        - [@AfterSaveDraft](#aftersavedraft)
-      - [`On`](#on-1)
-        - [@OnNewDraft](#onnewdraft)
-        - [@OnCancelDraft](#oncanceldraft)
-        - [@OnPatchDraft](#onpatchdraft)
-        - [@OnDiscardDraft](#ondiscarddraft)
-        - [@OnEditDraft](#oneditdraft)
-        - [@OnSaveDraft](#onsavedraft)
-      - [`Other draft decorators`](#other-draft-decorators)
-    - [`Server Lifecycle`](#server-lifecycle)
+    - [Method — CRUD, active entity](#method--crud-active-entity)
+      - Before: [@BeforeCreate](#beforecreate), [@BeforeRead](#beforeread), [@BeforeUpdate](#beforeupdate), [@BeforeDelete](#beforedelete), [@BeforeAction](#beforeaction), [@BeforeBoundAction](#beforeboundaction), [@BeforeFunction](#beforefunction), [@BeforeBoundFunction](#beforeboundfunction), [@BeforeAll](#beforeall)
+      - After: [@AfterCreate](#aftercreate), [@AfterRead](#afterread), [@AfterReadEachInstance](#afterreadeachinstance), [@AfterUpdate](#afterupdate), [@AfterDelete](#afterdelete), [@AfterAction](#afteraction), [@AfterAll](#afterall)
+      - On: [@OnCreate](#oncreate), [@OnRead](#onread), [@OnUpdate](#onupdate), [@OnDelete](#ondelete), [@OnAction](#onaction), [@OnFunction](#onfunction), [@OnBoundAction](#onboundaction), [@OnBoundFunction](#onboundfunction), [@OnAll](#onall)
+    - [Method — CRUD, draft entity](#method--crud-draft-entity)
+      - Before: [@BeforeNewDraft](#beforenewdraft), [@BeforeCancelDraft](#beforecanceldraft), [@BeforePatchDraft](#beforepatchdraft), [@BeforeDiscardDraft](#beforediscarddraft), [@BeforeEditDraft](#beforeeditdraft), [@BeforeSaveDraft](#beforesavedraft)
+      - After: [@AfterNewDraft](#afternewdraft), [@AfterCancelDraft](#aftercanceldraft), [@AfterPatchDraft](#afterpatchdraft), [@AfterDiscardDraft](#afterdiscarddraft), [@AfterEditDraft](#aftereditdraft), [@AfterSaveDraft](#aftersavedraft)
+      - On: [@OnNewDraft](#onnewdraft), [@OnCancelDraft](#oncanceldraft), [@OnPatchDraft](#onpatchdraft), [@OnDiscardDraft](#ondiscarddraft), [@OnEditDraft](#oneditdraft), [@OnSaveDraft](#onsavedraft)
+      - [Other draft decorators](#other-draft-decorators)
+    - [Method — Events & messaging](#method--events--messaging)
+      - [@OnEvent](#onevent)
+      - [@OnSubscribe](#onsubscribe)
+      - [@OnError](#onerror)
+    - [Method — Request lifecycle](#method--request-lifecycle)
+      - [@BeforeCommit](#beforecommit)
+      - [@AfterCommit](#aftercommit)
+      - [@AfterRollback](#afterrollback)
+      - [@OnRequestDone](#onrequestdone)
+    - [Method — Server lifecycle](#method--server-lifecycle)
       - [@OnServed](#onserved)
       - [@OnListening](#onlistening)
       - [@OnShutdown](#onshutdown)
-    - [`Scheduling`](#scheduling)
+    - [Method — Scheduling](#method--scheduling)
       - [@OnScheduled](#onscheduled)
       - [@Schedule](#schedule)
       - [@OnScheduledSuccess](#onscheduledsuccess)
       - [@OnScheduledFailure](#onscheduledfailure)
-    - [`Streaming`](#streaming)
+    - [Method — Streaming](#method--streaming)
       - [@Stream](#stream)
-    - [`WebSocket`](#websocket)
+    - [Method — WebSocket](#method--websocket)
       - [@OnWebSocketConnect](#onwebsocketconnect)
       - [@OnWebSocketDisconnect](#onwebsocketdisconnect)
       - [@OnWebSocketMessage](#onwebsocketmessage)
-    - [`Method`-`helpers`](#method-helpers)
+    - [Method — Middleware & guards](#method--middleware--guards)
+      - [@Use](#use-1)
+      - [@ExecutionAllowedForRole](#executionallowedforrole)
+      - [@Throttle](#throttle)
+    - [Method — Utilities](#method--utilities)
       - [@AfterReadSingleInstance](#afterreadsingleinstance)
       - [@Prepend](#prepend)
       - [@Validate](#validate)
       - [@FieldsFormatter](#fieldsformatter)
-      - [@ExecutionAllowedForRole](#executionallowedforrole)
-      - [@Throttle](#throttle)
-      - [@Use](#use-1)
       - [@CatchAndSetErrorCode](#catchandseterrorcode)
       - [@CatchAndSetErrorMessage](#catchandseterrormessage)
       - [@Exclude](#exclude)
       - [@Include](#include)
       - [@Mask](#mask)
       - [@LogExecution](#logexecution)
-- [`Deployment` to BTP using MTA](#deployment-to-btp-using-mta)
-- [`Best practices` \& `tips`](#best-practices--tips)
-- [`Samples`](#samples)
+- [Deployment to BTP using MTA](#deployment-to-btp-using-mta)
+- [Best practices & tips](#best-practices--tips)
+- [Samples](#samples)
 - [Contributing](#contributing)
 - [License](#license)
 - [Authors](#authors)
@@ -370,6 +328,8 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 > - **`import { Book } from '#cds-models/CatalogService';`**
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+## Migration guides
 
 ### `Migration:` from @sap/cds `v7` to `v8`
 
@@ -667,7 +627,7 @@ export = new CDSDispatcher([
 
 ### `Decorators`
 
-#### `Class`
+#### Class
 
 ##### @EntityHandler
 
@@ -1100,7 +1060,7 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Field`
+#### Field
 
 ##### @Inject
 
@@ -1228,7 +1188,7 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Parameter`
+#### Parameter
 
 ##### @Req
 
@@ -2240,7 +2200,7 @@ public async beforeUpdate(@Req() req: Request<MyEntity>, @Diff() diff: MyEntity)
 > **DEPRECATED:** The `@Msg` decorator is deprecated and will be removed in a future version. Please use `@Req` decorator instead for handling message data in event subscribers.
 
 
-The `@Msg` decorator is a parameter decorator used to inject response [Emitter](#https://cap.cloud.sap/docs/guides/messaging/#typical-emitter-and-receiver-roles) directly into a method parameter.
+The `@Msg` decorator is a parameter decorator used to inject response [Emitter](https://cap.cloud.sap/docs/guides/messaging/#typical-emitter-and-receiver-roles) directly into a method parameter.
 
 `Parameters`
 
@@ -2280,7 +2240,7 @@ public async onSubscribe(@Req() req: Request<{ foo: number; bar: string }>): Pro
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Method`-`active entity`
+#### Method — CRUD, active entity
 
 ##### `Before`
 
@@ -3380,384 +3340,6 @@ this.on(AFunction, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @OnEvent
-
-**@OnEvent**(`name` : CdsEvent)
-
-The `@OnEvent` decorator facilitates the listening of events when the [Emit](https://cap.cloud.sap/docs/guides/messaging/) and receiver are in the same `NODE JS PROCESS` and `SAME SERVICE`.
-
-This decorator is particularly useful in conjunction with the [Emit method](https://cap.cloud.sap/docs/guides/messaging/#emitting-events) to handle triggered events.
-
-`Parameters`
-
-- `name (CdsEvent)` : Representing the `CDS event` defined in the `CDS file`.
-
-`Example`
-
-```typescript
-import { OnEvent, Req, OnSubscribe } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { AEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@OnEvent(AEvent)
-private async onEventMethod(@Req() req: Request<AEvent>) {
-  // ...
-}
-
-// same as
-
-@OnSubscribe({
-  eventName: AEvent,
-  type: 'SAME_NODE_PROCESS',
-})
-private async onEventMethod(@Req() req: Request<AEvent>) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('AEvent', async (req) => {
-  // ...
-});
-```
-
-> [!NOTE] 
-> The `AEvent` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-> [!IMPORTANT]  
-> Decorator `@OnEvent` should be used inside [@UnboundActions](#unboundactions) class.
-
-> [!TIP]
-> An exended version of this event can be found [@OnSubscribe](#onsubscribe).
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @OnSubscribe
-
-```ts
-@OnSubscribe(options : {
-  eventName: string | object,
-  type : 'SAME_NODE_PROCESS' | 'MESSAGE_BROKER' | 'SAME_NODE_PROCESS_DIFFERENT_SERVICE'
-  externalServiceName: string // applicable only for 'SAME_NODE_PROCESS_DIFFERENT_SERVICE'
-  showReceiverMessage?: boolean
-  consoleStyle?: 'table | 'debug'
-})
-```
-
-Use `@OnSubscribe` decorator enables execution of custom logic when messaging events (`event bus` / `publish subscribe`) are triggered in your SAP CAP application.
-
-This decorator is particularly useful in conjunction with the [Emit method](https://cap.cloud.sap/docs/guides/messaging/#emitting-events) to handle triggered events.
-
-`Parameters`
-
-- `options`:
-  - `name`: CdsEvent - The name of the event to subscribe to. This can be a `string` or a `CDS event` type imported from your `@cds-models` folder.
-  - `type`: Defines the messaging transport mechanism for SAP CAP applications.
-    - `'SAME_NODE_PROCESS'` - Use when both `emitter` and `receiver` run in the same `CAP server instance` & `same service`.
-    - `'SAME_NODE_PROCESS_DIFFERENT_SERVICE'` - Use when `emitter` can be found in E.g. `Service A` and `receiver` can reside in E.g. `Service B`, having same `CAP server instance` but `different services`.
-    - `'MESSAGE_BROKER'` - Recommended for production with external message brokers, different CAP Server instances, different services.
-  - `showReceiverMessage?` `[optional]`: **boolean** - When enabled, logs inbound message payloads in the specified `consoleStyle` format.
-  - `externalServiceName`: - The name of the external service to attach the subscribe decorator to. `[Applicable only when type is 'SAME_NODE_PROCESS_DIFFERENT_SERVICE' ]`
-  - `consoleStyle?` `[optional]` - Specifies the log output format for received messages (when `showReceiverMessage` is true).
-    - `'table'`: Displays data using `console.table()`, ideal for structured messages.
-    - `'debug'`: Displays data using  `console.debug()`, ideal for nested or dynamic messages.
-
-`Example 1`
-
-In this example we emit the event in same `node process` and `same service` and we subscribe to it.
-
-`Emitting and subscribing:`
-
-```ts
-import { OnSubscribe, Req, OnEvent } from '@dxfrontier/cds-ts-dispatcher';
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-// Emitting the event
-@AfterRead()
-private async afterRead(
-  @Req() req: Request,
-  @Results() results: MyEntity[],
-): Promise<void> {
-  this.srv.emit('anEventName', { foo: 11, bar: '22' });
-}
-
-// Subscribing to the event
-@OnSubscribe({
-  eventName: 'anEventName'
-  type: 'SAME_NODE_PROCESS',
-})
-private async onSubscribe(@Req() req: Request<{ foo: number, bar: string }>): Promise<void> {
-  //
-}
-
-// same as
-
-@OnEvent('anEventName')
-private async onEventMethod(@Req() req: Request<{ foo: number, bar: string }>) {
-  // ...
-}
-
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.after('READ', MyEntity, async (req, res) => {
-  this.emit('anEventName', { foo: 11, bar: '22' });
-});
-
-this.on('anEventName', async (msg) => {
-  // ...
-});
-```
-
-`Example 2`
-
-In this example we emit the event in same `node process` and `same service` and we subscribe to it, the only difference, is in this case we get the Event from the `@cds-models` folder
-
-`Service Definition (CDS):`
-
-```yml
-// We declare an event into our Service
-service CatalogService {
-  event SendData : {
-    foo : Integer;
-    bar : String;
-  }
-}
-```
-
-`Emitting and subscribing:`
-
-```ts
-import { OnSubscribe, Req, AfterRead, Results, OnEvent } from '@dxfrontier/cds-ts-dispatcher';
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
-
-// Emitting the event
-@AfterRead()
-private async afterRead(
-  @Req() req: Request,
-  @Results() results: MyEntity[],
-): Promise<void> {
-  this.srv.emit('SendData', { foo: 11, bar: '22' });
-}
-
-// Receiving the event + data
-@OnSubscribe({
-  eventName: SendData
-  type: 'SAME_NODE_PROCESS'
-})
-private async onSubscribe(@Req() req: Request<SendData>): Promise<void> {
-  //
-  // req.data.foo ...
-  // req.data.bar ...
-  // req.headers ...
-  // ...
-}
-
-// same as
-
-@OnEvent(SendData)
-private async onEventMethod(@Req() req: Request<SendData>) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.after('READ', MyEntity, async (req, res) => {
-  this.emit('SendData', { foo: 11, bar: '22' });
-});
-
-this.on('SendData', async (msg) => {
-  // ...
-});
-```
-
-> [!NOTE] 
-> The `SendData` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-`Example 3` 
-
-
-In this example we assume we have `2 node instances` and `2 services` and we use external messaging `Cross-Instance Messaging (Message Broker)`
-
-`Emitter (Service 1 & node instance 1):`
-
-```ts
-import { Req, AfterRead, Results } from '@dxfrontier/cds-ts-dispatcher';
-import cds from '@sap/cds';
-
-@AfterRead()
-private async afterRead(
-  @Req() req: Request,
-  @Results() results: MyEntity[],
-): Promise<void> {
-
-  const messaging = await cds.connect.to('messaging');
-        messaging.emit('SendData', { foo: 11, bar: '22' });
-
-}
-```
-
-`Equivalent to 'JS'`
-
-```ts
-this.after('READ', MyEntity, async (req, res) => {
-  const messaging = await cds.connect.to('messaging');
-        messaging.emit('SendData', { foo: 11, bar: '22' });
-});
-```
-
-`Subscriber (Service 2 & Node instance 2):`
-
-```ts
-
-import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
-import { Messaging, OnSubscribe, Req } from '@dxfrontier/cds-ts-dispatcher';
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-// Receiving the event + data 
-@OnSubscribe({
-  eventName: SendData,
-  type: 'MESSAGE_BROKER' 
-})
-private async onSubscribe(@Req() req: Request): Promise<void> {
-  // 
-  // req.data.foo ...
-  // req.data.bar ...
-  // req.headers ...
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```ts
-const messaging = await cds.connect.to('messaging');
-      messaging.on(SendData, async (msg) => {
-        // ...
-      });
-```
-
-`Example 4`
-
-In this example we emit an event in `Service 1` & `node process 1`, and we attach from `Service 2` a subscribe to `Service 1` & `node process 1`, meaning that, when emit `SendData` the service `Service 2` will be notified and the `onSubscribe` method will be triggered which resides attached to `Service 1`.
-
-`Emitter (Service 1 & node process 1):`
-
-```ts
-import { Req, AfterRead, Results } from '@dxfrontier/cds-ts-dispatcher';
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
-
-// Emitting the event
-// This event resides in Service_1
-@AfterRead()
-private async afterRead(
-  @Req() req: Request,
-  @Results() results: MyEntity[],
-): Promise<void> {
-  this.srv.emit('SendData', { foo: 11, bar: '22' });
-}
-```
-
-`Equivalent to 'JS'`
-
-```ts
-// This event resides in Service_1
-this.after('READ', MyEntity, async (req, res) => {
-  this.emit('SendData', { foo: 11, bar: '22' });
-});
-```
-
-`Subscriber (Service 2 & node process 1):`
-
-```ts
-
-import { OnSubscribe, Req } from '@dxfrontier/cds-ts-dispatcher';
-
-// Receiving the event + data
-// This event resides in Service_2 but the subscribe will be attached to Service_1
- @OnSubscribe({
-  eventName: 'SendData',
-  type: 'SAME_NODE_PROCESS_DIFFERENT_SERVICE',
-  externalService: 'Service_1'
-})
-private async onSubscribe(@Req() req: Request<SendData>): Promise<void> {
-  // req.data.foo ...
-  // req.data.bar ...
-  // req.headers ...
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```ts
-// This code resides in Service_2 but it is subscribed to Service_1
-const Service_1 = cds.connect.to('Service_1');
-      Service_1.on('SendData', (msg) => {
-        //
-      });
-```
-
-> [!TIP]
-> You can find more info about SAP CAP messaging in the following url [SAP CAP Events and Messaging](https://cap.cloud.sap/docs/guides/messaging/).
-
-> [!IMPORTANT]  
-> Decorator `@OnSubscribe` should be used inside [@UnboundActions](#unboundactions) class, but not mandatory it can reside also in [@EntityHandler](#entityhandler) class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @OnError
-
-**@OnError**()
-
-Use `@OnError` decorator to register custom error handler.
-
-Error handlers are invoked whenever an error occurs during event processing of all potential events and requests, and are used to augment or modify error messages, before they go out to clients.
-
-`Example`
-
-```typescript
-import { OnError, Error, Req } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-@OnError()
-private onError(@Error() err: Error, @Req() req: Request) { // sync func
-  err.message = 'New message'
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('error', (err, req) => {
-  err.message = 'New message';
-  // ...
-});
-```
-
-> [!IMPORTANT]  
-> Decorator `@OnError` should be used inside [@UnboundActions](#unboundactions) class.
-
-> [!CAUTION]
-> OnError callback are expected to be a **`sync`** function, i.e., **`not async`**, not returning `Promises`.
-
-> [!TIP]
-> More info can be found at [SAP CAP Error](https://cap.cloud.sap/docs/node.js/core-services#srv-on-error)
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
 ###### @OnBoundAction
 
 **@OnBoundAction**(`name` : CdsAction)
@@ -3945,191 +3527,7 @@ this.on('*', '*', async (req, next) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### `Request Lifecycle`
-
-Use [@BeforeCommit()](#beforecommit), [@AfterCommit()](#aftercommit), [@AfterRollback()](#afterrollback), [@OnRequestDone()](#onrequestdone) to hook into the `commit` / `succeeded` / `failed` / `done` phases of the current `ROOT` request's transaction.
-
-The handlers receive one argument:
-
-- `req` of type `Request`
-
-> [!NOTE]
-> Ordering across `multiple handler classes`: `@BeforeCommit` callbacks run in `CDSDispatcher([...])` array order, while `@AfterCommit` / `@AfterRollback` / `@OnRequestDone` callbacks run in `reverse` array order (within one class, declaration order always holds). With more than ~10 handler classes hooking the `same` lifecycle event, Node's default `MaxListenersExceededWarning` may appear for the shared root-context emitter — harmless log noise, not a leak.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @BeforeCommit
-
-**@BeforeCommit**()
-
-The `@BeforeCommit` decorator runs custom logic `inside` the transaction, `immediately before commit`, after `all` other handlers of the request (including handlers of other services touched by the same request) have run. Throwing an error here `vetoes` the commit — the transaction is rolled back and the error is returned to the client.
-
-Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
-
-`Example`
-
-```typescript
-import { BeforeCommit } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@BeforeCommit()
-private async beforeCommit(@Req() req: Request<MyEntity>) {
-  if (/* cross-entity invariant violated */ false) {
-    throw new Error('Total stock must stay non-negative'); // vetoes the commit
-  }
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.before('*', MyEntity, (req) => {
-  req.before('commit', async () => {
-    // ...
-  });
-});
-```
-
-> [!IMPORTANT]
-> The injected `req` is the `first sub-request` of the root request that reached the hook. Use `@BeforeCommit` for `cross-request` / `final-state` invariants that need to read the current database state, keep `per-operation` validation in your [Before](#before) / [On](#on) handlers.
-
-> [!NOTE]
-> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @AfterCommit
-
-**@AfterCommit**()
-
-The `@AfterCommit` decorator runs custom logic only `after` the transaction of the current request was durably `committed`, `outside` any transaction. Errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
-
-Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
-
-`Example`
-
-```typescript
-import { AfterCommit } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-import cds from '@sap/cds';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterCommit()
-private async afterCommit(@Req() req: Request<MyEntity>) {
-  await cds.tx(async () => {
-    // ... e.g. send a confirmation e-mail, invalidate a cache
-  });
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.before('*', MyEntity, (req) => {
-  req.on('succeeded', async () => {
-    // ...
-  });
-});
-```
-
-> [!IMPORTANT]
-> The request's transaction is already `closed` by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
-
-> [!NOTE]
-> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @AfterRollback
-
-**@AfterRollback**()
-
-The `@AfterRollback` decorator runs custom logic `after` the transaction of the current request was `rolled back`, `outside` any transaction. Errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
-
-Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
-
-`Example`
-
-```typescript
-import { AfterRollback } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-import cds from '@sap/cds';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterRollback()
-private async afterRollback(@Req() req: Request<MyEntity>) {
-  await cds.tx(async () => {
-    // ... e.g. release a reservation in a remote system, alert on the failure
-  });
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.before('*', MyEntity, (req) => {
-  req.on('failed', async () => {
-    // ...
-  });
-});
-```
-
-> [!IMPORTANT]
-> The request's transaction is already `closed` (rolled back) by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
-
-> [!NOTE]
-> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @OnRequestDone
-
-**@OnRequestDone**()
-
-The `@OnRequestDone` decorator runs custom logic when the current request is `done`, no matter if it `succeeded` or `failed` — `finally` semantics. It runs `outside` any transaction and errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
-
-Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
-
-`Example`
-
-```typescript
-import { OnRequestDone } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-import cds from '@sap/cds';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@OnRequestDone()
-private async requestDone(@Req() req: Request<MyEntity>) {
-  await cds.tx(async () => {
-    // ... e.g. release a lock, stop a timer, emit duration metrics
-  });
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.before('*', MyEntity, (req) => {
-  req.on('done', async () => {
-    // ...
-  });
-});
-```
-
-> [!IMPORTANT]
-> The request's transaction is already `closed` by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
-
-> [!NOTE]
-> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-#### `Method`-`draft entity`
+#### Method — CRUD, draft entity
 
 ##### `Before`
 
@@ -4834,7 +4232,571 @@ All active entity [On](#on), [Before](#before), [After](#after) events have also
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Server Lifecycle`
+#### Method — Events & messaging
+
+##### @OnEvent
+
+**@OnEvent**(`name` : CdsEvent)
+
+The `@OnEvent` decorator facilitates the listening of events when the [Emit](https://cap.cloud.sap/docs/guides/messaging/) and receiver are in the same `NODE JS PROCESS` and `SAME SERVICE`.
+
+This decorator is particularly useful in conjunction with the [Emit method](https://cap.cloud.sap/docs/guides/messaging/#emitting-events) to handle triggered events.
+
+`Parameters`
+
+- `name (CdsEvent)` : Representing the `CDS event` defined in the `CDS file`.
+
+`Example`
+
+```typescript
+import { OnEvent, Req, OnSubscribe } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { AEvent } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnEvent(AEvent)
+private async onEventMethod(@Req() req: Request<AEvent>) {
+  // ...
+}
+
+// same as
+
+@OnSubscribe({
+  eventName: AEvent,
+  type: 'SAME_NODE_PROCESS',
+})
+private async onEventMethod(@Req() req: Request<AEvent>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('AEvent', async (req) => {
+  // ...
+});
+```
+
+> [!NOTE] 
+> The `AEvent` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+> [!IMPORTANT]  
+> Decorator `@OnEvent` should be used inside [@UnboundActions](#unboundactions) class.
+
+> [!TIP]
+> An exended version of this event can be found [@OnSubscribe](#onsubscribe).
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnSubscribe
+
+```ts
+@OnSubscribe(options : {
+  eventName: string | object,
+  type : 'SAME_NODE_PROCESS' | 'MESSAGE_BROKER' | 'SAME_NODE_PROCESS_DIFFERENT_SERVICE'
+  externalServiceName: string // applicable only for 'SAME_NODE_PROCESS_DIFFERENT_SERVICE'
+  showReceiverMessage?: boolean
+  consoleStyle?: 'table | 'debug'
+})
+```
+
+Use `@OnSubscribe` decorator enables execution of custom logic when messaging events (`event bus` / `publish subscribe`) are triggered in your SAP CAP application.
+
+This decorator is particularly useful in conjunction with the [Emit method](https://cap.cloud.sap/docs/guides/messaging/#emitting-events) to handle triggered events.
+
+`Parameters`
+
+- `options`:
+  - `name`: CdsEvent - The name of the event to subscribe to. This can be a `string` or a `CDS event` type imported from your `@cds-models` folder.
+  - `type`: Defines the messaging transport mechanism for SAP CAP applications.
+    - `'SAME_NODE_PROCESS'` - Use when both `emitter` and `receiver` run in the same `CAP server instance` & `same service`.
+    - `'SAME_NODE_PROCESS_DIFFERENT_SERVICE'` - Use when `emitter` can be found in E.g. `Service A` and `receiver` can reside in E.g. `Service B`, having same `CAP server instance` but `different services`.
+    - `'MESSAGE_BROKER'` - Recommended for production with external message brokers, different CAP Server instances, different services.
+  - `showReceiverMessage?` `[optional]`: **boolean** - When enabled, logs inbound message payloads in the specified `consoleStyle` format.
+  - `externalServiceName`: - The name of the external service to attach the subscribe decorator to. `[Applicable only when type is 'SAME_NODE_PROCESS_DIFFERENT_SERVICE' ]`
+  - `consoleStyle?` `[optional]` - Specifies the log output format for received messages (when `showReceiverMessage` is true).
+    - `'table'`: Displays data using `console.table()`, ideal for structured messages.
+    - `'debug'`: Displays data using  `console.debug()`, ideal for nested or dynamic messages.
+
+`Example 1`
+
+In this example we emit the event in same `node process` and `same service` and we subscribe to it.
+
+`Emitting and subscribing:`
+
+```ts
+import { OnSubscribe, Req, OnEvent } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+// Emitting the event
+@AfterRead()
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: MyEntity[],
+): Promise<void> {
+  this.srv.emit('anEventName', { foo: 11, bar: '22' });
+}
+
+// Subscribing to the event
+@OnSubscribe({
+  eventName: 'anEventName'
+  type: 'SAME_NODE_PROCESS',
+})
+private async onSubscribe(@Req() req: Request<{ foo: number, bar: string }>): Promise<void> {
+  //
+}
+
+// same as
+
+@OnEvent('anEventName')
+private async onEventMethod(@Req() req: Request<{ foo: number, bar: string }>) {
+  // ...
+}
+
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('READ', MyEntity, async (req, res) => {
+  this.emit('anEventName', { foo: 11, bar: '22' });
+});
+
+this.on('anEventName', async (msg) => {
+  // ...
+});
+```
+
+`Example 2`
+
+In this example we emit the event in same `node process` and `same service` and we subscribe to it, the only difference, is in this case we get the Event from the `@cds-models` folder
+
+`Service Definition (CDS):`
+
+```yml
+// We declare an event into our Service
+service CatalogService {
+  event SendData : {
+    foo : Integer;
+    bar : String;
+  }
+}
+```
+
+`Emitting and subscribing:`
+
+```ts
+import { OnSubscribe, Req, AfterRead, Results, OnEvent } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
+
+// Emitting the event
+@AfterRead()
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: MyEntity[],
+): Promise<void> {
+  this.srv.emit('SendData', { foo: 11, bar: '22' });
+}
+
+// Receiving the event + data
+@OnSubscribe({
+  eventName: SendData
+  type: 'SAME_NODE_PROCESS'
+})
+private async onSubscribe(@Req() req: Request<SendData>): Promise<void> {
+  //
+  // req.data.foo ...
+  // req.data.bar ...
+  // req.headers ...
+  // ...
+}
+
+// same as
+
+@OnEvent(SendData)
+private async onEventMethod(@Req() req: Request<SendData>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('READ', MyEntity, async (req, res) => {
+  this.emit('SendData', { foo: 11, bar: '22' });
+});
+
+this.on('SendData', async (msg) => {
+  // ...
+});
+```
+
+> [!NOTE] 
+> The `SendData` was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+`Example 3` 
+
+
+In this example we assume we have `2 node instances` and `2 services` and we use external messaging `Cross-Instance Messaging (Message Broker)`
+
+`Emitter (Service 1 & node instance 1):`
+
+```ts
+import { Req, AfterRead, Results } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
+
+@AfterRead()
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: MyEntity[],
+): Promise<void> {
+
+  const messaging = await cds.connect.to('messaging');
+        messaging.emit('SendData', { foo: 11, bar: '22' });
+
+}
+```
+
+`Equivalent to 'JS'`
+
+```ts
+this.after('READ', MyEntity, async (req, res) => {
+  const messaging = await cds.connect.to('messaging');
+        messaging.emit('SendData', { foo: 11, bar: '22' });
+});
+```
+
+`Subscriber (Service 2 & Node instance 2):`
+
+```ts
+
+import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
+import { Messaging, OnSubscribe, Req } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+// Receiving the event + data 
+@OnSubscribe({
+  eventName: SendData,
+  type: 'MESSAGE_BROKER' 
+})
+private async onSubscribe(@Req() req: Request): Promise<void> {
+  // 
+  // req.data.foo ...
+  // req.data.bar ...
+  // req.headers ...
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```ts
+const messaging = await cds.connect.to('messaging');
+      messaging.on(SendData, async (msg) => {
+        // ...
+      });
+```
+
+`Example 4`
+
+In this example we emit an event in `Service 1` & `node process 1`, and we attach from `Service 2` a subscribe to `Service 1` & `node process 1`, meaning that, when emit `SendData` the service `Service 2` will be notified and the `onSubscribe` method will be triggered which resides attached to `Service 1`.
+
+`Emitter (Service 1 & node process 1):`
+
+```ts
+import { Req, AfterRead, Results } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { SendData } from '#cds-models/CatalogService'; // <== location of @cds-models can differ.
+
+// Emitting the event
+// This event resides in Service_1
+@AfterRead()
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: MyEntity[],
+): Promise<void> {
+  this.srv.emit('SendData', { foo: 11, bar: '22' });
+}
+```
+
+`Equivalent to 'JS'`
+
+```ts
+// This event resides in Service_1
+this.after('READ', MyEntity, async (req, res) => {
+  this.emit('SendData', { foo: 11, bar: '22' });
+});
+```
+
+`Subscriber (Service 2 & node process 1):`
+
+```ts
+
+import { OnSubscribe, Req } from '@dxfrontier/cds-ts-dispatcher';
+
+// Receiving the event + data
+// This event resides in Service_2 but the subscribe will be attached to Service_1
+ @OnSubscribe({
+  eventName: 'SendData',
+  type: 'SAME_NODE_PROCESS_DIFFERENT_SERVICE',
+  externalService: 'Service_1'
+})
+private async onSubscribe(@Req() req: Request<SendData>): Promise<void> {
+  // req.data.foo ...
+  // req.data.bar ...
+  // req.headers ...
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```ts
+// This code resides in Service_2 but it is subscribed to Service_1
+const Service_1 = cds.connect.to('Service_1');
+      Service_1.on('SendData', (msg) => {
+        //
+      });
+```
+
+> [!TIP]
+> You can find more info about SAP CAP messaging in the following url [SAP CAP Events and Messaging](https://cap.cloud.sap/docs/guides/messaging/).
+
+> [!IMPORTANT]  
+> Decorator `@OnSubscribe` should be used inside [@UnboundActions](#unboundactions) class, but not mandatory it can reside also in [@EntityHandler](#entityhandler) class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnError
+
+**@OnError**()
+
+Use `@OnError` decorator to register custom error handler.
+
+Error handlers are invoked whenever an error occurs during event processing of all potential events and requests, and are used to augment or modify error messages, before they go out to clients.
+
+`Example`
+
+```typescript
+import { OnError, Error, Req } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@OnError()
+private onError(@Error() err: Error, @Req() req: Request) { // sync func
+  err.message = 'New message'
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('error', (err, req) => {
+  err.message = 'New message';
+  // ...
+});
+```
+
+> [!IMPORTANT]  
+> Decorator `@OnError` should be used inside [@UnboundActions](#unboundactions) class.
+
+> [!CAUTION]
+> OnError callback are expected to be a **`sync`** function, i.e., **`not async`**, not returning `Promises`.
+
+> [!TIP]
+> More info can be found at [SAP CAP Error](https://cap.cloud.sap/docs/node.js/core-services#srv-on-error)
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Method — Request lifecycle
+
+Use [@BeforeCommit()](#beforecommit), [@AfterCommit()](#aftercommit), [@AfterRollback()](#afterrollback), [@OnRequestDone()](#onrequestdone) to hook into the `commit` / `succeeded` / `failed` / `done` phases of the current `ROOT` request's transaction.
+
+The handlers receive one argument:
+
+- `req` of type `Request`
+
+> [!NOTE]
+> Ordering across `multiple handler classes`: `@BeforeCommit` callbacks run in `CDSDispatcher([...])` array order, while `@AfterCommit` / `@AfterRollback` / `@OnRequestDone` callbacks run in `reverse` array order (within one class, declaration order always holds). With more than ~10 handler classes hooking the `same` lifecycle event, Node's default `MaxListenersExceededWarning` may appear for the shared root-context emitter — harmless log noise, not a leak.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @BeforeCommit
+
+**@BeforeCommit**()
+
+The `@BeforeCommit` decorator runs custom logic `inside` the transaction, `immediately before commit`, after `all` other handlers of the request (including handlers of other services touched by the same request) have run. Throwing an error here `vetoes` the commit — the transaction is rolled back and the error is returned to the client.
+
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
+
+`Example`
+
+```typescript
+import { BeforeCommit } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeCommit()
+private async beforeCommit(@Req() req: Request<MyEntity>) {
+  if (/* cross-entity invariant violated */ false) {
+    throw new Error('Total stock must stay non-negative'); // vetoes the commit
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('*', MyEntity, (req) => {
+  req.before('commit', async () => {
+    // ...
+  });
+});
+```
+
+> [!IMPORTANT]
+> The injected `req` is the `first sub-request` of the root request that reached the hook. Use `@BeforeCommit` for `cross-request` / `final-state` invariants that need to read the current database state, keep `per-operation` validation in your [Before](#before) / [On](#on) handlers.
+
+> [!NOTE]
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @AfterCommit
+
+**@AfterCommit**()
+
+The `@AfterCommit` decorator runs custom logic only `after` the transaction of the current request was durably `committed`, `outside` any transaction. Errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
+
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
+
+`Example`
+
+```typescript
+import { AfterCommit } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterCommit()
+private async afterCommit(@Req() req: Request<MyEntity>) {
+  await cds.tx(async () => {
+    // ... e.g. send a confirmation e-mail, invalidate a cache
+  });
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('*', MyEntity, (req) => {
+  req.on('succeeded', async () => {
+    // ...
+  });
+});
+```
+
+> [!IMPORTANT]
+> The request's transaction is already `closed` by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
+
+> [!NOTE]
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @AfterRollback
+
+**@AfterRollback**()
+
+The `@AfterRollback` decorator runs custom logic `after` the transaction of the current request was `rolled back`, `outside` any transaction. Errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
+
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
+
+`Example`
+
+```typescript
+import { AfterRollback } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterRollback()
+private async afterRollback(@Req() req: Request<MyEntity>) {
+  await cds.tx(async () => {
+    // ... e.g. release a reservation in a remote system, alert on the failure
+  });
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('*', MyEntity, (req) => {
+  req.on('failed', async () => {
+    // ...
+  });
+});
+```
+
+> [!IMPORTANT]
+> The request's transaction is already `closed` (rolled back) by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
+
+> [!NOTE]
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnRequestDone
+
+**@OnRequestDone**()
+
+The `@OnRequestDone` decorator runs custom logic when the current request is `done`, no matter if it `succeeded` or `failed` — `finally` semantics. It runs `outside` any transaction and errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
+
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
+
+`Example`
+
+```typescript
+import { OnRequestDone } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnRequestDone()
+private async requestDone(@Req() req: Request<MyEntity>) {
+  await cds.tx(async () => {
+    // ... e.g. release a lock, stop a timer, emit duration metrics
+  });
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('*', MyEntity, (req) => {
+  req.on('done', async () => {
+    // ...
+  });
+});
+```
+
+> [!IMPORTANT]
+> The request's transaction is already `closed` by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
+
+> [!NOTE]
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Method — Server lifecycle
 
 Use [@OnServed()](#onserved), [@OnListening()](#onlistening), [@OnShutdown()](#onshutdown) - hosted in a [@ServerLifecycle](#serverlifecycle) class - to hook into the CAP server's `served` / `listening` / `shutdown` process lifecycle.
 
@@ -4948,7 +4910,7 @@ cds.on('shutdown', async (error) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Scheduling`
+#### Method — Scheduling
 
 Use [@OnScheduled()](#onscheduled) and [@Schedule()](#schedule) to handle and register recurring background tasks on top of the `@sap/cds` 10 `event-queue`.
 
@@ -5133,7 +5095,7 @@ this.after('cleanupExpiredCarts/#failed', (error, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Streaming`
+#### Method — Streaming
 
 Use [@Stream()](#stream) to pipe a handler's `Readable` return value straight to the HTTP response.
 
@@ -5172,7 +5134,7 @@ public async streamBooks(@Req() req: Request): Promise<Readable> {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `WebSocket`
+#### Method — WebSocket
 
 Use [@OnWebSocketConnect()](#onwebsocketconnect), [@OnWebSocketDisconnect()](#onwebsocketdisconnect), [@OnWebSocketMessage()](#onwebsocketmessage) to handle realtime operations of a CDS service exposed over the [`@cap-js-community/websocket`](https://github.com/cap-js-community/websocket) plugin - an `optional peer` the consumer app installs separately. They are pure `sugar` for [@OnEvent()](#onevent) - `@OnWebSocketConnect()` ≈ `@OnEvent('wsConnect')`, `@OnWebSocketDisconnect()` ≈ `@OnEvent('wsDisconnect')` - and register through the exact same [@UnboundActions](#unboundactions) host; there is no dedicated websocket host class, since a websocket service impl is just a regular CAP service impl (`module.exports = (srv) => ...`).
 
@@ -5255,7 +5217,7 @@ this.on('wsConnect', async (req) => {
 ```
 
 > [!IMPORTANT]
-> The service must model `action wsConnect();` - see the [WebSocket](#websocket) prerequisites above.
+> The service must model `action wsConnect();` - see the [WebSocket](#method--websocket) prerequisites above.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -5284,7 +5246,7 @@ this.on('wsDisconnect', async (req) => {
 ```
 
 > [!IMPORTANT]
-> The service must model `action wsDisconnect(reason: String);` to receive a disconnect detail in `req.data.reason` - see the [WebSocket](#websocket) prerequisites above.
+> The service must model `action wsDisconnect(reason: String);` to receive a disconnect detail in `req.data.reason` - see the [WebSocket](#method--websocket) prerequisites above.
 
 > [!WARNING]
 > Under the plugin's default `kind: 'ws'`, the delivered value is the socket `close code` as a `string` (e.g. `'1000'`, `'1005'`), **not** a reason phrase - raw `ws` passes `(code, reason)` and the plugin forwards only the first argument.
@@ -5323,7 +5285,168 @@ this.on('sendMessage', async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Method`-`helpers`
+#### Method — Middleware & guards
+
+##### @Use
+
+**@Use**(`...Middleware[]`)
+
+The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your method.
+
+Middleware decorators can perform the following tasks:
+
+- Execute any code.
+- Make changes to the request object.
+- End the request-response cycle.
+- Call the next middleware function in the stack.
+- If the current middleware function does not end the request-response cycle, it must call `next()` to pass control to the next middleware function. Otherwise, the request will be left hanging.
+
+`Parameters`
+
+- `...Middleware[])`: Middleware classes to be injected.
+
+`Example:` middleware implementation:
+
+```typescript
+import type { MiddlewareImpl, NextMiddleware, Request } from '@dxfrontier/cds-ts-dispatcher';
+
+export class MiddlewareClass implements MiddlewareImpl {
+  public async use(req: Request, next: NextMiddleware) {
+    console.log('Middleware use method called.');
+
+    await next();
+  }
+}
+```
+
+> [!TIP]
+>
+> Inside of the `use` method you can use [@CatchAndSetErrorCode](#catchandseterrorcode) and [@CatchAndSetErrorMessage](#catchandseterrormessage) decorators if you want to catch errors.
+
+
+`Example` usage:
+
+```typescript
+import { EntityHandler, Use, Inject, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
+import type { Service, Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class CustomerHandler {
+  // ...
+  @Inject(CDS_DISPATCHER.SRV) private srv: Service;
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  @Use(MiddlewareClass)
+  private async aMethod(@Results() results: MyEntity[], @Req() req: Request) {
+    // ...
+  }
+
+  // ...
+}
+```
+
+> [!TIP]
+>
+> 1. Middlewares when applied with `@Use` are executed before the normal events.
+> 2. If you need to apply middleware to `class` you can have a look over class specific [@Use](#use) decorator .
+
+> 
+> [!WARNING]
+> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @ExecutionAllowedForRole
+
+**@ExecutionAllowedForRole(...roles: string[])**
+
+The `@ExecutionAllowedForRole` is used as a `method` decorator and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
+
+It applies an logical `OR` on the specified **_roles_**, meaning it checks if at `least one` of the specified roles is assigned to the current request, then the execution will be allowed.
+
+`Parameters`
+
+- `...roles: string[]`: Specifies the roles that are permitted to execute the event logic.
+
+`Example`
+
+```typescript
+@AfterRead()
+@ExecutionAllowedForRole('Manager', 'User', 'CEO')
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: BookSale[],
+) {
+  // Method implementation
+  // Code will be executed only in case of User ( Manager, User and CEO )
+}
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Throttle
+
+**@Throttle(options: { limit: number; window: number; by?: 'user' | 'tenant' })**
+
+The `@Throttle` decorator is a `method` decorator that rate-limits a handler with a `fixed window`, counted per `user` (default) or per `tenant`. Once the limit is exhausted inside the current window, the request is rejected with `HTTP 429` through `req.reject(...)` - the decorated method body never runs.
+
+It works on any handler decorator that receives a real `cds.Request` - CRUD ([@OnCreate()](#oncreate), [@BeforeUpdate()](#beforeupdate), ...), actions and functions ([@OnAction()](#onaction), [@OnBoundFunction()](#onboundfunction), ...) - hosted in either [@EntityHandler](#entityhandler) or [@UnboundActions](#unboundactions).
+
+`Parameters`
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `limit` | `number` | _(required)_ | Maximum number of invocations allowed per window. Must be `>= 1`. |
+| `window` | `number` (ms) | _(required)_ | Fixed window length in milliseconds. Must be `>= 1`. |
+| `by` | `'user' \| 'tenant'` | `'user'` | Counter key source: `'user'` keys by `req.user.id` (fallback `'anonymous'`), `'tenant'` keys by `req.tenant` (fallback `'no-tenant'`). |
+
+`Example`
+
+```typescript
+import { OnAction, Req, Throttle, UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
+import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+
+import { GenerateReport } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@UnboundActions()
+export class ReportHandler {
+  @OnAction(GenerateReport)
+  @Throttle({ limit: 10, window: 60_000 }) // 10 calls per minute, per user
+  public async generate(@Req() req: ActionRequest<typeof GenerateReport>): ActionReturn<typeof GenerateReport> {
+    // ...
+  }
+}
+```
+
+> [!IMPORTANT]
+> Stack `@Throttle` **directly below** the handler decorator (`@OnAction`, `@OnCreate`, ...), closer to the method - the same rule as [@ExecutionAllowedForRole](#executionallowedforrole). Decorators wrap `descriptor.value` bottom-up, so a wrapper placed **above** the handler decorator never becomes part of the registered callback - it silently does nothing. Keep a [@Req()](#req) parameter: the wrapper reads the current `cds.Request` off the handler arguments to resolve the counter key and to call `req.reject(...)`.
+
+> [!IMPORTANT]
+> `@Throttle` targets `request` handlers only. On messaging-event handlers ([@OnEvent()](#onevent) / [@OnSubscribe()](#onsubscribe)) there is no `cds.Request` among the arguments - every delivery fails loudly with a descriptive error instead of silently letting messages through unthrottled.
+
+> [!NOTE]
+> Counters are `fixed-window`, kept `in-memory`, `per app instance` **and** `per decorated method` - in a multi-instance deployment the limit is effectively `per pod`, not global. Each OData `$batch` sub-request invokes the handler (and therefore the counter) individually - there is no batch-level dedup like [@BeforeCommit](#beforecommit) has.
+
+> [!NOTE]
+> Over the limit, the rejection message has the shape: `Rate limit exceeded: max ${limit} requests per ${window} ms for this ${by}. Retry in ${retryAfter} ms.`
+
+> [!WARNING]
+> `@Throttle` cannot be combined with [@OnError()](#onerror) - stacking it under `@OnError` throws at `decoration time` (error handlers run synchronously while the transaction unwinds, which a throttling wrapper cannot honor).
+
+> [!TIP]
+> For a `service-global` (not per-handler) limit, use CAP's own extension point instead: `cds.middlewares.add(rateLimit(), { after: 'auth' })` in a custom `server.js`. `@Throttle` stays the per-handler tool.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Method — Utilities
 
 ##### @AfterReadSingleInstance
 
@@ -5883,7 +6006,7 @@ export class CustomerHandler {
 ```
 
 > [!TIP]
-> See best practice for [customFormatter](#best-practices-tips)
+> See best practice for [customFormatter](#best-practices--tips)
 
 `Example 2` : using `@FieldsFormatter` decorator inside the [@UnboundActions](#unboundactions)
 
@@ -5940,165 +6063,6 @@ class UnboundActionsHandler {
 > - [@OnBoundFunction()](#onboundfunction)
 >
 > you must use the `ExposeFields type` inside of the `@FieldsFormatter` decorator.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-##### @ExecutionAllowedForRole
-
-**@ExecutionAllowedForRole(...roles: string[])**
-
-The `@ExecutionAllowedForRole` is used as a `method` decorator and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
-
-It applies an logical `OR` on the specified **_roles_**, meaning it checks if at `least one` of the specified roles is assigned to the current request, then the execution will be allowed.
-
-`Parameters`
-
-- `...roles: string[]`: Specifies the roles that are permitted to execute the event logic.
-
-`Example`
-
-```typescript
-@AfterRead()
-@ExecutionAllowedForRole('Manager', 'User', 'CEO')
-private async afterRead(
-  @Req() req: Request,
-  @Results() results: BookSale[],
-) {
-  // Method implementation
-  // Code will be executed only in case of User ( Manager, User and CEO )
-}
-```
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-##### @Throttle
-
-**@Throttle(options: { limit: number; window: number; by?: 'user' | 'tenant' })**
-
-The `@Throttle` decorator is a `method` decorator that rate-limits a handler with a `fixed window`, counted per `user` (default) or per `tenant`. Once the limit is exhausted inside the current window, the request is rejected with `HTTP 429` through `req.reject(...)` - the decorated method body never runs.
-
-It works on any handler decorator that receives a real `cds.Request` - CRUD ([@OnCreate()](#oncreate), [@BeforeUpdate()](#beforeupdate), ...), actions and functions ([@OnAction()](#onaction), [@OnBoundFunction()](#onboundfunction), ...) - hosted in either [@EntityHandler](#entityhandler) or [@UnboundActions](#unboundactions).
-
-`Parameters`
-
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `limit` | `number` | _(required)_ | Maximum number of invocations allowed per window. Must be `>= 1`. |
-| `window` | `number` (ms) | _(required)_ | Fixed window length in milliseconds. Must be `>= 1`. |
-| `by` | `'user' \| 'tenant'` | `'user'` | Counter key source: `'user'` keys by `req.user.id` (fallback `'anonymous'`), `'tenant'` keys by `req.tenant` (fallback `'no-tenant'`). |
-
-`Example`
-
-```typescript
-import { OnAction, Req, Throttle, UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
-import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
-
-import { GenerateReport } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@UnboundActions()
-export class ReportHandler {
-  @OnAction(GenerateReport)
-  @Throttle({ limit: 10, window: 60_000 }) // 10 calls per minute, per user
-  public async generate(@Req() req: ActionRequest<typeof GenerateReport>): ActionReturn<typeof GenerateReport> {
-    // ...
-  }
-}
-```
-
-> [!IMPORTANT]
-> Stack `@Throttle` **directly below** the handler decorator (`@OnAction`, `@OnCreate`, ...), closer to the method - the same rule as [@ExecutionAllowedForRole](#executionallowedforrole). Decorators wrap `descriptor.value` bottom-up, so a wrapper placed **above** the handler decorator never becomes part of the registered callback - it silently does nothing. Keep a [@Req()](#req) parameter: the wrapper reads the current `cds.Request` off the handler arguments to resolve the counter key and to call `req.reject(...)`.
-
-> [!IMPORTANT]
-> `@Throttle` targets `request` handlers only. On messaging-event handlers ([@OnEvent()](#onevent) / [@OnSubscribe()](#onsubscribe)) there is no `cds.Request` among the arguments - every delivery fails loudly with a descriptive error instead of silently letting messages through unthrottled.
-
-> [!NOTE]
-> Counters are `fixed-window`, kept `in-memory`, `per app instance` **and** `per decorated method` - in a multi-instance deployment the limit is effectively `per pod`, not global. Each OData `$batch` sub-request invokes the handler (and therefore the counter) individually - there is no batch-level dedup like [@BeforeCommit](#beforecommit) has.
-
-> [!NOTE]
-> Over the limit, the rejection message has the shape: `Rate limit exceeded: max ${limit} requests per ${window} ms for this ${by}. Retry in ${retryAfter} ms.`
-
-> [!WARNING]
-> `@Throttle` cannot be combined with [@OnError()](#onerror) - stacking it under `@OnError` throws at `decoration time` (error handlers run synchronously while the transaction unwinds, which a throttling wrapper cannot honor).
-
-> [!TIP]
-> For a `service-global` (not per-handler) limit, use CAP's own extension point instead: `cds.middlewares.add(rateLimit(), { after: 'auth' })` in a custom `server.js`. `@Throttle` stays the per-handler tool.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-##### @Use
-
-**@Use**(`...Middleware[]`)
-
-The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your method.
-
-Middleware decorators can perform the following tasks:
-
-- Execute any code.
-- Make changes to the request object.
-- End the request-response cycle.
-- Call the next middleware function in the stack.
-- If the current middleware function does not end the request-response cycle, it must call `next()` to pass control to the next middleware function. Otherwise, the request will be left hanging.
-
-`Parameters`
-
-- `...Middleware[])`: Middleware classes to be injected.
-
-`Example:` middleware implementation:
-
-```typescript
-import type { MiddlewareImpl, NextMiddleware, Request } from '@dxfrontier/cds-ts-dispatcher';
-
-export class MiddlewareClass implements MiddlewareImpl {
-  public async use(req: Request, next: NextMiddleware) {
-    console.log('Middleware use method called.');
-
-    await next();
-  }
-}
-```
-
-> [!TIP]
->
-> Inside of the `use` method you can use [@CatchAndSetErrorCode](#catchandseterrorcode) and [@CatchAndSetErrorMessage](#catchandseterrormessage) decorators if you want to catch errors.
-
-
-`Example` usage:
-
-```typescript
-import { EntityHandler, Use, Inject, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
-import type { Service, Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@EntityHandler(MyEntity)
-export class CustomerHandler {
-  // ...
-  @Inject(CDS_DISPATCHER.SRV) private srv: Service;
-  // ...
-  constructor() {}
-
-  @AfterRead()
-  @Use(MiddlewareClass)
-  private async aMethod(@Results() results: MyEntity[], @Req() req: Request) {
-    // ...
-  }
-
-  // ...
-}
-```
-
-> [!TIP]
->
-> 1. Middlewares when applied with `@Use` are executed before the normal events.
-> 2. If you need to apply middleware to `class` you can have a look over class specific [@Use](#use) decorator .
-
-> 
-> [!WARNING]
-> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
