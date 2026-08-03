@@ -5101,7 +5101,7 @@ Use [@Stream()](#stream) to pipe a handler's `Readable` return value straight to
 
 ##### @Stream
 
-**@Stream(contentType?: string)**
+**@Stream(contentType?: StreamContentType)**
 
 The `@Stream` decorator is a `method-level` decorator for `ON` read handlers ([@OnRead()](#onread), [@OnFunction()](#onfunction), [@OnBoundFunction()](#onboundfunction)). Place it **directly on the method, below the `ON` decorator**, so it wraps the returned value.
 
@@ -5109,7 +5109,7 @@ If the decorated method returns a `Readable` (an object exposing a `.pipe` funct
 
 `Parameters`
 
-- `contentType (string)` `optional` : The response `Content-Type`. Defaults to `'application/octet-stream'`.
+- `contentType (StreamContentType)` `optional` : The response `Content-Type`. Defaults to `'application/octet-stream'`. `StreamContentType` is a union of common MIME types (`'application/json'`, `'application/x-ndjson'`, `'text/csv'`, `'application/pdf'`, `'image/png'`, ...) so the editor suggests them - any other valid MIME type string is accepted as well.
 
 `Example`
 

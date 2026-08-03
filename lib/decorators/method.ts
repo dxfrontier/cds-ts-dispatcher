@@ -27,6 +27,7 @@ import type {
   Request,
   RequestType,
   ScheduleOptions,
+  StreamContentType,
   ThrottleOptions,
 } from '../types/types';
 
@@ -1905,7 +1906,7 @@ function OnScheduledFailure(name: string) {
  * @param contentType - `[Optional]` The `Content-Type` header for the streamed response. Defaults to `'application/octet-stream'`.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#stream | CDS-TS-Dispatcher - @Stream}
  */
-function Stream(contentType = 'application/octet-stream') {
+function Stream(contentType: StreamContentType = 'application/octet-stream') {
   return function <Target extends object>(
     _: Target,
     __: string | symbol,

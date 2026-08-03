@@ -123,6 +123,44 @@ export type ThrottleOptions = {
 // **************************************************************************************************************************
 
 // **************************************************************************************************************************
+// @Stream decorator types
+// **************************************************************************************************************************
+
+/**
+ * Common `Content-Type` values for the `@Stream` decorator.
+ * Any other valid MIME type string is also accepted.
+ */
+export type StreamContentType =
+  // Generic binary (the default)
+  | 'application/octet-stream'
+  // Streamed query results (SELECT.pipeline / for-await)
+  | 'application/json'
+  | 'application/x-ndjson'
+  // Tabular exports
+  | 'text/csv'
+  | 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // .xlsx
+  | 'application/vnd.ms-excel' // legacy .xls
+  // Documents & archives
+  | 'application/pdf'
+  | 'application/zip'
+  // Media entities
+  | 'image/png'
+  | 'image/jpeg'
+  | 'image/svg+xml'
+  | 'image/webp'
+  | 'video/mp4'
+  | 'audio/mpeg'
+  // Text
+  | 'text/plain'
+  | 'text/html'
+  | 'application/xml'
+  // Escape hatch: keeps the suggestions above while accepting any MIME string
+  | (string & {});
+
+// **************************************************************************************************************************
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
 // @GetQuery() decorator types
 // **************************************************************************************************************************
 
