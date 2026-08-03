@@ -23,13 +23,17 @@ When a developer uses `@dxfrontier/cds-ts-dispatcher` in a consumer project toge
 4. **Docs only:** no CLI, no MCP server, no new executables.
 5. **Approach:** layered curation — four thin, hand-written layers, each with one job, each useful on its own if it is the only layer an agent ever sees.
 
-## Component 1 — Package `AGENTS.md` (shipped in the tarball)
+## Component 1 — Shipped agent guide: `docs/AGENTS.md` in the tarball
 
-New hand-written file at the repo root, added to the `package.json` `files` array (it is **not** auto-included the way README.md is). Target size ≈ 300 lines. This is the agent's entry point for the package.
+New hand-written file at `docs/AGENTS.md`, shipped by adding `./docs/AGENTS.md` to the `package.json` `files` array (only this file — `docs/superpowers/` must not ship). Target size ≈ 300 lines. This is the agent's entry point for the package.
+
+**Placement rationale (research-validated):** *not* at the repo root. The AGENTS.md standard defines the root file as contributor-facing ("a README for agents working **on** your project") and 30+ tools auto-load it — a consumer guide there would feed usage docs into contributor agents' context. In-package placement follows the Next.js ≥16.2 precedent (docs shipped under `dist/docs/`); since no tool auto-reads `node_modules` anyway, discovery is pointer-based (Components 2 and 3) regardless of location.
+
+**Content rule (evidence-backed):** only information an agent cannot discover from the code, types, or README. The taxonomy is a one-line-per-decorator *index* into README anchors — never a copy of the docs. Stale or duplicative context files measurably hurt agent performance, which is why the drift gate is load-bearing.
 
 Content outline, in order:
 
-1. **Disambiguation line** (first line): this file documents *using* the package; contributors to the dispatcher itself see `CLAUDE.md`. Needed because a repo-root `AGENTS.md` is also picked up by contributors' tools.
+1. **Header note:** states this guide is for agents working in *consumer* projects, with the package version it was written for.
 2. **Mental model** (one screen): decorators only write metadata at decoration time; all registration happens once at `new CDSDispatcher([...]).initialize()`, which returns `cds.service.impl(...)`. This single fact prevents most wrong AI answers.
 3. **Setup contract:** required tsconfig flags (`experimentalDecorators`, `emitDecoratorMetadata`), the `@sap/cds` → `@cap-js/cds-types` `paths` mapping, peer-dependency major pairing, bootstrap wiring in the service implementation file.
 4. **Decorator taxonomy table:** every exported decorator (~60), grouped by kind (class / before / on / after / parameter / other), one row each: *name → one-sentence when-to-use → local README anchor*.
@@ -41,7 +45,7 @@ Content outline, in order:
 
 A new generator module in `postinstall/util/` (sibling of `TypeGenerator.ts`, writes through `FileManager` like the existing artifacts) emits `@dispatcher/AGENTS.md` next to the generated `index.ts`/`index.js`.
 
-- **Template, ~70 lines, version-stamped:** "This project uses `@dxfrontier/cds-ts-dispatcher` v{X}" · the mental model in five lines · the canonical handler-class shape (one short example) · the two local doc paths (`AGENTS.md`, `README.md` under `node_modules/…`) · the error-code loop ("errors starting `[dispatcher] E` → look up the code in the shipped catalog") · a do-not-edit banner (file is regenerated on every install).
+- **Template, ~70 lines, version-stamped:** "This project uses `@dxfrontier/cds-ts-dispatcher` v{X}" · the mental model in five lines · the canonical handler-class shape (one short example) · the two local doc paths (`docs/AGENTS.md`, `README.md` under `node_modules/…`) · the error-code loop ("errors starting `[dispatcher] E` → look up the code in the shipped catalog") · a do-not-edit banner (file is regenerated on every install).
 - **Console hint**, printed once per install, skip-safe: suggest adding a pointer line referencing `@dispatcher/AGENTS.md` from the project's root `AGENTS.md` / `CLAUDE.md`. Suggested wording of the pointer line is included in the hint so it can be pasted verbatim.
 - **Policy:** identical to the existing scaffold — the postinstall must never abort or hang an install; any failure in this generator degrades to skip-with-warning.
 - **Known limitation (accepted):** no assistant auto-loads a subfolder file; the pointer the developer adds to their root file is the load-bearing link. That is why the hint prints on every install rather than only the first.
@@ -89,7 +93,7 @@ Developer-facing errors funnel through `util.throwErrorMessage` (~14 call sites 
 
 **Scope boundary:** codes apply only to errors raised via `throwErrorMessage` — configuration/usage mistakes a developer must fix. Request-level rejections via `util.raiseBadRequestMessage` (`req.reject`, e.g. validation failures) are responses to the *API client*, not the developer; they keep their current format and get no codes.
 
-- **Format:** `[dispatcher] E012: <what happened>. Fix: <concrete action>. Docs: node_modules/@dxfrontier/cds-ts-dispatcher/AGENTS.md#e012`
+- **Format:** `[dispatcher] E012: <what happened>. Fix: <concrete action>. Docs: node_modules/@dxfrontier/cds-ts-dispatcher/docs/AGENTS.md#e012`
 - **Centralization:** messages currently inlined at call sites (e.g. the `@Throttle` validation strings in `method.ts`) move into the existing `internalConstants.ts` `MESSAGES` catalog; each entry carries code, message template, and fix line. A thin `throwDispatcherError(code, placeholders)` wrapper formats uniformly (built on the existing `util.buildMessage` templating).
 - **Code ranges:** `E0xx`/`E1xx` for consumer-triggerable errors; `E9xx` for internal invariants ("Unexpected eventKind") so bug reports become precise. Exact numbers are assigned during implementation.
 - **Stability contract:** codes are append-only — never renumbered, never reused. That is what makes them greppable across versions.
@@ -127,6 +131,16 @@ A jest unit test (`test/__tests__/unit/AGENT_DOCS.test.ts`, rides the existing s
 
 Smoke-eval after PR 1 and PR 3: open an AI assistant in a consumer-shaped project (e.g. `test/sample-project/bookshop`), ask a fixed set of canonical questions ("add validation before creating a Book", "why isn't my handler firing", "difference between @AfterRead and @AfterReadEachInstance"), and compare answer quality against today's behavior.
 
+## Research validation (added 2026-08-03, during spec review)
+
+Three web-research passes (the AGENTS.md standard's intent, an ecosystem survey, published evidence and critiques) ran before finalizing. What they changed or confirmed:
+
+- **Shipped guide moved out of the repo root** (Component 1): the standard reserves root `AGENTS.md` for contributor guidance and 30+ tools auto-load it there. In-tarball agent docs have real precedent — Next.js ≥16.2 ships its docs as markdown inside the package, Prisma ships versioned Skills with its CLI — but **no tool auto-reads `node_modules`**, so pointer-based discovery is the only reliable channel. Note: Claude Code itself auto-reads only `CLAUDE.md` (AGENTS.md support is an open request as of mid-2026), which is why the postinstall hint names both root files.
+- **JSDoc examples are the best-evidenced layer:** examples + signatures ≈ 5× improvement in agent code-generation correctness (ReadMe.LLM, arXiv:2504.09798). Component 3 is the highest-confidence investment in this program.
+- **Lean, human-written, non-duplicative — or nothing:** stale or auto-generated context files measurably *reduce* agent success (−2–3%) while adding ~20% token cost (ETH Zurich / Agent-READMEs study, arXiv:2511.12884). Hence Component 1's content rule and the drift gate being load-bearing.
+- **Skipping `llms.txt` vindicated:** ~97% of published files are never fetched; Astro sunset theirs in May 2026. **MCP is where measurable usage went** (Astro saw ~1000× llms.txt usage); it remains declined for this iteration but is the strongest future candidate if docs-only proves insufficient for the debugging scenario.
+- **Watch items, no action now:** the emerging `agents` package.json field (npm-agentskills — adopted by Vercel, Prisma, Supabase, Stripe), pnpm's proposed `agentNotice` field, and a *contributor-facing* root `AGENTS.md` for this repo (thin pointer to CLAUDE.md) as a separate follow-up.
+
 ## Non-goals
 
 - CLI tooling (`doctor` / `docs` commands) — revisit if the docs layers prove insufficient for debugging.
@@ -135,10 +149,12 @@ Smoke-eval after PR 1 and PR 3: open an AI assistant in a consumer-shaped projec
 - Hosting docs / `llms.txt` on a website — there is no docs site; local-first is the strategy.
 - New misconfiguration detection logic (new guards/validations beyond what already throws).
 - Per-tool guidance files or a Claude Code skill/plugin.
+- A contributor-facing root `AGENTS.md` for this repository — worthwhile, but a separate follow-up outside this program.
+- Adopting the emerging `agents` package.json field (npm-agentskills) or pnpm's `agentNotice` — watch until standardized.
 
 ## Acceptance criteria
 
-1. `npm pack` tarball contains `AGENTS.md` at the package root.
+1. `npm pack` tarball contains `docs/AGENTS.md` and nothing else from `docs/` (the `superpowers/` specs stay out).
 2. Verifier, MonoRepoVerifier, and the docker harness all assert the scaffolded `@dispatcher/AGENTS.md` (stamped version, correct paths); an induced generator failure still exits the install successfully (skip-with-warning).
 3. Drift-gate test green: taxonomy complete, `@example` on every exported decorator, error codes bidirectionally consistent, README anchors valid.
 4. Build CI grep confirms JSDoc (`@example`) present in `dist/index.d.ts`.
