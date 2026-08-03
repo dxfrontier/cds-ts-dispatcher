@@ -39,6 +39,11 @@ export interface CDS_ENV {
       };
       tenants: {};
     };
+    'redis-websocket': {
+      vcap: {
+        label: string;
+      };
+    };
     db: {
       impl: string;
       credentials: {
@@ -85,6 +90,14 @@ export interface CDS_ENV {
       path: string;
     };
     'data.product': null;
+    ws: {
+      path: string;
+      impl: string;
+    };
+    websocket: {
+      path: string;
+      impl: string;
+    };
   };
   features: {
     folders: string;
@@ -223,27 +236,111 @@ export interface CDS_ENV {
     '@sap/cds-fiori': {
       impl: string;
     };
-    '@cap-js/sqlite': {
+    '@cap-js-community/websocket': {
       impl: string;
     };
     '@cap-js/cds-typer': {
       impl: string;
     };
-  };
-  typer: {
-    output_directory: string;
-    inline_declarations: string;
-    target_module_type: string;
-    properties_optional: boolean;
-    use_entities_proxy: boolean;
-    build_task: boolean;
+    '@cap-js/sqlite': {
+      impl: string;
+    };
   };
   schema: {
-    buildTaskType: {
-      name: string;
-      description: string;
-    };
     cds: {
+      websocket: {
+        oneOf: Array<{
+          type: string;
+          properties: {
+            kind: {
+              type: string;
+              description: string;
+              enum: string[];
+              default: string;
+            };
+            impl: {
+              type: string;
+              description: string;
+            };
+            options: {
+              type: string;
+              description: string;
+              additionalProperties: boolean;
+            };
+            adapter: {
+              type: string;
+              description: string;
+              properties: {
+                impl: {
+                  type: string;
+                  description: string;
+                  enum: string[];
+                };
+                options: {
+                  type: string;
+                  description: string;
+                  properties: {
+                    key: {
+                      type: string;
+                      description: string;
+                      default: string;
+                    };
+                  };
+                  additionalProperties: boolean;
+                };
+                config: {
+                  type: string;
+                  description: string;
+                  additionalProperties: boolean;
+                };
+                active: {
+                  type: string;
+                  description: string;
+                  default: boolean;
+                };
+                local: {
+                  type: string;
+                  description: string;
+                  default: boolean;
+                };
+              };
+            };
+            format: {
+              type: string;
+              default: string;
+              description: string;
+              enum: string[];
+            };
+            operator: {
+              type: string;
+              properties: {
+                include: {
+                  type: string;
+                  default: string;
+                  enum: string[];
+                };
+                exclude: {
+                  type: string;
+                  default: string;
+                  enum: string[];
+                };
+              };
+              required: string[];
+              additionalProperties: boolean;
+            };
+            roles: {
+              type: string;
+              description: string;
+              items: {
+                type: string;
+              };
+            };
+          };
+        } | {
+          type: string;
+          description: string;
+        }>;
+      };
       typer: {
         type: string;
         description: string;
@@ -309,6 +406,21 @@ export interface CDS_ENV {
         };
       };
     };
+    buildTaskType: {
+      name: string;
+      description: string;
+    };
+  };
+  websocket: {
+    kind: string;
+  };
+  typer: {
+    output_directory: string;
+    inline_declarations: string;
+    target_module_type: string;
+    properties_optional: boolean;
+    use_entities_proxy: boolean;
+    build_task: boolean;
   };
   appid: null;
 }
