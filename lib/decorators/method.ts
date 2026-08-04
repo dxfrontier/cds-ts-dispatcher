@@ -1211,8 +1211,8 @@ function buildOnCRUD<Target extends object>(options: {
  * reach this handler, since those also target the active entity) — or `'*'` (every entity, DRAFTS
  * INCLUDED, since CAP drops the path filter entirely for a `'*'` target) when the class is
  * `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)`. On that host the `Draft` variant has no additional
- * effect — both register the identical `srv.before('*', '*', callback)`, so adding `@BeforeAllDraft`
- * there only double-fires every draft event.
+ * effect — both register the identical `srv.before('*', '*', callback)`, so stacking `@BeforeAllDraft`
+ * there duplicates every event — draft and active alike.
  *
  * @example
  * ```ts
@@ -1242,8 +1242,8 @@ const BeforeAll = buildBefore({ event: '*', eventKind: 'BEFORE', isDraft: false 
  * `@BeforeEditDraft` / `@BeforeSaveDraft`, which register against the ACTIVE entity (`EDIT` / `SAVE` are
  * not `.drafts` events) — use `@BeforeAll` for those. On an `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)`
  * host, `@BeforeAll` ALREADY registers `srv.before('*', '*', callback)` — CAP drops the path filter
- * entirely for `'*'`, so drafts of every entity are included there too, and adding this decorator only
- * double-fires every draft event.
+ * entirely for `'*'`, so drafts of every entity are included there too, and adding this decorator
+ * duplicates every event — draft and active alike.
  *
  * @example
  * ```ts
@@ -1578,8 +1578,8 @@ const BeforeBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'BEFOR
  * reach this handler, since those also target the active entity) — or `'*'` (every entity, DRAFTS
  * INCLUDED, since CAP drops the path filter entirely for a `'*'` target) when the class is
  * `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)`. On that host the `Draft` variant has no additional
- * effect — both register the identical `srv.after('*', '*', callback)`, so adding `@AfterAllDraft` there
- * only double-fires every draft event.
+ * effect — both register the identical `srv.after('*', '*', callback)`, so stacking `@AfterAllDraft` there
+ * duplicates every event — draft and active alike.
  *
  * @example
  * ```ts
@@ -1615,7 +1615,8 @@ const AfterAll = buildAfter({ event: '*', eventKind: 'AFTER', isDraft: false });
  * `@AfterEditDraft` / `@AfterSaveDraft`, which register against the ACTIVE entity — use `@AfterAll` for
  * those. On an `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)` host, `@AfterAll` ALREADY registers
  * `srv.after('*', '*', callback)` — CAP drops the path filter entirely for `'*'`, so drafts of every
- * entity are included there too, and adding this decorator only double-fires every draft event.
+ * entity are included there too, and adding this decorator duplicates every event — draft and active
+ * alike.
  *
  * @example
  * ```ts

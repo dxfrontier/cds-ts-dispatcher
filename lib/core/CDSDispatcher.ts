@@ -49,6 +49,13 @@ const registeredServerLifecycleClasses = new WeakSet<Constructable>();
  * - `initialize()` must be the module's export: CAP resolves the service implementation from it.
  * - A handler class NOT passed to the constructor is silently inert — its decorators only ever wrote
  *   metadata; nothing registers it.
+ * - Method decorators map 1:1 onto CAP registrations (`srv.before/on/after/prepend`); `…Draft` variants
+ *   target `entity.drafts`.
+ * - Required consumer tsconfig: `"experimentalDecorators": true`, `"emitDecoratorMetadata": true`.
+ * - Peer dependency: dispatcher major ↔ `@sap/cds` major (v6 ↔ `@sap/cds ^10`).
+ *
+ * Full documentation ships inside this package (no network needed):
+ * `node_modules/@dxfrontier/cds-ts-dispatcher/README.md`
  *
  * @example
  * // service implementation file referenced from your .cds `@impl`
@@ -77,10 +84,11 @@ class CDSDispatcher {
   /**
    * Creates an instance of `CDSDispatcher`.
    *
-   * @param entities - An array of entity classes to manage event handlers for.
+   * @param entities - Handler classes to register: `@EntityHandler`, `@UnboundActions`, and
+   * `@ServerLifecycle` classes alike.
    * @example
    * ```typescript
-   * export = new CDSDispatcher([Entity1, Entity2, EntityN]).initialize();
+   * export = new CDSDispatcher([BookHandler, ActionsHandler, Bootstrap]).initialize();
    * ```
    */
   constructor(private readonly entities: NonEmptyArray<Constructable>) {}
