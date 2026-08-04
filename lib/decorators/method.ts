@@ -914,110 +914,346 @@ function buildOnCRUD<Target extends object>(options: {
  */
 
 /**
- * Use `@BeforeAll` decorator to execute custom logic before creating a new resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
+ * Executes custom logic before every CRUD event on the host entity (`CREATE`, `READ`, `UPDATE`,
+ * `DELETE`, bound actions, bound functions).
+ * Registers `srv.before('*', <Entity>, callback)`.
+ *
+ * @remarks
+ * `'*'` matches every `BEFORE`-phase event on the entity — the narrower siblings (`@BeforeCreate`,
+ * `@BeforeRead`, `@BeforeUpdate`, `@BeforeDelete`, `@BeforeBoundAction`, `@BeforeBoundFunction`) still
+ * fire too when their specific event matches; both run. Registers ONLY against the active entity — use
+ * `@BeforeAllDraft` for the equivalent wildcard on `<Entity>.drafts`. `@BeforeEditDraft` /
+ * `@BeforeSaveDraft` also target the active entity, so those draft-lifecycle moments already reach this
+ * handler.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeAll()
+ *   private async beforeAny(@Req() req: Request<Book>): Promise<void> {
+ *     // ... runs ahead of every CREATE/READ/UPDATE/DELETE on Book
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeall | CDS-TS-Dispatcher - @BeforeAll}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeAll
  */
 const BeforeAll = buildBefore({ event: '*', eventKind: 'BEFORE', isDraft: false });
 
 /**
- * Use `@BeforeAllDraft` decorator to execute custom logic before creating a new `draft` resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeall | CDS-TS-Dispatcher - @BeforeAll}
+ * Executes custom logic before every draft-lifecycle event on the host entity's `.drafts` table (`NEW`,
+ * `CANCEL`, `PATCH`, `DISCARD`, plus `CREATE` / `READ` / `UPDATE` / `DELETE` issued directly against
+ * `.drafts`).
+ * Registers `srv.before('*', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * The draft counterpart of `@BeforeAll` — same wildcard, scoped to `<Entity>.drafts` instead of the
+ * active entity. It does NOT see `@BeforeEditDraft` / `@BeforeSaveDraft`, which register against the
+ * ACTIVE entity (`EDIT` / `SAVE` are not `.drafts` events); use `@BeforeAll` for those.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeAllDraft()
+ *   private async beforeAnyDraft(@Req() req: Request<Book>): Promise<void> {
+ *     // ... runs ahead of every NEW/CANCEL/PATCH/DISCARD on Book.drafts
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeall | CDS-TS-Dispatcher - @BeforeAllDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeAll
  */
 const BeforeAllDraft = buildBefore({ event: '*', eventKind: 'BEFORE', isDraft: true });
 
 /**
- * Use `@BeforeCreate` decorator to execute custom logic before creating a new resource.
+ * Executes custom logic before a new instance of the host entity is created.
+ * Registers `srv.before('CREATE', <Entity>, callback)`.
+ *
+ * @remarks
+ * The classic input-validation hook — reject or mutate `req.data` before `@OnCreate` (or CAP's generic
+ * handler) writes it. Fires alongside `@BeforeAll`, if also present. Draft variant: `@BeforeCreateDraft`
+ * (a literal `CREATE` issued directly against `<Entity>.drafts` — NOT the Fiori Elements "New" action,
+ * which is `@BeforeNewDraft`).
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeCreate()
+ *   private async beforeCreate(@Req() req: Request<Book>): Promise<void> {
+ *     if (!req.data.title) req.reject(400, 'title is required');
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforecreate | CDS-TS-Dispatcher - @BeforeCreate}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeCreate
  */
 const BeforeCreate = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', isDraft: false });
 
 /**
- * Use `@BeforeCreateDraft` decorator to execute custom logic before creating a new DRAFT resource.
+ * Executes custom logic before a `CREATE` request is applied directly against the host entity's
+ * `.drafts` table.
+ * Registers `srv.before('CREATE', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * NOT the Fiori Elements "New" draft action — that is CAP's `NEW` event, handled by `@BeforeNewDraft`.
+ * `@BeforeCreateDraft` only fires for a literal `CREATE` (`INSERT`) issued straight at `<Entity>.drafts`
+ * (e.g. a plain OData `POST` against the drafts collection, or a programmatic `INSERT`). Active-entity
+ * counterpart: `@BeforeCreate`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeCreateDraft()
+ *   private async beforeCreateDraft(@Req() req: Request<Book>): Promise<void> {
+ *     // ... runs only for a direct INSERT into Book.drafts
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeCreateDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
  */
 const BeforeCreateDraft = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', isDraft: true });
 
 /**
- * Use `@BeforeRead` decorator to execute custom logic before performing a read operation.
+ * Executes custom logic before a read operation on the host entity.
+ * Registers `srv.before('READ', <Entity>, callback)`.
+ *
+ * @remarks
+ * Fires for both the entity-set and single-instance `READ` request shapes — pair with
+ * `@SingleInstanceSwitch` to tell them apart, or read `req.params` directly. Draft variant:
+ * `@BeforeReadDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeRead()
+ *   private async beforeRead(@Req() req: Request<Book>): Promise<void> {
+ *     // ... e.g. inspect/adjust req.query before it runs
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeread | CDS-TS-Dispatcher - @BeforeRead}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeRead
  */
 const BeforeRead = buildBefore({ event: 'READ', eventKind: 'BEFORE', isDraft: false });
 
 /**
- * Use `@BeforeReadDraft` decorator to execute custom logic before performing a DRAFT read operation.
+ * Executes custom logic before a read operation on the host entity's `.drafts` table.
+ * Registers `srv.before('READ', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * The draft counterpart of `@BeforeRead` — same entity-set/single-instance shapes, scoped to
+ * `<Entity>.drafts` (e.g. re-opening an in-progress draft in the Fiori Elements UI).
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeReadDraft()
+ *   private async beforeReadDraft(@Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeReadDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
  */
 const BeforeReadDraft = buildBefore({ event: 'READ', eventKind: 'BEFORE', isDraft: true });
 
 /**
- * Use `@BeforeUpdate` decorator to execute custom logic before performing an update operation.
+ * Executes custom logic before an update operation on the host entity.
+ * Registers `srv.before('UPDATE', <Entity>, callback)`.
+ *
+ * @remarks
+ * Commonly paired with `@Diff` to inspect the incoming change-set before it is applied. Draft variant:
+ * `@BeforeUpdateDraft`; the more specific field-level draft edit is `@BeforePatchDraft` (`PATCH`, CAP's
+ * canonical alias of `UPDATE` on `.drafts` since `@sap/cds` 10).
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeUpdate()
+ *   private async beforeUpdate(@Req() req: Request<Book>, @Diff() diff: Book): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeupdate | CDS-TS-Dispatcher - @BeforeUpdate}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeUpdate
  */
 const BeforeUpdate = buildBefore({ event: 'UPDATE', eventKind: 'BEFORE', isDraft: false });
 
 /**
- * Use `@BeforeUpdateDraft` decorator to execute custom logic before performing a DRAFT update operation.
+ * Executes custom logic before an `UPDATE` request is applied directly against the host entity's
+ * `.drafts` table.
+ * Registers `srv.before('UPDATE', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * `@BeforePatchDraft` (`PATCH`) is CAP's canonical alias of this same `UPDATE` event on `.drafts` since
+ * `@sap/cds` 10 — the field-level draft-edit moment a Fiori Elements user triggers by typing into a
+ * field; prefer it for that scenario. Active-entity counterpart: `@BeforeUpdate`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeUpdateDraft()
+ *   private async beforeUpdateDraft(@Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeUpdateDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
  */
 const BeforeUpdateDraft = buildBefore({ event: 'UPDATE', eventKind: 'BEFORE', isDraft: true });
 
 /**
- * Use `@BeforeDelete` decorator to execute custom logic before performing a delete operation.
+ * Executes custom logic before an instance of the host entity is deleted.
+ * Registers `srv.before('DELETE', <Entity>, callback)`.
+ *
+ * @remarks
+ * The usual spot for last-chance authorization checks (`req.reject(...)`) before the row disappears.
+ * Draft variant: `@BeforeDeleteDraft`; abandoning an in-progress draft through the Fiori Elements UI is
+ * a different event — `@BeforeDiscardDraft` / `@BeforeCancelDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeDelete()
+ *   private async beforeDelete(@Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforedelete | CDS-TS-Dispatcher - @BeforeDelete}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeDelete
  */
 const BeforeDelete = buildBefore({ event: 'DELETE', eventKind: 'BEFORE', isDraft: false });
 
 /**
- * Use `@BeforeDeleteDraft` decorator to execute custom logic before performing a delete operation on a draft.
+ * Executes custom logic before a `DELETE` request is applied directly against the host entity's
+ * `.drafts` table.
+ * Registers `srv.before('DELETE', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * A literal `DELETE` against `<Entity>.drafts`, distinct from abandoning a draft through the Fiori
+ * Elements UI (`@BeforeDiscardDraft` / `@BeforeCancelDraft`). Active-entity counterpart: `@BeforeDelete`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeDeleteDraft()
+ *   private async beforeDeleteDraft(@Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeDeleteDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
  */
 const BeforeDeleteDraft = buildBefore({ event: 'DELETE', eventKind: 'BEFORE', isDraft: true });
 
 /**
- * Use `@BeforeAction` decorator to execute custom logic before an unbound action is triggered.
+ * Executes custom logic before an unbound action is invoked.
+ * Registers `srv.before(name, callback)`.
  *
- * This decorator allows you to run validation, authorization, or preparation logic
- * before the actual action implementation is executed.
+ * @remarks
+ * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
+ * unbound functions: `@BeforeFunction`; bound counterpart: `@BeforeBoundAction`. Runs ahead of
+ * `@OnAction` / `@AfterAction` for the same action.
  *
- * @param name - The name of the action, which can be a string or a CDS-Typer generated action.
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class ActionsHandler {
+ *   /@BeforeAction(SubmitOrder)
+ *   private async beforeSubmitOrder(@Req() req: ActionRequest<typeof SubmitOrder>): Promise<void> {
+ *     if (!req.data.orderId) req.reject(400, 'orderId is required');
+ *   }
+ * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeaction | CDS-TS-Dispatcher - @BeforeAction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeAction
  */
 const BeforeAction = buildAction({ event: 'ACTION', eventKind: 'BEFORE', isDraft: false });
 
 /**
- * Use `@BeforeBoundAction` decorator to execute custom logic before a bound action is triggered on an entity.
+ * Executes custom logic before a bound action is invoked on a specific instance of the host entity.
+ * Registers `srv.before(name, <Entity>, callback)`.
  *
- * This decorator allows you to run validation, authorization, or preparation logic
- * before the actual bound action implementation is executed on a specific entity instance.
+ * @remarks
+ * Must be hosted in an `@EntityHandler` class — the registration needs that class's resolved entity;
+ * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound functions:
+ * `@BeforeBoundFunction`; unbound counterpart: `@BeforeAction`.
  *
- * @param name - The name of the bound action, which can be a string or a CDS-Typer generated bound action.
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeBoundAction(Book.actions.approve)
+ *   private async beforeApprove(@Req() req: ActionRequest<typeof Book.actions.approve>): Promise<void> {
+ *     // ... validate before the bound action runs
+ *   }
+ * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeboundaction | CDS-TS-Dispatcher - @BeforeBoundAction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundAction
  */
 const BeforeBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'BEFORE', isDraft: false });
 
 /**
- * Use `@BeforeFunction` decorator to execute custom logic before an unbound function is triggered.
+ * Executes custom logic before an unbound function is invoked.
+ * Registers `srv.before(name, callback)`.
  *
- * This decorator allows you to run validation, authorization, or preparation logic
- * before the actual function implementation is executed.
+ * @remarks
+ * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
+ * unbound actions: `@BeforeAction`; bound counterpart: `@BeforeBoundFunction`.
  *
- * @param name - The name of the function, which can be a string or a CDS-Typer generated function.
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class ActionsHandler {
+ *   /@BeforeFunction(GetTopSellers)
+ *   private async beforeGetTopSellers(@Req() req: ActionRequest<typeof GetTopSellers>): Promise<void> { ... }
+ * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforefunction | CDS-TS-Dispatcher - @BeforeFunction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeFunction
  */
 const BeforeFunction = buildAction({ event: 'FUNC', eventKind: 'BEFORE', isDraft: false });
 
 /**
- * Use `@BeforeBoundFunction` decorator to execute custom logic before a bound function is triggered on an entity.
+ * Executes custom logic before a bound function is invoked on a specific instance of the host entity.
+ * Registers `srv.before(name, <Entity>, callback)`.
  *
- * This decorator allows you to run validation, authorization, or preparation logic
- * before the actual bound function implementation is executed on a specific entity instance.
+ * @remarks
+ * Must be hosted in an `@EntityHandler` class — the registration needs that class's resolved entity;
+ * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound actions:
+ * `@BeforeBoundAction`; unbound counterpart: `@BeforeFunction`.
  *
- * @param name - The name of the bound function, which can be a string or a CDS-Typer generated bound function.
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeBoundFunction(Book.actions.someFunction)
+ *   private async beforeSomeFunction(@Req() req: ActionRequest<typeof Book.actions.someFunction>): Promise<void> { ... }
+ * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeboundfunction | CDS-TS-Dispatcher - @BeforeBoundFunction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundFunction
  */
 const BeforeBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'BEFORE', isDraft: false });
 
@@ -1034,56 +1270,237 @@ const BeforeBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'BEFOR
  */
 
 /**
- * Use `@AfterAll` decorator to execute custom logic after creating a new resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreateall | CDS-TS-Dispatcher - @AfterCreateAll}
+ * Executes custom logic after every CRUD event on the host entity (`CREATE`, `READ`, `UPDATE`,
+ * `DELETE`, bound actions, bound functions).
+ * Registers `srv.after('*', <Entity>, callback)`.
+ *
+ * @remarks
+ * `'*'` matches every `AFTER`-phase event on the entity — the narrower siblings (`@AfterCreate`,
+ * `@AfterRead`, `@AfterUpdate`, `@AfterDelete`, `@AfterBoundAction`, `@AfterBoundFunction`) still fire
+ * too when their specific event matches; both run. The injected payload shape varies with the event —
+ * an array for `READ`, a single object for `CREATE`/`UPDATE`, a `boolean` for `DELETE` — narrow it at
+ * runtime (`Array.isArray(result)`, `typeof result === 'boolean'`). Registers ONLY against the active
+ * entity — use `@AfterAllDraft` for the equivalent wildcard on `<Entity>.drafts`. `@AfterEditDraft` /
+ * `@AfterSaveDraft` also target the active entity, so those draft-lifecycle moments already reach this
+ * handler.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterAll()
+ *   private async afterAny(@Result() result: Book | Book[] | boolean, @Req() req: Request<Book>): Promise<void> {
+ *     if (Array.isArray(result)) {
+ *       // READ (entity set)
+ *     } else if (typeof result === 'boolean') {
+ *       // DELETE
+ *     } else {
+ *       // CREATE / UPDATE
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterall | CDS-TS-Dispatcher - @AfterAll}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterAll
  */
 const AfterAll = buildAfter({ event: '*', eventKind: 'AFTER', isDraft: false });
 
 /**
- * Use `@AfterCreateAll` decorator to execute custom logic after creating a new draft resource for all events `('CREATE', 'READ', 'UPDATE', 'DELETE', 'BOUND ACTION', 'BOUND FUNCTION')`
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreateall | CDS-TS-Dispatcher - @AfterCreateAll}
+ * Executes custom logic after every draft-lifecycle event on the host entity's `.drafts` table (`NEW`,
+ * `CANCEL`, `PATCH`, `DISCARD`, plus `CREATE` / `READ` / `UPDATE` / `DELETE` issued directly against
+ * `.drafts`).
+ * Registers `srv.after('*', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * The draft counterpart of `@AfterAll` — same wildcard, scoped to `<Entity>.drafts` instead of the
+ * active entity. It does NOT see `@AfterEditDraft` / `@AfterSaveDraft`, which register against the
+ * ACTIVE entity; use `@AfterAll` for those.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterAllDraft()
+ *   private async afterAnyDraft(@Result() result: unknown, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterall | CDS-TS-Dispatcher - @AfterAllDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterAll
  */
 const AfterAllDraft = buildAfter({ event: '*', eventKind: 'AFTER', isDraft: true });
 
 /**
- * Use `@AfterCreate` decorator to execute custom logic after creating a new resource.
+ * Executes custom logic after a new instance of the host entity is created.
+ * Registers `srv.after('CREATE', <Entity>, callback)`.
+ *
+ * @remarks
+ * Receives the created row as a single object (`@Result`), NOT an array — pair with `@Results` only on
+ * `@AfterRead`. On `@sap/cds` >= 10 the framework's raw write result carries an `.affected` count
+ * instead; the dispatcher restores the pre-10 contract here, so `@Result` still gets the entity data.
+ * Use `@Affected` if you need the raw row count. Draft variant: `@AfterCreateDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterCreate()
+ *   private async afterCreate(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreate | CDS-TS-Dispatcher - @AfterCreate}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCreate
  */
 const AfterCreate = buildAfter({ event: 'CREATE', eventKind: 'AFTER', isDraft: false });
 
 /**
- * Use `@AfterCreateDraft` decorator to execute custom logic after creating a new DRAFT resource.
+ * Executes custom logic after a `CREATE` request is applied directly against the host entity's
+ * `.drafts` table.
+ * Registers `srv.after('CREATE', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * NOT the Fiori Elements "New" draft action — that is CAP's `NEW` event, handled by `@AfterNewDraft`.
+ * `@AfterCreateDraft` only fires for a literal `CREATE` issued straight at `<Entity>.drafts`.
+ * Active-entity counterpart: `@AfterCreate`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterCreateDraft()
+ *   private async afterCreateDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreate | CDS-TS-Dispatcher - @AfterCreateDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCreate
  */
 const AfterCreateDraft = buildAfter({ event: 'CREATE', eventKind: 'AFTER', isDraft: true });
 
 /**
- * Use `@AfterRead` decorator to execute custom logic after performing a read operation.
+ * Executes custom logic after a read operation, on the full result set.
+ * Registers `srv.after('READ', <Entity>, callback)`.
+ *
+ * @remarks
+ * Operates on the whole result array; use `@AfterReadEachInstance` for per-row logic and
+ * `@AfterReadSingleInstance` when a single entity is requested by key. Draft variant: `@AfterReadDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterRead()
+ *   private async enrich(@Results() results: Book[], @Req() req: Request): Promise<void> {
+ *     results.forEach((book) => (book.discount = '10%'));
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterread | CDS-TS-Dispatcher - @AfterRead}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRead
  */
 const AfterRead = buildAfter({ event: 'READ', eventKind: 'AFTER', isDraft: false });
 
 /**
- * Use `@AfterReadDraft` decorator to execute custom logic after performing a draft read operation.
+ * Executes custom logic after a read operation on the host entity's `.drafts` table, on the full
+ * result set.
+ * Registers `srv.after('READ', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * The draft counterpart of `@AfterRead` — same whole-array payload, scoped to `<Entity>.drafts`. Use
+ * `@AfterReadDraftEachInstance` for per-row logic and `@AfterReadDraftSingleInstance` when a single
+ * draft is requested by key.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterReadDraft()
+ *   private async afterReadDraft(@Results() results: Book[], @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterread | CDS-TS-Dispatcher - @AfterReadDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRead
  */
 const AfterReadDraft = buildAfter({ event: 'READ', eventKind: 'AFTER', isDraft: true });
 
 /**
- * The `@AfterReadEachInstance` decorator is used to execute custom logic after performing a read operation on `each individual instance`. This behavior is analogous to the JavaScript `Array.prototype.forEach` method.
+ * Executes custom logic once per instance after a read operation on the host entity — analogous to
+ * `Array.prototype.forEach`.
+ * Registers `srv.after('each', <Entity>, callback)`.
+ *
+ * @remarks
+ * Invoked once per row with a single object (`@Result`), NOT the whole array — use `@AfterRead` for
+ * bulk/whole-array logic and `@AfterReadSingleInstance` when a single entity is requested by key. Draft
+ * variant: `@AfterReadDraftEachInstance`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterReadEachInstance()
+ *   private async afterEach(@Result() result: Book, @Req() req: Request<Book>): Promise<void> {
+ *     result.discount = '10%';
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadeachinstance | CDS-TS-Dispatcher - @AfterReadEachInstance}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadEachInstance
  */
 const AfterReadEachInstance = buildAfter({ event: 'each', eventKind: 'AFTER', isDraft: false });
 
 /**
- * The `@AfterReadDraftEachInstance` decorator is used to execute custom logic after performing a read operation on `each individual draft instance`. This behavior is analogous to the JavaScript `Array.prototype.forEach` method.
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadeachinstance | CDS-TS-Dispatcher - @AfterReadEachInstance}
+ * Executes custom logic once per instance after a read operation on the host entity's `.drafts` table —
+ * analogous to `Array.prototype.forEach`.
+ * Registers `srv.after('each', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * The draft counterpart of `@AfterReadEachInstance` — same per-row `@Result` payload, scoped to
+ * `<Entity>.drafts`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterReadDraftEachInstance()
+ *   private async afterEachDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadeachinstance | CDS-TS-Dispatcher - @AfterReadDraftEachInstance}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadEachInstance
  */
 const AfterReadDraftEachInstance = buildAfter({ event: 'each', eventKind: 'AFTER', isDraft: true });
 
 /**
- * Use `@AfterReadSingleInstance` decorator to execute custom logic after creating a new single instance resource.
+ * Executes custom logic after a read operation, only when the request targets a single instance by key.
+ * Registers `srv.after('READ', <Entity>, callback)` — the same CAP registration as `@AfterRead`.
+ *
+ * @remarks
+ * The dispatcher's wrapper only invokes your callback when `req.params.length > 0` (a single-instance
+ * request), passing that one row (`@Result`) instead of the array; entity-set requests never reach it.
+ * Combining this with `@AfterRead` in the same class fires BOTH for the same single-instance request —
+ * use `@AfterRead` with `@SingleInstanceSwitch` instead if you want one handler for both shapes. Use
+ * `@AfterReadEachInstance` for per-row logic across an entity-set read. Draft variant:
+ * `@AfterReadDraftSingleInstance`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterReadSingleInstance()
+ *   private async afterReadOne(@Result() result: Book, @Req() req: Request<Book>): Promise<void> {
+ *     // ... only for GET .../Book(ID=...)
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadsingleinstance | CDS-TS-Dispatcher - @AfterReadSingleInstance}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadSingleInstance
  */
 const AfterReadSingleInstance = buildAfter({
   event: 'READ',
@@ -1092,8 +1509,26 @@ const AfterReadSingleInstance = buildAfter({
 });
 
 /**
- * Use `@AfterReadDraftSingleInstance` decorator to execute custom logic after creating a new DRAFT single instance resource.
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadsingleinstance | CDS-TS-Dispatcher - @AfterReadSingleInstance}
+ * Executes custom logic after a read operation on the host entity's `.drafts` table, only when the
+ * request targets a single draft instance by key.
+ * Registers `srv.after('READ', <Entity>.drafts, callback)` — the same CAP registration as
+ * `@AfterReadDraft`.
+ *
+ * @remarks
+ * The draft counterpart of `@AfterReadSingleInstance` — same `req.params.length > 0` gate and
+ * single-row `@Result` payload, scoped to `<Entity>.drafts`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterReadDraftSingleInstance()
+ *   private async afterReadOneDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadsingleinstance | CDS-TS-Dispatcher - @AfterReadDraftSingleInstance}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadSingleInstance
  */
 const AfterReadDraftSingleInstance = buildAfter({
   event: 'READ',
@@ -1102,74 +1537,191 @@ const AfterReadDraftSingleInstance = buildAfter({
 });
 
 /**
- * Use `@AfterUpdate` decorator to execute custom logic after performing an update operation.
+ * Executes custom logic after an update operation on the host entity.
+ * Registers `srv.after('UPDATE', <Entity>, callback)`.
+ *
+ * @remarks
+ * Receives the updated row as a single object (`@Result`), NOT an array. On `@sap/cds` >= 10 the
+ * dispatcher restores the pre-10 contract (entity data instead of the raw `.affected`-carrying write
+ * result) — use `@Affected` if you need the raw row count. Draft variant: `@AfterUpdateDraft`; the more
+ * specific field-level draft edit is `@AfterPatchDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterUpdate()
+ *   private async afterUpdate(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterupdate | CDS-TS-Dispatcher - @AfterUpdate}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterUpdate
  */
 const AfterUpdate = buildAfter({ event: 'UPDATE', eventKind: 'AFTER', isDraft: false });
 
 /**
- * Use `@AfterUpdateDraft` decorator to execute custom logic after performing a DRAFT update operation.
+ * Executes custom logic after an `UPDATE` request is applied directly against the host entity's
+ * `.drafts` table.
+ * Registers `srv.after('UPDATE', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * `@AfterPatchDraft` (`PATCH`) is CAP's canonical alias of this same `UPDATE` event on `.drafts` since
+ * `@sap/cds` 10 — the field-level draft-edit moment a Fiori Elements user triggers by typing into a
+ * field; prefer it for that scenario. Active-entity counterpart: `@AfterUpdate`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterUpdateDraft()
+ *   private async afterUpdateDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterupdate | CDS-TS-Dispatcher - @AfterUpdateDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterUpdate
  */
 const AfterUpdateDraft = buildAfter({ event: 'UPDATE', eventKind: 'AFTER', isDraft: true });
 
 /**
- * Use `@AfterDelete` decorator to execute custom logic after performing a delete operation.
+ * Executes custom logic after an instance of the host entity is deleted.
+ * Registers `srv.after('DELETE', <Entity>, callback)`.
+ *
+ * @remarks
+ * Receives a `boolean` (`@Result`), NOT the deleted row — the dispatcher normalizes both the pre-10 and
+ * the `@sap/cds` >= 10 (`.affected`-carrying) write result down to `affected === 1`. Use `@Affected` if
+ * you need the raw row count instead of the boolean. Draft variant: `@AfterDeleteDraft`; abandoning an
+ * in-progress draft through the Fiori Elements UI is a different event — `@AfterDiscardDraft` /
+ * `@AfterCancelDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterDelete()
+ *   private async afterDelete(@Result() deleted: boolean, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterdelete | CDS-TS-Dispatcher - @AfterDelete}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterDelete
  */
 const AfterDelete = buildAfter({ event: 'DELETE', eventKind: 'AFTER', isDraft: false });
 
 /**
- * Use `@AfterDeleteDraft` decorator to execute custom logic after performing a delete operation on a draft.
+ * Executes custom logic after a `DELETE` request is applied directly against the host entity's
+ * `.drafts` table.
+ * Registers `srv.after('DELETE', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * A literal `DELETE` against `<Entity>.drafts`, distinct from abandoning a draft through the Fiori
+ * Elements UI (`@AfterDiscardDraft` / `@AfterCancelDraft`). Active-entity counterpart: `@AfterDelete`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterDeleteDraft()
+ *   private async afterDeleteDraft(@Result() deleted: boolean, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterdelete | CDS-TS-Dispatcher - @AfterDeleteDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterDelete
  */
 const AfterDeleteDraft = buildAfter({ event: 'DELETE', eventKind: 'AFTER', isDraft: true });
 
 /**
- * Use `@AfterAction` decorator to execute custom logic after an unbound action has been executed.
+ * Executes custom logic after an unbound action has completed.
+ * Registers `srv.after(name, callback)`.
  *
- * This decorator allows you to run post-processing logic, such as logging, data cleanup,
- * or triggering subsequent operations after the actual action implementation has completed.
+ * @remarks
+ * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
+ * unbound functions: `@AfterFunction`; bound counterpart: `@AfterBoundAction`. Typical use: audit
+ * logging, notifications, cleanup after the action's own implementation (`@OnAction`) has run.
  *
- * @param name - The name of the action, which can be a string or a CDS-Typer generated action.
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class ActionsHandler {
+ *   /@AfterAction(SubmitOrder)
+ *   private async afterSubmitOrder(@Result() result: unknown, @Req() req: ActionRequest<typeof SubmitOrder>): Promise<void> {
+ *     // ... e.g. audit logging
+ *   }
+ * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afteraction | CDS-TS-Dispatcher - @AfterAction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterAction
  */
 const AfterAction = buildAction({ event: 'ACTION', eventKind: 'AFTER', isDraft: false });
 
 /**
- * Use `@AfterBoundAction` decorator to execute custom logic after a bound action has been executed on an entity.
+ * Executes custom logic after a bound action has completed on a specific instance of the host entity.
+ * Registers `srv.after(name, <Entity>, callback)`.
  *
- * This decorator allows you to run post-processing logic, such as logging, data cleanup,
- * or triggering subsequent operations after the actual bound action implementation has completed on a specific entity instance.
+ * @remarks
+ * Must be hosted in an `@EntityHandler` class — the registration needs that class's resolved entity;
+ * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound functions:
+ * `@AfterBoundFunction`; unbound counterpart: `@AfterAction`.
  *
- * @param name - The name of the bound action, which can be a string or a CDS-Typer generated bound action.
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterBoundAction(Book.actions.approve)
+ *   private async afterApprove(@Result() result: unknown, @Req() req: ActionRequest<typeof Book.actions.approve>): Promise<void> { ... }
+ * }
+ * ```
  *
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterboundaction | CDS-TS-Dispatcher - @AfterBoundAction}
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeboundaction | CDS-TS-Dispatcher - @AfterBoundAction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundAction
  */
 const AfterBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'AFTER', isDraft: false });
 
 /**
- * Use `@AfterFunction` decorator to execute custom logic after an unbound function has been executed.
+ * Executes custom logic after an unbound function has completed.
+ * Registers `srv.after(name, callback)`.
  *
- * This decorator allows you to run post-processing logic, such as logging, data cleanup,
- * or triggering subsequent operations after the actual function implementation has completed.
+ * @remarks
+ * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
+ * unbound actions: `@AfterAction`; bound counterpart: `@AfterBoundFunction`.
  *
- * @param name - The name of the function, which can be a string or a CDS-Typer generated function.
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class ActionsHandler {
+ *   /@AfterFunction(GetTopSellers)
+ *   private async afterGetTopSellers(@Result() result: unknown, @Req() req: ActionRequest<typeof GetTopSellers>): Promise<void> { ... }
+ * }
+ * ```
  *
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterfunction | CDS-TS-Dispatcher - @AfterFunction}
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforefunction | CDS-TS-Dispatcher - @AfterFunction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeFunction
  */
 const AfterFunction = buildAction({ event: 'FUNC', eventKind: 'AFTER', isDraft: false });
 
 /**
- * Use `@AfterBoundFunction` decorator to execute custom logic after a bound function has been executed on an entity.
+ * Executes custom logic after a bound function has completed on a specific instance of the host entity.
+ * Registers `srv.after(name, <Entity>, callback)`.
  *
- * This decorator allows you to run post-processing logic, such as logging, data cleanup,
- * or triggering subsequent operations after the actual bound function implementation has completed on a specific entity instance.
+ * @remarks
+ * Must be hosted in an `@EntityHandler` class — the registration needs that class's resolved entity;
+ * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound actions:
+ * `@AfterBoundAction`; unbound counterpart: `@AfterFunction`.
  *
- * @param name - The name of the bound function, which can be a string or a CDS-Typer generated bound function.
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterBoundFunction(Book.actions.someFunction)
+ *   private async afterSomeFunction(@Result() result: unknown, @Req() req: ActionRequest<typeof Book.actions.someFunction>): Promise<void> { ... }
+ * }
+ * ```
  *
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterboundfunction | CDS-TS-Dispatcher - @AfterBoundFunction}
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeboundfunction | CDS-TS-Dispatcher - @AfterBoundFunction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundFunction
  */
 const AfterBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'AFTER', isDraft: false });
 
@@ -1382,82 +1934,282 @@ const OnNewDraft = buildOnCRUD({ event: 'NEW', eventKind: 'ON', isDraft: true })
 const OnCancelDraft = buildOnCRUD({ event: 'CANCEL', eventKind: 'ON', isDraft: true });
 
 /**
- * Use `@BeforeNewDraft` decorator to execute custom logic before a 'draft' is created.
+ * Executes custom logic before a new draft is created (the Fiori Elements "New" action).
+ * Registers `srv.before('NEW', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * NOT a literal `CREATE` against `.drafts` — that is `@BeforeCreateDraft`. `@BeforeNewDraft` is CAP's
+ * dedicated draft-creation event, fired when a user starts editing a brand-new instance. Pairs with
+ * `@AfterNewDraft` / `@OnNewDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeNewDraft()
+ *   private async beforeNewDraft(@Req() req: Request<Book>): Promise<void> {
+ *     // ... e.g. pre-fill or validate defaults for the new draft
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforenewdraft | CDS-TS-Dispatcher - @BeforeNewDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeNewDraft
  */
 const BeforeNewDraft = buildBefore({ event: 'NEW', eventKind: 'BEFORE', isDraft: true });
 
 /**
- * Use `@BeforeCancelDraft` decorator to execute custom logic before a 'draft' is cancelled.
+ * Executes custom logic before an in-progress draft is cancelled.
+ * Registers `srv.before('CANCEL', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * `@BeforeDiscardDraft` (`DISCARD`) is CAP's canonical alias of this same `CANCEL` event on `.drafts`
+ * since `@sap/cds` 10 — the same draft-abandon moment under a different, newer event name. Pairs with
+ * `@AfterCancelDraft` / `@OnCancelDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeCancelDraft()
+ *   private async beforeCancelDraft(@Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforecanceldraft | CDS-TS-Dispatcher - @BeforeCancelDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeCancelDraft
  */
 const BeforeCancelDraft = buildBefore({ event: 'CANCEL', eventKind: 'BEFORE', isDraft: true });
 
 /**
- * Use `@BeforeEditDraft` decorator to execute custom logic before a 'draft' is edited.
+ * Executes custom logic before a new draft is created FROM an existing active instance (the Fiori
+ * Elements "Edit" action).
+ * Registers `srv.before('EDIT', <Entity>, callback)` — against the ACTIVE entity, NOT `.drafts`.
+ *
+ * @remarks
+ * Despite the "Draft" in its name this registers on the active entity: `EDIT` is the moment a user
+ * starts editing an already-saved instance (as opposed to `@BeforeNewDraft`, which starts a brand-new
+ * one). Pairs with `@AfterEditDraft` / `@OnEditDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeEditDraft()
+ *   private async beforeEditDraft(@Req() req: Request<Book>): Promise<void> {
+ *     // ... e.g. reject editing a locked Book
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeeditdraft | CDS-TS-Dispatcher - @BeforeEditDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeEditDraft
  */
 const BeforeEditDraft = buildBefore({ event: 'EDIT', eventKind: 'BEFORE', isDraft: false });
 
 /**
- * Use `@BeforeSaveDraft` decorator to execute custom logic before a 'draft' is saved.
+ * Executes custom logic before a draft is activated — written back to the active entity (the Fiori
+ * Elements "Save" action).
+ * Registers `srv.before('SAVE', <Entity>, callback)` — against the ACTIVE entity, NOT `.drafts`.
+ *
+ * @remarks
+ * Despite the "Draft" in its name this registers on the active entity: `SAVE` is the final validation
+ * gate before the draft's data becomes the active instance's data. Pairs with `@AfterSaveDraft` /
+ * `@OnSaveDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeSaveDraft()
+ *   private async beforeSaveDraft(@Req() req: Request<Book>): Promise<void> {
+ *     if (!req.data.title) req.reject(400, 'title is required before saving');
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforesavedraft | CDS-TS-Dispatcher - @BeforeSaveDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeSaveDraft
  */
 const BeforeSaveDraft = buildBefore({ event: 'SAVE', eventKind: 'BEFORE', isDraft: false });
 
 /**
- * Use `@AfterNewDraft` decorator to execute custom logic after a new 'draft' is created.
+ * Executes custom logic after a new draft is created (the Fiori Elements "New" action).
+ * Registers `srv.after('NEW', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * NOT a literal `CREATE` against `.drafts` — that is `@AfterCreateDraft`. Pairs with `@BeforeNewDraft` /
+ * `@OnNewDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterNewDraft()
+ *   private async afterNewDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afternewdraft | CDS-TS-Dispatcher - @AfterNewDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterNewDraft
  */
 const AfterNewDraft = buildAfter({ event: 'NEW', eventKind: 'AFTER', isDraft: true });
 
 /**
- * Use `@AfterCancelDraft` decorator to execute custom logic after a 'draft' is cancelled.
+ * Executes custom logic after an in-progress draft has been cancelled.
+ * Registers `srv.after('CANCEL', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * `@AfterDiscardDraft` (`DISCARD`) is CAP's canonical alias of this same `CANCEL` event on `.drafts`
+ * since `@sap/cds` 10 — the same draft-abandon moment under a different, newer event name. Pairs with
+ * `@BeforeCancelDraft` / `@OnCancelDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterCancelDraft()
+ *   private async afterCancelDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercanceldraft | CDS-TS-Dispatcher - @AfterCancelDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCancelDraft
  */
 const AfterCancelDraft = buildAfter({ event: 'CANCEL', eventKind: 'AFTER', isDraft: true });
 
 /**
- * Use `@AfterEditDraft` decorator to execute custom logic after a 'draft' is edited.
+ * Executes custom logic after a new draft has been created FROM an existing active instance (the
+ * Fiori Elements "Edit" action).
+ * Registers `srv.after('EDIT', <Entity>, callback)` — against the ACTIVE entity, NOT `.drafts`.
+ *
+ * @remarks
+ * Despite the "Draft" in its name this registers on the active entity, mirroring `@BeforeEditDraft`.
+ * Pairs with `@OnEditDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterEditDraft()
+ *   private async afterEditDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftereditdraft | CDS-TS-Dispatcher - @AfterEditDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterEditDraft
  */
 const AfterEditDraft = buildAfter({ event: 'EDIT', eventKind: 'AFTER', isDraft: false });
 
 /**
- * Use `@AfterSaveDraft` decorator to execute custom logic after a 'draft' is saved.
+ * Executes custom logic after a draft has been activated — written back to the active entity (the
+ * Fiori Elements "Save" action).
+ * Registers `srv.after('SAVE', <Entity>, callback)` — against the ACTIVE entity, NOT `.drafts`.
+ *
+ * @remarks
+ * Despite the "Draft" in its name this registers on the active entity, mirroring `@BeforeSaveDraft`.
+ * `@Result` receives the now-active entity data. Pairs with `@OnSaveDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterSaveDraft()
+ *   private async afterSaveDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftersavedraft | CDS-TS-Dispatcher - @AfterSaveDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterSaveDraft
  */
 const AfterSaveDraft = buildAfter({ event: 'SAVE', eventKind: 'AFTER', isDraft: false });
 
 /**
- * Use `@BeforePatchDraft` decorator to execute custom logic before a 'draft' field is patched.
+ * Executes custom logic before a field of an in-progress draft is changed.
+ * Registers `srv.before('PATCH', <Entity>.drafts, callback)`.
  *
- * `PATCH` is CAP's canonical `field-level draft-edit` event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) - it is triggered on the draft entity `MyEntity.drafts` every time a field of an in-progress draft is changed.
+ * @remarks
+ * `PATCH` is CAP's canonical field-level draft-edit event — an alias of `UPDATE` on `.drafts` since
+ * `@sap/cds` 10 — fired every time a Fiori Elements user changes a field of an in-progress draft.
+ * `@BeforeUpdateDraft` (`UPDATE`) is the same moment under the older event name.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforePatchDraft()
+ *   private async beforePatchDraft(@Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforepatchdraft | CDS-TS-Dispatcher - @BeforePatchDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforePatchDraft
  */
 const BeforePatchDraft = buildBefore({ event: 'PATCH', eventKind: 'BEFORE', isDraft: true });
 
 /**
- * Use `@BeforeDiscardDraft` decorator to execute custom logic before a 'draft' is discarded.
+ * Executes custom logic before an in-progress draft is discarded.
+ * Registers `srv.before('DISCARD', <Entity>.drafts, callback)`.
  *
- * `DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 - it is triggered on the draft entity `MyEntity.drafts` when an in-progress draft is discarded.
+ * @remarks
+ * `DISCARD` is CAP's canonical alias of `CANCEL` on `.drafts` since `@sap/cds` 10. `@BeforeCancelDraft`
+ * (`CANCEL`) is the same moment under the older event name.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeDiscardDraft()
+ *   private async beforeDiscardDraft(@Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforediscarddraft | CDS-TS-Dispatcher - @BeforeDiscardDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeDiscardDraft
  */
 const BeforeDiscardDraft = buildBefore({ event: 'DISCARD', eventKind: 'BEFORE', isDraft: true });
 
 /**
- * Use `@AfterPatchDraft` decorator to execute custom logic after a 'draft' field is patched.
+ * Executes custom logic after a field of an in-progress draft has been changed.
+ * Registers `srv.after('PATCH', <Entity>.drafts, callback)`.
  *
- * `PATCH` is CAP's canonical `field-level draft-edit` event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) - it is triggered on the draft entity `MyEntity.drafts` every time a field of an in-progress draft is changed.
+ * @remarks
+ * `PATCH` is CAP's canonical field-level draft-edit event — an alias of `UPDATE` on `.drafts` since
+ * `@sap/cds` 10. `@AfterUpdateDraft` (`UPDATE`) is the same moment under the older event name.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterPatchDraft()
+ *   private async afterPatchDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterpatchdraft | CDS-TS-Dispatcher - @AfterPatchDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterPatchDraft
  */
 const AfterPatchDraft = buildAfter({ event: 'PATCH', eventKind: 'AFTER', isDraft: true });
 
 /**
- * Use `@AfterDiscardDraft` decorator to execute custom logic after a 'draft' is discarded.
+ * Executes custom logic after an in-progress draft has been discarded.
+ * Registers `srv.after('DISCARD', <Entity>.drafts, callback)`.
  *
- * `DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 - it is triggered on the draft entity `MyEntity.drafts` when an in-progress draft is discarded.
+ * @remarks
+ * `DISCARD` is CAP's canonical alias of `CANCEL` on `.drafts` since `@sap/cds` 10. `@AfterCancelDraft`
+ * (`CANCEL`) is the same moment under the older event name.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterDiscardDraft()
+ *   private async afterDiscardDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterdiscarddraft | CDS-TS-Dispatcher - @AfterDiscardDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterDiscardDraft
  */
 const AfterDiscardDraft = buildAfter({ event: 'DISCARD', eventKind: 'AFTER', isDraft: true });
 
