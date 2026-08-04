@@ -534,8 +534,9 @@ function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
  * @remarks
  * The sanctioned replacement for `req.query` on bound actions/functions since `@sap/cds` 10 (`req.query`
  * on bound operations is planned for removal in `@sap/cds` 11) — use it to resolve the entity instance a
- * bound `@OnBoundAction` / `@OnBoundFunction` was invoked on. `ref | undefined`: only bound invocations
- * populate `req.subject` — it is `undefined` on unbound operations and plain CRUD requests.
+ * bound `@OnBoundAction` / `@OnBoundFunction` was invoked on. `ref | undefined`: `undefined` on unbound
+ * operations (no query, no target); on plain CRUD requests it resolves to the target ref derived from the
+ * query (`SELECT.from` / `INSERT.into` / `UPSERT.into` / `UPDATE.entity` / `DELETE.from`).
  *
  * @example
  * ```ts

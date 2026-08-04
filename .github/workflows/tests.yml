@@ -84,7 +84,7 @@ jobs:
         run: |
           COUNT=$(grep -c "@example" dist/index.d.ts)
           echo "Found $COUNT @example blocks in dist/index.d.ts"
-          test "$COUNT" -ge 80
+          test "$COUNT" -ge 120
           grep -q "silently inert" dist/index.d.ts
           grep -q "experimentalDecorators" dist/index.d.ts
 

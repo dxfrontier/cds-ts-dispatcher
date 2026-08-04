@@ -98,9 +98,9 @@ function CatchAndSetErrorCode(newStatusCode: keyof StatusCodeMapping) {
  * message and an optional new HTTP status code.
  *
  * @remarks
- * Resolves the error via `req.reject(...)` — with only `newMessage` given, the original status code is
- * retained and just the message changes; passing `newStatusCode` (e.g. `'NOT_FOUND-404'`) additionally
- * overwrites the status code. Sibling: `@CatchAndSetErrorCode` overwrites the status code but replaces
+ * Resolves the error via `req.reject(...)` — with only `newMessage` given, the response carries no
+ * specific status code and surfaces as a generic 500; pass `newStatusCode` (e.g. `'NOT_FOUND-404'`) to
+ * control the status. Sibling: `@CatchAndSetErrorCode` overwrites the status code but replaces
  * the message with that code's generic reason phrase instead of a custom one. Like `@Throttle`, place it
  * BELOW the handler decorator (`@AfterRead`, `@OnCreate`, ...), closer to the method — a wrapper applied
  * above the handler decorator never becomes part of the registered callback. Also usable on a

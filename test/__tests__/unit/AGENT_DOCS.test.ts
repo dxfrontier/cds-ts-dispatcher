@@ -43,4 +43,12 @@ describe('agent-facing JSDoc drift gate', () => {
     const indexSource = readFileSync(join(REPO_ROOT, 'lib', 'index.ts'), 'utf8');
     expect(indexSource).toContain('@packageDocumentation');
   });
+
+  it('lib/core/CDSDispatcher.ts (the module that ships in dist/index.d.ts) carries the agent-facing sentinels', () => {
+    // lib/index.ts's @packageDocumentation header does not survive the dts rollup; the CDSDispatcher
+    // class JSDoc is what agents actually see, so it is what must be pinned here.
+    const dispatcherSource = readFileSync(join(REPO_ROOT, 'lib', 'core', 'CDSDispatcher.ts'), 'utf8');
+    expect(dispatcherSource).toContain('silently inert');
+    expect(dispatcherSource).toContain('experimentalDecorators');
+  });
 });

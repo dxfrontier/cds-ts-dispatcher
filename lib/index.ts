@@ -12,15 +12,20 @@
  * - Required consumer tsconfig: `"experimentalDecorators": true`, `"emitDecoratorMetadata": true`.
  * - Peer dependency: dispatcher major ↔ `@sap/cds` major (v6 ↔ `@sap/cds ^10`).
  *
+ * In the examples throughout these typings, a decorator at the start of a line is written `/@Name` —
+ * drop the leading slash when copying; it only keeps TypeScript's JSDoc parser from truncating the example.
+ *
  * Full documentation ships inside this package (no network needed):
  * `node_modules/@dxfrontier/cds-ts-dispatcher/README.md`
  *
  * @example
+ * ```ts
  * // service implementation file referenced from your .cds `@impl`
  * import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
  * import { BookHandler } from './handler/BookHandler';
  *
  * export = new CDSDispatcher([BookHandler]).initialize();
+ * ```
  *
  * @packageDocumentation
  */
