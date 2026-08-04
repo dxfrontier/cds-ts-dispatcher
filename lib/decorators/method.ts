@@ -2052,11 +2052,13 @@ const AfterBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'AFTER'
  * `'*'` matches every `ON`-phase event on the entity, but `ON` handlers do NOT all run the way
  * `BEFORE`/`AFTER` handlers do (CAP runs every matching `BEFORE`/`AFTER` handler in parallel). For a
  * normal, reply-expecting request CAP dispatches matching `.on` handlers as an INTERCEPTOR STACK, in
- * REGISTRATION order: only the FIRST match runs; a narrower sibling (`@OnCreate`, `@OnRead`, `@OnUpdate`,
- * `@OnDelete`, `@OnBoundAction`, `@OnBoundFunction`) registered for the same event only runs if that
- * first handler calls `next()` — and, symmetrically, `@OnAll` itself only runs when it is NOT the
- * first-registered match. `@OnAction`, `@OnFunction`, `@OnEvent`, `@OnError` are excluded — they are
- * bound to the service itself, not to an entity, so a `'*'` scoped to `<Entity>` never reaches them.
+ * REGISTRATION order: only the FIRST match runs. Registered first — or as the only `.on` handler for the
+ * event, as in the example below — `@OnAll` itself runs, and a narrower sibling (`@OnCreate`, `@OnRead`,
+ * `@OnUpdate`, `@OnDelete`, `@OnBoundAction`, `@OnBoundFunction`) registered for the same event then runs
+ * only if `@OnAll`'s callback calls `next()`. Registered AFTER that sibling instead, the roles reverse:
+ * the sibling runs first, and `@OnAll` runs only if the sibling calls `next()`. `@OnAction`,
+ * `@OnFunction`, `@OnEvent`, `@OnError` are excluded — they are bound to the service itself, not to an
+ * entity, so a `'*'` scoped to `<Entity>` never reaches them.
  * Registers against whatever the host `@EntityHandler` resolved: the specific active entity for a
  * normal host — pair with
  * `@OnAllDraft` for the equivalent wildcard on `<Entity>.drafts` there — or `'*'` (every entity, DRAFTS
