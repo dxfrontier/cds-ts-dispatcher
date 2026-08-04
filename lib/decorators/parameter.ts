@@ -68,8 +68,9 @@ function SingleInstanceSwitch(): ParameterDecorator {
  * Annotates a parameter of an `@OnError` handler with the `Error` that failed the request.
  *
  * @remarks
- * Only meaningful on `@OnError`, which itself is only valid inside an `@UnboundActions` class (it is a
- * service-wide hook, not entity-scoped). `@OnError` runs synchronously — no `await`, no `@Diff`, in the
+ * Only meaningful on `@OnError`, which is conventionally hosted in an `@UnboundActions` class (it is a
+ * service-wide hook, not entity-scoped — registration is identical from any handler class). `@OnError`
+ * runs synchronously — no `await`, no `@Diff`, in the
  * handler body. `Error` shadows the global `Error` constructor in any file that imports this decorator;
  * alias the import (`Error as ErrorDecorator`) if the file also throws/constructs `Error`s.
  *
@@ -101,15 +102,18 @@ function Error(): ParameterDecorator {
  * handler in CAP's execution chain (or the default implementation if none remain).
  *
  * @remarks
- * Valid on every `@On*` decorator (active and draft) — `@Before*` / `@After*` handlers never receive a
- * `next` argument (CAP always continues automatically for those phases), so `@Next` there is
- * `undefined`. Returning `next()` (or its result) forwards the request; not calling it ends the chain at
+ * Valid on the ON-phase CRUD / action / function / custom-event decorators (active and draft) —
+ * `@Before*` / `@After*` handlers never receive a `next` argument (CAP always continues automatically
+ * for those phases), so `@Next` there is `undefined`. Equally `undefined` or ignored on `@OnError`,
+ * `@OnScheduledSuccess` / `@OnScheduledFailure`, `@OnRequestDone` and the server-lifecycle decorators
+ * (`@OnServed` / `@OnListening` / `@OnShutdown`) — none of these dispatch through an interceptor chain.
+ * Returning `next()` (or its result) forwards the request; not calling it ends the chain at
  * your handler.
  *
  * @example
  * ```ts
  * /@OnCreate()
- * public async onCreate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ * public async onCreate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
  *   return next();
  * }
  * ```
@@ -135,8 +139,9 @@ function Next(): ParameterDecorator {
  * `@Results` and `@Result` bind the same metadata under the hood — the split exists purely for
  * readability: use `@Results` when the payload is an array (`@AfterRead`), `@Result` for a single object
  * (`@AfterCreate`, `@AfterUpdate`, `@AfterReadEachInstance` — invoked once per instance, analogous to
- * `Array.prototype.forEach`) or a `boolean` (`@AfterDelete`). Mutating the array in place changes the
- * OData response.
+ * `Array.prototype.forEach`) or a `boolean` (`@AfterDelete`). Mutating row OBJECTS in place changes the
+ * OData response; structural array operations (`push` / `splice`) are lost on single-instance READs,
+ * where CAP hands the after-phase a fresh `[req.results]` wrapper.
  *
  * @example
  * ```ts
@@ -409,7 +414,10 @@ function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryProps
  *
  * @remarks
  * Expects the `Bearer <token>` format. Resolves to `undefined` (with a warning logged) when the header
- * is missing or malformed — it does not throw, so always narrow the `string | undefined` type before use.
+ * is missing or malformed — no throw for HTTP-borne requests, so narrow the `string | undefined` type
+ * before use. NON-HTTP dispatches are the exception: without `req.http` (queued/scheduled tasks,
+ * messaging events, programmatic `srv.run` outside an HTTP context) the underlying SDK helper throws —
+ * only use `@Jwt` on handlers reached via HTTP.
  *
  * @example
  * ```ts
@@ -711,7 +719,8 @@ function Tenant(): ParameterDecorator {
  * request against the current database state (compositions expanded, draft-aware).
  *
  * @remarks
- * The only `async` parameter decorator: it costs one extra database read and resolves a microtask later
+ * The only `async` parameter decorator: it costs one extra database read on `UPDATE` / `DELETE` (none
+ * on `CREATE`) and resolves a microtask later
  * than sibling handlers on the same event — do not rely on synchronous ordering against them. Not
  * supported on `@OnError` (which runs synchronously). `req.diff()` is a semi-stable, undocumented
  * `@sap/cds` API; on `@sap/cds` 10 an `UPDATE` diff carries the NEW values at the top level, the OLD

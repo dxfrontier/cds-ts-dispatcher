@@ -717,7 +717,7 @@ This decorator configures the dependency injection scope for the service class, 
 `Parameters`
 
 - `scope` `[Optional]` - The dependency injection scope for the service class:
-  - `'Singleton'` - Single instance shared across the entire application
+  - `'Singleton'` - Single instance shared per `CDSDispatcher` container (one per CAP service implementation)
   - `'Transient'` - New instance created for each injection (default)
   
   If not provided, defaults to `'Transient'` scope behavior.
@@ -766,15 +766,15 @@ export class AnyService {
 ```
 
 > [!IMPORTANT]
-> When using `@ServiceLogic('Singleton')`, the same instance is shared across the entire application. Any values set in the class properties (like `message` in the example above) will be **carried everywhere** and **persist** throughout the application lifecycle. 
+> When using `@ServiceLogic('Singleton')`, the same instance is shared across the owning `CDSDispatcher` container — i.e. one CAP service implementation. Any values set in the class properties (like `message` in the example above) **persist** across requests within that dispatcher; a class injected by SEPARATE dispatchers gets a separate instance per dispatcher. 
 > 
 > This means:
 > 
-> - State modifications in one part of your application will be visible in all other parts
+> - State modifications made by one handler class are visible in all other classes of the same dispatcher
 > - Data stored in singleton services persists across multiple requests
 > - All classes that `@Inject` this singleton service will receive the exact same instance with the same state
 >
-> Use `'Singleton'` scope carefully and only when you need shared state across your application.
+> Use `'Singleton'` scope carefully and only when you need shared state across a service implementation.
 
 > [!TIP]
 > When applying `@ServiceLogic()` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`.
@@ -3615,7 +3615,7 @@ this.before('CANCEL', MyEntity.drafts, async (req) => {
 
 Use this decorator when you want to validate inputs before a field of an in-progress draft is changed.
 
-`PATCH` is CAP's canonical `field-level` draft-edit event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) and fires every time a field of an in-progress draft changes.
+`PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at registration time (`req.event` is `'UPDATE'` at runtime, never `'PATCH'`) and fires every time a field of an in-progress draft changes.
 
 `Example`
 
@@ -3653,7 +3653,7 @@ this.before('PATCH', MyEntity.drafts, async (req) => {
 
 Use this decorator when you want to validate inputs before an in-progress draft is discarded.
 
-`DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 and fires when an in-progress draft is discarded.
+`DISCARD` is an alias CAP normalizes to `CANCEL` at registration time (`req.event` is `'CANCEL'` at runtime) and fires when an in-progress draft is discarded.
 
 `Example`
 
@@ -3849,7 +3849,7 @@ this.after('CANCEL', MyEntity.drafts, async (results, req) => {
 
 Use this decorator when you want to enhance outbound data when a field of an in-progress draft is changed.
 
-`PATCH` is CAP's canonical `field-level` draft-edit event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) and fires every time a field of an in-progress draft changes.
+`PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at registration time (`req.event` is `'UPDATE'` at runtime, never `'PATCH'`) and fires every time a field of an in-progress draft changes.
 
 `Example`
 
@@ -3887,7 +3887,7 @@ this.after('PATCH', MyEntity.drafts, async (results, req) => {
 
 Use this decorator when you want to enhance outbound data when an in-progress draft is discarded.
 
-`DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 and fires when an in-progress draft is discarded.
+`DISCARD` is an alias CAP normalizes to `CANCEL` at registration time (`req.event` is `'CANCEL'` at runtime) and fires when an in-progress draft is discarded.
 
 `Example`
 
@@ -4080,7 +4080,7 @@ this.on('CANCEL', MyEntity.drafts, async (req, next) => {
 
 This decorator will be triggered when `a field of an in-progress draft is changed`.
 
-`PATCH` is CAP's canonical `field-level` draft-edit event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) and fires every time a field of an in-progress draft changes.
+`PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at registration time (`req.event` is `'UPDATE'` at runtime, never `'PATCH'`) and fires every time a field of an in-progress draft changes.
 
 `Example`
 
@@ -4118,7 +4118,7 @@ this.on('PATCH', MyEntity.drafts, async (req, next) => {
 
 This decorator will be triggered when `an in-progress draft is discarded`.
 
-`DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 and fires when an in-progress draft is discarded.
+`DISCARD` is an alias CAP normalizes to `CANCEL` at registration time (`req.event` is `'CANCEL'` at runtime) and fires when an in-progress draft is discarded.
 
 `Example`
 

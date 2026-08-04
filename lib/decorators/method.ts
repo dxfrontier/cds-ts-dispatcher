@@ -412,7 +412,9 @@ function Throttle(options: ThrottleOptions) {
  * `@OnCreate` / `@OnUpdate` / `@OnAction` / `@OnBoundAction` / `@OnFunction` / `@OnBoundFunction`, formats
  * `req.data` instead. `formatter.action` picks a built-in (`'blacklist'`, `'trim'`, `'toUpper'`,
  * `'camelCase'`, `'truncate'`, ...) or `'customFormatter'` with your own `callback(req, results)`.
- * Sibling: `@Validate` runs the same `BEFORE`/`ON` pass but rejects instead of transforming. Like
+ * Sibling: `@Validate` runs the same `BEFORE`/`ON` pass but only rejects. Note this decorator can ALSO
+ * reject: on the request-data path, a formatted field that is `null`/`undefined` in `req.data` is
+ * rejected with 400 — attach it only where the field is guaranteed present. Like
  * `@Throttle`, place it BELOW the handler decorator (closer to the method) — a wrapper applied above the
  * handler decorator never becomes part of the registered callback.
  *
@@ -471,7 +473,8 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
 
 /**
  * Validates one or more fields against a built-in validator before the decorated handler runs; on
- * failure the decorator itself calls `req.reject(...)` and the handler body never executes.
+ * failure the decorator itself calls `req.reject(...)` and the handler body never executes (unless
+ * `exposeValidatorResult` is set — see remarks).
  *
  * @remarks
  * Valid on `@BeforeCreate`, `@BeforeUpdate`, `@OnCreate`, `@OnUpdate`, `@OnAction`, `@OnBoundAction`,
@@ -480,8 +483,9 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
  * catalogue in the README); `validator.options` is that check's OWN per-validator options (validator.js's
  * 2nd argument, e.g. `isLength`'s `{ min, max }`), forwarded verbatim.
  * `validator.exposeValidatorResult: true` is a separate, TOP-LEVEL flag (a sibling of `action`, NOT
- * nested under `options`) that additionally makes the pass/fail flags readable via the
- * `@ValidationResults` parameter decorator instead of just rejecting. Sibling: `@FieldsFormatter` runs
+ * nested under `options`) that REPLACES the rejection: the decorator then never calls `req.reject`, the
+ * handler always runs, and it reads the pass/fail flags via the `@ValidationResults` parameter
+ * decorator. Sibling: `@FieldsFormatter` runs
  * the same `BEFORE`/`ON` pass but transforms instead of rejecting. Stack multiple `@Validate` decorators
  * to check multiple fields/rules on the same handler.
  *
@@ -659,8 +663,10 @@ function Mask<T>(fields: (keyof T)[], options?: MaskOptions) {
  * wraps.
  *
  * @remarks
- * Measures only the method BODY itself, not the full request lifecycle — `@Use` middleware and other
- * stacked response transformers (`@Exclude`, `@Mask`, ...) are not included in the duration; database/
+ * Measures only what it wraps, not the full request lifecycle — decorators apply bottom-up, so wrappers
+ * stacked ABOVE `@LogExecution` are excluded from the duration while anything BETWEEN it and the method
+ * (`@Exclude`, `@Mask`, method-level `@Use`, ...) IS included; place it innermost (closest to the
+ * method) to time only the method body. Database/
  * network calls count only if `await`ed inside the method. `options.logDuration` defaults to `true`,
  * `logArgs` / `logResult` default to `false` (avoid logging sensitive request/response data in
  * production). `options.condition` can skip logging per-request; `options.prefix` (default `'[LOG]'`) and
@@ -778,9 +784,12 @@ function SingleInstanceCapable<Target extends object>() {
  * Wires one or more middleware classes into the request pipeline — as a CLASS decorator (all handlers of
  * the class) or a METHOD decorator (that one handler only), depending on how many arguments TypeScript
  * hands the decorator function.
- * At class level: registers `srv.before('*', <Entity>, callback)` (plus one `srv.before` per action /
- * function / event / error handler of the class) that runs the middleware chain before the matched
- * handler. At method level: wraps the method directly and runs the chain before it.
+ * At class level: for an `@EntityHandler` class, registers ONE `srv.before('*', <path>, callback)` where
+ * `<path>` is `<Entity>.drafts` for draft-enabled entities (the chain then runs before draft-targeted
+ * requests, NOT before plain active-entity ones) and `<Entity>` otherwise; for an `@UnboundActions`
+ * class it instead registers one `srv.before` per action / function / event / error handler of the
+ * class — the two modes are exclusive. At method level: wraps the method directly and runs the chain
+ * before it.
  *
  * @remarks
  * A middleware class implements `MiddlewareImpl` (`use(req, next): Promise<void>`); call `next()` to
@@ -1293,11 +1302,14 @@ const BeforeCreate = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', isDraft
  * Registers `srv.before('CREATE', <Entity>.drafts, callback)`.
  *
  * @remarks
- * NOT the Fiori Elements "New" draft action — a protocol-borne (HTTP/OData) `POST` against a
- * draft-enabled entity is itself rewritten to CAP's `NEW` event (handled by `@BeforeNewDraft`) unless the
- * payload explicitly sets `IsActiveEntity: true`. `@BeforeCreateDraft` only fires for a literal `CREATE`
- * issued WITHOUT a protocol straight at `<Entity>.drafts` — a programmatic `INSERT.into(<Entity>.drafts)`
- * or `srv.send('CREATE', <Entity>.drafts, ...)`. Active-entity counterpart: `@BeforeCreate`.
+ * A protocol-borne (HTTP/OData) `POST` against a draft-enabled entity is rewritten to CAP's `NEW`
+ * event (handled by `@BeforeNewDraft`) unless the payload explicitly sets `IsActiveEntity: true` — but
+ * CAP's `NEW` implementation then persists the draft row through a NESTED `CREATE` sub-request against
+ * `<Entity>.drafts`, so `@BeforeCreateDraft` ALSO fires during every Fiori Elements "New" (inside the
+ * `NEW` on-phase). It equally fires for programmatic creates issued straight at `<Entity>.drafts`
+ * (`INSERT.into(<Entity>.drafts)`, `srv.send('CREATE', ...)`). Prefer `@BeforeNewDraft` for UI-flow
+ * semantics; use this hook for logic that must run for EVERY draft-row insert regardless of origin.
+ * Active-entity counterpart: `@BeforeCreate`.
  *
  * @example
  * ```ts
@@ -1305,7 +1317,7 @@ const BeforeCreate = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', isDraft
  * class BookHandler {
  *   /@BeforeCreateDraft()
  *   private async beforeCreateDraft(@Req() req: Request<Book>): Promise<void> {
- *     // ... runs only for a protocol-less INSERT straight into Book.drafts (e.g. srv.send)
+ *     // ... runs for programmatic INSERTs into Book.drafts AND the nested CREATE inside every Fiori "New"
  *   }
  * }
  * ```
@@ -1368,8 +1380,9 @@ const BeforeReadDraft = buildBefore({ event: 'READ', eventKind: 'BEFORE', isDraf
  *
  * @remarks
  * Commonly paired with `@Diff` to inspect the incoming change-set before it is applied. Draft variant:
- * `@BeforeUpdateDraft`; the more specific field-level draft edit is `@BeforePatchDraft` (`PATCH`, CAP's
- * canonical alias of `UPDATE` on `.drafts` since `@sap/cds` 10).
+ * `@BeforeUpdateDraft`; `@BeforePatchDraft` registers the identical `UPDATE` event on `.drafts` —
+ * `PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at registration time (`req.event` is never
+ * `'PATCH'` at runtime).
  *
  * @example
  * ```ts
@@ -1391,9 +1404,11 @@ const BeforeUpdate = buildBefore({ event: 'UPDATE', eventKind: 'BEFORE', isDraft
  * Registers `srv.before('UPDATE', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `@BeforePatchDraft` (`PATCH`) is CAP's canonical alias of this same `UPDATE` event on `.drafts` since
- * `@sap/cds` 10 — the field-level draft-edit moment a Fiori Elements user triggers by typing into a
- * field; prefer it for that scenario. Active-entity counterpart: `@BeforeUpdate`.
+ * The field-level draft-edit moment a Fiori Elements user triggers by typing into a field.
+ * `@BeforePatchDraft` produces the byte-identical registration — `PATCH` is an HTTP-method alias CAP
+ * normalizes to `UPDATE` at registration time (since `@sap/cds` 9; `req.event` is never `'PATCH'` at
+ * runtime) — so stacking both simply registers two handlers for the same event. Active-entity
+ * counterpart: `@BeforeUpdate`.
  *
  * @example
  * ```ts
@@ -1438,8 +1453,12 @@ const BeforeDelete = buildBefore({ event: 'DELETE', eventKind: 'BEFORE', isDraft
  * Registers `srv.before('DELETE', <Entity>.drafts, callback)`.
  *
  * @remarks
- * A literal `DELETE` against `<Entity>.drafts`, distinct from abandoning a draft through the Fiori
- * Elements UI (`@BeforeDiscardDraft` / `@BeforeCancelDraft`). Active-entity counterpart: `@BeforeDelete`.
+ * Fires for a literal `DELETE` against `<Entity>.drafts` — AND during every Fiori Elements draft
+ * discard: CAP rewrites the discard to `CANCEL` (`@BeforeDiscardDraft` / `@BeforeCancelDraft`), whose
+ * implementation then removes the draft row through a NESTED `DELETE` sub-request against
+ * `<Entity>.drafts`, which this decorator observes too. Prefer the Cancel/Discard decorators for
+ * UI-flow semantics; use this hook for logic that must run for EVERY draft-row delete regardless of
+ * origin. Active-entity counterpart: `@BeforeDelete`.
  *
  * @example
  * ```ts
@@ -1588,7 +1607,7 @@ const BeforeBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'BEFOR
  *   /@AfterAll()
  *   private async afterAny(@Result() result: Book | Book[] | boolean, @Req() req: Request<Book>): Promise<void> {
  *     if (Array.isArray(result)) {
- *       // READ (entity set)
+ *       // READ — entity set AND single reads (CAP array-wraps single READ results)
  *     } else if (typeof result === 'boolean') {
  *       // DELETE
  *     } else {
@@ -1662,11 +1681,14 @@ const AfterCreate = buildAfter({ event: 'CREATE', eventKind: 'AFTER', isDraft: f
  * Registers `srv.after('CREATE', <Entity>.drafts, callback)`.
  *
  * @remarks
- * NOT the Fiori Elements "New" draft action — a protocol-borne (HTTP/OData) `POST` against a
- * draft-enabled entity is itself rewritten to CAP's `NEW` event (handled by `@AfterNewDraft`) unless the
- * payload explicitly sets `IsActiveEntity: true`. `@AfterCreateDraft` only fires for a literal `CREATE`
- * issued WITHOUT a protocol straight at `<Entity>.drafts` — a programmatic `INSERT.into(<Entity>.drafts)`
- * or `srv.send('CREATE', <Entity>.drafts, ...)`. Active-entity counterpart: `@AfterCreate`.
+ * A protocol-borne (HTTP/OData) `POST` against a draft-enabled entity is rewritten to CAP's `NEW`
+ * event (handled by `@AfterNewDraft`) unless the payload explicitly sets `IsActiveEntity: true` — but
+ * CAP's `NEW` implementation then persists the draft row through a NESTED `CREATE` sub-request against
+ * `<Entity>.drafts`, so `@AfterCreateDraft` ALSO fires during every Fiori Elements "New" (inside the
+ * `NEW` on-phase). It equally fires for programmatic creates issued straight at `<Entity>.drafts`
+ * (`INSERT.into(<Entity>.drafts)`, `srv.send('CREATE', ...)`). Prefer `@AfterNewDraft` for UI-flow
+ * semantics; use this hook for logic that must run for EVERY draft-row insert regardless of origin.
+ * Active-entity counterpart: `@AfterCreate`.
  *
  * @example
  * ```ts
@@ -1737,8 +1759,10 @@ const AfterReadDraft = buildAfter({ event: 'READ', eventKind: 'AFTER', isDraft: 
  *
  * @remarks
  * Invoked once per row with a single object (`@Result`), NOT the whole array — use `@AfterRead` for
- * bulk/whole-array logic and `@AfterReadSingleInstance` when a single entity is requested by key. Draft
- * variant: `@AfterReadDraftEachInstance`.
+ * bulk/whole-array logic and `@AfterReadSingleInstance` when a single entity is requested by key.
+ * IMPORTANT: CAP invokes per-row callbacks via `Array.prototype.forEach` and does NOT await returned
+ * promises — `await`ed work inside races the response; keep per-row logic synchronous, or use
+ * `@AfterRead` and iterate with `await` yourself. Draft variant: `@AfterReadDraftEachInstance`.
  *
  * @example
  * ```ts
@@ -1762,8 +1786,8 @@ const AfterReadEachInstance = buildAfter({ event: 'each', eventKind: 'AFTER', is
  * Registers `srv.after('each', <Entity>.drafts, callback)`.
  *
  * @remarks
- * The draft counterpart of `@AfterReadEachInstance` — same per-row `@Result` payload, scoped to
- * `<Entity>.drafts`.
+ * The draft counterpart of `@AfterReadEachInstance` — same per-row `@Result` payload (and the same
+ * not-awaited caveat: keep per-row logic synchronous), scoped to `<Entity>.drafts`.
  *
  * @example
  * ```ts
@@ -1784,8 +1808,11 @@ const AfterReadDraftEachInstance = buildAfter({ event: 'each', eventKind: 'AFTER
  * Registers `srv.after('READ', <Entity>, callback)` — the same CAP registration as `@AfterRead`.
  *
  * @remarks
- * The dispatcher's wrapper only invokes your callback when `req.params.length > 0` (a single-instance
- * request), passing that one row (`@Result`) instead of the array; entity-set requests never reach it.
+ * The dispatcher's wrapper only invokes your callback when `req.params.length > 0`, passing the FIRST
+ * row (`@Result`; `{}` on an empty result — the callback never sees `undefined`) instead of the array.
+ * Caveat: `req.params` carries one entry per keyed path segment, so keyed NAVIGATION reads that target
+ * a set (`GET /Authors(1)/books`) also pass the gate — the callback then receives only `data[0]` of
+ * that set. Un-keyed entity-set requests never reach it.
  * Combining this with `@AfterRead` in the same class fires BOTH for the same single-instance request —
  * use `@AfterRead` with `@SingleInstanceSwitch` instead if you want one handler for both shapes. Use
  * `@AfterReadEachInstance` for per-row logic across an entity-set read. Draft variant:
@@ -1818,8 +1845,8 @@ const AfterReadSingleInstance = buildAfter({
  * `@AfterReadDraft`.
  *
  * @remarks
- * The draft counterpart of `@AfterReadSingleInstance` — same `req.params.length > 0` gate and
- * single-row `@Result` payload, scoped to `<Entity>.drafts`.
+ * The draft counterpart of `@AfterReadSingleInstance` — same `req.params.length > 0` gate (including
+ * its keyed-navigation caveat) and single-row `@Result` payload, scoped to `<Entity>.drafts`.
  *
  * @example
  * ```ts
@@ -1844,10 +1871,13 @@ const AfterReadDraftSingleInstance = buildAfter({
  * Registers `srv.after('UPDATE', <Entity>, callback)`.
  *
  * @remarks
- * Receives the updated row as a single object (`@Result`), NOT an array. On `@sap/cds` >= 10 the
- * dispatcher restores the pre-10 contract (entity data instead of the raw `.affected`-carrying write
- * result) — use `@Affected` if you need the raw row count. Draft variant: `@AfterUpdateDraft`; the more
- * specific field-level draft edit is `@AfterPatchDraft`.
+ * Receives the request change-set as a single object (`@Result`): `req.data` — the `PATCH`/`PUT`
+ * payload merged with the URL keys — NOT the full updated row; fields the request did not touch are
+ * absent. (On `@sap/cds` >= 10 the dispatcher substitutes `req.data` for the raw `.affected`-carrying
+ * write result; use `@Affected` for the row count.) Re-read the entity when full state is needed —
+ * OData write responses are usually built via a follow-up read that runs the `@AfterRead` chain. Draft
+ * variant: `@AfterUpdateDraft`; `@AfterPatchDraft` registers the identical event (`PATCH` is an alias
+ * normalized to `UPDATE`).
  *
  * @example
  * ```ts
@@ -1869,9 +1899,11 @@ const AfterUpdate = buildAfter({ event: 'UPDATE', eventKind: 'AFTER', isDraft: f
  * Registers `srv.after('UPDATE', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `@AfterPatchDraft` (`PATCH`) is CAP's canonical alias of this same `UPDATE` event on `.drafts` since
- * `@sap/cds` 10 — the field-level draft-edit moment a Fiori Elements user triggers by typing into a
- * field; prefer it for that scenario. Active-entity counterpart: `@AfterUpdate`.
+ * The field-level draft-edit moment a Fiori Elements user triggers by typing into a field.
+ * `@AfterPatchDraft` produces the byte-identical registration — `PATCH` is an HTTP-method alias CAP
+ * normalizes to `UPDATE` at registration time (since `@sap/cds` 9; `req.event` is never `'PATCH'` at
+ * runtime) — so stacking both simply registers two handlers for the same event. Active-entity
+ * counterpart: `@AfterUpdate`.
  *
  * @example
  * ```ts
@@ -1918,8 +1950,12 @@ const AfterDelete = buildAfter({ event: 'DELETE', eventKind: 'AFTER', isDraft: f
  * Registers `srv.after('DELETE', <Entity>.drafts, callback)`.
  *
  * @remarks
- * A literal `DELETE` against `<Entity>.drafts`, distinct from abandoning a draft through the Fiori
- * Elements UI (`@AfterDiscardDraft` / `@AfterCancelDraft`). Active-entity counterpart: `@AfterDelete`.
+ * Fires for a literal `DELETE` against `<Entity>.drafts` — AND during every Fiori Elements draft
+ * discard: CAP rewrites the discard to `CANCEL` (`@AfterDiscardDraft` / `@AfterCancelDraft`), whose
+ * implementation then removes the draft row through a NESTED `DELETE` sub-request against
+ * `<Entity>.drafts`, which this decorator observes too. Prefer the Cancel/Discard decorators for
+ * UI-flow semantics; use this hook for logic that must run for EVERY draft-row delete regardless of
+ * origin. Active-entity counterpart: `@AfterDelete`.
  *
  * @example
  * ```ts
@@ -1943,6 +1979,9 @@ const AfterDeleteDraft = buildAfter({ event: 'DELETE', eventKind: 'AFTER', isDra
  * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
  * unbound functions: `@AfterFunction`; bound counterpart: `@AfterBoundAction`. Typical use: audit
  * logging, notifications, cleanup after the action's own implementation (`@OnAction`) has run.
+ * Caveat: results flow through the dispatcher's write-result normalization — a bare NUMERIC return is
+ * coerced to the boolean `value === 1` before reaching `@Result`; return an object / structured payload
+ * to receive it unchanged.
  *
  * @example
  * ```ts
@@ -1969,6 +2008,9 @@ const AfterAction = buildAction({ event: 'ACTION', eventKind: 'AFTER', isDraft: 
  * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound functions:
  * `@AfterBoundFunction`; unbound counterpart: `@AfterAction`. README has no dedicated `@AfterBoundAction`
  * section; the closest coverage is `@BeforeBoundAction`.
+ * Caveat: results flow through the dispatcher's write-result normalization — a bare NUMERIC return is
+ * coerced to the boolean `value === 1` before reaching `@Result`; return an object / structured payload
+ * to receive it unchanged.
  *
  * @example
  * ```ts
@@ -1992,6 +2034,9 @@ const AfterBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'AFTER'
  * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
  * unbound actions: `@AfterAction`; bound counterpart: `@AfterBoundFunction`. README has no dedicated
  * `@AfterFunction` section; the closest coverage is `@BeforeFunction`.
+ * Caveat: results flow through the dispatcher's write-result normalization — a bare NUMERIC return is
+ * coerced to the boolean `value === 1` before reaching `@Result`; return an object / structured payload
+ * to receive it unchanged.
  *
  * @example
  * ```ts
@@ -2016,6 +2061,9 @@ const AfterFunction = buildAction({ event: 'FUNC', eventKind: 'AFTER', isDraft: 
  * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound actions:
  * `@AfterBoundAction`; unbound counterpart: `@AfterFunction`. README has no dedicated
  * `@AfterBoundFunction` section; the closest coverage is `@BeforeBoundFunction`.
+ * Caveat: results flow through the dispatcher's write-result normalization — a bare NUMERIC return is
+ * coerced to the boolean `value === 1` before reaching `@Result`; return an object / structured payload
+ * to receive it unchanged.
  *
  * @example
  * ```ts
@@ -2240,8 +2288,8 @@ const OnReadDraft = buildOnCRUD({ event: 'READ', eventKind: 'ON', isDraft: true 
  * @remarks
  * Unlike `@BeforeUpdate` (validation before the write) or `@AfterUpdate` (post-processing after it), this
  * REPLACES the write itself — without `return next()` (or your own persistence call), nothing is ever
- * written. Draft variant: `@OnUpdateDraft`; the more specific field-level draft edit is `@OnPatchDraft`
- * (`PATCH`, CAP's canonical alias of `UPDATE` on `.drafts` since `@sap/cds` 10).
+ * written. Draft variant: `@OnUpdateDraft`; `@OnPatchDraft` registers the identical `UPDATE` event on
+ * `.drafts` (`PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at registration time).
  *
  * @example
  * ```ts
@@ -2265,9 +2313,11 @@ const OnUpdate = buildOnCRUD({ event: 'UPDATE', eventKind: 'ON', isDraft: false 
  * Registers `srv.on('UPDATE', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `@OnPatchDraft` (`PATCH`) is CAP's canonical alias of this same `UPDATE` event on `.drafts` since
- * `@sap/cds` 10 — the field-level draft-edit moment a Fiori Elements user triggers by typing into a
- * field; prefer it for that scenario. Active-entity counterpart: `@OnUpdate`. README has no dedicated
+ * The field-level draft-edit moment a Fiori Elements user triggers by typing into a field.
+ * `@OnPatchDraft` produces the byte-identical registration — `PATCH` is an HTTP-method alias CAP
+ * normalizes to `UPDATE` at registration time (since `@sap/cds` 9; `req.event` is never `'PATCH'` at
+ * runtime) — so stacking both builds a two-link `next()` interceptor chain, not two independent
+ * handlers. Active-entity counterpart: `@OnUpdate`. README has no dedicated
  * `@OnUpdateDraft` section; the closest coverage is `@OnUpdate`.
  *
  * @example
@@ -2503,8 +2553,9 @@ const OnFunction = buildAction({ event: 'FUNC', eventKind: 'ON', isDraft: false 
  * For emitter and receiver in the same Node process but on DIFFERENT services, or over an external
  * message broker, use `@OnSubscribe` instead — `@OnEvent(name)` is exactly `@OnSubscribe({ eventName:
  * name, type: 'SAME_NODE_PROCESS' })`. Conventionally hosted in an `@UnboundActions` class (service-wide,
- * not entity-scoped) — excluded from `@OnAll` / `@BeforeAll` / `@AfterAll` firing, since it is not
- * entity-scoped. The websocket decorators (`@OnWebSocketConnect`, `@OnWebSocketDisconnect`,
+ * not entity-scoped) — excluded from `@OnAll` / `@BeforeAll` / `@AfterAll` firing when those wildcards
+ * are entity-scoped; a wildcard host bound via `CDS_DISPATCHER.ALL_ENTITIES` registers unfiltered and
+ * DOES fire for custom events. The websocket decorators (`@OnWebSocketConnect`, `@OnWebSocketDisconnect`,
  * `@OnWebSocketMessage`) are sugar built on top of this one.
  *
  * @example
@@ -2766,8 +2817,9 @@ const OnNewDraft = buildOnCRUD({ event: 'NEW', eventKind: 'ON', isDraft: true })
  * Registers `srv.on('CANCEL', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `@OnDiscardDraft` (`DISCARD`) is CAP's canonical alias of this same `CANCEL` event on `.drafts` since
- * `@sap/cds` 10 — the same draft-abandon moment under a different, newer event name. Pairs with
+ * `@OnDiscardDraft` registers this same `CANCEL` event — `DISCARD` is an alias CAP normalizes to
+ * `CANCEL` at registration time (`req.event` is `'CANCEL'` at runtime, never `'DISCARD'`); stacking
+ * both builds a `next()` interceptor chain, not two independent handlers. Pairs with
  * `@BeforeCancelDraft` / `@AfterCancelDraft`.
  *
  * @example
@@ -2818,8 +2870,8 @@ const BeforeNewDraft = buildBefore({ event: 'NEW', eventKind: 'BEFORE', isDraft:
  * Registers `srv.before('CANCEL', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `@BeforeDiscardDraft` (`DISCARD`) is CAP's canonical alias of this same `CANCEL` event on `.drafts`
- * since `@sap/cds` 10 — the same draft-abandon moment under a different, newer event name. Pairs with
+ * `@BeforeDiscardDraft` registers this same `CANCEL` event — `DISCARD` is an alias CAP normalizes to
+ * `CANCEL` at registration time (`req.event` is `'CANCEL'` at runtime, never `'DISCARD'`). Pairs with
  * `@AfterCancelDraft` / `@OnCancelDraft`.
  *
  * @example
@@ -2921,8 +2973,8 @@ const AfterNewDraft = buildAfter({ event: 'NEW', eventKind: 'AFTER', isDraft: tr
  * Registers `srv.after('CANCEL', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `@AfterDiscardDraft` (`DISCARD`) is CAP's canonical alias of this same `CANCEL` event on `.drafts`
- * since `@sap/cds` 10 — the same draft-abandon moment under a different, newer event name. Pairs with
+ * `@AfterDiscardDraft` registers this same `CANCEL` event — `DISCARD` is an alias CAP normalizes to
+ * `CANCEL` at registration time (`req.event` is `'CANCEL'` at runtime, never `'DISCARD'`). Pairs with
  * `@BeforeCancelDraft` / `@OnCancelDraft`.
  *
  * @example
@@ -2995,9 +3047,10 @@ const AfterSaveDraft = buildAfter({ event: 'SAVE', eventKind: 'AFTER', isDraft: 
  * Registers `srv.before('PATCH', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `PATCH` is CAP's canonical field-level draft-edit event — an alias of `UPDATE` on `.drafts` since
- * `@sap/cds` 10 — fired every time a Fiori Elements user changes a field of an in-progress draft.
- * `@BeforeUpdateDraft` (`UPDATE`) is the same moment under the older event name.
+ * The field-level draft edit — fired every time a Fiori Elements user changes a field of an in-progress
+ * draft. `PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at registration time (since
+ * `@sap/cds` 9): `@BeforeUpdateDraft` produces the byte-identical registration, and `req.event` is
+ * `'UPDATE'` at runtime, never `'PATCH'`.
  *
  * @example
  * ```ts
@@ -3018,8 +3071,8 @@ const BeforePatchDraft = buildBefore({ event: 'PATCH', eventKind: 'BEFORE', isDr
  * Registers `srv.before('DISCARD', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `DISCARD` is CAP's canonical alias of `CANCEL` on `.drafts` since `@sap/cds` 10. `@BeforeCancelDraft`
- * (`CANCEL`) is the same moment under the older event name.
+ * `DISCARD` is an alias CAP normalizes to `CANCEL` at registration time: `@BeforeCancelDraft` produces
+ * the byte-identical registration, and `req.event` is `'CANCEL'` at runtime, never `'DISCARD'`.
  *
  * @example
  * ```ts
@@ -3040,8 +3093,9 @@ const BeforeDiscardDraft = buildBefore({ event: 'DISCARD', eventKind: 'BEFORE', 
  * Registers `srv.after('PATCH', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `PATCH` is CAP's canonical field-level draft-edit event — an alias of `UPDATE` on `.drafts` since
- * `@sap/cds` 10. `@AfterUpdateDraft` (`UPDATE`) is the same moment under the older event name.
+ * The field-level draft edit. `PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at
+ * registration time (since `@sap/cds` 9): `@AfterUpdateDraft` produces the byte-identical registration,
+ * and `req.event` is `'UPDATE'` at runtime, never `'PATCH'`.
  *
  * @example
  * ```ts
@@ -3062,8 +3116,8 @@ const AfterPatchDraft = buildAfter({ event: 'PATCH', eventKind: 'AFTER', isDraft
  * Registers `srv.after('DISCARD', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `DISCARD` is CAP's canonical alias of `CANCEL` on `.drafts` since `@sap/cds` 10. `@AfterCancelDraft`
- * (`CANCEL`) is the same moment under the older event name.
+ * `DISCARD` is an alias CAP normalizes to `CANCEL` at registration time: `@AfterCancelDraft` produces
+ * the byte-identical registration, and `req.event` is `'CANCEL'` at runtime, never `'DISCARD'`.
  *
  * @example
  * ```ts
@@ -3085,9 +3139,11 @@ const AfterDiscardDraft = buildAfter({ event: 'DISCARD', eventKind: 'AFTER', isD
  * Registers `srv.on('PATCH', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `PATCH` is CAP's canonical field-level draft-edit event — an alias of `UPDATE` on `.drafts` since
- * `@sap/cds` 10 — fired every time a Fiori Elements user changes a field of an in-progress draft.
- * `@OnUpdateDraft` (`UPDATE`) is the same moment under the older event name.
+ * The field-level draft edit — fired every time a Fiori Elements user changes a field of an in-progress
+ * draft. `PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at registration time (since
+ * `@sap/cds` 9): `@OnUpdateDraft` produces the byte-identical registration (`req.event` is `'UPDATE'`
+ * at runtime, never `'PATCH'`), so stacking both builds a `next()` interceptor chain, not two
+ * independent handlers.
  *
  * @example
  * ```ts
@@ -3111,8 +3167,9 @@ const OnPatchDraft = buildOnCRUD({ event: 'PATCH', eventKind: 'ON', isDraft: tru
  * Registers `srv.on('DISCARD', <Entity>.drafts, callback)`.
  *
  * @remarks
- * `DISCARD` is CAP's canonical alias of `CANCEL` on `.drafts` since `@sap/cds` 10. `@OnCancelDraft`
- * (`CANCEL`) is the same moment under the older event name.
+ * `DISCARD` is an alias CAP normalizes to `CANCEL` at registration time: `@OnCancelDraft` produces the
+ * byte-identical registration (`req.event` is `'CANCEL'` at runtime, never `'DISCARD'`), so stacking
+ * both builds a `next()` interceptor chain, not two independent handlers.
  *
  * @example
  * ```ts
@@ -3140,13 +3197,15 @@ const OnDiscardDraft = buildOnCRUD({ event: 'DISCARD', eventKind: 'ON', isDraft:
  * Executes custom logic INSIDE the transaction, immediately before commit, after all other handlers of
  * the request (including handlers of other services touched by the same request) have run — throwing
  * here VETOES the commit and the error is returned to the client.
- * Registers via the request's root event context — `req.context.before('commit', callback)` — attached
- * once per root request through a `srv.prepend`-installed `srv.before('*', ...)` hook.
+ * Registers `req.before('commit', callback)` — a sub-request call that writes to the ROOT event
+ * context's shared emitter — attached once per root request through a `srv.prepend`-installed
+ * `srv.before('*', ...)` hook.
  *
  * @remarks
  * Runs `once` per ROOT request (once per OData `$batch` changeset). Hosted in an `@EntityHandler` class
  * it is scoped to requests targeting that entity; hosted in an `@UnboundActions` class it applies to
- * every request of the service. The injected `req` is the FIRST sub-request of the root request that
+ * every request of the service — EXCEPT background dispatches of the persistent event queue, whose
+ * deserialized task context cannot host lifecycle hooks (they are skipped by design). The injected `req` is the FIRST sub-request of the root request that
  * reached this hook — validate PER OPERATION in `@BeforeCreate` & co, and keep `@BeforeCommit` for
  * CROSS-REQUEST / final-state invariants that need to read the current database state. Registers on the
  * ACTIVE entity only — for `@odata.draft.enabled` entities the draft-editing roundtrip
@@ -3177,13 +3236,15 @@ const BeforeCommit = buildRequestLifecycle({ event: 'BEFORE_COMMIT' });
 /**
  * Executes custom logic only AFTER the transaction of the current request was durably committed, OUTSIDE
  * any transaction — errors CANNOT veto anything anymore, they are caught and logged by the dispatcher.
- * Registers via the request's root event context — `req.context.on('succeeded', callback)` — attached
- * once per root request through a `srv.prepend`-installed `srv.before('*', ...)` hook.
+ * Registers `req.on('succeeded', callback)` — a sub-request call that writes to the ROOT event
+ * context's shared emitter — attached once per root request through a `srv.prepend`-installed
+ * `srv.before('*', ...)` hook.
  *
  * @remarks
  * Runs `once` per ROOT request (once per OData `$batch` changeset). Hosted in an `@EntityHandler` class
  * it is scoped to requests targeting that entity; hosted in an `@UnboundActions` class it applies to
- * every request of the service. The request's transaction is already CLOSED by the time this handler
+ * every request of the service — EXCEPT background dispatches of the persistent event queue, whose
+ * deserialized task context cannot host lifecycle hooks (they are skipped by design). The request's transaction is already CLOSED by the time this handler
  * runs — a plain query fails; open a NEW transaction with `await cds.tx(async () => { ... })` for any
  * database work. Registers on the ACTIVE entity only — for `@odata.draft.enabled` entities the
  * draft-editing roundtrip does NOT fire it, only draft ACTIVATION does. Across multiple handler classes,
@@ -3211,13 +3272,15 @@ const AfterCommit = buildRequestLifecycle({ event: 'AFTER_COMMIT' });
 /**
  * Executes custom logic AFTER the transaction of the current request was rolled back, OUTSIDE any
  * transaction — errors CANNOT veto anything anymore, they are caught and logged by the dispatcher.
- * Registers via the request's root event context — `req.context.on('failed', callback)` — attached once
- * per root request through a `srv.prepend`-installed `srv.before('*', ...)` hook.
+ * Registers `req.on('failed', callback)` — a sub-request call that writes to the ROOT event context's
+ * shared emitter — attached once per root request through a `srv.prepend`-installed
+ * `srv.before('*', ...)` hook.
  *
  * @remarks
  * Runs `once` per ROOT request (once per OData `$batch` changeset). Hosted in an `@EntityHandler` class
  * it is scoped to requests targeting that entity; hosted in an `@UnboundActions` class it applies to
- * every request of the service. The request's transaction is already CLOSED (rolled back) by the time
+ * every request of the service — EXCEPT background dispatches of the persistent event queue, whose
+ * deserialized task context cannot host lifecycle hooks (they are skipped by design). The request's transaction is already CLOSED (rolled back) by the time
  * this handler runs — a plain query fails; open a NEW transaction with `await cds.tx(async () => { ...
  * })` for any database work. Registers on the ACTIVE entity only — for `@odata.draft.enabled` entities
  * the draft-editing roundtrip does NOT fire it, only draft ACTIVATION does. Across multiple handler
@@ -3246,13 +3309,15 @@ const AfterRollback = buildRequestLifecycle({ event: 'AFTER_ROLLBACK' });
  * Executes custom logic when the current request is done, no matter if it succeeded or failed —
  * `finally` semantics — OUTSIDE any transaction; errors CANNOT veto anything anymore, they are caught and
  * logged by the dispatcher.
- * Registers via the request's root event context — `req.context.on('done', callback)` — attached once
- * per root request through a `srv.prepend`-installed `srv.before('*', ...)` hook.
+ * Registers `req.on('done', callback)` — a sub-request call that writes to the ROOT event context's
+ * shared emitter — attached once per root request through a `srv.prepend`-installed
+ * `srv.before('*', ...)` hook.
  *
  * @remarks
  * Runs `once` per ROOT request (once per OData `$batch` changeset). Hosted in an `@EntityHandler` class
  * it is scoped to requests targeting that entity; hosted in an `@UnboundActions` class it applies to
- * every request of the service. The request's transaction is already CLOSED by the time this handler
+ * every request of the service — EXCEPT background dispatches of the persistent event queue, whose
+ * deserialized task context cannot host lifecycle hooks (they are skipped by design). The request's transaction is already CLOSED by the time this handler
  * runs — a plain query fails; open a NEW transaction with `await cds.tx(async () => { ... })` for any
  * database work. Registers on the ACTIVE entity only — for `@odata.draft.enabled` entities the
  * draft-editing roundtrip does NOT fire it, only draft ACTIVATION does. Across multiple handler classes,

@@ -7,8 +7,10 @@
  * - Decorators do NO work at decoration time; they only write metadata (reflect-metadata).
  * - Everything registers once at bootstrap: `new CDSDispatcher([Handler, …]).initialize()`
  *   returns `cds.service.impl(...)`. A handler class NOT passed to `CDSDispatcher` is silently inert.
- * - `@EntityHandler(Entity)` binds a class to a CDS-Typer entity; method decorators map 1:1 onto
- *   CAP registrations (`srv.before/on/after/prepend`). `…Draft` variants target `entity.drafts`.
+ * - `@EntityHandler(Entity)` binds a class to a CDS-Typer entity; method decorators map onto CAP
+ *   registrations — `srv.before/on/after/prepend` for request handlers, `cds.on` for `@ServerLifecycle`
+ *   hooks, per-request `req.before`/`req.on` for the request-lifecycle decorators. `…Draft` variants
+ *   target `entity.drafts`.
  * - Required consumer tsconfig: `"experimentalDecorators": true`, `"emitDecoratorMetadata": true`.
  * - Peer dependency: dispatcher major ↔ `@sap/cds` major (v6 ↔ `@sap/cds ^10`).
  *

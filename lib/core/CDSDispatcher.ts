@@ -49,8 +49,9 @@ const registeredServerLifecycleClasses = new WeakSet<Constructable>();
  * - `initialize()` must be the module's export: CAP resolves the service implementation from it.
  * - A handler class NOT passed to the constructor is silently inert — its decorators only ever wrote
  *   metadata; nothing registers it.
- * - Method decorators map 1:1 onto CAP registrations (`srv.before/on/after/prepend`); `…Draft` variants
- *   target `entity.drafts`.
+ * - Method decorators map onto CAP registrations — `srv.before/on/after/prepend` for request handlers,
+ *   `cds.on` for `@ServerLifecycle` hooks, per-request `req.before`/`req.on` for the request-lifecycle
+ *   decorators; `…Draft` variants target `entity.drafts`.
  * - Required consumer tsconfig: `"experimentalDecorators": true`, `"emitDecoratorMetadata": true`.
  * - Peer dependency: dispatcher major ↔ `@sap/cds` major (v6 ↔ `@sap/cds ^10`).
  *

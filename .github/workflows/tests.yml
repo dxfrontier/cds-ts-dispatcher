@@ -87,6 +87,7 @@ jobs:
           test "$COUNT" -ge 120
           grep -q "silently inert" dist/index.d.ts
           grep -q "experimentalDecorators" dist/index.d.ts
+          grep -q "drop the leading slash when copying" dist/index.d.ts
 
       - name: Verify @dispatcher folder, index.ts file, and content
         run: npm run test:verifier

@@ -102,8 +102,9 @@ function Repository<Target extends new (...args: never) => unknown>() {
  *
  * @remarks
  * `scope` defaults to `'Transient'` (a new instance per injection); `'Singleton'` shares ONE instance
- * app-wide — its property values persist across requests and are visible to every injector, so use it
- * only for genuinely shared state. Like `@Repository`, it is not passed to `new CDSDispatcher([...])`
+ * per `CDSDispatcher` container (i.e. per CAP service implementation) — its property values persist
+ * across requests and are visible to every injector within that dispatcher, but SEPARATE dispatchers
+ * each construct their own instance. Use it only for genuinely shared state. Like `@Repository`, it is not passed to `new CDSDispatcher([...])`
  * directly: it takes effect once `@Inject`ed — directly or transitively — into a class that itself is in
  * that array; otherwise it is never instantiated.
  *
