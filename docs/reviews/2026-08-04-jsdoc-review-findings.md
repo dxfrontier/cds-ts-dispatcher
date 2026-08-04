@@ -10,7 +10,9 @@
 
 **Classification:** `DOC` = the prose is wrong, code behaves sensibly → fix wording. `CODE` = the doc describes the *intended/sensible* behavior and the implementation diverges → decide code-fix (+ tests) vs doc-fix. `GATE` = defect in review infrastructure. All findings below are **CONFIRMED** (traced in source; none rest on reviewer authority alone except where noted).
 
-**Status (2026-08-04, docs-only tranche):** ✅ **FIXED & shipped on this branch** — C1, C2, M1–M5, M7, M10–M17, N1–N9 (JSDoc prose in `lib/`, README mirrors for M1/M16, tests.yml escape-convention sentinel for N8). Gates at fix time: check clean · build + 3 d.ts sentinels PASS · unit 527/527. ⏳ **OPEN** — C3, C4, C5, C6, M6, M8, M9 (code-fix vs doc-fix fork, user decision pending) and M18 (gate hardening).
+**Status (2026-08-04, docs-only tranche):** ✅ **FIXED & shipped on this branch** — C1, C2, M1–M5, M7, M10–M17, N1–N9 (JSDoc prose in `lib/`, README mirrors for M1/M16, tests.yml escape-convention sentinel for N8). Gates at fix time: check clean · build + 3 d.ts sentinels PASS · unit 527/527.
+
+**Status (2026-08-04, code-fix tranche):** the code-fix fork was taken for all seven open defects. ✅ **M18** — gate hardened (`matchAll` + per-name expected declaration counts; red-proofed by stripping the wildcard `@EntityHandler` overload's JSDoc). ⏳ **IN PROGRESS** — C3, C4, C5, C6, M6, M8, M9 (red-first tests per the backlog below; status updated per commit).
 
 ---
 
@@ -126,4 +128,4 @@ Each gap that let a bug hide is the test to write:
 
 - **C1, C2, M1-M5, M7, M10-M17, N1-N9** — ✅ DONE: shipped as the docs-only tranche on this branch.
 - **C3, C4, C5, C6, M6, M8, M9** — OPEN: the docs describe the *intended* behavior; fixing the code is a behavior change requiring tests (backlog above). Recommended to fix in code: **C5** (data-leak footgun; note the fix must target `req.results`, which is what CAP replies from — not the swapped callback argument), **C3** (crash), **M8/M9** (silent correctness). If deferred, the corresponding JSDoc must be rewritten to the current behavior in the meantime — a published doc must not promise what the code doesn't do.
-- **M18** — OPEN: test-infra fix, independent of the fork.
+- **M18** — ✅ DONE: `AGENT_DOCS.test.ts` now `matchAll`s every documented declaration per name and pins the count (`EntityHandler: 2`); deleting either overload's JSDoc fails the gate.
