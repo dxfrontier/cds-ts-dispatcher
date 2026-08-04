@@ -112,7 +112,7 @@ function CatchAndSetErrorCode(newStatusCode: keyof StatusCodeMapping) {
  * class BookHandler {
  *   /@OnUpdate()
  *   /@CatchAndSetErrorMessage('User data could not be retrieved', 'NOT_FOUND-404')
- *   private async onUpdate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *   private async onUpdate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
  *     await axios.get(`https://example.invalid/users/${req.data.ID}`); // any error becomes 404 with this message
  *     return next();
  *   }
@@ -144,7 +144,9 @@ function CatchAndSetErrorMessage(newMessage: string, newStatusCode?: keyof Statu
 /**
  * Registers a callback that runs BEFORE all other registered handlers of the given draft-lifecycle event
  * (the draft counterpart of `@Prepend`).
- * Registers `srv.prepend(callback)`.
+ * Registers `srv.prepend(() => srv.before|after|on(event, entity, callback))` — the wrapped registration
+ * call matches the target decorator's own phase (`BEFORE` → `srv.before`, `AFTER` → `srv.after`, `ON` →
+ * `srv.on`).
  *
  * @remarks
  * `options.eventDecorator` names the target Draft-suffixed decorator (e.g. `'BeforeReadDraft'`,
@@ -206,7 +208,9 @@ function PrependDraft(options: PrependBaseDraft) {
 /**
  * Registers a callback that runs BEFORE all other registered handlers of the given event (whichever
  * decorator `options.eventDecorator` names).
- * Registers `srv.prepend(callback)`.
+ * Registers `srv.prepend(() => srv.before|after|on(event, entity, callback))` — the wrapped registration
+ * call matches the target decorator's own phase (`BEFORE` → `srv.before`, `AFTER` → `srv.after`, `ON` →
+ * `srv.on`).
  *
  * @remarks
  * `options.eventDecorator` accepts the BEFORE (`'BeforeCreate'`, ..., `'BeforeAll'`), AFTER
@@ -473,10 +477,13 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
  * Valid on `@BeforeCreate`, `@BeforeUpdate`, `@OnCreate`, `@OnUpdate`, `@OnAction`, `@OnBoundAction`,
  * `@OnFunction`, `@OnBoundFunction` — anywhere `req.data` carries the fields to check. `validator.action`
  * picks a built-in check (`'isEmail'`, `'isLength'`, `'contains'`, `'matches'`, ..., see the validator.js
- * catalogue in the README); `validator.options.exposeValidatorResult: true` additionally makes the
- * pass/fail flags readable via the `@ValidationResults` parameter decorator instead of just rejecting.
- * Sibling: `@FieldsFormatter` runs the same `BEFORE`/`ON` pass but transforms instead of rejecting. Stack
- * multiple `@Validate` decorators to check multiple fields/rules on the same handler.
+ * catalogue in the README); `validator.options` is that check's OWN per-validator options (validator.js's
+ * 2nd argument, e.g. `isLength`'s `{ min, max }`), forwarded verbatim.
+ * `validator.exposeValidatorResult: true` is a separate, TOP-LEVEL flag (a sibling of `action`, NOT
+ * nested under `options`) that additionally makes the pass/fail flags readable via the
+ * `@ValidationResults` parameter decorator instead of just rejecting. Sibling: `@FieldsFormatter` runs
+ * the same `BEFORE`/`ON` pass but transforms instead of rejecting. Stack multiple `@Validate` decorators
+ * to check multiple fields/rules on the same handler.
  *
  * @example
  * ```ts
@@ -2042,11 +2049,16 @@ const AfterBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'AFTER'
  * Registers `srv.on('*', <Entity>, callback)`.
  *
  * @remarks
- * `'*'` matches every `ON`-phase event on the entity — the narrower siblings (`@OnCreate`, `@OnRead`,
- * `@OnUpdate`, `@OnDelete`, `@OnBoundAction`, `@OnBoundFunction`) still fire too when their specific event
- * matches. `@OnAction`, `@OnFunction`, `@OnEvent`, `@OnError` are excluded — they are bound to the
- * service itself, not to an entity, so a `'*'` scoped to `<Entity>` never reaches them. Registers against
- * whatever the host `@EntityHandler` resolved: the specific active entity for a normal host — pair with
+ * `'*'` matches every `ON`-phase event on the entity, but `ON` handlers do NOT all run the way
+ * `BEFORE`/`AFTER` handlers do (CAP runs every matching `BEFORE`/`AFTER` handler in parallel). For a
+ * normal, reply-expecting request CAP dispatches matching `.on` handlers as an INTERCEPTOR STACK, in
+ * REGISTRATION order: only the FIRST match runs; a narrower sibling (`@OnCreate`, `@OnRead`, `@OnUpdate`,
+ * `@OnDelete`, `@OnBoundAction`, `@OnBoundFunction`) registered for the same event only runs if that
+ * first handler calls `next()` — and, symmetrically, `@OnAll` itself only runs when it is NOT the
+ * first-registered match. `@OnAction`, `@OnFunction`, `@OnEvent`, `@OnError` are excluded — they are
+ * bound to the service itself, not to an entity, so a `'*'` scoped to `<Entity>` never reaches them.
+ * Registers against whatever the host `@EntityHandler` resolved: the specific active entity for a
+ * normal host — pair with
  * `@OnAllDraft` for the equivalent wildcard on `<Entity>.drafts` there — or `'*'` (every entity, DRAFTS
  * INCLUDED, since CAP drops the path filter entirely for a `'*'` target) when the class is
  * `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)`. On that host the `Draft` variant has no additional
@@ -2081,8 +2093,11 @@ const OnAll = buildOnCRUD({ event: '*', eventKind: 'ON', isDraft: false });
  * `@OnEditDraft` / `@OnSaveDraft`, which register against the ACTIVE entity (`EDIT`/`SAVE` are not
  * `.drafts` events) — use `@OnAll` for those. On an `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)` host,
  * `@OnAll` ALREADY registers `srv.on('*', '*', callback)` — CAP drops the path filter entirely for `'*'`,
- * so drafts of every entity are included there too, and adding this decorator only double-fires every
- * draft event.
+ * so drafts AND actives of every entity are included there too. Because both register the byte-identical
+ * `srv.on('*', '*', callback)`, adding `@OnAllDraft` there does NOT create two handlers that both fire —
+ * `ON` handlers dispatch as a REGISTRATION-order interceptor stack (see `@OnAll`'s own remarks), so it
+ * becomes a second link in the SAME `'*'`/`'*'` stack: only the first-registered of the two runs, and the
+ * other runs only if that first one calls `next()`.
  *
  * @example
  * ```ts
@@ -2108,16 +2123,18 @@ const OnAllDraft = buildOnCRUD({ event: '*', eventKind: 'ON', isDraft: true });
  * @remarks
  * Unlike `@BeforeCreate` (validation before the write) or `@AfterCreate` (post-processing after it), this
  * REPLACES the write itself — without `return next()` (or your own persistence call), nothing is ever
- * written. Fires alongside `@OnAll`, if also present. Draft variant: `@OnCreateDraft` (a literal `CREATE`
- * issued directly against `<Entity>.drafts` — NOT the Fiori Elements "New" action, which is
- * `@OnNewDraft`).
+ * written. If `@OnAll` is ALSO present on the same host, only ONE of the two runs for a given `CREATE`
+ * request — CAP dispatches matching `.on` handlers as a REGISTRATION-order interceptor stack (see
+ * `@OnAll`'s own remarks): whichever of `@OnCreate` / `@OnAll` is registered first runs, and the other
+ * runs only if that first one calls `next()`. Draft variant: `@OnCreateDraft` (a literal `CREATE` issued
+ * directly against `<Entity>.drafts` — NOT the Fiori Elements "New" action, which is `@OnNewDraft`).
  *
  * @example
  * ```ts
  * /@EntityHandler(Book)
  * class BookHandler {
  *   /@OnCreate()
- *   private async onCreate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *   private async onCreate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
  *     // ... custom persistence, or:
  *     return next();
  *   }
@@ -2147,7 +2164,7 @@ const OnCreate = buildOnCRUD({ event: 'CREATE', eventKind: 'ON', isDraft: false 
  * /@EntityHandler(Book)
  * class BookHandler {
  *   /@OnCreateDraft()
- *   private async onCreateDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *   private async onCreateDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
  *     return next();
  *   }
  * }
@@ -2174,7 +2191,7 @@ const OnCreateDraft = buildOnCRUD({ event: 'CREATE', eventKind: 'ON', isDraft: t
  * /@EntityHandler(Book)
  * class BookHandler {
  *   /@OnRead()
- *   private async onRead(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book[]> {
+ *   private async onRead(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
  *     // ... custom fetch, or:
  *     return next();
  *   }
@@ -2201,7 +2218,7 @@ const OnRead = buildOnCRUD({ event: 'READ', eventKind: 'ON', isDraft: false });
  * /@EntityHandler(Book)
  * class BookHandler {
  *   /@OnReadDraft()
- *   private async onReadDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book[]> {
+ *   private async onReadDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
  *     return next();
  *   }
  * }
@@ -2228,7 +2245,7 @@ const OnReadDraft = buildOnCRUD({ event: 'READ', eventKind: 'ON', isDraft: true 
  * /@EntityHandler(Book)
  * class BookHandler {
  *   /@OnUpdate()
- *   private async onUpdate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *   private async onUpdate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
  *     return next();
  *   }
  * }
@@ -2255,7 +2272,7 @@ const OnUpdate = buildOnCRUD({ event: 'UPDATE', eventKind: 'ON', isDraft: false 
  * /@EntityHandler(Book)
  * class BookHandler {
  *   /@OnUpdateDraft()
- *   private async onUpdateDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *   private async onUpdateDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
  *     return next();
  *   }
  * }
