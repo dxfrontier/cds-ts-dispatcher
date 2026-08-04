@@ -40,9 +40,22 @@ type RequestLifecycleContext = {
 const registeredServerLifecycleClasses = new WeakSet<Constructable>();
 
 /**
- * `CDSDispatcher` is responsible for managing and registering event handlers for entities within the CDS framework.
+ * `CDSDispatcher` registers the event handlers declared by handler classes against the CDS framework, then
+ * hands the result to `cds.service.impl(...)`. It supports events such as `Before`, `After`, `On`, and `Prepend`.
  *
- * It supports events such as `Before`, `After`, `On`, and `Prepend`.
+ * @remarks
+ * - The constructor takes ALL handler classes for the service in one array — entity handlers
+ *   (`@EntityHandler`), `@UnboundActions` classes, and `@ServerLifecycle` classes alike.
+ * - `initialize()` must be the module's export: CAP resolves the service implementation from it.
+ * - A handler class NOT passed to the constructor is silently inert — its decorators only ever wrote
+ *   metadata; nothing registers it.
+ *
+ * @example
+ * // service implementation file referenced from your .cds `@impl`
+ * import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
+ * import { BookHandler } from './handler/BookHandler';
+ *
+ * export = new CDSDispatcher([BookHandler]).initialize();
  */
 class CDSDispatcher {
   /**
