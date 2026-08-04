@@ -921,10 +921,14 @@ function buildOnCRUD<Target extends object>(options: {
  * @remarks
  * `'*'` matches every `BEFORE`-phase event on the entity — the narrower siblings (`@BeforeCreate`,
  * `@BeforeRead`, `@BeforeUpdate`, `@BeforeDelete`, `@BeforeBoundAction`, `@BeforeBoundFunction`) still
- * fire too when their specific event matches; both run. Registers ONLY against the active entity — use
- * `@BeforeAllDraft` for the equivalent wildcard on `<Entity>.drafts`. `@BeforeEditDraft` /
- * `@BeforeSaveDraft` also target the active entity, so those draft-lifecycle moments already reach this
- * handler.
+ * fire too when their specific event matches; both run. Registers against whatever the host
+ * `@EntityHandler` resolved: the specific active entity for a normal host — pair with `@BeforeAllDraft`
+ * for the equivalent wildcard on `<Entity>.drafts` there (`@BeforeEditDraft` / `@BeforeSaveDraft` already
+ * reach this handler, since those also target the active entity) — or `'*'` (every entity, DRAFTS
+ * INCLUDED, since CAP drops the path filter entirely for a `'*'` target) when the class is
+ * `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)`. On that host the `Draft` variant has no additional
+ * effect — both register the identical `srv.before('*', '*', callback)`, so adding `@BeforeAllDraft`
+ * there only double-fires every draft event.
  *
  * @example
  * ```ts
@@ -950,8 +954,12 @@ const BeforeAll = buildBefore({ event: '*', eventKind: 'BEFORE', isDraft: false 
  *
  * @remarks
  * The draft counterpart of `@BeforeAll` — same wildcard, scoped to `<Entity>.drafts` instead of the
- * active entity. It does NOT see `@BeforeEditDraft` / `@BeforeSaveDraft`, which register against the
- * ACTIVE entity (`EDIT` / `SAVE` are not `.drafts` events); use `@BeforeAll` for those.
+ * active entity. Meaningful ONLY on a normal, entity-scoped `@EntityHandler` host: there it does NOT see
+ * `@BeforeEditDraft` / `@BeforeSaveDraft`, which register against the ACTIVE entity (`EDIT` / `SAVE` are
+ * not `.drafts` events) — use `@BeforeAll` for those. On an `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)`
+ * host, `@BeforeAll` ALREADY registers `srv.before('*', '*', callback)` — CAP drops the path filter
+ * entirely for `'*'`, so drafts of every entity are included there too, and adding this decorator only
+ * double-fires every draft event.
  *
  * @example
  * ```ts
@@ -1001,10 +1009,11 @@ const BeforeCreate = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', isDraft
  * Registers `srv.before('CREATE', <Entity>.drafts, callback)`.
  *
  * @remarks
- * NOT the Fiori Elements "New" draft action — that is CAP's `NEW` event, handled by `@BeforeNewDraft`.
- * `@BeforeCreateDraft` only fires for a literal `CREATE` (`INSERT`) issued straight at `<Entity>.drafts`
- * (e.g. a plain OData `POST` against the drafts collection, or a programmatic `INSERT`). Active-entity
- * counterpart: `@BeforeCreate`.
+ * NOT the Fiori Elements "New" draft action — a protocol-borne (HTTP/OData) `POST` against a
+ * draft-enabled entity is itself rewritten to CAP's `NEW` event (handled by `@BeforeNewDraft`) unless the
+ * payload explicitly sets `IsActiveEntity: true`. `@BeforeCreateDraft` only fires for a literal `CREATE`
+ * issued WITHOUT a protocol straight at `<Entity>.drafts` — a programmatic `INSERT.into(<Entity>.drafts)`
+ * or `srv.send('CREATE', <Entity>.drafts, ...)`. Active-entity counterpart: `@BeforeCreate`.
  *
  * @example
  * ```ts
@@ -1012,7 +1021,7 @@ const BeforeCreate = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', isDraft
  * class BookHandler {
  *   /@BeforeCreateDraft()
  *   private async beforeCreateDraft(@Req() req: Request<Book>): Promise<void> {
- *     // ... runs only for a direct INSERT into Book.drafts
+ *     // ... runs only for a protocol-less INSERT straight into Book.drafts (e.g. srv.send)
  *   }
  * }
  * ```
@@ -1279,10 +1288,14 @@ const BeforeBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'BEFOR
  * `@AfterRead`, `@AfterUpdate`, `@AfterDelete`, `@AfterBoundAction`, `@AfterBoundFunction`) still fire
  * too when their specific event matches; both run. The injected payload shape varies with the event —
  * an array for `READ`, a single object for `CREATE`/`UPDATE`, a `boolean` for `DELETE` — narrow it at
- * runtime (`Array.isArray(result)`, `typeof result === 'boolean'`). Registers ONLY against the active
- * entity — use `@AfterAllDraft` for the equivalent wildcard on `<Entity>.drafts`. `@AfterEditDraft` /
- * `@AfterSaveDraft` also target the active entity, so those draft-lifecycle moments already reach this
- * handler.
+ * runtime (`Array.isArray(result)`, `typeof result === 'boolean'`). Registers against whatever the host
+ * `@EntityHandler` resolved: the specific active entity for a normal host — pair with `@AfterAllDraft`
+ * for the equivalent wildcard on `<Entity>.drafts` there (`@AfterEditDraft` / `@AfterSaveDraft` already
+ * reach this handler, since those also target the active entity) — or `'*'` (every entity, DRAFTS
+ * INCLUDED, since CAP drops the path filter entirely for a `'*'` target) when the class is
+ * `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)`. On that host the `Draft` variant has no additional
+ * effect — both register the identical `srv.after('*', '*', callback)`, so adding `@AfterAllDraft` there
+ * only double-fires every draft event.
  *
  * @example
  * ```ts
@@ -1314,8 +1327,11 @@ const AfterAll = buildAfter({ event: '*', eventKind: 'AFTER', isDraft: false });
  *
  * @remarks
  * The draft counterpart of `@AfterAll` — same wildcard, scoped to `<Entity>.drafts` instead of the
- * active entity. It does NOT see `@AfterEditDraft` / `@AfterSaveDraft`, which register against the
- * ACTIVE entity; use `@AfterAll` for those.
+ * active entity. Meaningful ONLY on a normal, entity-scoped `@EntityHandler` host: there it does NOT see
+ * `@AfterEditDraft` / `@AfterSaveDraft`, which register against the ACTIVE entity — use `@AfterAll` for
+ * those. On an `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)` host, `@AfterAll` ALREADY registers
+ * `srv.after('*', '*', callback)` — CAP drops the path filter entirely for `'*'`, so drafts of every
+ * entity are included there too, and adding this decorator only double-fires every draft event.
  *
  * @example
  * ```ts
@@ -1361,9 +1377,11 @@ const AfterCreate = buildAfter({ event: 'CREATE', eventKind: 'AFTER', isDraft: f
  * Registers `srv.after('CREATE', <Entity>.drafts, callback)`.
  *
  * @remarks
- * NOT the Fiori Elements "New" draft action — that is CAP's `NEW` event, handled by `@AfterNewDraft`.
- * `@AfterCreateDraft` only fires for a literal `CREATE` issued straight at `<Entity>.drafts`.
- * Active-entity counterpart: `@AfterCreate`.
+ * NOT the Fiori Elements "New" draft action — a protocol-borne (HTTP/OData) `POST` against a
+ * draft-enabled entity is itself rewritten to CAP's `NEW` event (handled by `@AfterNewDraft`) unless the
+ * payload explicitly sets `IsActiveEntity: true`. `@AfterCreateDraft` only fires for a literal `CREATE`
+ * issued WITHOUT a protocol straight at `<Entity>.drafts` — a programmatic `INSERT.into(<Entity>.drafts)`
+ * or `srv.send('CREATE', <Entity>.drafts, ...)`. Active-entity counterpart: `@AfterCreate`.
  *
  * @example
  * ```ts
@@ -1664,7 +1682,8 @@ const AfterAction = buildAction({ event: 'ACTION', eventKind: 'AFTER', isDraft: 
  * @remarks
  * Must be hosted in an `@EntityHandler` class — the registration needs that class's resolved entity;
  * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound functions:
- * `@AfterBoundFunction`; unbound counterpart: `@AfterAction`.
+ * `@AfterBoundFunction`; unbound counterpart: `@AfterAction`. README has no dedicated `@AfterBoundAction`
+ * section; the closest coverage is `@BeforeBoundAction`.
  *
  * @example
  * ```ts
@@ -1686,7 +1705,8 @@ const AfterBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'AFTER'
  *
  * @remarks
  * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
- * unbound actions: `@AfterAction`; bound counterpart: `@AfterBoundFunction`.
+ * unbound actions: `@AfterAction`; bound counterpart: `@AfterBoundFunction`. README has no dedicated
+ * `@AfterFunction` section; the closest coverage is `@BeforeFunction`.
  *
  * @example
  * ```ts
@@ -1709,7 +1729,8 @@ const AfterFunction = buildAction({ event: 'FUNC', eventKind: 'AFTER', isDraft: 
  * @remarks
  * Must be hosted in an `@EntityHandler` class — the registration needs that class's resolved entity;
  * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound actions:
- * `@AfterBoundAction`; unbound counterpart: `@AfterFunction`.
+ * `@AfterBoundAction`; unbound counterpart: `@AfterFunction`. README has no dedicated
+ * `@AfterBoundFunction` section; the closest coverage is `@BeforeBoundFunction`.
  *
  * @example
  * ```ts
@@ -1938,8 +1959,10 @@ const OnCancelDraft = buildOnCRUD({ event: 'CANCEL', eventKind: 'ON', isDraft: t
  * Registers `srv.before('NEW', <Entity>.drafts, callback)`.
  *
  * @remarks
- * NOT a literal `CREATE` against `.drafts` — that is `@BeforeCreateDraft`. `@BeforeNewDraft` is CAP's
- * dedicated draft-creation event, fired when a user starts editing a brand-new instance. Pairs with
+ * The event a real, protocol-borne (HTTP/OData) "New" request actually dispatches as — CAP rewrites a
+ * `POST` against a draft-enabled entity from `CREATE` to `NEW` unless the payload explicitly sets
+ * `IsActiveEntity: true`. A literal, protocol-less `CREATE` straight against `.drafts` (e.g. a
+ * programmatic `INSERT`/`srv.send`) is the separate, narrower `@BeforeCreateDraft`. Pairs with
  * `@AfterNewDraft` / `@OnNewDraft`.
  *
  * @example
@@ -2015,7 +2038,11 @@ const BeforeEditDraft = buildBefore({ event: 'EDIT', eventKind: 'BEFORE', isDraf
  * @remarks
  * Despite the "Draft" in its name this registers on the active entity: `SAVE` is the final validation
  * gate before the draft's data becomes the active instance's data. Pairs with `@AfterSaveDraft` /
- * `@OnSaveDraft`.
+ * `@OnSaveDraft`. CAP expands a `SAVE` registration into `[CREATE, UPSERT, UPDATE]` on the given path;
+ * the "only during draft-activation" gate CAP applies to that expansion is keyed on the path ending in
+ * `.drafts` — since this decorator's path is the ACTIVE entity, the gate never applies, so the handler
+ * ALSO runs for ordinary direct writes on the active entity (e.g. a `@sap/cds` 10 `PATCH
+ * ...IsActiveEntity=true` under `cds.fiori.bypass_draft`), not only for genuine draft activation.
  *
  * @example
  * ```ts
@@ -2038,8 +2065,10 @@ const BeforeSaveDraft = buildBefore({ event: 'SAVE', eventKind: 'BEFORE', isDraf
  * Registers `srv.after('NEW', <Entity>.drafts, callback)`.
  *
  * @remarks
- * NOT a literal `CREATE` against `.drafts` — that is `@AfterCreateDraft`. Pairs with `@BeforeNewDraft` /
- * `@OnNewDraft`.
+ * The event a real, protocol-borne (HTTP/OData) "New" request actually dispatches as — CAP rewrites a
+ * `POST` against a draft-enabled entity from `CREATE` to `NEW` unless the payload explicitly sets
+ * `IsActiveEntity: true`. A literal, protocol-less `CREATE` straight against `.drafts` is the separate,
+ * narrower `@AfterCreateDraft`. Pairs with `@BeforeNewDraft` / `@OnNewDraft`.
  *
  * @example
  * ```ts
@@ -2108,7 +2137,12 @@ const AfterEditDraft = buildAfter({ event: 'EDIT', eventKind: 'AFTER', isDraft: 
  *
  * @remarks
  * Despite the "Draft" in its name this registers on the active entity, mirroring `@BeforeSaveDraft`.
- * `@Result` receives the now-active entity data. Pairs with `@OnSaveDraft`.
+ * `@Result` receives the now-active entity data. Pairs with `@OnSaveDraft`. CAP expands a `SAVE`
+ * registration into `[CREATE, UPSERT, UPDATE]` on the given path; the "only during draft-activation" gate
+ * CAP applies to that expansion is keyed on the path ending in `.drafts` — since this decorator's path is
+ * the ACTIVE entity, the gate never applies, so the handler ALSO runs for ordinary direct writes on the
+ * active entity (e.g. a `@sap/cds` 10 `PATCH ...IsActiveEntity=true` under `cds.fiori.bypass_draft`), not
+ * only for genuine draft activation.
  *
  * @example
  * ```ts
