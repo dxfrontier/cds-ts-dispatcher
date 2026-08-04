@@ -42,13 +42,15 @@
  * `@AfterReadSingleInstance` when a single entity is requested by key. Draft variant: `@AfterReadDraft`.
  *
  * @example
- * @EntityHandler(Book)
+ * ```ts
+ * /@EntityHandler(Book)
  * class BookHandler {
- *   @AfterRead()
+ *   /@AfterRead()
  *   private async enrich(@Results() results: Book[], @Req() req: Request): Promise<void> {
  *     results.forEach((book) => (book.discount = '10%'));
  *   }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterread | CDS-TS-Dispatcher - @AfterRead}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRead
@@ -62,6 +64,7 @@ Hard rules, per site:
 3. Exactly one `@example`, compilable against the real signatures, showing the host class decorator and typical parameter decorators. Parameter decorators get the richest examples (what is injected, when it is `undefined`).
 4. Keep the existing `@see` GitHub anchor; add the local-path plain-text line.
 5. Replace the existing thin one-liner block entirely; never stack two JSDoc blocks.
+6. Inside `@example`: wrap the code in a ` ```ts ` fence, and escape decorators AT LINE START with a leading slash (`/@EntityHandler(...)`) — TypeScript's JSDoc parser treats a line-leading `@` as a new block tag even inside fences, which would truncate the example (this is the repo's pre-existing convention; see the old `@Env`/`@Diff` blocks). Mid-line decorators (e.g. parameter decorators after an opening parenthesis) stay unescaped. Summaries/remarks may reference decorators inline (`@AfterRead`) freely — only line-start positions inside the comment are affected.
 
 ---
 
@@ -220,11 +223,13 @@ Two fully-worked references (the rest follow the template + hard rules):
  * Unbound actions belong in an `@UnboundActions` class; server lifecycle hooks in `@ServerLifecycle`.
  *
  * @example
- * @EntityHandler(Book)
+ * ```ts
+ * /@EntityHandler(Book)
  * class BookHandler {
- *   @AfterRead()
+ *   /@AfterRead()
  *   private async enrich(@Results() results: Book[], @Req() req: Request): Promise<void> { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#entityhandler | CDS-TS-Dispatcher - @EntityHandler}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § EntityHandler
@@ -233,20 +238,24 @@ Two fully-worked references (the rest follow the template + hard rules):
 
 ```ts
 /**
- * Injects the typed `cds.env` project configuration (generated into `@dispatcher/index.ts` by the
- * postinstall) into the decorated parameter.
+ * Injects one value from the project's `cds.env` configuration, resolved by dotted path.
+ * Signature: `@Env<CDS_ENV>('<dotted.path>')` — the path is REQUIRED (`PropertyStringPath<T>`);
+ * the whole env object is never injected.
  *
  * @remarks
- * The type comes from the consumer project's own `CDS_ENV`; import it via the `#dispatcher` alias.
- * If the postinstall was skipped (warning in the install log), the value is still injected but untyped.
+ * Type the generic with the consumer project's own `CDS_ENV` (generated into `@dispatcher/index.ts`
+ * by the postinstall; import via the `#dispatcher` alias). If the postinstall was skipped, the value
+ * still resolves at runtime but the path loses its typing.
  *
  * @example
+ * ```ts
  * import type { CDS_ENV } from '#dispatcher';
  *
- * @AfterRead()
- * private async read(@Results() results: Book[], @Env() env: CDS_ENV): Promise<void> {
- *   if (env.requires.db.kind === 'sqlite') { ... }
+ * /@AfterRead()
+ * private async read(@Results() results: Book[], @Env<CDS_ENV>('requires.db.kind') kind: string): Promise<void> {
+ *   if (kind === 'sqlite') { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#env | CDS-TS-Dispatcher - @Env}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Env
