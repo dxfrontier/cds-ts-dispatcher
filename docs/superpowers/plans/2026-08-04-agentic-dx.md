@@ -135,9 +135,11 @@ Expected: FAIL — most per-name cases red (only ~23 sites have `@example` today
 
 - [ ] **Step 4: Commit the red gate**
 
+`--no-verify` is REQUIRED on this and every commit through Task 4: the pre-commit hook runs the unit suite, and the gate is intentionally red until Task 5 completes. Lint/format are run manually in each step instead; commit messages stay conventional.
+
 ```bash
 git add test/__tests__/unit/AGENT_DOCS.test.ts
-git commit -m "test(agent-docs): add JSDoc drift gate (@example per export, package docs)
+git commit --no-verify -m "test(agent-docs): add JSDoc drift gate (@example per export, package docs)
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
@@ -191,7 +193,7 @@ In `lib/core/CDSDispatcher.ts`, replace the existing class-level JSDoc (directly
 npx jest test/__tests__/unit/AGENT_DOCS.test.ts --selectProjects unit -t "packageDocumentation"
 npx tsc --noEmit -p tsconfig.json && npm run check
 git add lib/index.ts lib/core/CDSDispatcher.ts
-git commit -m "docs(jsdoc): add @packageDocumentation header and CDSDispatcher bootstrap contract
+git commit --no-verify -m "docs(jsdoc): add @packageDocumentation header and CDSDispatcher bootstrap contract
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
@@ -261,7 +263,7 @@ Expected: remaining failures name only `method.ts` exports. (Simply re-run the f
 ```bash
 npx tsc --noEmit -p tsconfig.json && npm run check
 git add lib/decorators/class.ts lib/decorators/parameter.ts
-git commit -m "docs(jsdoc): canonical agent-oriented JSDoc for class and parameter decorators
+git commit --no-verify -m "docs(jsdoc): canonical agent-oriented JSDoc for class and parameter decorators
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
@@ -278,7 +280,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 npx jest test/__tests__/unit/AGENT_DOCS.test.ts --selectProjects unit
 npx tsc --noEmit -p tsconfig.json && npm run check
 git add lib/decorators/method.ts
-git commit -m "docs(jsdoc): canonical agent-oriented JSDoc for BEFORE/AFTER method decorators
+git commit --no-verify -m "docs(jsdoc): canonical agent-oriented JSDoc for BEFORE/AFTER method decorators
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
