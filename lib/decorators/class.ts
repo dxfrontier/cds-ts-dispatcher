@@ -16,17 +16,41 @@ import type CDS_DISPATCHER from '../constants/constants';
  * Unbound actions belong in an `@UnboundActions` class; server lifecycle hooks in `@ServerLifecycle`.
  *
  * @example
- * @EntityHandler(Book)
+ * ```ts
+ * /@EntityHandler(Book)
  * class BookHandler {
- *   @AfterRead()
+ *   /@AfterRead()
  *   private async enrich(@Results() results: Book[], @Req() req: Request): Promise<void> { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#entityhandler | CDS-TS-Dispatcher - @EntityHandler}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § EntityHandler
  */
 function EntityHandler<T>(entity: CDSTyperEntity<T>): (target: new (...args: never) => unknown) => void;
 
+/**
+ * Binds the handler class to every entity (the `CDS_DISPATCHER.ALL_ENTITIES` wildcard, i.e. the `'*'`
+ * literal) and marks it inversify-injectable.
+ *
+ * @remarks
+ * Same contract as the entity-specific overload — silently inert unless passed to
+ * `new CDSDispatcher([...])` — but every handler decorator inside the class fires for ALL entities
+ * instead of one. `@OnAction`, `@OnFunction`, `@OnEvent`, `@OnError` are excluded from that firing (they
+ * belong to the service itself, not to any entity); host them in an `@UnboundActions` class instead.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES) // or '*'
+ * class AllEntitiesHandler {
+ *   /@AfterRead()
+ *   private async logRead(@Results() results: unknown[], @Req() req: Request): Promise<void> { ... }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#entityhandler | CDS-TS-Dispatcher - @EntityHandler}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § EntityHandler
+ */
 function EntityHandler(entity: typeof CDS_DISPATCHER.ALL_ENTITIES): (target: new (...args: never) => unknown) => void;
 
 function EntityHandler<T>(entity: CDSTyperEntity<T> | typeof CDS_DISPATCHER.ALL_ENTITIES) {
@@ -49,17 +73,19 @@ function EntityHandler<T>(entity: CDSTyperEntity<T> | typeof CDS_DISPATCHER.ALL_
  * into repositories, not the other way around.
  *
  * @example
- * @Repository()
+ * ```ts
+ * /@Repository()
  * class BookRepository extends BaseRepository<Book> {
  *   constructor() {
  *     super(Book);
  *   }
  * }
  *
- * @EntityHandler(Book)
+ * /@EntityHandler(Book)
  * class BookHandler {
- *   @Inject(BookRepository) private repository: BookRepository;
+ *   /@Inject(BookRepository) private repository: BookRepository;
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#repository | CDS-TS-Dispatcher - @Repository}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Repository
@@ -82,15 +108,17 @@ function Repository<Target extends new (...args: never) => unknown>() {
  * that array; otherwise it is never instantiated.
  *
  * @example
- * @ServiceLogic('Singleton')
+ * ```ts
+ * /@ServiceLogic('Singleton')
  * class BookService {
  *   private cache = new Map<string, Book>();
  * }
  *
- * @EntityHandler(Book)
+ * /@EntityHandler(Book)
  * class BookHandler {
- *   @Inject(BookService) private service: BookService;
+ *   /@Inject(BookService) private service: BookService;
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#servicelogic | CDS-TS-Dispatcher - @ServiceLogic}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ServiceLogic
@@ -112,14 +140,13 @@ function ServiceLogic<Target extends new (...args: never) => unknown>(scope?: 'S
  * takes effect when passed to `new CDSDispatcher([...])` — otherwise it is silently inert.
  *
  * @example
- * @UnboundActions()
+ * ```ts
+ * /@UnboundActions()
  * class ActionsHandler {
- *   @OnAction(SubmitOrder)
- *   private async onSubmitOrder(
- *     @Req() req: ActionRequest<typeof SubmitOrder>,
- *     @Next() next: NextEvent,
- *   ): ActionReturn<typeof SubmitOrder> { ... }
+ *   /@OnAction(SubmitOrder)
+ *   private async onSubmitOrder(@Req() req: ActionRequest<typeof SubmitOrder>, @Next() next: NextEvent): ActionReturn<typeof SubmitOrder> { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#unboundactions | CDS-TS-Dispatcher - @UnboundActions}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § UnboundActions
@@ -145,17 +172,19 @@ function UnboundActions<Target extends new (...args: never) => unknown>() {
  * effect when passed to `new CDSDispatcher([...])` — otherwise it is silently inert.
  *
  * @example
- * @ServerLifecycle()
+ * ```ts
+ * /@ServerLifecycle()
  * class Bootstrap {
- *   @OnServed()
+ *   /@OnServed()
  *   public async seed(services: object): Promise<void> { ... }
  *
- *   @OnListening()
+ *   /@OnListening()
  *   public logUrl(payload: { server: unknown; url: string }): void { ... }
  *
- *   @OnShutdown()
+ *   /@OnShutdown()
  *   public async cleanup(error: Error | null): Promise<void> { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#serverlifecycle | CDS-TS-Dispatcher - @ServerLifecycle}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ServerLifecycle

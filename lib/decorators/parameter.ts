@@ -14,8 +14,10 @@ import type { PickQueryPropsByKey, CustomRequest, CRUDQueryKeys, PropertyStringP
  * Kept only for source compatibility with existing `@OnSubscribe` handlers.
  *
  * @example
- * @OnSubscribe({ eventName: 'BookOrdered', type: 'SAME_NODE_PROCESS' })
+ * ```ts
+ * /@OnSubscribe({ eventName: 'BookOrdered', type: 'SAME_NODE_PROCESS' })
  * private async onBookOrdered(@Msg() msg: Request<{ ID: string; amount: number }>): Promise<void> { ... }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#msg | CDS-TS-Dispatcher - @Msg}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Msg
@@ -32,8 +34,8 @@ function Msg(): ParameterDecorator {
 }
 
 /**
- * Injects a `boolean` switch telling the method whether the current request targets a single entity
- * instance (`true`) or the entity set (`false`).
+ * Annotates a parameter of a method with a `boolean` switch: whether the current request targets a
+ * single entity instance (`true`) or the entity set (`false`).
  *
  * @remarks
  * Derived from `req.params.length > 0` — only meaningful on `@AfterRead`, `@BeforeRead`, `@OnRead` (and
@@ -41,14 +43,12 @@ function Msg(): ParameterDecorator {
  * through the same handler.
  *
  * @example
- * @AfterRead()
- * private async enrich(
- *   @Results() results: Book[],
- *   @Req() req: Request<Book>,
- *   @SingleInstanceSwitch() isSingleInstance: boolean,
- * ): Promise<void> {
+ * ```ts
+ * /@AfterRead()
+ * private async enrich(@Results() results: Book[], @Req() req: Request<Book>, @SingleInstanceSwitch() isSingleInstance: boolean): Promise<void> {
  *   if (isSingleInstance) { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#singleinstanceswitch | CDS-TS-Dispatcher - @SingleInstanceSwitch}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § SingleInstanceSwitch
@@ -74,11 +74,13 @@ function SingleInstanceSwitch(): ParameterDecorator {
  * alias the import (`Error as ErrorDecorator`) if the file also throws/constructs `Error`s.
  *
  * @example
- * @UnboundActions()
+ * ```ts
+ * /@UnboundActions()
  * class ErrorHandler {
- *   @OnError()
+ *   /@OnError()
  *   private onError(@Error() err: Error, @Req() req: Request): void { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#error | CDS-TS-Dispatcher - @Error}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Error
@@ -105,10 +107,12 @@ function Error(): ParameterDecorator {
  * your handler.
  *
  * @example
- * @OnCreate()
+ * ```ts
+ * /@OnCreate()
  * public async onCreate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
  *   return next();
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#next | CDS-TS-Dispatcher - @Next}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Next
@@ -129,15 +133,18 @@ function Next(): ParameterDecorator {
  *
  * @remarks
  * `@Results` and `@Result` bind the same metadata under the hood — the split exists purely for
- * readability: use `@Results` when the payload is an array (`@AfterRead`, `@AfterReadEachInstance`),
- * `@Result` for a single object (`@AfterCreate`, `@AfterUpdate`) or a `boolean` (`@AfterDelete`).
- * Mutating the array in place changes the OData response.
+ * readability: use `@Results` when the payload is an array (`@AfterRead`), `@Result` for a single object
+ * (`@AfterCreate`, `@AfterUpdate`, `@AfterReadEachInstance` — invoked once per instance, analogous to
+ * `Array.prototype.forEach`) or a `boolean` (`@AfterDelete`). Mutating the array in place changes the
+ * OData response.
  *
  * @example
- * @AfterRead()
+ * ```ts
+ * /@AfterRead()
  * private async enrich(@Results() results: Book[], @Req() req: Request): Promise<void> {
  *   results.forEach((book) => (book.discount = '10%'));
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#results--result | CDS-TS-Dispatcher - @Results}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Results / Result
@@ -159,14 +166,17 @@ function Results(): ParameterDecorator {
  *
  * @remarks
  * `@Result` and `@Results` bind the same metadata under the hood — the split exists purely for
- * readability: use `@Result` for a single object (`@AfterCreate`, `@AfterUpdate`) or a `boolean`
- * (`@AfterDelete`), `@Results` when the payload is an array (`@AfterRead`, `@AfterReadEachInstance`).
+ * readability: use `@Result` for a single object (`@AfterCreate`, `@AfterUpdate`, `@AfterReadEachInstance`
+ * — invoked once per instance, analogous to `Array.prototype.forEach`) or a `boolean` (`@AfterDelete`),
+ * `@Results` when the payload is an array (`@AfterRead`).
  *
  * @example
- * @AfterDelete()
+ * ```ts
+ * /@AfterDelete()
  * private async logDeletion(@Result() deleted: boolean, @Req() req: Request): Promise<void> {
  *   if (deleted) { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#results--result | CDS-TS-Dispatcher - @Result}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Results / Result
@@ -192,8 +202,10 @@ function Result(): ParameterDecorator {
  * you need the object itself (e.g. to call `req.reject()` / `req.notify()`).
  *
  * @example
- * @AfterRead()
+ * ```ts
+ * /@AfterRead()
  * private async enrich(@Req() req: Request<Book>, @Results() results: Book[]): Promise<void> { ... }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#req | CDS-TS-Dispatcher - @Req}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Req
@@ -214,15 +226,18 @@ function Req(): ParameterDecorator {
  * response manipulation (e.g. custom headers).
  *
  * @remarks
- * Valid on `@Before*`, `@After*` and `@On*` handlers alike. Prefer `req.reject()` / `req.notify()` on
- * `@Req` for standard error/message responses; reach for `@Res` only when you need the raw response
- * object itself.
+ * Valid on `@Before*`, `@After*` and `@On*` handlers alike. `undefined` for requests that do not
+ * originate over HTTP (internal `srv.read` / `srv.emit` calls, messaging events) — always guard before
+ * use. Prefer `req.reject()` / `req.notify()` on `@Req` for standard error/message responses; reach for
+ * `@Res` only when you need the raw response object itself.
  *
  * @example
- * @AfterRead()
- * private async addHeader(@Req() req: Request, @Res() res: RequestResponse): Promise<void> {
- *   res.setHeader('Accept-Language', 'de-DE');
+ * ```ts
+ * /@AfterRead()
+ * private async addHeader(@Req() req: Request, @Res() res: RequestResponse | undefined): Promise<void> {
+ *   res?.setHeader('Accept-Language', 'de-DE');
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#res | CDS-TS-Dispatcher - @Res}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Res
@@ -248,11 +263,10 @@ function Res(): ParameterDecorator {
  * per-key property map. Pairs with `@IsPresent` to check existence before reading the value.
  *
  * @example
- * @BeforeCreate()
- * public async beforeCreate(
- *   @Req() req: Request<Book>,
- *   @GetQuery('INSERT', 'columns') columns: GetQueryType['columns']['forInsert'],
- * ): Promise<void> { ... }
+ * ```ts
+ * /@BeforeCreate()
+ * public async beforeCreate(@Req() req: Request<Book>, @GetQuery('INSERT', 'columns') columns: GetQueryType['columns']['forInsert']): Promise<void> { ... }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#getquery | CDS-TS-Dispatcher - @GetQuery}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § GetQuery
@@ -279,11 +293,10 @@ function GetQuery<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsB
  * typed decorator instead (`@Data`, `@UserInfo`, `@Tenant`, `@Locale`, `@Subject`).
  *
  * @example
- * @AfterRead()
- * private async enrich(
- *   @Results() results: Book[],
- *   @GetRequest('locale') locale: Request['locale'],
- * ): Promise<void> { ... }
+ * ```ts
+ * /@AfterRead()
+ * private async enrich(@Results() results: Book[], @GetRequest('locale') locale: Request['locale']): Promise<void> { ... }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#getrequest | CDS-TS-Dispatcher - @GetRequest}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § GetRequest
@@ -308,13 +321,12 @@ function GetRequest(property: CustomRequest): ParameterDecorator {
  * set) on `UPDATE` / `DELETE` requests, which do not carry a `columns` list.
  *
  * @example
- * @BeforeCreate()
- * public async beforeCreate(
- *   @Req() req: Request<Book>,
- *   @IsColumnSupplied<Book>('price') priceSupplied: boolean,
- * ): Promise<void> {
+ * ```ts
+ * /@BeforeCreate()
+ * public async beforeCreate(@Req() req: Request<Book>, @IsColumnSupplied<Book>('price') priceSupplied: boolean): Promise<void> {
  *   if (priceSupplied) { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#iscolumnsupplied | CDS-TS-Dispatcher - @IsColumnSupplied}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsColumnSupplied
@@ -339,13 +351,12 @@ function IsColumnSupplied<Key>(field: keyof Key): ParameterDecorator {
  * / `@restrict.grants.to` annotations in your CDS models.
  *
  * @example
- * @AfterRead()
- * private async enrich(
- *   @Results() results: Book[],
- *   @IsRole('Admin', 'Editor') isPrivileged: boolean,
- * ): Promise<void> {
+ * ```ts
+ * /@AfterRead()
+ * private async enrich(@Results() results: Book[], @IsRole('Admin', 'Editor') isPrivileged: boolean): Promise<void> {
  *   if (isPrivileged) { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#isrole | CDS-TS-Dispatcher - @IsRole}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsRole
@@ -371,13 +382,12 @@ function IsRole(...roles: string[]): ParameterDecorator {
  * `@GetQuery` when the property may legitimately be absent.
  *
  * @example
- * @BeforeCreate()
- * public async beforeCreate(
- *   @Req() req: Request<Book>,
- *   @IsPresent('INSERT', 'columns') hasColumns: boolean,
- * ): Promise<void> {
+ * ```ts
+ * /@BeforeCreate()
+ * public async beforeCreate(@Req() req: Request<Book>, @IsPresent('INSERT', 'columns') hasColumns: boolean): Promise<void> {
  *   if (hasColumns) { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#ispresent | CDS-TS-Dispatcher - @IsPresent}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsPresent
@@ -402,11 +412,10 @@ function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryProps
  * is missing or malformed — it does not throw, so always narrow the `string | undefined` type before use.
  *
  * @example
- * @AfterRead()
- * private async enrich(
- *   @Results() results: Book[],
- *   @Jwt() token: string | undefined,
- * ): Promise<void> { ... }
+ * ```ts
+ * /@AfterRead()
+ * private async enrich(@Results() results: Book[], @Jwt() token: string | undefined): Promise<void> { ... }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#jwt | CDS-TS-Dispatcher - @Jwt}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Jwt
@@ -423,22 +432,22 @@ function Jwt(): ParameterDecorator {
 }
 
 /**
- * Injects the accumulated `@Validate` flags for the current invocation as a single object.
+ * Annotates a parameter of a method with the accumulated `@Validate` flags for the current invocation.
  *
  * @remarks
  * Only `@Validate` calls with `exposeValidatorResult: true` contribute a flag; each contributing call
- * adds one key named after its `action` (e.g. `isLowercase`, `endsWith`) to the injected object. Needs
- * at least one such `@Validate` on the same method — otherwise the object is empty.
+ * adds one key named after its `action` (e.g. `isLowercase`, `endsWith`) to the injected object. If no
+ * such `@Validate` decorates the same method, the parameter is never assigned and stays `undefined` (NOT
+ * an empty object) — guard before reading a flag off it.
  *
  * @example
- * @BeforeCreate()
- * @Validate<Book>({ action: 'isLowercase', exposeValidatorResult: true }, 'title')
- * public async beforeCreate(
- *   @Req() req: Request<Book>,
- *   @ValidationResults() validator: ValidatorFlags<'isLowercase'>,
- * ): Promise<void> {
- *   if (validator.isLowercase) { ... }
+ * ```ts
+ * /@BeforeCreate()
+ * /@Validate<Book>({ action: 'isLowercase', exposeValidatorResult: true }, 'title')
+ * public async beforeCreate(@Req() req: Request<Book>, @ValidationResults() validator: ValidatorFlags<'isLowercase'> | undefined): Promise<void> {
+ *   if (validator?.isLowercase) { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#validationresults | CDS-TS-Dispatcher - @ValidationResults}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ValidationResults
@@ -461,10 +470,12 @@ function ValidationResults(): ParameterDecorator {
  * A convenience projection of `@Req`; equivalent to `@GetRequest('locale')` typed as `string`.
  *
  * @example
- * @BeforeCreate()
+ * ```ts
+ * /@BeforeCreate()
  * public async beforeCreate(@Req() req: Request<Book>, @Locale() locale: string): Promise<void> {
  *   if (locale === 'en-US') { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#locale | CDS-TS-Dispatcher - @Locale}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Locale
@@ -481,24 +492,25 @@ function Locale(): ParameterDecorator {
 }
 
 /**
- * Injects a single nested value read live from `cds.env` at the given dotted `env` path.
+ * Annotates a parameter of a method with a single value resolved from the project's `cds.env`
+ * configuration, read at the given dotted `env` path.
  *
  * @remarks
- * `env` is a required, dotted property path into `T` (e.g. `'requires.db.kind'`) — type it with the
- * consumer project's generated `CDS_ENV` (from the `#dispatcher` postinstall alias) so the path and the
- * parameter's type are both checked: `@Env<CDS_ENV>('requires.db.kind')`. Reads `cds.env` directly, not
- * the generated file, so the value always reflects the live runtime configuration.
+ * `env` is a required, dotted property path into `T` (e.g. `'requires.db.kind'`) — the whole env object
+ * is never injected. Type the generic with the consumer project's generated `CDS_ENV` (from the
+ * `#dispatcher` postinstall alias) so the path and the parameter's type are both checked:
+ * `@Env<CDS_ENV>('requires.db.kind')`. Reads `cds.env` directly, not the generated file, so the value
+ * always reflects the live runtime configuration.
  *
  * @example
+ * ```ts
  * import type { CDS_ENV } from '#dispatcher';
  *
- * @BeforeCreate()
- * public async beforeCreate(
- *   @Req() req: Request<Book>,
- *   @Env<CDS_ENV>('requires.db.kind') dbKind: string,
- * ): Promise<void> {
+ * /@BeforeCreate()
+ * public async beforeCreate(@Req() req: Request<Book>, @Env<CDS_ENV>('requires.db.kind') dbKind: string): Promise<void> {
  *   if (dbKind === 'sqlite') { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#env | CDS-TS-Dispatcher - @Env}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Env
@@ -522,13 +534,18 @@ function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
  * @remarks
  * The sanctioned replacement for `req.query` on bound actions/functions since `@sap/cds` 10 (`req.query`
  * on bound operations is planned for removal in `@sap/cds` 11) — use it to resolve the entity instance a
- * bound `@OnBoundAction` / `@OnBoundFunction` was invoked on.
+ * bound `@OnBoundAction` / `@OnBoundFunction` was invoked on. `ref | undefined`: only bound invocations
+ * populate `req.subject` — it is `undefined` on unbound operations and plain CRUD requests.
  *
  * @example
- * @OnBoundFunction(Book.actions.someFunction)
- * public async someBoundFunction(@Req() req: Request, @Subject() subject: ref): Promise<void> {
- *   const instance = await SELECT.one.from(subject);
+ * ```ts
+ * /@OnBoundFunction(Book.actions.someFunction)
+ * public async someBoundFunction(@Req() req: Request, @Subject() subject: ref | undefined): Promise<void> {
+ *   if (subject) {
+ *     const instance = await SELECT.one.from(subject);
+ *   }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#subject | CDS-TS-Dispatcher - @Subject}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Subject
@@ -554,10 +571,12 @@ function Subject(): ParameterDecorator {
  * they receive, it only exposes the raw count.
  *
  * @example
- * @AfterDelete()
+ * ```ts
+ * /@AfterDelete()
  * public async afterDelete(@Req() req: Request<Book>, @Affected() affected: number | undefined): Promise<void> {
  *   req.notify(`Deleted ${affected} row(s)`);
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#affected | CDS-TS-Dispatcher - @Affected}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Affected
@@ -581,10 +600,12 @@ function Affected(): ParameterDecorator {
  * whole `Request`. For a single field instead of the whole payload, use `@Param`.
  *
  * @example
- * @OnCreate()
+ * ```ts
+ * /@OnCreate()
  * public async onCreate(@Data() data: Book): Promise<Book> {
  *   return data;
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#data | CDS-TS-Dispatcher - @Data}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Data
@@ -609,11 +630,10 @@ function Data(): ParameterDecorator {
  * as many parameters as the fields you need.
  *
  * @example
- * @OnCreate()
- * public async onCreate(
- *   @Param<Book>('title') title: string,
- *   @Param<Book>('stock') stock: number,
- * ): Promise<void> { ... }
+ * ```ts
+ * /@OnCreate()
+ * public async onCreate(@Param<Book>('title') title: string, @Param<Book>('stock') stock: number): Promise<void> { ... }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#param | CDS-TS-Dispatcher - @Param}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Param
@@ -637,10 +657,12 @@ function Param<T = Record<string, any>>(field: Extract<keyof T, string>): Parame
  * `user.is(role)` for ownership/authorization checks, or use `@IsRole` for a ready-made `boolean`.
  *
  * @example
- * @OnUpdate()
+ * ```ts
+ * /@OnUpdate()
  * public async onUpdate(@UserInfo() user: User): Promise<void> {
  *   if (user.is('Manager')) { ... }
  * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#userinfo | CDS-TS-Dispatcher - @UserInfo}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § UserInfo
@@ -664,8 +686,10 @@ function UserInfo(): ParameterDecorator {
  * single-tenant setups and for requests without a resolved tenant.
  *
  * @example
- * @OnRead()
+ * ```ts
+ * /@OnRead()
  * public async onRead(@Tenant() tenant: string | undefined): Promise<void> { ... }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#tenant | CDS-TS-Dispatcher - @Tenant}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Tenant
@@ -694,8 +718,10 @@ function Tenant(): ParameterDecorator {
  * present. Do not assume `diff.<field>` is the old value.
  *
  * @example
- * @BeforeUpdate()
+ * ```ts
+ * /@BeforeUpdate()
  * public async beforeUpdate(@Req() req: Request<Book>, @Diff() diff: Book): Promise<void> { ... }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#diff | CDS-TS-Dispatcher - @Diff}
  * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Diff
