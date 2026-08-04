@@ -47,11 +47,32 @@ import type {
 import type { LogExecutionOptions, MaskOptions } from '../types/responseTransformers';
 
 /**
- * Use `CatchAndSetErrorCode` decorator to `catch errors` and assigns a `new status code` to the response.
- * @param newStatusCode - The new status code to use when an error occurs.
+ * Catches any error thrown or rejected by the decorated method and rewrites the response with the given
+ * HTTP status code, discarding the original error's message.
+ *
+ * @remarks
+ * Resolves the error via `req.reject({ code, message: <standard HTTP reason phrase for code> })` — the
+ * ORIGINAL error message is replaced by the generic reason phrase of `newStatusCode` (e.g.
+ * `'BAD_REQUEST-400'` → `'Bad Request'`); use `@CatchAndSetErrorMessage` instead to keep control over the
+ * message. Like `@Throttle`, place it BELOW the handler decorator (`@AfterRead`, `@OnCreate`, ...), closer
+ * to the method: decorators wrap `descriptor.value` bottom-up and the handler decorator freezes a
+ * snapshot of `descriptor.value` into the registered callback at ITS OWN decoration time, so a wrapper
+ * applied above it never becomes part of what CAP calls. Also usable on a `MiddlewareImpl.use` method.
+ *
  * @example
- * "CatchAndSetErrorCode('BAD_REQUEST-400')"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#errorCode | CDS-TS-Dispatcher - @CatchAndSetErrorCode}
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterRead()
+ *   /@CatchAndSetErrorCode('BAD_REQUEST-400')
+ *   private async afterRead(@Req() req: Request, @Results() results: Book[]): Promise<void> {
+ *     await axios.get('https://example.invalid'); // any thrown/rejected error becomes HTTP 400
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#catchandseterrorcode | CDS-TS-Dispatcher - @CatchAndSetErrorCode}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § CatchAndSetErrorCode
  */
 function CatchAndSetErrorCode(newStatusCode: keyof StatusCodeMapping) {
   return function (_: object, __: string, descriptor: PropertyDescriptor) {
@@ -73,14 +94,33 @@ function CatchAndSetErrorCode(newStatusCode: keyof StatusCodeMapping) {
 }
 
 /**
- * Use `CatchAndSetErrorMessage` to `catch errors` and to provide a `custom error message` along with an `optional` `status code`.
- * @param newMessage - The custom error message to return.
- * @param newStatusCode - (Optional) The new status code to use. If not provided, the original status code is retained.
+ * Catches any error thrown or rejected by the decorated method and rewrites the response with a custom
+ * message and an optional new HTTP status code.
+ *
+ * @remarks
+ * Resolves the error via `req.reject(...)` — with only `newMessage` given, the original status code is
+ * retained and just the message changes; passing `newStatusCode` (e.g. `'NOT_FOUND-404'`) additionally
+ * overwrites the status code. Sibling: `@CatchAndSetErrorCode` overwrites the status code but replaces
+ * the message with that code's generic reason phrase instead of a custom one. Like `@Throttle`, place it
+ * BELOW the handler decorator (`@AfterRead`, `@OnCreate`, ...), closer to the method — a wrapper applied
+ * above the handler decorator never becomes part of the registered callback. Also usable on a
+ * `MiddlewareImpl.use` method.
+ *
  * @example
- * "CatchAndSetErrorMessage('Bad request of the call', 'BAD_REQUEST-400')"
- * or
- * "CatchAndSetErrorMessage('Bad request of the call')"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#onerrormessage | CDS-TS-Dispatcher - @CatchAndSetErrorMessage}
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnUpdate()
+ *   /@CatchAndSetErrorMessage('User data could not be retrieved', 'NOT_FOUND-404')
+ *   private async onUpdate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *     await axios.get(`https://example.invalid/users/${req.data.ID}`); // any error becomes 404 with this message
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#catchandseterrormessage | CDS-TS-Dispatcher - @CatchAndSetErrorMessage}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § CatchAndSetErrorMessage
  */
 function CatchAndSetErrorMessage(newMessage: string, newStatusCode?: keyof StatusCodeMapping) {
   return function (_: object, __: string, descriptor: PropertyDescriptor) {
@@ -102,14 +142,35 @@ function CatchAndSetErrorMessage(newMessage: string, newStatusCode?: keyof Statu
 }
 
 /**
- * Use `@PrependDraft` decorator to register an event handler to run before existing ones.
- * @param options - The options object.
- * @param options.eventDecorator - The event decorator name, example `BeforeCreate`, `AfterCreate`, `BeforeDelete`, etc.
- * @param [options.actionName] - `[Optional]` This option will appear when `eventDecorator` is `OnBoundActionDraft`, `OnBoundFunctionDraft`.
- * @example
- * "@PrependDraft({ eventDecoratorName: 'BeforeReadDraft' })"
+ * Registers a callback that runs BEFORE all other registered handlers of the given draft-lifecycle event
+ * (the draft counterpart of `@Prepend`).
+ * Registers `srv.prepend(callback)`.
  *
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#prepend | CDS-TS-Dispatcher - @Prepend}
+ * @remarks
+ * `options.eventDecorator` names the target Draft-suffixed decorator (e.g. `'BeforeReadDraft'`,
+ * `'AfterUpdateDraft'`, `'OnNewDraft'`, ...); `options.actionName` is required only when the target is
+ * `'OnBoundActionDraft'` / `'OnBoundFunctionDraft'`. On an `ON`-phase target, `return next()` is mandatory
+ * in the prepended callback to let the actual event still run. Active-entity counterpart: `@Prepend`.
+ * README has no dedicated `@PrependDraft` section; the closest coverage is `@Prepend`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@PrependDraft({ eventDecorator: 'BeforeReadDraft' })
+ *   private async prepend(@Req() req: Request<Book>): Promise<void> {
+ *     req.locale = 'de-DE'; // runs before every @BeforeReadDraft handler
+ *   }
+ *
+ *   /@BeforeReadDraft()
+ *   private async beforeReadDraft(@Req() req: Request<Book>): Promise<void> {
+ *     // ... req.locale is already 'de-DE' here
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#prepend | CDS-TS-Dispatcher - @PrependDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Prepend
  */
 function PrependDraft(options: PrependBaseDraft) {
   return function (target: object, propertyName: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -143,18 +204,36 @@ function PrependDraft(options: PrependBaseDraft) {
 }
 
 /**
- * Use `@Prepend` decorator to register an event handler to be executed **before existing handlers**.
- * @param options - Configuration options for the decorator.
- * @param options.eventDecorator - The event decorator name (e.g., `BeforeCreate`, `AfterCreate`, `BeforeDelete`, etc.).
- * @param [options.actionName] - (Optional) Applicable when `eventDecorator` is `OnAction`, `OnFunction`, `OnBoundAction`, or `OnBoundFunction`.
- * @param [options.eventName] - (Optional) Applicable when `eventDecorator` is `OnEvent`.
+ * Registers a callback that runs BEFORE all other registered handlers of the given event (whichever
+ * decorator `options.eventDecorator` names).
+ * Registers `srv.prepend(callback)`.
  *
- * **Important:** When using `@Prepend` on decorators like [@OnCreate](#oncreate), [@OnRead](#onread), [@OnUpdate](#onupdate), [@OnDelete](#ondelete), [@OnAction](#onaction), [@OnFunction](#onfunction), [@OnEvent](#onevent), [@OnSubscribe](#onsubscribe), [@OnError](#onerror), [@OnBoundAction](#onboundaction), [@OnBoundFunction](#onboundfunction), [@OnAll](#onall) **calling** `return next()` **is mandatory** to ensure the actual action is executed.
+ * @remarks
+ * `options.eventDecorator` accepts the BEFORE (`'BeforeCreate'`, ..., `'BeforeAll'`), AFTER
+ * (`'AfterCreate'`, ..., `'AfterAll'`) and ON (`'OnCreate'`, ..., `'OnAll'`, `'OnError'`) decorator names;
+ * `options.actionName` is required when the target is `'OnAction'` / `'OnFunction'` / `'OnBoundAction'` /
+ * `'OnBoundFunction'` (or their `Before`/`After` counterparts), `options.eventName` when it is
+ * `'OnEvent'`. On an `ON`-phase target, `return next()` in the prepended callback is mandatory —
+ * otherwise the actual event handler never runs. Draft variant: `@PrependDraft`.
  *
  * @example
- * "@Prepend({ eventDecoratorName: 'BeforeRead' })"
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@Prepend({ eventDecorator: 'AfterRead' })
+ *   private async prepend(@Req() req: Request<Book>): Promise<void> {
+ *     req.locale = 'de-DE'; // runs before every @AfterRead handler
+ *   }
  *
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#prepend | CDS-TS-Dispatcher - @Prepend}
+ *   /@AfterRead()
+ *   private async afterRead(@Results() results: Book[], @Req() req: Request<Book>): Promise<void> {
+ *     // ... req.locale is already 'de-DE' here
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#prepend | CDS-TS-Dispatcher - @Prepend}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Prepend
  */
 function Prepend(options: PrependBase) {
   return function (target: object, propertyName: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -189,11 +268,31 @@ function Prepend(options: PrependBase) {
 }
 
 /**
- * Use `@ExecutionAllowedForRole` decorator to enforce role-based access control ensuring that only `Users` with specific role are authorized to execute the `event` (`AfterRead`, `AfterCreate`, ...) and the custom logic inside of the event.
- * @param ...roles[] An array of roles that are permitted to execute the event logic.
+ * Guards the decorated handler so its body only runs when the current user has at least one of the given
+ * roles (`req.user.is(role)`); otherwise the handler is silently skipped (no `req.reject`).
+ *
+ * @remarks
+ * Logical `OR` across `roles`. Role names correspond to the `@requires` / `@restrict.grants.to`
+ * annotations in your CDS models — see also the `@IsRole` parameter decorator for a `boolean` check
+ * inside a handler that must still run for every role. Like `@Throttle`, place `@ExecutionAllowedForRole`
+ * BELOW the handler decorator (closer to the method): decorators wrap `descriptor.value` bottom-up and
+ * the handler decorator freezes a snapshot of `descriptor.value` into the registered callback at ITS OWN
+ * decoration time, so a wrapper applied above it never becomes part of what CAP calls.
+ *
  * @example
- * "@ExecutionAllowedForRole('Manager', 'CEO')"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#ExecutionAllowedForRole | CDS-TS-Dispatcher - @ExecutionAllowedForRole}
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterRead()
+ *   /@ExecutionAllowedForRole('Manager', 'CEO')
+ *   private async afterRead(@Req() req: Request, @Results() results: Book[]): Promise<void> {
+ *     // ... only runs for a Manager or CEO
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#executionallowedforrole | CDS-TS-Dispatcher - @ExecutionAllowedForRole}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ExecutionAllowedForRole
  */
 
 function ExecutionAllowedForRole(...roles: string[]) {
@@ -213,16 +312,35 @@ function ExecutionAllowedForRole(...roles: string[]) {
 }
 
 /**
- * Rate-limits the decorated handler with a fixed window, counted per user (default) or per tenant.
+ * Rate-limits the decorated handler with a fixed window, counted per `user` (default) or per `tenant`;
+ * over the limit the request is rejected with HTTP 429 and the handler body never runs.
  *
- * Counters are per app instance and per decorated method (in-memory). Over the limit the request is
- * rejected with HTTP 429. Place `@Throttle()` BELOW the handler decorator (closer to the method),
- * like every wrapping decorator - otherwise it is not part of the registered callback.
+ * @remarks
+ * Counters are `in-memory`, kept per app instance AND per decorated method (a multi-instance deployment
+ * limits per pod, not globally); each OData `$batch` sub-request is counted individually. `by: 'user'`
+ * keys on `req.user.id` (fallback `'anonymous'`), `by: 'tenant'` on `req.tenant` (fallback `'no-tenant'`).
+ * Requires a real `cds.Request` among the handler arguments — throws at DECORATION time on `@OnError`
+ * (which is rejected outright, since error handlers run synchronously) and throws at RUNTIME on
+ * messaging handlers (`@OnEvent` / `@OnSubscribe`), which carry no `cds.Request`. Place `@Throttle` BELOW
+ * the handler decorator (closer to the method), like every wrapping decorator: decorators wrap
+ * `descriptor.value` bottom-up, and the handler decorator freezes a snapshot of `descriptor.value` into
+ * the registered callback at ITS OWN decoration time, so a wrapper applied above it never becomes part of
+ * what CAP calls.
  *
  * @example
- * "@OnAction(GenerateReport)"
- * "@Throttle({ limit: 10, window: 60_000 })"
- * public async generate(@Req() req: Request) { ... }
+ * ```ts
+ * /@UnboundActions()
+ * class ReportHandler {
+ *   /@OnAction(GenerateReport)
+ *   /@Throttle({ limit: 10, window: 60_000 }) // 10 calls per minute, per user
+ *   public async generate(@Req() req: ActionRequest<typeof GenerateReport>): ActionReturn<typeof GenerateReport> {
+ *     // ...
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#throttle | CDS-TS-Dispatcher - @Throttle}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Throttle
  */
 function Throttle(options: ThrottleOptions) {
   if (!Number.isFinite(options.limit) || options.limit < 1) {
@@ -282,13 +400,32 @@ function Throttle(options: ThrottleOptions) {
 }
 
 /**
- * Use `@FieldsFormatter` decorator to `enhance / format` the fields.
- * @param formatter The formatter method to apply.
- * @param fields An array of fields to apply the formatter method on.
+ * Applies a built-in (or custom) formatter to one or more fields, on `@After*` results or `@Before*` /
+ * `@On*` request data.
+ *
+ * @remarks
+ * On `@AfterRead`, formats `results` (array or single row); on `@BeforeCreate` / `@BeforeUpdate` /
+ * `@OnCreate` / `@OnUpdate` / `@OnAction` / `@OnBoundAction` / `@OnFunction` / `@OnBoundFunction`, formats
+ * `req.data` instead. `formatter.action` picks a built-in (`'blacklist'`, `'trim'`, `'toUpper'`,
+ * `'camelCase'`, `'truncate'`, ...) or `'customFormatter'` with your own `callback(req, results)`.
+ * Sibling: `@Validate` runs the same `BEFORE`/`ON` pass but rejects instead of transforming. Like
+ * `@Throttle`, place it BELOW the handler decorator (closer to the method) — a wrapper applied above the
+ * handler decorator never becomes part of the registered callback.
+ *
  * @example
- * // Enhance the 'title' field of Book entity by removing the letter 'W' using the 'blacklist' action.
- * "@FieldsFormatter<Book>({ action: 'blacklist', charsToRemove: 'W' }, 'title')"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#fieldsformatter | CDS-TS-Dispatcher - @FieldsFormatter}
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterRead()
+ *   /@FieldsFormatter<Book>({ action: 'blacklist', charsToRemove: 'W' }, 'title')
+ *   private async afterRead(@Results() results: Book[], @Req() req: Request<Book>): Promise<void> {
+ *     // ... 'title' has every 'W' removed
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#fieldsformatter | CDS-TS-Dispatcher - @FieldsFormatter}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § FieldsFormatter
  */
 function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -329,14 +466,32 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
 }
 
 /**
- * Use `@Validate` decorator to validate fields.
- * @param validator The validation method to apply.
- * @param fields An array of fields to validate.
+ * Validates one or more fields against a built-in validator before the decorated handler runs; on
+ * failure the decorator itself calls `req.reject(...)` and the handler body never executes.
+ *
+ * @remarks
+ * Valid on `@BeforeCreate`, `@BeforeUpdate`, `@OnCreate`, `@OnUpdate`, `@OnAction`, `@OnBoundAction`,
+ * `@OnFunction`, `@OnBoundFunction` — anywhere `req.data` carries the fields to check. `validator.action`
+ * picks a built-in check (`'isEmail'`, `'isLength'`, `'contains'`, `'matches'`, ..., see the validator.js
+ * catalogue in the README); `validator.options.exposeValidatorResult: true` additionally makes the
+ * pass/fail flags readable via the `@ValidationResults` parameter decorator instead of just rejecting.
+ * Sibling: `@FieldsFormatter` runs the same `BEFORE`/`ON` pass but transforms instead of rejecting. Stack
+ * multiple `@Validate` decorators to check multiple fields/rules on the same handler.
+ *
  * @example
- * // Validates the 'comment' field of 'MyEntity' entity using the 'contains' validator with the seed 'text'.
- * "@Validate<MyEntity>({ validator: 'contains', seed: 'text' }, 'comment')"
- * // If 'comment' contains 'text', the validation will not raise an error message.
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#validate | CDS-TS-Dispatcher - @Validate}
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeCreate()
+ *   /@Validate<Book>({ action: 'isLowercase' }, 'comment')
+ *   private async beforeCreate(@Req() req: Request<Book>): Promise<void> {
+ *     // ... only reached if 'comment' is already lowercase
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#validate | CDS-TS-Dispatcher - @Validate}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Validate
  */
 
 function Validate<T>(validator: Validators, ...fields: (keyof T)[]) {
@@ -373,12 +528,28 @@ function Validate<T>(validator: Validators, ...fields: (keyof T)[]) {
 // ========================================================================================================================================================
 
 /**
- * Use `@Exclude` decorator to remove specified fields from the response after a read operation.
- * @param fields - The fields to exclude from the response.
+ * Removes the given fields from the response, in place, after the decorated `@After*` handler resolves.
+ *
+ * @remarks
+ * Runs on whatever `results` shape the wrapped handler exposes — the array from `@AfterRead` / `@AfterAll`,
+ * or the single row from `@AfterCreate` / `@AfterUpdate`. Complements `@Include` (keep only) and `@Mask`
+ * (partially hide instead of remove). Place it directly below the handler decorator; multiple response
+ * transformers (`@Exclude`, `@Include`, `@Mask`) may be stacked on the same handler.
+ *
  * @example
- * // Remove 'password' and 'ssn' fields from User response
- * "@Exclude<User>('password', 'ssn')"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#exclude | CDS-TS-Dispatcher - @Exclude}
+ * ```ts
+ * /@EntityHandler(User)
+ * class UserHandler {
+ *   /@AfterRead()
+ *   /@Exclude<User>('password', 'ssn')
+ *   private async afterRead(@Results() results: User[], @Req() req: Request<User>): Promise<void> {
+ *     // ... the response omits 'password' and 'ssn'
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#exclude | CDS-TS-Dispatcher - @Exclude}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Exclude
  */
 function Exclude<T>(...fields: (keyof T)[]) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -396,13 +567,29 @@ function Exclude<T>(...fields: (keyof T)[]) {
 }
 
 /**
- * Use `@Include` decorator to keep only specified fields in the response after a read operation.
- * All other fields will be removed.
- * @param fields - The fields to include in the response.
+ * Keeps only the given fields in the response, in place, after the decorated `@After*` handler resolves —
+ * every other field is removed.
+ *
+ * @remarks
+ * Runs on whatever `results` shape the wrapped handler exposes — the array from `@AfterRead` / `@AfterAll`,
+ * or the single row from `@AfterCreate` / `@AfterUpdate`. Complements `@Exclude` (remove specific fields
+ * instead of keeping only a set) and `@Mask` (partially hide instead of remove). Useful for minimal
+ * list/summary responses.
+ *
  * @example
- * // Only include 'ID', 'name', and 'email' fields in User response
- * "@Include<User>('ID', 'name', 'email')"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#include | CDS-TS-Dispatcher - @Include}
+ * ```ts
+ * /@EntityHandler(User)
+ * class UserHandler {
+ *   /@AfterRead()
+ *   /@Include<User>('ID', 'name', 'email')
+ *   private async afterRead(@Results() results: User[], @Req() req: Request<User>): Promise<void> {
+ *     // ... the response contains only 'ID', 'name', 'email'
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#include | CDS-TS-Dispatcher - @Include}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Include
  */
 function Include<T>(...fields: (keyof T)[]) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -420,15 +607,30 @@ function Include<T>(...fields: (keyof T)[]) {
 }
 
 /**
- * Use `@Mask` decorator to partially hide sensitive field values in the response.
- * @param fields - The fields to mask.
- * @param options - Optional masking options (char, visibleStart, visibleEnd).
+ * Partially masks the given fields in the response, in place, after the decorated `@After*` handler
+ * resolves — keeps a configurable number of characters visible and replaces the rest.
+ *
+ * @remarks
+ * Runs on whatever `results` shape the wrapped handler exposes — the array from `@AfterRead` / `@AfterAll`,
+ * or the single row from `@AfterCreate` / `@AfterUpdate`. `options.char` (default `'*'`),
+ * `options.visibleEnd` (default `4`) and `options.visibleStart` (default `0`) control the mask; e.g.
+ * `'1234567890123456'` with defaults becomes `'************3456'`. Complements `@Exclude` / `@Include`
+ * (remove instead of mask).
+ *
  * @example
- * // Mask 'creditCard' and 'phone' showing only last 4 characters
- * "@Mask<User>(['creditCard', 'phone'])"
- * // Mask with custom options: show first 2 and last 4 characters
- * "@Mask<User>(['creditCard'], { char: 'X', visibleStart: 2, visibleEnd: 4 })"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#mask | CDS-TS-Dispatcher - @Mask}
+ * ```ts
+ * /@EntityHandler(User)
+ * class UserHandler {
+ *   /@AfterRead()
+ *   /@Mask<User>(['creditCard'], { char: 'X', visibleStart: 2, visibleEnd: 4 })
+ *   private async afterRead(@Results() results: User[], @Req() req: Request<User>): Promise<void> {
+ *     // ... 'creditCard' keeps its first 2 and last 4 characters visible
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#mask | CDS-TS-Dispatcher - @Mask}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Mask
  */
 function Mask<T>(fields: (keyof T)[], options?: MaskOptions) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -446,16 +648,31 @@ function Mask<T>(fields: (keyof T)[], options?: MaskOptions) {
 }
 
 /**
- * Use `@LogExecution` decorator to log method execution details including arguments, result, and duration.
- * @param options - Optional logging options.
+ * Logs the decorated method's execution — arguments, return value and/or duration — around whatever it
+ * wraps.
+ *
+ * @remarks
+ * Measures only the method BODY itself, not the full request lifecycle — `@Use` middleware and other
+ * stacked response transformers (`@Exclude`, `@Mask`, ...) are not included in the duration; database/
+ * network calls count only if `await`ed inside the method. `options.logDuration` defaults to `true`,
+ * `logArgs` / `logResult` default to `false` (avoid logging sensitive request/response data in
+ * production). `options.condition` can skip logging per-request; `options.prefix` (default `'[LOG]'`) and
+ * `options.logLevel` (default `'info'`) control the console output.
+ *
  * @example
- * // Log only execution duration
- * "@LogExecution({ logDuration: true })"
- * // Log arguments and duration
- * "@LogExecution({ logArgs: true, logDuration: true })"
- * // Log everything with custom prefix
- * "@LogExecution({ logArgs: true, logResult: true, logDuration: true, prefix: '[DEBUG]' })"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#logexecution | CDS-TS-Dispatcher - @LogExecution}
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterRead()
+ *   /@LogExecution({ logDuration: true })
+ *   private async afterRead(@Results() results: Book[], @Req() req: Request<Book>): Promise<void> {
+ *     // ... logs '[LOG] BookHandler.afterRead - Duration: <n>ms'
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#logexecution | CDS-TS-Dispatcher - @LogExecution}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § LogExecution
  */
 function LogExecution(options?: LogExecutionOptions) {
   return function <Target>(
@@ -499,8 +716,33 @@ function LogExecution(options?: LogExecutionOptions) {
 // ========================================================================================================================================================
 
 /**
- * @deprecated
- * @see  {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#singleinstanceswitch | CDS-TS-Dispatcher - @SingleInstanceSwitch}
+ * Appends a synthetic `boolean` argument to the handler's argument list — `true` for a single-instance
+ * request, `false` for an entity-set request (derived from `req.params.length > 0`).
+ *
+ * @deprecated Use the `@SingleInstanceSwitch` parameter decorator instead — it injects the same `boolean`
+ * directly, without a positional, un-annotated trailing argument.
+ *
+ * @remarks
+ * Kept only for source compatibility with handlers written before `@SingleInstanceSwitch` existed.
+ * README has no dedicated `@SingleInstanceCapable` section; the closest coverage is
+ * `@SingleInstanceSwitch`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterRead()
+ *   /@SingleInstanceCapable()
+ *   private async afterRead(@Results() results: Book[], @Req() req: Request, isSingleInstance: boolean): Promise<void> {
+ *     if (isSingleInstance) {
+ *       // ...
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#singleinstanceswitch | CDS-TS-Dispatcher - @SingleInstanceSwitch}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § SingleInstanceSwitch
  */
 
 function SingleInstanceCapable<Target extends object>() {
@@ -526,9 +768,44 @@ function SingleInstanceCapable<Target extends object>() {
 }
 
 /**
- * Use the `@Use` decorator to associate a method or a class with a specified middleware classes, mainly used to `verify`, `enhance`, `validate` various request related-information.
- * @param MiddlewareClasses - The middleware classes to be applied.
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#use | CDS-TS-Dispatcher - @Use}
+ * Wires one or more middleware classes into the request pipeline — as a CLASS decorator (all handlers of
+ * the class) or a METHOD decorator (that one handler only), depending on how many arguments TypeScript
+ * hands the decorator function.
+ * At class level: registers `srv.before('*', <Entity>, callback)` (plus one `srv.before` per action /
+ * function / event / error handler of the class) that runs the middleware chain before the matched
+ * handler. At method level: wraps the method directly and runs the chain before it.
+ *
+ * @remarks
+ * A middleware class implements `MiddlewareImpl` (`use(req, next): Promise<void>`); call `next()` to
+ * continue the chain, or end the response (`req.reject(...)`) to stop it — chained middlewares run in
+ * declaration order, class-level ones before method-level ones. NOT applicable to `@ServerLifecycle`
+ * classes — lifecycle hooks are not request handlers, and stacking `@Use` on one throws at bootstrap.
+ * Like `@Throttle`, place the method-level form BELOW the handler decorator (closer to the method) — a
+ * wrapper applied above the handler decorator never becomes part of the registered callback.
+ * `@CatchAndSetErrorCode` / `@CatchAndSetErrorMessage` may be used inside a middleware's own `use` method.
+ *
+ * @example
+ * ```ts
+ * class LocaleMiddleware implements MiddlewareImpl {
+ *   public async use(req: Request, next: NextMiddleware): Promise<void> {
+ *     req.locale = 'de-DE';
+ *     await next();
+ *   }
+ * }
+ *
+ * /@EntityHandler(Book)
+ * /@Use(LocaleMiddleware) // class-level: runs before every handler of BookHandler
+ * class BookHandler {
+ *   /@AfterRead()
+ *   /@Use(LocaleMiddleware) // method-level: runs before only this handler
+ *   private async afterRead(@Results() results: Book[], @Req() req: Request<Book>): Promise<void> {
+ *     // ...
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#use | CDS-TS-Dispatcher - @Use}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Use (class-level and method-level sections)
  */
 function Use<Middleware extends Constructable<MiddlewareImpl>>(...MiddlewareClasses: Middleware[]) {
   return function <Target extends object>(
@@ -1759,174 +2036,668 @@ const AfterBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'AFTER'
  */
 
 /**
- * Use `@OnAll` decorator to execute custom logic when a new resource is (READ, CREATED, UPDATED, DELETED)
+ * Replaces the default implementation for every CRUD event on the host entity (`CREATE`, `READ`,
+ * `UPDATE`, `DELETE`, bound actions, bound functions) — call `next()` to continue to the next handler (a
+ * narrower `@On*` handler, or CAP's generic database implementation).
+ * Registers `srv.on('*', <Entity>, callback)`.
+ *
+ * @remarks
+ * `'*'` matches every `ON`-phase event on the entity — the narrower siblings (`@OnCreate`, `@OnRead`,
+ * `@OnUpdate`, `@OnDelete`, `@OnBoundAction`, `@OnBoundFunction`) still fire too when their specific event
+ * matches. `@OnAction`, `@OnFunction`, `@OnEvent`, `@OnError` are excluded — they are bound to the
+ * service itself, not to an entity, so a `'*'` scoped to `<Entity>` never reaches them. Registers against
+ * whatever the host `@EntityHandler` resolved: the specific active entity for a normal host — pair with
+ * `@OnAllDraft` for the equivalent wildcard on `<Entity>.drafts` there — or `'*'` (every entity, DRAFTS
+ * INCLUDED, since CAP drops the path filter entirely for a `'*'` target) when the class is
+ * `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)`. On that host the `Draft` variant has no additional
+ * effect — both register the identical `srv.on('*', '*', callback)`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnAll()
+ *   private async onAny(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *     // ... runs instead of CREATE/READ/UPDATE/DELETE on Book
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onall | CDS-TS-Dispatcher - @OnAll}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnAll
  */
 const OnAll = buildOnCRUD({ event: '*', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnAllDraft` decorator to execute custom logic.
+ * Replaces the default implementation for every draft-lifecycle event on the host entity's `.drafts`
+ * table (`NEW`, `CANCEL`, `PATCH`, `DISCARD`, plus `CREATE`/`READ`/`UPDATE`/`DELETE` issued directly
+ * against `.drafts`) — call `next()` to continue the chain.
+ * Registers `srv.on('*', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * The draft counterpart of `@OnAll` — same wildcard, scoped to `<Entity>.drafts` instead of the active
+ * entity. Meaningful ONLY on a normal, entity-scoped `@EntityHandler` host: there it does NOT see
+ * `@OnEditDraft` / `@OnSaveDraft`, which register against the ACTIVE entity (`EDIT`/`SAVE` are not
+ * `.drafts` events) — use `@OnAll` for those. On an `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)` host,
+ * `@OnAll` ALREADY registers `srv.on('*', '*', callback)` — CAP drops the path filter entirely for `'*'`,
+ * so drafts of every entity are included there too, and adding this decorator only double-fires every
+ * draft event.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnAllDraft()
+ *   private async onAnyDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onall | CDS-TS-Dispatcher - @OnAllDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnAll
  */
 const OnAllDraft = buildOnCRUD({ event: '*', eventKind: 'ON', isDraft: true });
 
 /**
- * Use `@OnCreate` decorator to execute custom logic when a new resource is created.
+ * Replaces the default CREATE implementation of the host entity — call `next()` to fall back to CAP's
+ * generic database implementation (or the next registered `ON` handler).
+ * Registers `srv.on('CREATE', <Entity>, callback)`.
+ *
+ * @remarks
+ * Unlike `@BeforeCreate` (validation before the write) or `@AfterCreate` (post-processing after it), this
+ * REPLACES the write itself — without `return next()` (or your own persistence call), nothing is ever
+ * written. Fires alongside `@OnAll`, if also present. Draft variant: `@OnCreateDraft` (a literal `CREATE`
+ * issued directly against `<Entity>.drafts` — NOT the Fiori Elements "New" action, which is
+ * `@OnNewDraft`).
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnCreate()
+ *   private async onCreate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *     // ... custom persistence, or:
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oncreate | CDS-TS-Dispatcher - @OnCreate}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnCreate
  */
 const OnCreate = buildOnCRUD({ event: 'CREATE', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnCreateDraft` decorator to execute custom logic when a new DRAFT resource is created.
+ * Replaces the default implementation of a `CREATE` request applied directly against the host entity's
+ * `.drafts` table — call `next()` to fall back to CAP's generic implementation.
+ * Registers `srv.on('CREATE', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * NOT the Fiori Elements "New" draft action — a protocol-borne (HTTP/OData) `POST` against a
+ * draft-enabled entity is itself rewritten to CAP's `NEW` event (handled by `@OnNewDraft`) unless the
+ * payload explicitly sets `IsActiveEntity: true`. `@OnCreateDraft` only fires for a literal `CREATE`
+ * issued WITHOUT a protocol straight at `<Entity>.drafts` — a programmatic `INSERT.into(<Entity>.drafts)`
+ * or `srv.send('CREATE', <Entity>.drafts, ...)`. Active-entity counterpart: `@OnCreate`. README has no
+ * dedicated `@OnCreateDraft` section; the closest coverage is `@OnCreate`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnCreateDraft()
+ *   private async onCreateDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oncreate | CDS-TS-Dispatcher - @OnCreateDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnCreate
  */
 const OnCreateDraft = buildOnCRUD({ event: 'CREATE', eventKind: 'ON', isDraft: true });
 
 /**
- * Use `@OnRead` decorator to execute custom logic when a read operation is performed.
+ * Replaces the default READ implementation of the host entity — call `next()` to fall back to CAP's
+ * generic database implementation (or the next registered `ON` handler).
+ * Registers `srv.on('READ', <Entity>, callback)`.
+ *
+ * @remarks
+ * Unlike `@AfterRead` (post-processes the array CAP already fetched), `@OnRead` REPLACES the fetch itself
+ * — without `return next()` (or your own query), nothing is ever read. Fires for both the entity-set and
+ * single-instance shapes — pair with `@SingleInstanceSwitch` to tell them apart. Draft variant:
+ * `@OnReadDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnRead()
+ *   private async onRead(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book[]> {
+ *     // ... custom fetch, or:
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onread | CDS-TS-Dispatcher - @OnRead}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnRead
  */
 const OnRead = buildOnCRUD({ event: 'READ', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnReadDraft` decorator to execute custom logic when a read operation is performed on a DRAFT resource.
+ * Replaces the default READ implementation on the host entity's `.drafts` table — call `next()` to fall
+ * back to CAP's generic implementation.
+ * Registers `srv.on('READ', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * The draft counterpart of `@OnRead` — same entity-set/single-instance shapes, scoped to
+ * `<Entity>.drafts` (e.g. re-opening an in-progress draft in the Fiori Elements UI). README has no
+ * dedicated `@OnReadDraft` section; the closest coverage is `@OnRead`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnReadDraft()
+ *   private async onReadDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book[]> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onread | CDS-TS-Dispatcher - @OnReadDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnRead
  */
 const OnReadDraft = buildOnCRUD({ event: 'READ', eventKind: 'ON', isDraft: true });
 
 /**
- * Use `@OnUpdate` decorator to execute custom logic when an update operation is performed.
+ * Replaces the default UPDATE implementation of the host entity — call `next()` to fall back to CAP's
+ * generic database implementation (or the next registered `ON` handler).
+ * Registers `srv.on('UPDATE', <Entity>, callback)`.
+ *
+ * @remarks
+ * Unlike `@BeforeUpdate` (validation before the write) or `@AfterUpdate` (post-processing after it), this
+ * REPLACES the write itself — without `return next()` (or your own persistence call), nothing is ever
+ * written. Draft variant: `@OnUpdateDraft`; the more specific field-level draft edit is `@OnPatchDraft`
+ * (`PATCH`, CAP's canonical alias of `UPDATE` on `.drafts` since `@sap/cds` 10).
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnUpdate()
+ *   private async onUpdate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onupdate | CDS-TS-Dispatcher - @OnUpdate}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnUpdate
  */
 const OnUpdate = buildOnCRUD({ event: 'UPDATE', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnUpdateDraft` decorator to execute custom logic when an update operation is performed on a DRAFT resource.
+ * Replaces the default implementation of an `UPDATE` request applied directly against the host entity's
+ * `.drafts` table — call `next()` to fall back to CAP's generic implementation.
+ * Registers `srv.on('UPDATE', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * `@OnPatchDraft` (`PATCH`) is CAP's canonical alias of this same `UPDATE` event on `.drafts` since
+ * `@sap/cds` 10 — the field-level draft-edit moment a Fiori Elements user triggers by typing into a
+ * field; prefer it for that scenario. Active-entity counterpart: `@OnUpdate`. README has no dedicated
+ * `@OnUpdateDraft` section; the closest coverage is `@OnUpdate`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnUpdateDraft()
+ *   private async onUpdateDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onupdate | CDS-TS-Dispatcher - @OnUpdateDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnUpdate
  */
 const OnUpdateDraft = buildOnCRUD({ event: 'UPDATE', eventKind: 'ON', isDraft: true });
 
 /**
- * Use `@OnDelete` decorator to execute custom logic when a delete operation is performed.
+ * Replaces the default DELETE implementation of the host entity — call `next()` to fall back to CAP's
+ * generic database implementation (or the next registered `ON` handler).
+ * Registers `srv.on('DELETE', <Entity>, callback)`.
+ *
+ * @remarks
+ * Unlike `@BeforeDelete` (last-chance authorization) or `@AfterDelete` (post-processing), this REPLACES
+ * the deletion itself — without `return next()` (or your own persistence call), the row is never removed.
+ * Draft variant: `@OnDeleteDraft`; abandoning an in-progress draft through the Fiori Elements UI is a
+ * different event — `@OnDiscardDraft` / `@OnCancelDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnDelete()
+ *   private async onDelete(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#ondelete | CDS-TS-Dispatcher - @OnDelete}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnDelete
  */
 const OnDelete = buildOnCRUD({ event: 'DELETE', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnDeleteDraft` decorator to execute custom logic when a delete operation is performed on a DRAFT resource.
+ * Replaces the default implementation of a `DELETE` request applied directly against the host entity's
+ * `.drafts` table — call `next()` to fall back to CAP's generic implementation.
+ * Registers `srv.on('DELETE', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * A literal `DELETE` against `<Entity>.drafts`, distinct from abandoning a draft through the Fiori
+ * Elements UI (`@OnDiscardDraft` / `@OnCancelDraft`). Active-entity counterpart: `@OnDelete`. README has
+ * no dedicated `@OnDeleteDraft` section; the closest coverage is `@OnDelete`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnDeleteDraft()
+ *   private async onDeleteDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#ondelete | CDS-TS-Dispatcher - @OnDeleteDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnDelete
  */
 const OnDeleteDraft = buildOnCRUD({ event: 'DELETE', eventKind: 'ON', isDraft: true });
 
 /**
- * Use `@OnAction` decorator to execute custom logic when a custom action event is triggered.
- * @param name CdsFunction - name of the action, which can be a `string` or a `@cds-model` event.
+ * Handles an unbound action — call `next()` to continue to the next registered handler, or return the
+ * action's result directly.
+ * Registers `srv.on(name, callback)`.
+ *
+ * @remarks
+ * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
+ * unbound functions: `@OnFunction`; bound counterpart: `@OnBoundAction`. Runs after `@BeforeAction`,
+ * before `@AfterAction`, for the same action.
+ *
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class ActionsHandler {
+ *   /@OnAction(SubmitOrder)
+ *   private async onSubmitOrder(@Req() req: ActionRequest<typeof SubmitOrder>, @Next() next: NextEvent): ActionReturn<typeof SubmitOrder> {
+ *     // ...
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onaction | CDS-TS-Dispatcher - @OnAction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnAction
  */
 const OnAction = buildAction({ event: 'ACTION', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnBoundAction` decorator to execute custom logic when a custom bound action event is triggered.
- * @param name CdsFunction - name of the action, which can be a `string` or a `@cds-model` event.
+ * Handles a bound action on a specific instance of the host entity — call `next()` to continue, or
+ * return the action's result directly.
+ * Registers `srv.on(name, <Entity>, callback)`.
+ *
+ * @remarks
+ * Must be hosted in an `@EntityHandler` class — the registration needs that class's resolved entity;
+ * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound functions:
+ * `@OnBoundFunction`; unbound counterpart: `@OnAction`. Draft variant: `@OnBoundActionDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnBoundAction(Book.actions.approve)
+ *   private async onApprove(@Req() req: ActionRequest<typeof Book.actions.approve>, @Next() next: NextEvent): ActionReturn<typeof Book.actions.approve> {
+ *     // ...
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction | CDS-TS-Dispatcher - @OnBoundAction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundAction
  */
 const OnBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnBoundActionDraft` decorator to execute custom logic when a custom bound action event is triggered on a DRAFT resource.
- * @param name CdsFunction - name of the action, which can be a `string` or a `@cds-model` event.
+ * Handles a bound action on a specific DRAFT instance of the host entity — call `next()` to continue, or
+ * return the action's result directly.
+ * Registers `srv.on(name, <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * The draft counterpart of `@OnBoundAction` — same bound-action shape, scoped to `<Entity>.drafts`. Must
+ * be hosted in an `@EntityHandler` class. README has no dedicated `@OnBoundActionDraft` section; the
+ * closest coverage is `@OnBoundAction`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnBoundActionDraft(Book.actions.approve)
+ *   private async onApproveDraft(@Req() req: ActionRequest<typeof Book.actions.approve>, @Next() next: NextEvent): ActionReturn<typeof Book.actions.approve> {
+ *     // ...
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction | CDS-TS-Dispatcher - @OnBoundActionDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundAction
  */
 const OnBoundActionDraft = buildAction({ event: 'BOUND_ACTION', eventKind: 'ON', isDraft: true });
 
 /**
- * Use `@OnBoundFunction` decorator to execute custom logic when a custom bound function event is triggered.
- * @param name CdsFunction - name of the function, which can be a `string` or a `@cds-model` event.
+ * Handles a bound function on a specific instance of the host entity — call `next()` to continue, or
+ * return the function's result directly.
+ * Registers `srv.on(name, <Entity>, callback)`.
+ *
+ * @remarks
+ * Must be hosted in an `@EntityHandler` class — the registration needs that class's resolved entity;
+ * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound actions:
+ * `@OnBoundAction`; unbound counterpart: `@OnFunction`. Draft variant: `@OnBoundFunctionDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnBoundFunction(Book.actions.someFunction)
+ *   private async onSomeFunction(@Req() req: ActionRequest<typeof Book.actions.someFunction>, @Next() next: NextEvent): ActionReturn<typeof Book.actions.someFunction> {
+ *     // ...
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction | CDS-TS-Dispatcher - @OnBoundFunction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundFunction
  */
 const OnBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnBoundFunctionDraft` decorator to execute custom logic when a custom bound function event is triggered on a DRAFT resource.
- * @param name CdsFunction - name of the function, which can be a `string` or a `@cds-model` event.
+ * Handles a bound function on a specific DRAFT instance of the host entity — call `next()` to continue,
+ * or return the function's result directly.
+ * Registers `srv.on(name, <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * The draft counterpart of `@OnBoundFunction` — same bound-function shape, scoped to `<Entity>.drafts`.
+ * Must be hosted in an `@EntityHandler` class. README has no dedicated `@OnBoundFunctionDraft` section;
+ * the closest coverage is `@OnBoundFunction`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnBoundFunctionDraft(Book.actions.someFunction)
+ *   private async onSomeFunctionDraft(@Req() req: ActionRequest<typeof Book.actions.someFunction>, @Next() next: NextEvent): ActionReturn<typeof Book.actions.someFunction> {
+ *     // ...
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction | CDS-TS-Dispatcher - @OnBoundFunctionDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundFunction
  */
 const OnBoundFunctionDraft = buildAction({ event: 'BOUND_FUNC', eventKind: 'ON', isDraft: true });
 
 /**
- * Use `@OnFunction` decorator to execute custom logic when a custom function event is triggered.
- * @param name CdsFunction - name of the function, which can be a `string` or a `@cds-model` event.
+ * Handles an unbound function — call `next()` to continue to the next registered handler, or return the
+ * function's result directly.
+ * Registers `srv.on(name, callback)`.
+ *
+ * @remarks
+ * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
+ * unbound actions: `@OnAction`; bound counterpart: `@OnBoundFunction`.
+ *
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class ActionsHandler {
+ *   /@OnFunction(GetTopSellers)
+ *   private async onGetTopSellers(@Req() req: ActionRequest<typeof GetTopSellers>, @Next() next: NextEvent): ActionReturn<typeof GetTopSellers> {
+ *     // ...
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onfunction | CDS-TS-Dispatcher - @OnFunction}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnFunction
  */
 const OnFunction = buildAction({ event: 'FUNC', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnEvent` decorator to execute custom logic when a custom event is triggered.
- * @param name CdsEvent - name of the event, which can be a `string` or a `@cds-model` event.
+ * Handles a custom CDS event emitted in-process on the SAME service (`srv.emit(...)` / `this.emit(...)`).
+ * Registers `srv.on(name, callback)` — `name` has everything before its LAST dot stripped first (a
+ * `@cds-model` event's fully-qualified name like `'CatalogService.SendData'` registers as `'SendData'`).
+ *
+ * @remarks
+ * For emitter and receiver in the same Node process but on DIFFERENT services, or over an external
+ * message broker, use `@OnSubscribe` instead — `@OnEvent(name)` is exactly `@OnSubscribe({ eventName:
+ * name, type: 'SAME_NODE_PROCESS' })`. Conventionally hosted in an `@UnboundActions` class (service-wide,
+ * not entity-scoped) — excluded from `@OnAll` / `@BeforeAll` / `@AfterAll` firing, since it is not
+ * entity-scoped. The websocket decorators (`@OnWebSocketConnect`, `@OnWebSocketDisconnect`,
+ * `@OnWebSocketMessage`) are sugar built on top of this one.
+ *
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class CatalogEventsHandler {
+ *   /@OnEvent(SendData)
+ *   private async onSendData(@Req() req: Request<SendData>): Promise<void> {
+ *     // req.data.foo, req.data.bar, req.headers, ...
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onevent | CDS-TS-Dispatcher - @OnEvent}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnEvent
  */
 const OnEvent = buildOnEvent({ event: 'EVENT', eventKind: 'ON', isDraft: false });
 
 /**
- * Handles an incoming websocket operation/event by name (`@cap-js-community/websocket` services).
- * Sugar for `@OnEvent(name)`; requires the websocket plugin in the consumer app and a
- * `@protocol: 'websocket'` (or `@ws`) service whose impl hosts this `@UnboundActions` class.
- * @param name string - name of the websocket operation, as sent in the `event` field of the wire payload.
- * `NOTE:` like `@OnEvent`, everything before the last dot is stripped at registration time
- * (`'ChatService.sendMessage'` registers as `'sendMessage'`) - the ws plugin routes by the local
- * operation name, so pass the plain name.
+ * Handles an incoming websocket operation/event by name, over the `@cap-js-community/websocket` plugin.
+ * Registers `srv.on(name, callback)` — pure sugar for `@OnEvent(name)`.
+ *
+ * @remarks
+ * Requires the websocket plugin (an OPTIONAL peer the consumer app installs separately) and a
+ * `@protocol: 'websocket'` (or `@ws`) service whose impl hosts this `@UnboundActions` class — there is no
+ * dedicated websocket host class, a websocket service impl is a regular CAP service impl. `name` is
+ * matched against the `event` field of the wire payload (`{"event":"<name>","data":{...}}`); like
+ * `@OnEvent`, everything before the LAST dot is stripped at registration time
+ * (`'ChatService.sendMessage'` registers as `'sendMessage'`), so pass the plain operation name. Siblings
+ * for the fixed connect/disconnect events: `@OnWebSocketConnect`, `@OnWebSocketDisconnect`. Observed on
+ * plugin `1.11.x`/kind `'ws'`: the handler's return value is NOT echoed back as a reply frame — use
+ * `srv.emit(...)` / `srv.broadcast(...)` if the client needs a message back.
+ *
+ * @example
+ * ```ts
+ * /@UnboundActions() // bound as ChatService's impl via CDSDispatcher
+ * class ChatHandler {
+ *   /@OnWebSocketMessage('sendMessage')
+ *   private async onMessage(@Req() req: Request<{ text: string }>): Promise<string> {
+ *     return req.data.text;
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketmessage | CDS-TS-Dispatcher - @OnWebSocketMessage}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnWebSocketMessage
  */
 const OnWebSocketMessage = (name: string) => OnEvent(name);
 
 /**
- * Fires when a websocket client connects. Sugar for `@OnEvent('wsConnect')`; the CDS service must
- * model `action wsConnect();`.
+ * Fires when a websocket client connects, over the `@cap-js-community/websocket` plugin.
+ * Registers `srv.on('wsConnect', callback)` — pure sugar for `@OnEvent('wsConnect')`.
+ *
+ * @remarks
+ * The service must model `action wsConnect();` — the plugin's adapter only calls MODELED operations, it
+ * does not synthesize a connect event for services that omit it. Hosted the same way as
+ * `@OnWebSocketMessage` / `@OnWebSocketDisconnect`, in an `@UnboundActions` class bound to the
+ * websocket-protocol service.
+ *
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class ChatHandler {
+ *   /@OnWebSocketConnect()
+ *   private async onConnect(@Req() req: Request): Promise<void> {
+ *     console.log('[Chat] connect');
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketconnect | CDS-TS-Dispatcher - @OnWebSocketConnect}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnWebSocketConnect
  */
 const OnWebSocketConnect = () => OnEvent('wsConnect');
 
 /**
- * Fires when a websocket client disconnects. Sugar for `@OnEvent('wsDisconnect')`; model
- * `action wsDisconnect(reason: String);` to receive a disconnect detail in `req.data.reason`.
- * `NOTE:` under the plugin's default `kind: 'ws'` the delivered value is the socket `close code` as a
- * string (e.g. `'1000'`, `'1005'`), not a reason phrase - raw `ws` passes `(code, reason)` and the
- * plugin forwards the first argument.
+ * Fires when a websocket client disconnects, over the `@cap-js-community/websocket` plugin.
+ * Registers `srv.on('wsDisconnect', callback)` — pure sugar for `@OnEvent('wsDisconnect')`.
+ *
+ * @remarks
+ * Model `action wsDisconnect(reason: String);` to receive a disconnect detail in `req.data.reason` — the
+ * plugin's adapter only calls MODELED operations. Under the plugin's default `kind: 'ws'` the delivered
+ * value is the socket CLOSE CODE as a string (e.g. `'1000'`, `'1005'`), NOT a reason phrase — raw `ws`
+ * passes `(code, reason)` and the plugin forwards only the first argument. Siblings:
+ * `@OnWebSocketConnect`, `@OnWebSocketMessage`.
+ *
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class ChatHandler {
+ *   /@OnWebSocketDisconnect()
+ *   private async onDisconnect(@Req() req: Request<{ reason?: string }>): Promise<void> {
+ *     console.log(`[Chat] disconnect ${req.data?.reason ?? ''}`);
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketdisconnect | CDS-TS-Dispatcher - @OnWebSocketDisconnect}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnWebSocketDisconnect
  */
 const OnWebSocketDisconnect = () => OnEvent('wsDisconnect');
 
 /**
+ * Handles a custom messaging event (event bus / publish-subscribe), in-process or over an external
+ * broker.
+ * Registers `eventSource.on(eventName, callback)` where `eventSource` depends on `options.type`: the
+ * host service itself for `'SAME_NODE_PROCESS'`, `cds.connect.to(options.externalServiceName)` for
+ * `'SAME_NODE_PROCESS_DIFFERENT_SERVICE'`, or `cds.connect.to('messaging')` for `'MESSAGE_BROKER'`.
  *
- * Use `@OnSubscribe` decorator to execute custom logic when a custom messaging event is triggered.
- * - Executes custom logic when a specific messaging event is triggered
- * - Built on CAP's intrinsic eventing system
- * - Compatible with both in-process and external messaging
- * @param options - The options object
- * @param options.eventName string | object (@cds-model) - Name of the event, which can be a `string` or a `@cds-model` event.
- * @param options.type `'SAME_NODE_PROCESS'` | `'SAME_NODE_PROCESS_DIFFERENT_SERVICE'` | `'MESSAGE_BROKER'` - Type of the subscriber
- * @param options.externalServiceName string - Name of the external service - applicable only for `SAME_NODE_PROCESS_DIFFERENT_SERVICE`
- * @param options.showReceiverMessage [optional] - When enabled, displays inbound message payloads in the specified format. (Default `false`)
- * @param options.consoleStyle [optional] - 'table' : 'debug' - Specifies the log output format for received messages (when `showReceiverMessage` is true). (Default `'debug'`).
+ * @remarks
+ * `options.eventName` matches everything after its LAST dot only (same stripping as `@OnEvent`).
+ * `'SAME_NODE_PROCESS'` is exactly what `@OnEvent(eventName)` does — reach for that shorthand when
+ * emitter and receiver share the same service. `options.showReceiverMessage` (default `false`) plus
+ * `options.consoleStyle` (`'table'` | `'debug'`, default `'debug'`) log inbound payloads for debugging.
+ * Conventionally hosted in an `@UnboundActions` class, though an `@EntityHandler` class works too.
+ *
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class CatalogEventsHandler {
+ *   /@OnSubscribe({ eventName: SendData, type: 'SAME_NODE_PROCESS' })
+ *   private async onSendData(@Req() req: Request<SendData>): Promise<void> {
+ *     // req.data.foo, req.data.bar, req.headers, ...
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onsubscribe | CDS-TS-Dispatcher - @OnSubscribe}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnSubscribe
  */
 const OnSubscribe = buildOnMessagingEvent({ event: 'MESSAGING_EVENT', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnError` decorator to execute custom logic when an error occurs.
+ * Registers a custom error handler, invoked whenever an error occurs during event processing of any
+ * request, to augment or replace the error before it reaches the client.
+ * Registers `srv.on('error', callback)`.
+ *
+ * @remarks
+ * MUST be a `sync` function — no `await`, no returned `Promise`; CAP invokes error handlers
+ * SYNCHRONOUSLY while the transaction unwinds. Consequently `@Diff` (the only asynchronous parameter
+ * decorator) and `@Throttle` are both REJECTED here — the dispatcher throws at decoration time if either
+ * is stacked on an `@OnError` handler. Mutate the injected `@Error` (or `@Req`) synchronously instead
+ * (`err.message = '...'`); do any async work (logging, notifications) fire-and-forget, uncoupled from the
+ * handler's own return. Conventionally hosted in an `@UnboundActions` class (service-wide, not
+ * entity-scoped) — excluded from `@OnAll` / `@BeforeAll` / `@AfterAll` firing.
+ *
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class ErrorHandler {
+ *   /@OnError()
+ *   private onError(@Error() err: Error, @Req() req: Request): void {
+ *     err.message = 'New message';
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onerror | CDS-TS-Dispatcher - @OnError}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnError
  */
 const OnError = buildOnError({ eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnEditDraft` decorator to execute custom logic when a new draft is created from an active instance.
+ * Replaces the default implementation for creating a new draft FROM an existing active instance (the
+ * Fiori Elements "Edit" action) — call `next()` to fall back to CAP's generic implementation.
+ * Registers `srv.on('EDIT', <Entity>, callback)` — against the ACTIVE entity, NOT `.drafts`.
+ *
+ * @remarks
+ * Despite the "Draft" in its name this registers on the active entity: `EDIT` is the moment a user
+ * starts editing an already-saved instance (as opposed to `@OnNewDraft`, which starts a brand-new one).
+ * Pairs with `@BeforeEditDraft` / `@AfterEditDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnEditDraft()
+ *   private async onEditDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oneditdraft | CDS-TS-Dispatcher - @OnEditDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnEditDraft
  */
 const OnEditDraft = buildOnCRUD({ event: 'EDIT', eventKind: 'ON', isDraft: false });
 
 /**
- * Use `@OnSaveDraft` decorator to execute custom logic when the 'active entity' is changed.
+ * Replaces the default implementation for activating a draft — writing it back to the active entity (the
+ * Fiori Elements "Save" action) — call `next()` to fall back to CAP's generic implementation.
+ * Registers `srv.on('SAVE', <Entity>, callback)` — against the ACTIVE entity, NOT `.drafts`.
+ *
+ * @remarks
+ * Despite the "Draft" in its name this registers on the active entity, mirroring `@BeforeSaveDraft` /
+ * `@AfterSaveDraft`. CAP expands a `SAVE` registration into `[CREATE, UPSERT, UPDATE]` on the given path;
+ * the "only during draft-activation" gate CAP applies to that expansion is keyed on the path ending in
+ * `.drafts` — since this decorator's path is the ACTIVE entity, the gate never applies, so the handler
+ * ALSO runs for ordinary direct writes on the active entity, not only for genuine draft activation.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnSaveDraft()
+ *   private async onSaveDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onsavedraft | CDS-TS-Dispatcher - @OnSaveDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnSaveDraft
  */
 const OnSaveDraft = buildOnCRUD({ event: 'SAVE', eventKind: 'ON', isDraft: false });
 
@@ -1943,14 +2714,55 @@ const OnSaveDraft = buildOnCRUD({ event: 'SAVE', eventKind: 'ON', isDraft: false
  */
 
 /**
- * Use `@OnNewDraft` decorator to execute custom logic when a 'draft' is created.
+ * Replaces the default implementation for creating a new draft (the Fiori Elements "New" action) — call
+ * `next()` to fall back to CAP's generic implementation.
+ * Registers `srv.on('NEW', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * The event a real, protocol-borne (HTTP/OData) "New" request actually dispatches as — CAP rewrites a
+ * `POST` against a draft-enabled entity from `CREATE` to `NEW` unless the payload explicitly sets
+ * `IsActiveEntity: true`. A literal, protocol-less `CREATE` straight against `.drafts` is the separate,
+ * narrower `@OnCreateDraft`. Pairs with `@BeforeNewDraft` / `@AfterNewDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnNewDraft()
+ *   private async onNewDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onnewdraft | CDS-TS-Dispatcher - @OnNewDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnNewDraft
  */
 const OnNewDraft = buildOnCRUD({ event: 'NEW', eventKind: 'ON', isDraft: true });
 
 /**
- * Use `@OnCancelDraft` decorator to execute custom logic when a 'draft' is cancelled.
+ * Replaces the default implementation for cancelling an in-progress draft — call `next()` to fall back to
+ * CAP's generic implementation.
+ * Registers `srv.on('CANCEL', <Entity>.drafts, callback)`.
+ *
+ * @remarks
+ * `@OnDiscardDraft` (`DISCARD`) is CAP's canonical alias of this same `CANCEL` event on `.drafts` since
+ * `@sap/cds` 10 — the same draft-abandon moment under a different, newer event name. Pairs with
+ * `@BeforeCancelDraft` / `@AfterCancelDraft`.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnCancelDraft()
+ *   private async onCancelDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *     return next();
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oncanceldraft | CDS-TS-Dispatcher - @OnCancelDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnCancelDraft
  */
 const OnCancelDraft = buildOnCRUD({ event: 'CANCEL', eventKind: 'ON', isDraft: true });
 
@@ -2248,18 +3060,53 @@ const AfterPatchDraft = buildAfter({ event: 'PATCH', eventKind: 'AFTER', isDraft
 const AfterDiscardDraft = buildAfter({ event: 'DISCARD', eventKind: 'AFTER', isDraft: true });
 
 /**
- * Use `@OnPatchDraft` decorator to execute custom logic when a 'draft' field is patched.
+ * Replaces the default implementation for changing a field of an in-progress draft — call `next()` to
+ * fall back to CAP's generic implementation.
+ * Registers `srv.on('PATCH', <Entity>.drafts, callback)`.
  *
- * `PATCH` is CAP's canonical `field-level draft-edit` event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) - it is triggered on the draft entity `MyEntity.drafts` every time a field of an in-progress draft is changed.
+ * @remarks
+ * `PATCH` is CAP's canonical field-level draft-edit event — an alias of `UPDATE` on `.drafts` since
+ * `@sap/cds` 10 — fired every time a Fiori Elements user changes a field of an in-progress draft.
+ * `@OnUpdateDraft` (`UPDATE`) is the same moment under the older event name.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnPatchDraft()
+ *   private async onPatchDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *     return next(); // preserve the default draft PATCH behavior
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onpatchdraft | CDS-TS-Dispatcher - @OnPatchDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnPatchDraft
  */
 const OnPatchDraft = buildOnCRUD({ event: 'PATCH', eventKind: 'ON', isDraft: true });
 
 /**
- * Use `@OnDiscardDraft` decorator to execute custom logic when a 'draft' is discarded.
+ * Replaces the default implementation for discarding an in-progress draft — call `next()` to fall back to
+ * CAP's generic implementation.
+ * Registers `srv.on('DISCARD', <Entity>.drafts, callback)`.
  *
- * `DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 - it is triggered on the draft entity `MyEntity.drafts` when an in-progress draft is discarded.
+ * @remarks
+ * `DISCARD` is CAP's canonical alias of `CANCEL` on `.drafts` since `@sap/cds` 10. `@OnCancelDraft`
+ * (`CANCEL`) is the same moment under the older event name.
+ *
+ * @example
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnDiscardDraft()
+ *   private async onDiscardDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *     return next(); // preserve the default draft DISCARD behavior
+ *   }
+ * }
+ * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#ondiscarddraft | CDS-TS-Dispatcher - @OnDiscardDraft}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnDiscardDraft
  */
 const OnDiscardDraft = buildOnCRUD({ event: 'DISCARD', eventKind: 'ON', isDraft: true });
 
@@ -2270,103 +3117,143 @@ const OnDiscardDraft = buildOnCRUD({ event: 'DISCARD', eventKind: 'ON', isDraft:
  */
 
 /**
- * Use `@BeforeCommit` decorator to execute custom logic `before` the database transaction of the current request is `committed`.
+ * Executes custom logic INSIDE the transaction, immediately before commit, after all other handlers of
+ * the request (including handlers of other services touched by the same request) have run — throwing
+ * here VETOES the commit and the error is returned to the client.
+ * Registers via the request's root event context — `req.context.before('commit', callback)` — attached
+ * once per root request through a `srv.prepend`-installed `srv.before('*', ...)` hook.
  *
- * It runs `once` per `ROOT` request (once per `$batch` changeset), `inside` the request transaction, so any database
- * work joins the same transaction. Throwing here `vetoes` the request - the transaction is rolled back and the error
- * is returned to the client.
+ * @remarks
+ * Runs `once` per ROOT request (once per OData `$batch` changeset). Hosted in an `@EntityHandler` class
+ * it is scoped to requests targeting that entity; hosted in an `@UnboundActions` class it applies to
+ * every request of the service. The injected `req` is the FIRST sub-request of the root request that
+ * reached this hook — validate PER OPERATION in `@BeforeCreate` & co, and keep `@BeforeCommit` for
+ * CROSS-REQUEST / final-state invariants that need to read the current database state. Registers on the
+ * ACTIVE entity only — for `@odata.draft.enabled` entities the draft-editing roundtrip
+ * (`NEW`/`PATCH`/`CANCEL` on `.drafts`) does NOT fire it, only draft ACTIVATION (`CREATE`/`UPDATE` on the
+ * active entity) does. Across multiple handler classes, `@BeforeCommit` callbacks run in
+ * `CDSDispatcher([...])` array order (see `@AfterCommit` / `@AfterRollback` / `@OnRequestDone` for the
+ * reverse-order siblings).
  *
- * Hosted in an [@EntityHandler](#entityhandler) class it is scoped to the requests targeting that entity, hosted in an
- * [@UnboundActions](#unboundactions) class it applies to every request of the service.
- *
- * `NOTE:` the hooks register on the `ACTIVE` entity only - for `@odata.draft.enabled` entities the draft-editing
- * roundtrip (`NEW` / `PATCH` / `CANCEL` on `MyEntity.drafts`) does **not** fire them, they fire when the draft is
- * `activated` (`CREATE` / `UPDATE` on the active entity).
- *
- * `NOTE:` the `req` handed over is the `FIRST` sub-request of the root request which reached this class - in a
- * `$batch` changeset carrying several operations, `req.data` belongs to that `first` operation only. Validate
- * `per operation` in [@BeforeCreate](#beforecreate) & co and keep `@BeforeCommit` for `cross-request` /
- * `final state` invariants (read the database state, not `req.data`).
  * @example
- * ```typescript
- * /@BeforeCommit()
- * public async beforeCommit(/@Req() req: Request) {
- *   // ... throw to veto the commit
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@BeforeCommit()
+ *   private async beforeCommit(@Req() req: Request<Book>): Promise<void> {
+ *     const invariantViolated = false; // ... e.g. a cross-entity stock check
+ *     if (invariantViolated) {
+ *       throw new Error('Total stock must stay non-negative'); // vetoes the commit
+ *     }
+ *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforecommit | CDS-TS-Dispatcher - @BeforeCommit}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeCommit
  */
 const BeforeCommit = buildRequestLifecycle({ event: 'BEFORE_COMMIT' });
 
 /**
- * Use `@AfterCommit` decorator to execute custom logic `after` the database transaction of the current request was `committed`.
+ * Executes custom logic only AFTER the transaction of the current request was durably committed, OUTSIDE
+ * any transaction — errors CANNOT veto anything anymore, they are caught and logged by the dispatcher.
+ * Registers via the request's root event context — `req.context.on('succeeded', callback)` — attached
+ * once per root request through a `srv.prepend`-installed `srv.before('*', ...)` hook.
  *
- * It runs `once` per `ROOT` request (once per `$batch` changeset) and `OUTSIDE` any transaction - the commit is already
- * durable, so database work needs its own transaction (`await cds.tx(async () => { ... })`). Errors `cannot` veto
- * anything anymore, they are `caught` and `logged` by the dispatcher.
+ * @remarks
+ * Runs `once` per ROOT request (once per OData `$batch` changeset). Hosted in an `@EntityHandler` class
+ * it is scoped to requests targeting that entity; hosted in an `@UnboundActions` class it applies to
+ * every request of the service. The request's transaction is already CLOSED by the time this handler
+ * runs — a plain query fails; open a NEW transaction with `await cds.tx(async () => { ... })` for any
+ * database work. Registers on the ACTIVE entity only — for `@odata.draft.enabled` entities the
+ * draft-editing roundtrip does NOT fire it, only draft ACTIVATION does. Across multiple handler classes,
+ * `@AfterCommit` callbacks run in REVERSE `CDSDispatcher([...])` array order (`@BeforeCommit` runs in
+ * forward order). Sibling for a failed transaction: `@AfterRollback`.
  *
- * Hosted in an [@EntityHandler](#entityhandler) class it is scoped to the requests targeting that entity, hosted in an
- * [@UnboundActions](#unboundactions) class it applies to every request of the service.
- *
- * `NOTE:` the hooks register on the `ACTIVE` entity only - for `@odata.draft.enabled` entities the draft-editing
- * roundtrip (`NEW` / `PATCH` / `CANCEL` on `MyEntity.drafts`) does **not** fire them, they fire when the draft is
- * `activated` (`CREATE` / `UPDATE` on the active entity).
  * @example
- * ```typescript
- * /@AfterCommit()
- * public async afterCommit(/@Req() req: Request) {
- *   await cds.tx(async () => { ... }); // needs its own transaction
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterCommit()
+ *   private async afterCommit(@Req() req: Request<Book>): Promise<void> {
+ *     await cds.tx(async () => {
+ *       // ... e.g. send a confirmation e-mail, invalidate a cache
+ *     });
+ *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercommit | CDS-TS-Dispatcher - @AfterCommit}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCommit
  */
 const AfterCommit = buildRequestLifecycle({ event: 'AFTER_COMMIT' });
 
 /**
- * Use `@AfterRollback` decorator to execute custom logic `after` the database transaction of the current request was `rolled back`.
+ * Executes custom logic AFTER the transaction of the current request was rolled back, OUTSIDE any
+ * transaction — errors CANNOT veto anything anymore, they are caught and logged by the dispatcher.
+ * Registers via the request's root event context — `req.context.on('failed', callback)` — attached once
+ * per root request through a `srv.prepend`-installed `srv.before('*', ...)` hook.
  *
- * It runs `once` per `ROOT` request (once per `$batch` changeset) and `OUTSIDE` any transaction - the failed one is
- * gone, so database work needs its own transaction (`await cds.tx(async () => { ... })`). Errors `cannot` veto
- * anything anymore, they are `caught` and `logged` by the dispatcher.
+ * @remarks
+ * Runs `once` per ROOT request (once per OData `$batch` changeset). Hosted in an `@EntityHandler` class
+ * it is scoped to requests targeting that entity; hosted in an `@UnboundActions` class it applies to
+ * every request of the service. The request's transaction is already CLOSED (rolled back) by the time
+ * this handler runs — a plain query fails; open a NEW transaction with `await cds.tx(async () => { ...
+ * })` for any database work. Registers on the ACTIVE entity only — for `@odata.draft.enabled` entities
+ * the draft-editing roundtrip does NOT fire it, only draft ACTIVATION does. Across multiple handler
+ * classes, `@AfterRollback` callbacks run in REVERSE `CDSDispatcher([...])` array order (`@BeforeCommit`
+ * runs in forward order). Sibling for a successful transaction: `@AfterCommit`.
  *
- * Hosted in an [@EntityHandler](#entityhandler) class it is scoped to the requests targeting that entity, hosted in an
- * [@UnboundActions](#unboundactions) class it applies to every request of the service.
- *
- * `NOTE:` the hooks register on the `ACTIVE` entity only - for `@odata.draft.enabled` entities the draft-editing
- * roundtrip (`NEW` / `PATCH` / `CANCEL` on `MyEntity.drafts`) does **not** fire them, they fire when the draft is
- * `activated` (`CREATE` / `UPDATE` on the active entity).
  * @example
- * ```typescript
- * /@AfterRollback()
- * public async afterRollback(/@Req() req: Request) {
- *   // ... compensate the failed request
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@AfterRollback()
+ *   private async afterRollback(@Req() req: Request<Book>): Promise<void> {
+ *     await cds.tx(async () => {
+ *       // ... e.g. release a reservation in a remote system, alert on the failure
+ *     });
+ *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterrollback | CDS-TS-Dispatcher - @AfterRollback}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRollback
  */
 const AfterRollback = buildRequestLifecycle({ event: 'AFTER_ROLLBACK' });
 
 /**
- * Use `@OnRequestDone` decorator to execute custom logic when the current request is `done`, no matter if it `succeeded` or `failed`.
+ * Executes custom logic when the current request is done, no matter if it succeeded or failed —
+ * `finally` semantics — OUTSIDE any transaction; errors CANNOT veto anything anymore, they are caught and
+ * logged by the dispatcher.
+ * Registers via the request's root event context — `req.context.on('done', callback)` — attached once
+ * per root request through a `srv.prepend`-installed `srv.before('*', ...)` hook.
  *
- * It runs `once` per `ROOT` request (once per `$batch` changeset) and `OUTSIDE` any transaction, so database work needs
- * its own transaction (`await cds.tx(async () => { ... })`). Errors `cannot` veto anything anymore, they are `caught`
- * and `logged` by the dispatcher.
+ * @remarks
+ * Runs `once` per ROOT request (once per OData `$batch` changeset). Hosted in an `@EntityHandler` class
+ * it is scoped to requests targeting that entity; hosted in an `@UnboundActions` class it applies to
+ * every request of the service. The request's transaction is already CLOSED by the time this handler
+ * runs — a plain query fails; open a NEW transaction with `await cds.tx(async () => { ... })` for any
+ * database work. Registers on the ACTIVE entity only — for `@odata.draft.enabled` entities the
+ * draft-editing roundtrip does NOT fire it, only draft ACTIVATION does. Across multiple handler classes,
+ * `@OnRequestDone` callbacks run in REVERSE `CDSDispatcher([...])` array order (`@BeforeCommit` runs in
+ * forward order).
  *
- * Hosted in an [@EntityHandler](#entityhandler) class it is scoped to the requests targeting that entity, hosted in an
- * [@UnboundActions](#unboundactions) class it applies to every request of the service.
- *
- * `NOTE:` the hooks register on the `ACTIVE` entity only - for `@odata.draft.enabled` entities the draft-editing
- * roundtrip (`NEW` / `PATCH` / `CANCEL` on `MyEntity.drafts`) does **not** fire them, they fire when the draft is
- * `activated` (`CREATE` / `UPDATE` on the active entity).
  * @example
- * ```typescript
- * /@OnRequestDone()
- * public async requestDone(/@Req() req: Request) {
- *   // ... cleanup, always runs
+ * ```ts
+ * /@EntityHandler(Book)
+ * class BookHandler {
+ *   /@OnRequestDone()
+ *   private async requestDone(@Req() req: Request<Book>): Promise<void> {
+ *     await cds.tx(async () => {
+ *       // ... e.g. release a lock, stop a timer, emit duration metrics
+ *     });
+ *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onrequestdone | CDS-TS-Dispatcher - @OnRequestDone}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnRequestDone
  */
 const OnRequestDone = buildRequestLifecycle({ event: 'REQUEST_DONE' });
 
@@ -2383,78 +3270,89 @@ const OnRequestDone = buildRequestLifecycle({ event: 'REQUEST_DONE' });
  */
 
 /**
- * Use `@OnServed` decorator to execute custom logic once, right before the CAP server starts `listening` for requests.
+ * Executes custom logic once, right before the CAP server starts listening for requests. The handler
+ * receives `cds.services` (the bootstrapped services) as its only argument.
+ * Registers `cds.on('served', callback)`.
  *
- * Must be hosted in a [@ServerLifecycle](#serverlifecycle) class. The handler receives `cds.services` (the
- * bootstrapped services) as its only argument. CAP `awaits` every `@OnServed` handler `sequentially` - in
- * `declaration order` inside a class, and in `CDSDispatcher` array order across classes - `before` `app.listen`
- * runs. A `thrown` error `fails` server startup.
+ * @remarks
+ * Must be hosted in a `@ServerLifecycle` class. CAP `await`s every `@OnServed` handler SEQUENTIALLY — in
+ * declaration order inside a class, and in `CDSDispatcher` array order across classes — before
+ * `app.listen` runs; a thrown error fails server startup. Registers ONCE PER PROCESS: no matter how many
+ * `CDSDispatcher` instances (or bootstraps, e.g. in tests) list the class, only the first one's resolved
+ * instance stays bound. Unlike every other method decorator in this library, no `@Req()`-style parameter
+ * decorator applies here — the callback receives CAP's native arguments verbatim. Siblings:
+ * `@OnListening`, `@OnShutdown`.
  *
- * `NOTE:` these arguments come straight from `cds.on('served', ...)` - no `@Req()`-style parameter decorator
- * applies, the callback is invoked with CAP's native arguments `verbatim`.
  * @example
- * ```typescript
+ * ```ts
  * /@ServerLifecycle()
  * export class Bootstrap {
  *   /@OnServed()
- *   public async seed(services: object) {
+ *   public async seed(services: object): Promise<void> {
  *     // ... one-time startup work, may throw to abort the boot
  *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onserved | CDS-TS-Dispatcher - @OnServed}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnServed
  */
 const OnServed = buildServerLifecycle({ event: 'SERVED' });
 
 /**
- * Use `@OnListening` decorator to execute custom logic once the CAP server is `listening` for requests.
+ * Executes custom logic once the CAP server is listening for requests. The handler receives `{ server,
+ * url }`.
+ * Registers `cds.on('listening', callback)`.
  *
- * Must be hosted in a [@ServerLifecycle](#serverlifecycle) class. The handler receives `{ server, url }`. CAP
- * dispatches `@OnListening` `synchronously` - any return value (including a `Promise`) is `discarded`, so treat
- * the handler as `fire-and-forget`.
+ * @remarks
+ * Must be hosted in a `@ServerLifecycle` class. CAP dispatches `@OnListening` SYNCHRONOUSLY — any return
+ * value (including a `Promise`) is DISCARDED, so treat the handler as fire-and-forget. Unlike every other
+ * method decorator in this library, no `@Req()`-style parameter decorator applies here — the callback
+ * receives CAP's native arguments verbatim. Siblings: `@OnServed`, `@OnShutdown`.
  *
- * `NOTE:` these arguments come straight from `cds.on('listening', ...)` - no `@Req()`-style parameter decorator
- * applies, the callback is invoked with CAP's native arguments `verbatim`.
  * @example
- * ```typescript
+ * ```ts
  * /@ServerLifecycle()
  * export class Bootstrap {
  *   /@OnListening()
- *   public logUrl(payload: { server: unknown; url: string }) {
+ *   public logUrl(payload: { server: unknown; url: string }): void {
  *     console.log(`Listening on ${payload.url}`);
  *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onlistening | CDS-TS-Dispatcher - @OnListening}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnListening
  */
 const OnListening = buildServerLifecycle({ event: 'LISTENING' });
 
 /**
- * Use `@OnShutdown` decorator to execute custom logic while the CAP server is shutting down.
+ * Executes custom logic while the CAP server is shutting down. The handler receives `err: Error | null`.
+ * Registers `cds.on('shutdown', callback)`.
  *
- * Must be hosted in a [@ServerLifecycle](#serverlifecycle) class. The handler receives `err: Error | null`. CAP
- * runs `all` `@OnShutdown` handlers (of every class) `in parallel` and `awaits` them `before` the server closes.
+ * @remarks
+ * Must be hosted in a `@ServerLifecycle` class. CAP runs ALL `@OnShutdown` handlers (of every class) IN
+ * PARALLEL and awaits them before the server closes. CAP has NO once-guard on `shutdown` — unlike
+ * `served`/`listening`, this callback MAY FIRE MORE THAN ONCE per process; make the handler idempotent.
+ * Catch your own errors: a REJECTED `@OnShutdown` handler propagates out of CAP's shutdown dispatch, so
+ * `server.close` (and the force-exit fallback timer) never run — the process stays alive with an
+ * unhandled rejection instead of shutting down. Unlike every other method decorator in this library, no
+ * `@Req()`-style parameter decorator applies here — the callback receives CAP's native arguments
+ * verbatim. Siblings: `@OnServed`, `@OnListening`.
  *
- * `NOTE:` CAP has `NO once-guard` on `shutdown` - unlike `served` / `listening`, this callback `may fire more than
- * once` per process. Make the handler idempotent.
- *
- * `NOTE:` catch your own errors: a `rejected` `@OnShutdown` handler propagates out of CAP's shutdown dispatch,
- * so `server.close` (and the force-exit fallback timer) never run - the process stays alive with an
- * `unhandled rejection` instead of shutting down.
- *
- * `NOTE:` these arguments come straight from `cds.on('shutdown', ...)` - no `@Req()`-style parameter decorator
- * applies, the callback is invoked with CAP's native arguments `verbatim`.
  * @example
- * ```typescript
+ * ```ts
  * /@ServerLifecycle()
  * export class Bootstrap {
  *   /@OnShutdown()
- *   public async cleanup(err: Error | null) {
+ *   public async cleanup(error: Error | null): Promise<void> {
  *     // ... release resources, may run more than once
  *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onshutdown | CDS-TS-Dispatcher - @OnShutdown}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnShutdown
  */
 const OnShutdown = buildServerLifecycle({ event: 'SHUTDOWN' });
 
@@ -2542,23 +3440,28 @@ function registerScheduledOutcomeHandler(
 }
 
 /**
- * Use `@OnScheduled` decorator to handle a `@sap/cds` 10 event-queue `scheduled task` by its name.
+ * Handles a `@sap/cds` 10 event-queue scheduled task by name — a normal `ON` handler on the (queued) app
+ * service; read the task payload off `req.data`.
+ * Registers `srv.on(name, callback)` — `name` is registered VERBATIM, dots are NOT stripped, so
+ * fully-qualified task names like `'my.namespace.Task'` match exactly.
  *
- * It registers `srv.on(name, cb)` for the task - handling a scheduled task is just a normal `ON` handler on the
- * (queued) app service. The `name` is registered `verbatim` (dots are **not** stripped), so fully-qualified task
- * names like `'my.namespace.Task'` are matched exactly.
+ * @remarks
+ * `@OnScheduled` only HANDLES the task; to also SCHEDULE it recurrently at bootstrap use `@Schedule`
+ * instead (which does everything `@OnScheduled` does, plus the scheduling call).
  *
- * `NOTE:` `@OnScheduled` only `handles` the task. To also `schedule` it recurrently at bootstrap use [@Schedule](#schedule).
- *
- * @param name - The task name to handle.
  * @example
- * ```typescript
- * /@OnScheduled('cleanupExpiredCarts')
- * public async cleanup(/@Req() req: Request) {
- *   // ... runs whenever the 'cleanupExpiredCarts' task is dispatched
+ * ```ts
+ * /@UnboundActions()
+ * class ScheduledTasksHandler {
+ *   /@OnScheduled('my.namespace.reindexCatalog')
+ *   public async reindex(@Req() req: Request): Promise<void> {
+ *     // req.data holds the task payload
+ *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onscheduled | CDS-TS-Dispatcher - @OnScheduled}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnScheduled
  */
 function OnScheduled(name: string) {
   return function <Target extends object>(
@@ -2571,30 +3474,32 @@ function OnScheduled(name: string) {
 }
 
 /**
- * Use `@Schedule` decorator to `handle` **and** recurrently `schedule` a `@sap/cds` 10 event-queue task.
+ * Handles AND recurrently schedules a `@sap/cds` 10 event-queue task — everything `@OnScheduled` does,
+ * plus scheduling it as a recurring task at bootstrap.
+ * Registers `srv.on(options.name, callback)` (verbatim, like `@OnScheduled`) AND, at bootstrap,
+ * `srv.schedule(options.name, options.data).every(options.every).as(options.name)`.
  *
- * It does everything [@OnScheduled](#onscheduled) does (registers `srv.on(name, cb)`) **and** schedules the task as a
- * `recurring singleton` at bootstrap via `srv.schedule(name, data).every(every).as(name)`. Because `.every().as(name)`
- * makes the task a `named singleton`, re-scheduling on every boot `upserts` rather than duplicates it.
+ * @remarks
+ * `.every().as(name)` makes the task a NAMED SINGLETON, so re-scheduling on every boot UPSERTS rather
+ * than duplicates it. `options.every` accepts an interval string (e.g. `'10m'`) or a `cron` expression,
+ * passed through verbatim (CAP's `ms4`/`cron` parse it). If the scheduling infrastructure (`db` + `queue`)
+ * is missing or misconfigured, scheduling fails LOUDLY in the logs but never crashes boot — the task
+ * handler stays registered. One-shot scheduling (`.after`) is intentionally NOT a decorator — inject
+ * `CDS_DISPATCHER.SRV` and call `srv.schedule(name, data).after(delay).as(name)` programmatically instead.
  *
- * `every` accepts an `interval` string (e.g. `'10m'`) or a `cron` expression - it is passed through verbatim (CAP's
- * `ms4` / `cron` parse it).
- *
- * `NOTE:` `one-shot` scheduling (`.after`) is intentionally **not** a decorator - inject the service
- * (`CDS_DISPATCHER.SRV`) and call `srv.schedule(name, data).after(delay).as(name)` programmatically when you need it.
- *
- * @param options - The schedule options.
- * @param options.name - The task name (registered `verbatim` and used as the singleton identity).
- * @param options.every - The recurrence as an `interval` string (`'10m'`) or a `cron` expression.
- * @param [options.data] - `[Optional]` The payload delivered to the handler on every run (as `req.data`).
  * @example
- * ```typescript
- * /@Schedule({ name: 'sendDailyDigest', every: '24h' })
- * public async digest(/@Req() req: Request) {
- *   // ... runs on bootstrap-scheduled recurrence
+ * ```ts
+ * /@UnboundActions()
+ * class ScheduledTasksHandler {
+ *   /@Schedule({ name: 'cleanupExpiredCarts', every: '2m' })
+ *   public async cleanup(@Req() req: Request): Promise<void> {
+ *     // ... runs on the bootstrap-scheduled recurrence
+ *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#schedule | CDS-TS-Dispatcher - @Schedule}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Schedule
  */
 function Schedule(options: ScheduleOptions) {
   return function <Target extends object>(
@@ -2607,21 +3512,29 @@ function Schedule(options: ScheduleOptions) {
 }
 
 /**
- * Use `@OnScheduledSuccess` decorator to handle the `successful` outcome of a `@sap/cds` 10 event-queue `scheduled task`.
+ * Handles the SUCCESSFUL outcome of a `@sap/cds` 10 event-queue scheduled task — receives the `result`
+ * returned by the task handler (`@OnScheduled` / `@Schedule`).
+ * Registers `srv.after('<name>/#succeeded', callback)` — `name` is registered VERBATIM (dots are NOT
+ * stripped), so fully-qualified task names like `'my.namespace.Task'` match exactly.
  *
- * It registers `srv.after('<name>/#succeeded', cb)` for the task - the handler receives the `result` returned by the
- * task handler ([@OnScheduled](#onscheduled) / [@Schedule](#schedule)) and the request. The `name` is registered
- * `verbatim` (dots are **not** stripped), so fully-qualified task names like `'my.namespace.Task'` are matched exactly.
+ * @remarks
+ * Bypasses the normal `@After*` `.affected` normalization (which would corrupt a numeric task result,
+ * e.g. turning `1` into `true`) — the task's `result` reaches `@Result` untouched. Sibling for the failed
+ * outcome: `@OnScheduledFailure`.
  *
- * @param name - The task name whose success to handle.
  * @example
- * ```typescript
- * /@OnScheduledSuccess('cleanupExpiredCarts')
- * public async succeeded(/@Result() result: unknown, /@Req() req: Request) {
- *   // ... runs after the task ran through
+ * ```ts
+ * /@UnboundActions()
+ * class ScheduledTasksHandler {
+ *   /@OnScheduledSuccess('cleanupExpiredCarts')
+ *   public async succeeded(@Result() result: unknown, @Req() req: Request): Promise<void> {
+ *     // ... e.g. kick off follow-up work now that the task ran through
+ *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onscheduledsuccess | CDS-TS-Dispatcher - @OnScheduledSuccess}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnScheduledSuccess
  */
 function OnScheduledSuccess(name: string) {
   return function <Target extends object>(
@@ -2634,26 +3547,31 @@ function OnScheduledSuccess(name: string) {
 }
 
 /**
- * Use `@OnScheduledFailure` decorator to handle the `failed` outcome of a `@sap/cds` 10 event-queue `scheduled task`.
+ * Handles the FAILED outcome of a `@sap/cds` 10 event-queue scheduled task, once its retries are
+ * exhausted.
+ * Registers `srv.after('<name>/#failed', callback)` — `name` is registered VERBATIM (dots are NOT
+ * stripped), so fully-qualified task names like `'my.namespace.Task'` match exactly.
  *
- * It registers `srv.after('<name>/#failed', cb)` for the task - the handler receives the `failure` and the request. It
- * only fires once the `retries` of the task are `exhausted` (event-queue `maxAttempts`, `10` by default), not on every
- * failed attempt. The `name` is registered `verbatim` (dots are **not** stripped), so fully-qualified task names like
- * `'my.namespace.Task'` are matched exactly.
+ * @remarks
+ * Only fires once the task's retries are EXHAUSTED (event-queue `maxAttempts`, `10` by default) — not on
+ * every failed attempt. The failure is delivered as a SERIALIZED PLAIN OBJECT (`{ name, message, stack,
+ * code, ... }`), NOT an `Error` instance — CAP serializes it into the queued callback task, so it
+ * survives a JSON round-trip. Pick it up with `@Result`; `@Error` will NOT populate here, as it only
+ * matches real `Error` instances. Sibling for the successful outcome: `@OnScheduledSuccess`.
  *
- * `NOTE:` the failure is delivered as a `serialized plain object` (`{ name, message, stack, code, ... }`), **not** as
- * an `Error` instance - CAP serializes it into the queued callback task, so it survives a `JSON` round-trip. Pick it
- * up with [@Result](#result); [@Error](#error) will **not** populate here, as it only matches real `Error` instances.
- *
- * @param name - The task name whose failure to handle.
  * @example
- * ```typescript
- * /@OnScheduledFailure('cleanupExpiredCarts')
- * public async failed(/@Result() failure: { message?: string }, /@Req() req: Request) {
- *   // ... runs after the last attempt failed
+ * ```ts
+ * /@UnboundActions()
+ * class ScheduledTasksHandler {
+ *   /@OnScheduledFailure('cleanupExpiredCarts')
+ *   public async failed(@Result() failure: { message?: string }, @Req() req: Request): Promise<void> {
+ *     // ... e.g. alert ops
+ *   }
  * }
  * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onscheduledfailure | CDS-TS-Dispatcher - @OnScheduledFailure}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnScheduledFailure
  */
 function OnScheduledFailure(name: string) {
   return function <Target extends object>(
@@ -2672,25 +3590,35 @@ function OnScheduledFailure(name: string) {
  */
 
 /**
- * Use `@Stream` decorator to stream a `@sap/cds` 10 streaming read (`SELECT.pipeline()`, `SELECT.foreach()`,
- * `for-await` iteration) straight to the HTTP response from an `ON` handler ([@OnRead](#onread),
- * [@OnFunction](#onfunction), [@OnBoundFunction](#onboundfunction)).
+ * Pipes a `Readable` return value straight to the HTTP response, from an `ON` handler (`@OnRead`,
+ * `@OnFunction`, `@OnBoundFunction`).
  *
- * If the decorated method returns a `Readable` (an object exposing a `.pipe` function), `@Stream` sets the response
- * `Content-Type` (default `'application/octet-stream'`) and pipes the stream to the express response, destroying the
- * response if the stream errors. Any `non-stream` return value is passed through unchanged.
+ * @remarks
+ * If the wrapped method resolves to a `Readable` (an object exposing a `.pipe` function — e.g. from
+ * `SELECT.pipeline()`, `SELECT.foreach()`, or `for-await` iteration over a `@sap/cds` 10 streaming read),
+ * `@Stream` sets the response `Content-Type` (default `'application/octet-stream'`) and pipes it to the
+ * express response, destroying the response if the stream errors; any NON-stream return value passes
+ * through unchanged. `contentType` accepts the `StreamContentType` union (`'application/json'`,
+ * `'text/csv'`, `'application/pdf'`, `'image/png'`, ...) for editor suggestions, or any other MIME type
+ * string. Place `@Stream` DIRECTLY on the method, BELOW the `ON` decorator, so it wraps the returned value
+ * — decorators wrap `descriptor.value` bottom-up, and a wrapper applied above the handler decorator never
+ * becomes part of the registered callback.
  *
- * `NOTE:` place `@Stream` **directly on the method, below** the `ON` decorator so it wraps the returned value:
- * ```typescript
- * /@OnBoundFunction(Book.actions.download)
- * /@Stream('application/json')
- * public async download(/@Req() req: Request) {
- *   return SELECT.from(Book).stream(); // a Readable
+ * @example
+ * ```ts
+ * /@UnboundActions()
+ * class BookHandler {
+ *   /@OnFunction('streamBooks')
+ *   /@Stream('application/json')
+ *   public async streamBooks(@Req() req: Request): Promise<Readable> {
+ *     const books = await SELECT.from('CatalogService.Books').columns('ID', 'title');
+ *     return Readable.from([books.map((b) => JSON.stringify(b)).join('\n')]); // NDJSON
+ *   }
  * }
  * ```
  *
- * @param contentType - `[Optional]` The `Content-Type` header for the streamed response. Defaults to `'application/octet-stream'`.
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#stream | CDS-TS-Dispatcher - @Stream}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Stream
  */
 function Stream(contentType: StreamContentType = 'application/octet-stream') {
   return function <Target extends object>(
