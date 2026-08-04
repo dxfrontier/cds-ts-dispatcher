@@ -1,8 +1,16 @@
 # Agentic DX — making cds-ts-dispatcher guide AI assistants
 
-- **Date:** 2026-08-03
-- **Status:** design approved, implementation plan pending
-- **Branch context:** builds on `feature-batch2-decorators` (or lands after it merges) — the decorator taxonomy must include `@Throttle`, the `@ServerLifecycle` family, and the websocket decorators, which exist only there.
+- **Date:** 2026-08-03 · **Revision 2:** 2026-08-04
+- **Status:** design approved (rev 2), implementation plan at `docs/superpowers/plans/2026-08-04-agentic-dx.md`
+- **Branch context:** builds on `feature-batch2-decorators` (or lands after it merges) — the JSDoc pass must cover `@Throttle`, the `@ServerLifecycle` family, and the websocket decorators, which exist only there.
+
+> **Revision 2 (2026-08-04):** scope reduced to **JSDoc-only** by user decision after the research
+> review. The shipped `docs/AGENTS.md` guide, the postinstall-scaffolded `@dispatcher/AGENTS.md`,
+> and the error-code catalog are dropped/deferred (see "Dropped components"). Rationale: the 5×
+> empirical evidence belongs to JSDoc examples + signatures; context files carry drift risk and a
+> weak discovery chain (nothing auto-reads `node_modules`), while JSDoc is discovered automatically
+> via hover/go-to-definition/d.ts reads. Every unique job the guide had relocates into places
+> agents already look (see Component 3).
 
 ## Problem
 
@@ -11,153 +19,74 @@ When a developer uses `@dxfrontier/cds-ts-dispatcher` in a consumer project toge
 - wrong sibling choice (`@AfterRead` vs `@AfterReadEachInstance`, non-draft vs draft variants),
 - hallucinated decorator options,
 - missed setup contract (tsconfig flags, bootstrap pattern),
-- dead ends on runtime errors that don't say how to fix themselves.
+- not knowing that an unregistered handler class is silently inert.
 
-**Key discovered fact:** `README.md` (6,646 lines, 268.8 kB) already ships in the npm tarball — npm auto-includes it (verified with `npm pack --dry-run`). Full documentation is already on every consumer's disk at `node_modules/@dxfrontier/cds-ts-dispatcher/README.md`. The problem is not availability; it is discovery, orientation, and feedback loops.
+**Key facts:** `README.md` (6,646 lines, 268.8 kB) already ships in the npm tarball — npm auto-includes it (verified with `npm pack --dry-run`). Full documentation is already on every consumer's disk. And the d.ts is the one artifact every agent reads without being told to.
 
-## Decisions (from brainstorming)
+## Decisions
 
-1. **Target moments, in priority order:** answering questions → debugging/self-correcting → project setup → writing code. All four are in scope.
-2. **Tool-agnostic:** one canonical AGENTS.md-style format readable by every assistant. No per-tool files (`.cursor/rules`, `copilot-instructions.md`, Claude skills).
-3. **Delivery:** files shipped inside the tarball, plus a scaffold into the `@dispatcher/` folder the postinstall already owns. The package never writes root-level files in consumer repos.
-4. **Docs only:** no CLI, no MCP server, no new executables.
-5. **Approach:** layered curation — four thin, hand-written layers, each with one job, each useful on its own if it is the only layer an agent ever sees.
+1. **Target moments** (rev 1 priority: answering questions → debugging → setup → writing code). Rev 2 serves all four through a single channel: module-level and per-export JSDoc.
+2. **Tool-agnostic:** JSDoc/TSDoc in the shipped `dist/index.d.ts` works identically for every assistant and IDE. No per-tool files.
+3. **Zero new artifacts:** no new shipped files, no postinstall changes, no runtime changes. The tarball contents are unchanged.
+4. **Content rule:** JSDoc carries only what an agent cannot infer from the signature alone — semantics, sibling disambiguation, gotchas, one realistic example. No duplication of README prose; deep dives stay in the shipped README, referenced by local path.
 
-## Component 1 — Shipped agent guide: `docs/AGENTS.md` in the tarball
+## Component 3 (now the whole program) — JSDoc enrichment
 
-New hand-written file at `docs/AGENTS.md`, shipped by adding `./docs/AGENTS.md` to the `package.json` `files` array (only this file — `docs/superpowers/` must not ship). Target size ≈ 300 lines. This is the agent's entry point for the package.
+`dist/index.d.ts` is what agents read first; it is produced by tsup's dts rollup from the `lib/` sources.
 
-**Placement rationale (research-validated):** *not* at the repo root. The AGENTS.md standard defines the root file as contributor-facing ("a README for agents working **on** your project") and 30+ tools auto-load it — a consumer guide there would feed usage docs into contributor agents' context. In-package placement follows the Next.js ≥16.2 precedent (docs shipped under `dist/docs/`); since no tool auto-reads `node_modules` anyway, discovery is pointer-based (Components 2 and 3) regardless of location.
+### 3a. Module-level documentation
 
-**Content rule (evidence-backed):** only information an agent cannot discover from the code, types, or README. The taxonomy is a one-line-per-decorator *index* into README anchors — never a copy of the docs. Stale or duplicative context files measurably hurt agent performance, which is why the drift gate is load-bearing.
+- A **`@packageDocumentation`** JSDoc block at the top of `lib/index.ts` — it lands at the very top of `dist/index.d.ts`, the first thing an agent sees. Content: the mental model (decorators only write metadata at decoration time; everything registers once at `new CDSDispatcher([...]).initialize()`; **a handler class not passed to `CDSDispatcher` is silently inert**), the setup contract (`experimentalDecorators`, `emitDecoratorMetadata`, peer-dependency major pairing), the bootstrap example, and the local-docs pointer (`node_modules/@dxfrontier/cds-ts-dispatcher/README.md`).
+- **`CDSDispatcher` class JSDoc** carries the same bootstrap contract at the API's front door (constructor expectations + `initialize()` example).
+- Contingency: if the dts rollup strips the entry-file banner, the identical content lives on the `CDSDispatcher` class JSDoc (which provably survives); the build check below decides.
 
-Content outline, in order:
+### 3b. Per-export canonical template
 
-1. **Header note:** states this guide is for agents working in *consumer* projects, with the package version it was written for.
-2. **Mental model** (one screen): decorators only write metadata at decoration time; all registration happens once at `new CDSDispatcher([...]).initialize()`, which returns `cds.service.impl(...)`. This single fact prevents most wrong AI answers.
-3. **Setup contract:** required tsconfig flags (`experimentalDecorators`, `emitDecoratorMetadata`), the `@sap/cds` → `@cap-js/cds-types` `paths` mapping, peer-dependency major pairing, bootstrap wiring in the service implementation file.
-4. **Decorator taxonomy table:** every exported decorator (~60), grouped by kind (class / before / on / after / parameter / other), one row each: *name → one-sentence when-to-use → local README anchor*.
-5. **Confusables section:** the pairs agents mix up — `@AfterRead` vs `@AfterReadEachInstance`, non-draft vs `…Draft` variants, `@OnAction` vs bound actions, `@Prepend` semantics, `@Use` middleware ordering.
-6. **Error catalog:** table of stable error codes (Component 4): *code → meaning → likely cause → fix*. Each row carries an anchor (`#e012`) so error messages can deep-link.
-7. **Where to read more:** explicit pointers into the local `node_modules/@dxfrontier/cds-ts-dispatcher/README.md` sections, stated as file paths so agents know no network is needed.
+Every exported decorator (~90 sites in `lib/decorators/method.ts`, `class.ts`, `parameter.ts`) gets:
 
-## Component 2 — Scaffolded `@dispatcher/AGENTS.md` (consumer project)
+- **Summary** — always naming the raw CAP registration (`srv.after('READ', <Entity>, cb)`, `cds.on('served', …)`, `srv.prepend(…)`).
+- **`@remarks`** — when to use vs confusable siblings (`@AfterRead` vs `@AfterReadEachInstance` vs `@AfterReadSingleInstance`), draft-variant pointer, and the gotcha if one exists (execution order, mutation vs return semantics, host-class requirements). The rev-1 "confusables" section distributes here, at the exact site where the confusion happens.
+- **One `@example`** — short, realistic, compilable: host class decorator + the method with its typical parameter decorators. Parameter decorators (`@Req`, `@Results`, `@Next`, `@Env`, `@Jwt`, …) get the richest examples — their bare signatures are opaque.
+- **`@see`** — the existing GitHub anchor link stays; plus one plain-text line: "Full docs ship with this package: `node_modules/@dxfrontier/cds-ts-dispatcher/README.md` § <section>".
 
-A new generator module in `postinstall/util/` (sibling of `TypeGenerator.ts`, writes through `FileManager` like the existing artifacts) emits `@dispatcher/AGENTS.md` next to the generated `index.ts`/`index.js`.
-
-- **Template, ~70 lines, version-stamped:** "This project uses `@dxfrontier/cds-ts-dispatcher` v{X}" · the mental model in five lines · the canonical handler-class shape (one short example) · the two local doc paths (`docs/AGENTS.md`, `README.md` under `node_modules/…`) · the error-code loop ("errors starting `[dispatcher] E` → look up the code in the shipped catalog") · a do-not-edit banner (file is regenerated on every install).
-- **Console hint**, printed once per install, skip-safe: suggest adding a pointer line referencing `@dispatcher/AGENTS.md` from the project's root `AGENTS.md` / `CLAUDE.md`. Suggested wording of the pointer line is included in the hint so it can be pasted verbatim.
-- **Policy:** identical to the existing scaffold — the postinstall must never abort or hang an install; any failure in this generator degrades to skip-with-warning.
-- **Known limitation (accepted):** no assistant auto-loads a subfolder file; the pointer the developer adds to their root file is the load-bearing link. That is why the hint prints on every install rather than only the first.
-
-## Component 3 — JSDoc enrichment (`dist/index.d.ts` is what agents read first)
-
-Rewrite the JSDoc at every export site (the `const X = buildY({...})` declarations in `lib/decorators/method.ts`, `class.ts`, `parameter.ts`, plus core exports `CDSDispatcher`, `@EntityHandler`, `@Use`, `@Validate`, `@FieldsFormatter`, `@UnboundActions`, `@Repository`, `@ServiceLogic`). No structural change — the blocks already exist, they are just thin (~23 `@example` blocks today across ~60 decorators).
-
-Canonical template per decorator:
-
-```ts
-/**
- * Executes custom logic after a read operation, on the full result set.
- * Registers `srv.after('READ', <Entity>, callback)`.
- *
- * @remarks
- * Operates on the whole result array; use `@AfterReadEachInstance` for
- * per-row logic. Draft variant: `@AfterReadDraft`. Mutate `results` in
- * place or return a new value — returning `undefined` keeps the original.
- *
- * @example
- * @EntityHandler(Book)
- * class BookHandler {
- *   @AfterRead()
- *   async enrich(@Results() results: Book[], @Req() req: Request) { ... }
- * }
- *
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterread | GitHub docs}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRead
- */
-```
-
-Rules:
-
-- Summary line always names the raw CAP registration (`srv.before/on/after/prepend`) — agents that know CAP anchor on it.
-- Exactly one realistic, compilable `@example` per decorator, showing the class decorator and typical parameter decorators. Parameter decorators (`@Req`, `@Results`, `@Next`, `@Env`, `@Jwt`, …) get the richest examples — their bare signatures are opaque.
-- Keep the existing GitHub `@see` link; add the plain-text local-path line.
-- Net `dist/index.d.ts` growth ≈ +1,500 lines — acceptable; d.ts exists for tooling.
-
-**Verification item:** confirm tsup's d.ts rollup preserves these JSDoc blocks in `dist/index.d.ts`; the whole layer depends on it. Checked once during implementation and permanently via a grep step in the build CI job.
-
-## Component 4 — Error catalog with stable codes
-
-Developer-facing errors funnel through `util.throwErrorMessage` (~14 call sites in `CDSDispatcher.ts`, `ArgumentMethodProcessor.ts`, `MiddlewareEntityRegistry.ts`, `parameterUtil.ts`, `method.ts`). This component is a message refactor, not new machinery:
-
-**Scope boundary:** codes apply only to errors raised via `throwErrorMessage` — configuration/usage mistakes a developer must fix. Request-level rejections via `util.raiseBadRequestMessage` (`req.reject`, e.g. validation failures) are responses to the *API client*, not the developer; they keep their current format and get no codes.
-
-- **Format:** `[dispatcher] E012: <what happened>. Fix: <concrete action>. Docs: node_modules/@dxfrontier/cds-ts-dispatcher/docs/AGENTS.md#e012`
-- **Centralization:** messages currently inlined at call sites (e.g. the `@Throttle` validation strings in `method.ts`) move into the existing `internalConstants.ts` `MESSAGES` catalog; each entry carries code, message template, and fix line. A thin `throwDispatcherError(code, placeholders)` wrapper formats uniformly (built on the existing `util.buildMessage` templating).
-- **Code ranges:** `E0xx`/`E1xx` for consumer-triggerable errors; `E9xx` for internal invariants ("Unexpected eventKind") so bug reports become precise. Exact numbers are assigned during implementation.
-- **Stability contract:** codes are append-only — never renumbered, never reused. That is what makes them greppable across versions.
-- **Catalog home:** the table in the package `AGENTS.md` (Component 1); the scaffolded file only teaches the lookup loop.
-- **Scope discipline:** recode *existing* errors and add fix lines. No new misconfiguration detection logic in this iteration. Existing tests asserting message text are updated alongside.
+Net `dist/index.d.ts` growth ≈ +1,500–2,000 lines — free; d.ts exists for tooling.
 
 ## Cross-cutting
 
-### Drift gate
+- **Drift gate** — `test/__tests__/unit/AGENT_DOCS.test.ts` (rides the existing jest unit project): (1) every exported decorator's declaration site has a JSDoc block containing `@example` (source-level check over the three decorator files; `Inject` excluded — re-exported from inversify); (2) `lib/index.ts` contains a `@packageDocumentation` block.
+- **Build survival check** — after `npm run build`, `dist/index.d.ts` must contain ≥ 80 `@example` blocks and the package-doc banner; enforced locally during implementation and by one grep step in `.github/workflows/tests.yml` (the job that already builds).
+- **No README change required** — JSDoc is not a public-API surface change; the README already documents every decorator.
+- **Rollout** — a single `docs(jsdoc)`-scoped PR on top of `feature-batch2-decorators`. No version bump.
 
-A jest unit test (`test/__tests__/unit/AGENT_DOCS.test.ts`, rides the existing suite — no new CI plumbing) asserting four invariants:
+## Dropped components (rev 2) — recorded for history
 
-1. every decorator exported from `lib/index.ts` has a row in the `AGENTS.md` taxonomy table;
-2. every exported decorator's JSDoc block contains `@example`;
-3. error codes in `MESSAGES` ↔ rows in the `AGENTS.md` error catalog match bidirectionally;
-4. every README anchor referenced from `AGENTS.md` resolves against `README.md` headings (protects against TOC restructures like commit `3daf3e8`).
+- **Shipped `docs/AGENTS.md` guide** (rev-1 Component 1) — dropped. Weak discovery chain (no tool auto-reads `node_modules`), drift risk, duplication pressure. Its content relocated: mental model + setup → `@packageDocumentation` and `CDSDispatcher` JSDoc; confusables → per-site `@remarks`; taxonomy → unnecessary (the d.ts *is* the enumeration).
+- **Postinstall-scaffolded `@dispatcher/AGENTS.md`** (rev-1 Component 2) — dropped with it; postinstall stays untouched.
+- **Error catalog with stable codes** (rev-1 Component 4) — **deferred, not rejected**: revisit if debugging-with-agents proves weak in practice. The recon for it is preserved in the plan history (git) — 14 `throwErrorMessage` sites, proposed E001–E008/E901–E906 assignment, `req.reject` boundary.
 
-### Tests
+## Research validation (2026-08-03/04)
 
-- Extend `test/postinstall/Verifier.ts` and `MonoRepoVerifier.ts` (and therefore the docker harness) to assert `@dispatcher/AGENTS.md` exists, carries the stamped version, and contains correct `node_modules` doc paths.
-- Update unit tests whose message expectations change with the error recoding.
-- Build CI job gains one grep asserting `@example` blocks survived into `dist/index.d.ts`.
+Three web-research passes (standard intent, ecosystem survey, published evidence) ran during spec review and directly produced rev 2:
 
-### README mirroring (project convention)
-
-- New short README section **"Using with AI assistants"**: what ships (`AGENTS.md`, error codes, scaffolded `@dispatcher/AGENTS.md`), the one pointer line to add to the project's root agent file, and the error-code format.
-- The README postinstall section documents the new scaffolded file.
-
-### Rollout
-
-- All changes are minor-version `feat:` material; no breaking changes (error message text is not API).
-- Natural PR split, matching the priority order: **(1)** both AGENTS.md layers + scaffold + verifiers, **(2)** error catalog + test updates, **(3)** JSDoc enrichment pass. The drift-gate test lands with PR 1, and each PR arms the invariants it makes satisfiable: PR 1 → taxonomy completeness + README-anchor validity, PR 2 → error-code consistency, PR 3 → `@example` coverage.
-
-### Manual validation (optional, not CI)
-
-Smoke-eval after PR 1 and PR 3: open an AI assistant in a consumer-shaped project (e.g. `test/sample-project/bookshop`), ask a fixed set of canonical questions ("add validation before creating a Book", "why isn't my handler firing", "difference between @AfterRead and @AfterReadEachInstance"), and compare answer quality against today's behavior.
-
-## Research validation (added 2026-08-03, during spec review)
-
-Three web-research passes (the AGENTS.md standard's intent, an ecosystem survey, published evidence and critiques) ran before finalizing. What they changed or confirmed:
-
-- **Shipped guide moved out of the repo root** (Component 1): the standard reserves root `AGENTS.md` for contributor guidance and 30+ tools auto-load it there. In-tarball agent docs have real precedent — Next.js ≥16.2 ships its docs as markdown inside the package, Prisma ships versioned Skills with its CLI — but **no tool auto-reads `node_modules`**, so pointer-based discovery is the only reliable channel. Note: Claude Code itself auto-reads only `CLAUDE.md` (AGENTS.md support is an open request as of mid-2026), which is why the postinstall hint names both root files.
-- **JSDoc examples are the best-evidenced layer:** examples + signatures ≈ 5× improvement in agent code-generation correctness (ReadMe.LLM, arXiv:2504.09798). Component 3 is the highest-confidence investment in this program.
-- **Lean, human-written, non-duplicative — or nothing:** stale or auto-generated context files measurably *reduce* agent success (−2–3%) while adding ~20% token cost (ETH Zurich / Agent-READMEs study, arXiv:2511.12884). Hence Component 1's content rule and the drift gate being load-bearing.
-- **Skipping `llms.txt` vindicated:** ~97% of published files are never fetched; Astro sunset theirs in May 2026. **MCP is where measurable usage went** (Astro saw ~1000× llms.txt usage); it remains declined for this iteration but is the strongest future candidate if docs-only proves insufficient for the debugging scenario.
-- **Watch items, no action now:** the emerging `agents` package.json field (npm-agentskills — adopted by Vercel, Prisma, Supabase, Stripe), pnpm's proposed `agentNotice` field, and a *contributor-facing* root `AGENTS.md` for this repo (thin pointer to CLAUDE.md) as a separate follow-up.
+- **JSDoc examples are the best-evidenced mechanism:** examples + signatures ≈ 5× improvement in agent code-generation correctness (ReadMe.LLM, arXiv:2504.09798).
+- **Context files are the mixed-evidence mechanism:** lean human-written ones gain ~4% at 15–20% token cost; stale/auto-generated ones measurably hurt (ETH Zurich / Agent-READMEs, arXiv:2511.12884). Rev 2 removes them rather than managing that risk with gates.
+- **The AGENTS.md standard is contributor-facing** (root file, auto-loaded by 30+ tools; Claude Code itself reads only `CLAUDE.md` as of mid-2026); no tool reads agent files from dependencies — in-package guides (Next.js ≥16.2 precedent) rely on pointer chains agents may never follow.
+- **`llms.txt` non-goal vindicated** (~97% never read; Astro sunset May 2026). **MCP is where measurable usage went** — it remains the strongest future candidate if docs-only proves insufficient.
+- **Watch items:** the `agents` package.json field (npm-agentskills), pnpm `agentNotice`, a contributor-facing root `AGENTS.md` for this repo.
 
 ## Non-goals
 
-- CLI tooling (`doctor` / `docs` commands) — revisit if the docs layers prove insufficient for debugging.
-- MCP server — SAP's `@cap-js/mcp-server` covers the CAP side; a dispatcher server is future work at best.
+- Shipped agent-guide files (`docs/AGENTS.md`) or postinstall scaffolds — dropped in rev 2 (above).
+- Error codes — deferred (above).
+- CLI tooling (`doctor` / `docs` commands) and MCP server — revisit only if JSDoc-only proves insufficient.
 - Managing root-level files (`AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, …) in consumer repos.
-- Hosting docs / `llms.txt` on a website — there is no docs site; local-first is the strategy.
-- New misconfiguration detection logic (new guards/validations beyond what already throws).
-- Per-tool guidance files or a Claude Code skill/plugin.
-- A contributor-facing root `AGENTS.md` for this repository — worthwhile, but a separate follow-up outside this program.
-- Adopting the emerging `agents` package.json field (npm-agentskills) or pnpm's `agentNotice` — watch until standardized.
+- Hosting docs / `llms.txt` on a website — local-first is the strategy.
+- New misconfiguration detection logic; per-tool guidance files; Claude Code skill/plugin.
+- Adopting the emerging `agents` package.json field or pnpm `agentNotice` — watch until standardized.
 
 ## Acceptance criteria
 
-1. `npm pack` tarball contains `docs/AGENTS.md` and nothing else from `docs/` (the `superpowers/` specs stay out).
-2. Verifier, MonoRepoVerifier, and the docker harness all assert the scaffolded `@dispatcher/AGENTS.md` (stamped version, correct paths); an induced generator failure still exits the install successfully (skip-with-warning).
-3. Drift-gate test green: taxonomy complete, `@example` on every exported decorator, error codes bidirectionally consistent, README anchors valid.
-4. Build CI grep confirms JSDoc (`@example`) present in `dist/index.d.ts`.
-5. Every developer-facing error raised via `throwErrorMessage` carries an `E`-code with a fix line and a docs pointer; `req.reject` responses remain untouched.
-6. README contains the "Using with AI assistants" section.
-7. Full suite green: unit, integration, e2e, verifiers, docker postinstall harness.
+1. Drift gate green: every exported decorator (minus `Inject`) has a JSDoc block with `@example` at its declaration site; `lib/index.ts` carries `@packageDocumentation`.
+2. After `npm run build`: `dist/index.d.ts` contains the module-level documentation (or, if the rollup strips it, the identical content on `CDSDispatcher`) and ≥ 80 `@example` blocks; CI enforces the grep.
+3. `npm pack --dry-run` file list is **unchanged** versus `main` (no new shipped files).
+4. Full suite green: `npm run test:unit`, `npm run test:integration`, `npm run check`.
