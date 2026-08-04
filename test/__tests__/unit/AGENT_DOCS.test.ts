@@ -30,7 +30,9 @@ describe('agent-facing JSDoc drift gate', () => {
       // (?:[^*]|\*(?!/))* forbids `*/` inside the capture, so the match is the JSDoc block
       // DIRECTLY above the declaration — lazy [\s\S]*? would backtrack across comment
       // boundaries and false-pass names whose @example lives in an earlier, unrelated block.
-      const declaration = new RegExp(String.raw`/\*\*((?:[^*]|\*(?!/))*)\*/\s*(?:export )?(?:const|function) ${name}\b`);
+      const declaration = new RegExp(
+        String.raw`/\*\*((?:[^*]|\*(?!/))*)\*/\s*(?:export )?(?:const|function) ${name}\b`,
+      );
       const match = declaration.exec(decoratorSources);
       expect(match).not.toBeNull();
       expect(match![1]).toContain('@example');

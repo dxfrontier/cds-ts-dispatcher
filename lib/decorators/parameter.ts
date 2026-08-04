@@ -4,16 +4,21 @@ import type { PickQueryPropsByKey, CustomRequest, CRUDQueryKeys, PropertyStringP
 
 // TODO: to be removed in the future
 /**
+ * Annotates a parameter of a method with the `Request` on an `@OnSubscribe` messaging handler.
  *
- * Annotates a parameter of a method with the `Messaging` response.
+ * @deprecated Use `@Req` instead of `@Msg`.
+ *
+ * @remarks
+ * On the current `@sap/cds`, `@Msg` resolves to the exact same value as `@Req` — the distinct
+ * `Emitter`-shaped payload (`{ event, data, headers, inbound }`) it used to inject no longer applies.
+ * Kept only for source compatibility with existing `@OnSubscribe` handlers.
+ *
  * @example
- * "@Msg() msg: Request<{ foo: number; bar: string }>"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#messaging | CDS-TS-Dispatcher - @Msg}
+ * @OnSubscribe({ eventName: 'BookOrdered', type: 'SAME_NODE_PROCESS' })
+ * private async onBookOrdered(@Msg() msg: Request<{ ID: string; amount: number }>): Promise<void> { ... }
  *
- * @deprecated
- *
- * Use `@Req` instead of `@Msg`
- *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#msg | CDS-TS-Dispatcher - @Msg}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Msg
  */
 function Msg(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -27,10 +32,26 @@ function Msg(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method to enable `switching` between `single instance` and `entity set` functionality in your method.
+ * Injects a `boolean` switch telling the method whether the current request targets a single entity
+ * instance (`true`) or the entity set (`false`).
+ *
+ * @remarks
+ * Derived from `req.params.length > 0` — only meaningful on `@AfterRead`, `@BeforeRead`, `@OnRead` (and
+ * their draft variants), the events where CAP dispatches both single-instance and entity-set reads
+ * through the same handler.
+ *
  * @example
- * "@SingleInstanceSwitch() isSingleInstance: boolean"
+ * @AfterRead()
+ * private async enrich(
+ *   @Results() results: Book[],
+ *   @Req() req: Request<Book>,
+ *   @SingleInstanceSwitch() isSingleInstance: boolean,
+ * ): Promise<void> {
+ *   if (isSingleInstance) { ... }
+ * }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#singleinstanceswitch | CDS-TS-Dispatcher - @SingleInstanceSwitch}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § SingleInstanceSwitch
  */
 function SingleInstanceSwitch(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -44,10 +65,23 @@ function SingleInstanceSwitch(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method with the `Error` response.
+ * Annotates a parameter of an `@OnError` handler with the `Error` that failed the request.
+ *
+ * @remarks
+ * Only meaningful on `@OnError`, which itself is only valid inside an `@UnboundActions` class (it is a
+ * service-wide hook, not entity-scoped). `@OnError` runs synchronously — no `await`, no `@Diff`, in the
+ * handler body. `Error` shadows the global `Error` constructor in any file that imports this decorator;
+ * alias the import (`Error as ErrorDecorator`) if the file also throws/constructs `Error`s.
+ *
  * @example
- * "@Error() err: Error"
+ * @UnboundActions()
+ * class ErrorHandler {
+ *   @OnError()
+ *   private onError(@Error() err: Error, @Req() req: Request): void { ... }
+ * }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#error | CDS-TS-Dispatcher - @Error}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Error
  */
 function Error(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -61,10 +95,23 @@ function Error(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method with the `next` event in the chain of execution.
+ * Annotates a parameter of an `@On*` handler with the `next` function, which proceeds to the next
+ * handler in CAP's execution chain (or the default implementation if none remain).
+ *
+ * @remarks
+ * Valid on every `@On*` decorator (active and draft) — `@Before*` / `@After*` handlers never receive a
+ * `next` argument (CAP always continues automatically for those phases), so `@Next` there is
+ * `undefined`. Returning `next()` (or its result) forwards the request; not calling it ends the chain at
+ * your handler.
+ *
  * @example
- * "@Next() next: NextEvent"
+ * @OnCreate()
+ * public async onCreate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Book> {
+ *   return next();
+ * }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#next | CDS-TS-Dispatcher - @Next}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Next
  */
 function Next(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -78,10 +125,22 @@ function Next(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method with the `results`.
+ * Annotates a parameter of an `@After*` handler with the full result array of the operation.
+ *
+ * @remarks
+ * `@Results` and `@Result` bind the same metadata under the hood — the split exists purely for
+ * readability: use `@Results` when the payload is an array (`@AfterRead`, `@AfterReadEachInstance`),
+ * `@Result` for a single object (`@AfterCreate`, `@AfterUpdate`) or a `boolean` (`@AfterDelete`).
+ * Mutating the array in place changes the OData response.
+ *
  * @example
- * "@Results() results: MyEntity[]"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#results | CDS-TS-Dispatcher - @Results}
+ * @AfterRead()
+ * private async enrich(@Results() results: Book[], @Req() req: Request): Promise<void> {
+ *   results.forEach((book) => (book.discount = '10%'));
+ * }
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#results--result | CDS-TS-Dispatcher - @Results}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Results / Result
  */
 function Results(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -95,15 +154,22 @@ function Results(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method with the `result`.
- * `NOTE`: This can be used on the `create`, `update`, `delete` when the result contains only an object `(create, update)` or boolean `(delete)`
+ * Annotates a parameter of an `@After*` handler with the single-object (or `boolean`) result of the
+ * operation.
  *
- * NOTE If the `results` is an `array` use `@Results` decorator.
+ * @remarks
+ * `@Result` and `@Results` bind the same metadata under the hood — the split exists purely for
+ * readability: use `@Result` for a single object (`@AfterCreate`, `@AfterUpdate`) or a `boolean`
+ * (`@AfterDelete`), `@Results` when the payload is an array (`@AfterRead`, `@AfterReadEachInstance`).
  *
  * @example
- * "@Result() result: MyEntity"
- * "@Result() deleted: boolean"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#results | CDS-TS-Dispatcher - @Results}
+ * @AfterDelete()
+ * private async logDeletion(@Result() deleted: boolean, @Req() req: Request): Promise<void> {
+ *   if (deleted) { ... }
+ * }
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#results--result | CDS-TS-Dispatcher - @Result}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Results / Result
  */
 function Result(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -117,9 +183,20 @@ function Result(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method with the `Request` object.
- * @example "@Req() req: Request"
+ * Annotates a parameter of a method with the current `Request` object.
+ *
+ * @remarks
+ * The all-purpose escape hatch — every other request-derived parameter decorator (`@Data`, `@Param`,
+ * `@UserInfo`, `@Tenant`, `@GetRequest`, ...) is a convenience projection of a property already
+ * reachable through `@Req`. Reach for those when you only need one or two properties; use `@Req` when
+ * you need the object itself (e.g. to call `req.reject()` / `req.notify()`).
+ *
+ * @example
+ * @AfterRead()
+ * private async enrich(@Req() req: Request<Book>, @Results() results: Book[]): Promise<void> { ... }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#req | CDS-TS-Dispatcher - @Req}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Req
  */
 function Req(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -133,9 +210,22 @@ function Req(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method with the `Req.res (Response)` object.
- * @example "@Res() response: ServerResponse"
+ * Annotates a parameter of a method with `req.http.res` — the raw Node.js `ServerResponse`, for direct
+ * response manipulation (e.g. custom headers).
+ *
+ * @remarks
+ * Valid on `@Before*`, `@After*` and `@On*` handlers alike. Prefer `req.reject()` / `req.notify()` on
+ * `@Req` for standard error/message responses; reach for `@Res` only when you need the raw response
+ * object itself.
+ *
+ * @example
+ * @AfterRead()
+ * private async addHeader(@Req() req: Request, @Res() res: RequestResponse): Promise<void> {
+ *   res.setHeader('Accept-Language', 'de-DE');
+ * }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#res | CDS-TS-Dispatcher - @Res}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Res
  */
 function Res(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -149,11 +239,23 @@ function Res(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method to `get` the `request.query[INSERT, SELECT, UPDATE, UPSERT, DELETE][property]` properties.
- * @param key The key indicating the type of query operation (`INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`).
- * @param property The specific property to get within the `request.query[key][property]`.
- * @example "GetQuery('SELECT', 'columns') columns: GetColumns"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#get | CDS-TS-Dispatcher - @GetQuery}
+ * Annotates a parameter of a method with a single `req.query[key][property]` value (`INSERT`, `SELECT`,
+ * `UPDATE`, `UPSERT`, `DELETE`).
+ *
+ * @remarks
+ * `key` gates which `property` names type-check (e.g. `'SELECT'` accepts `'columns' | 'where' |
+ * 'orderBy' | ...`, `'UPDATE'` accepts `'data' | 'entity' | 'where'`) — see `GetQueryType` for the full,
+ * per-key property map. Pairs with `@IsPresent` to check existence before reading the value.
+ *
+ * @example
+ * @BeforeCreate()
+ * public async beforeCreate(
+ *   @Req() req: Request<Book>,
+ *   @GetQuery('INSERT', 'columns') columns: GetQueryType['columns']['forInsert'],
+ * ): Promise<void> { ... }
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#getquery | CDS-TS-Dispatcher - @GetQuery}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § GetQuery
  */
 function GetQuery<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsByKey<Key>): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -167,13 +269,24 @@ function GetQuery<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsB
 }
 
 /**
- * Annotates a parameter of a method to `get` the `Request` properties.
+ * Annotates a parameter of a method with a single named property of the `Request` object (e.g.
+ * `'locale'`, `'method'`, `'tenant'`).
  *
- * `NOTE:` This is a convenient decorator to get only some properties of the `Request` object, to get all properties use `@Req()` decorator.
+ * @remarks
+ * A convenience projection of `@Req` for when the handler only needs one or two properties instead of
+ * the whole object. `property` excludes the `Request` action methods (`reject`, `notify`, `reply`,
+ * `warn`, `error`) — those are not gettable properties. Several properties have their own dedicated,
+ * typed decorator instead (`@Data`, `@UserInfo`, `@Tenant`, `@Locale`, `@Subject`).
  *
- * @param  property The `Request` property to get.
- * @example "@GetRequest('locale') locale: string"
- * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#getrequestproperty | CDS-TS-Dispatcher - @GetRequest}
+ * @example
+ * @AfterRead()
+ * private async enrich(
+ *   @Results() results: Book[],
+ *   @GetRequest('locale') locale: Request['locale'],
+ * ): Promise<void> { ... }
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#getrequest | CDS-TS-Dispatcher - @GetRequest}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § GetRequest
  */
 function GetRequest(property: CustomRequest): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -187,12 +300,24 @@ function GetRequest(property: CustomRequest): ParameterDecorator {
 }
 
 /**
+ * Annotates a parameter of a method with a `boolean`: whether `field` was supplied as a column in the
+ * request's `INSERT`, `UPSERT` or `SELECT` query.
  *
- * Annotates a parameter of a method to `check` existence of `request.query[INSERT, SELECT, UPSERT].columns - item` with the value from `field` parameter.
- * @param field The name of the `column` to verify in the `request.query[INSERT, SELECT, UPSERT].columns`.
- * @example "@IsColumnSupplied('name') isPresent: boolean"
- * @returns boolean
+ * @remarks
+ * Only inspects `INSERT.columns`, `UPSERT.columns` and `SELECT.columns` — always `undefined` (never
+ * set) on `UPDATE` / `DELETE` requests, which do not carry a `columns` list.
+ *
+ * @example
+ * @BeforeCreate()
+ * public async beforeCreate(
+ *   @Req() req: Request<Book>,
+ *   @IsColumnSupplied<Book>('price') priceSupplied: boolean,
+ * ): Promise<void> {
+ *   if (priceSupplied) { ... }
+ * }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#iscolumnsupplied | CDS-TS-Dispatcher - @IsColumnSupplied}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsColumnSupplied
  */
 function IsColumnSupplied<Key>(field: keyof Key): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -206,14 +331,24 @@ function IsColumnSupplied<Key>(field: keyof Key): ParameterDecorator {
 }
 
 /**
+ * Annotates a parameter of a method with a `boolean`: whether the current user has at least one of the
+ * given roles (`req.user.is(role)`).
  *
- * Annotates a parameter of a method to `check` the `existence` of specific role values in the request.
+ * @remarks
+ * Logical `OR` across `roles` — `true` as soon as one matches. Role names correspond to the `@requires`
+ * / `@restrict.grants.to` annotations in your CDS models.
  *
- * `NOTE`: `IsRole` applies a logical `OR` between the roles, meaning it checks if at least one of the specified roles exists.
- * @param roles An array of role names to verify in `req.user.is(role)`.
- * @example "@IsRole('name', 'anotherRole') roles: boolean"
- * @returns boolean
+ * @example
+ * @AfterRead()
+ * private async enrich(
+ *   @Results() results: Book[],
+ *   @IsRole('Admin', 'Editor') isPrivileged: boolean,
+ * ): Promise<void> {
+ *   if (isPrivileged) { ... }
+ * }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#isrole | CDS-TS-Dispatcher - @IsRole}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsRole
  */
 function IsRole(...roles: string[]): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -227,12 +362,25 @@ function IsRole(...roles: string[]): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method to `check` existence of `request.query[INSERT, SELECT, UPDATE, UPSERT, DELETE][property]` various properties.
- * @param key The key indicating the type of query operation (`INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`).
- * @param property The specific property to check within the `request.query[key][property]`.
- * @example "@IsPresent('SELECT', 'columns') hasColumns: boolean"
- * @returns boolean
+ * Annotates a parameter of a method with a `boolean`: whether `req.query[key][property]` is present
+ * (`INSERT`, `SELECT`, `UPDATE`, `UPSERT`, `DELETE`).
+ *
+ * @remarks
+ * Same `key` / `property` pairing as `@GetQuery` (see `PickQueryPropsByKey` for the per-key property
+ * union) but returns existence instead of the value — check with `@IsPresent` before reading with
+ * `@GetQuery` when the property may legitimately be absent.
+ *
+ * @example
+ * @BeforeCreate()
+ * public async beforeCreate(
+ *   @Req() req: Request<Book>,
+ *   @IsPresent('INSERT', 'columns') hasColumns: boolean,
+ * ): Promise<void> {
+ *   if (hasColumns) { ... }
+ * }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#ispresent | CDS-TS-Dispatcher - @IsPresent}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsPresent
  */
 function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsByKey<Key>): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -246,10 +394,22 @@ function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryProps
 }
 
 /**
- * Annotates a parameter of a method to retrieve the `JWT - (JSON Web Token)` from the request.
- * @example "@Jwt() token: string | undefined"
+ * Annotates a parameter of a method with the bearer `JWT` extracted from `req.http.req`'s
+ * `Authorization` header.
+ *
+ * @remarks
+ * Expects the `Bearer <token>` format. Resolves to `undefined` (with a warning logged) when the header
+ * is missing or malformed — it does not throw, so always narrow the `string | undefined` type before use.
+ *
+ * @example
+ * @AfterRead()
+ * private async enrich(
+ *   @Results() results: Book[],
+ *   @Jwt() token: string | undefined,
+ * ): Promise<void> { ... }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#jwt | CDS-TS-Dispatcher - @Jwt}
- * @returns string | undefined
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Jwt
  */
 function Jwt(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -263,30 +423,25 @@ function Jwt(): ParameterDecorator {
 }
 
 /**
- * Parameter decorator used to inject validation flags into a method parameter.
+ * Injects the accumulated `@Validate` flags for the current invocation as a single object.
  *
- * The `@ValidationResults` decorator captures validation results from
- * the `@Validate` decorator and makes them accessible as a parameter in the
- * decorated method. This allows conditional logic based on validation outcomes.
- *
- * Apply `@ValidationResults` to a method parameter to receive validation flags,
- * for instance:
+ * @remarks
+ * Only `@Validate` calls with `exposeValidatorResult: true` contribute a flag; each contributing call
+ * adds one key named after its `action` (e.g. `isLowercase`, `endsWith`) to the injected object. Needs
+ * at least one such `@Validate` on the same method — otherwise the object is empty.
  *
  * @example
- *
- * ```typescript
- * /@Validate<MyEntity>({ action: 'isLowercase', exposeValidatorResult: true }, 'comment')
- * /@Validate<MyEntity>({ action: 'endsWith', target: 'N', exposeValidatorResult: true }, 'description')
+ * @BeforeCreate()
+ * @Validate<Book>({ action: 'isLowercase', exposeValidatorResult: true }, 'title')
  * public async beforeCreate(
- *   /@Req() req: Request<MyEntity>,
- *   /@ValidationResults() validator: ValidatorFlags<'isLowercase' | 'endsWith'>
- * ) {
- *   if (validator.isLowercase) {
- *     // handle logic based on validation result
- *   }
+ *   @Req() req: Request<Book>,
+ *   @ValidationResults() validator: ValidatorFlags<'isLowercase'>,
+ * ): Promise<void> {
+ *   if (validator.isLowercase) { ... }
  * }
- * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#validationresults | CDS-TS-Dispatcher - @ValidationResults}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ValidationResults
  */
 function ValidationResults(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -300,23 +455,19 @@ function ValidationResults(): ParameterDecorator {
 }
 
 /**
- * Parameter decorator used to inject locale information into a method parameter.
+ * Annotates a parameter of a method with `req.locale` — the negotiated locale of the current request.
  *
- * Apply `@Locale` to a method parameter to receive the locale context, for instance:
+ * @remarks
+ * A convenience projection of `@Req`; equivalent to `@GetRequest('locale')` typed as `string`.
  *
  * @example
- *
- * ```typescript
- * public async someMethod(
- *   /@Req() req: Request<MyEntity>,
- *   /@Locale() locale: string
- * ) {
- *   if (locale === 'en-US') {
- *     // handle logic specific to the 'en-US' locale
- *   }
+ * @BeforeCreate()
+ * public async beforeCreate(@Req() req: Request<Book>, @Locale() locale: string): Promise<void> {
+ *   if (locale === 'en-US') { ... }
  * }
- * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#locale | CDS-TS-Dispatcher - @Locale}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Locale
  */
 function Locale(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -330,24 +481,27 @@ function Locale(): ParameterDecorator {
 }
 
 /**
- * Apply `@Env` to a method parameter to retrieve specific environment properties from configuration files.
- * This can be useful for injecting runtime configurations without directly accessing the environment variables.
- * @param env - The path to the environment property as a string, supporting nested properties (e.g., `'database.host'`).
+ * Injects a single nested value read live from `cds.env` at the given dotted `env` path.
+ *
+ * @remarks
+ * `env` is a required, dotted property path into `T` (e.g. `'requires.db.kind'`) — type it with the
+ * consumer project's generated `CDS_ENV` (from the `#dispatcher` postinstall alias) so the path and the
+ * parameter's type are both checked: `@Env<CDS_ENV>('requires.db.kind')`. Reads `cds.env` directly, not
+ * the generated file, so the value always reflects the live runtime configuration.
  *
  * @example
- * ```typescript
- * import { CDS_ENV } from '#dispatcher';
+ * import type { CDS_ENV } from '#dispatcher';
  *
- * public async someMethod(
- *   /@Req() req: Request<MyEntity>,
- *   /@Env<CDS_ENV>('requires.db.kind') dbKind: string
- * ) {
- *   if(dbKind) {
- *    // custom logic
- *   }
+ * @BeforeCreate()
+ * public async beforeCreate(
+ *   @Req() req: Request<Book>,
+ *   @Env<CDS_ENV>('requires.db.kind') dbKind: string,
+ * ): Promise<void> {
+ *   if (dbKind === 'sqlite') { ... }
  * }
- * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#env | CDS-TS-Dispatcher - @Env}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Env
  */
 
 function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
@@ -362,22 +516,22 @@ function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method to inject `req.subject` - the `CQN ref` identifying the request's target instance.
+ * Annotates a parameter of a method with `req.subject` — the CQN `ref` identifying the request's target
+ * instance.
  *
- * `NOTE:` `@Subject` is the sanctioned replacement for `req.query` on `bound actions / functions` since `@sap/cds` 10
- * (`req.query` on bound operations is planned for removal in `@sap/cds` 11). Use it to reliably resolve the entity
- * instance a bound `@OnBoundAction` / `@OnBoundFunction` was invoked on.
+ * @remarks
+ * The sanctioned replacement for `req.query` on bound actions/functions since `@sap/cds` 10 (`req.query`
+ * on bound operations is planned for removal in `@sap/cds` 11) — use it to resolve the entity instance a
+ * bound `@OnBoundAction` / `@OnBoundFunction` was invoked on.
  *
  * @example
- * ```typescript
- * public async someBoundAction(
- *   /@Req() req: Request<MyEntity>,
- *   /@Subject() subject: ref
- * ) {
+ * @OnBoundFunction(Book.actions.someFunction)
+ * public async someBoundFunction(@Req() req: Request, @Subject() subject: ref): Promise<void> {
  *   const instance = await SELECT.one.from(subject);
  * }
- * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#subject | CDS-TS-Dispatcher - @Subject}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Subject
  */
 function Subject(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -391,23 +545,22 @@ function Subject(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method to inject the database `affected` row count of the current request.
+ * Annotates a parameter of an `@After*` handler with the database `affected` row count of the current
+ * request.
  *
- * `NOTE:` `@Affected` is defined for `CREATE` / `UPDATE` / `DELETE` `@After*` handlers under `@sap/cds` >= 10 and
- * returns the row count as reported by the database. It is `undefined` for `READ`.
+ * @remarks
+ * Populated for `CREATE` / `UPDATE` / `DELETE` under `@sap/cds` >= 10 (the row count reported by the
+ * database); `undefined` for `READ`. Independent of `@Results` / `@Result` — it does not change what
+ * they receive, it only exposes the raw count.
  *
  * @example
- * ```typescript
- * /@AfterDelete()
- * public async afterDelete(
- *   /@Req() req: Request<MyEntity>,
- *   /@Affected() affected: number | undefined
- * ) {
+ * @AfterDelete()
+ * public async afterDelete(@Req() req: Request<Book>, @Affected() affected: number | undefined): Promise<void> {
  *   req.notify(`Deleted ${affected} row(s)`);
  * }
- * ```
- * @returns number | undefined
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#affected | CDS-TS-Dispatcher - @Affected}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Affected
  */
 function Affected(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -421,17 +574,20 @@ function Affected(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method to inject `req.data` - the payload of the current request.
+ * Annotates a parameter of a method with `req.data` — the payload of the current request, typed.
+ *
+ * @remarks
+ * Keeps handler signatures (and their unit tests) simple: pass a plain object instead of mocking the
+ * whole `Request`. For a single field instead of the whole payload, use `@Param`.
  *
  * @example
- * ```typescript
- * public async someMethod(
- *   /@Data() data: MyEntity
- * ) {
- *   // custom logic based on data
+ * @OnCreate()
+ * public async onCreate(@Data() data: Book): Promise<Book> {
+ *   return data;
  * }
- * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#data | CDS-TS-Dispatcher - @Data}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Data
  */
 function Data(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -445,18 +601,22 @@ function Data(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method to inject `req.data[field]` - a single field of the current request's payload.
- * @param field The name of the field to get within `req.data`.
+ * Annotates a parameter of a method with `req.data[field]` — a single field of the current request's
+ * payload.
+ *
+ * @remarks
+ * A narrower alternative to `@Data` when the handler only needs one or two fields. Repeatable — decorate
+ * as many parameters as the fields you need.
  *
  * @example
- * ```typescript
- * public async someMethod(
- *   /@Param<MyEntity>('title') title: string
- * ) {
- *   // custom logic based on title
- * }
- * ```
+ * @OnCreate()
+ * public async onCreate(
+ *   @Param<Book>('title') title: string,
+ *   @Param<Book>('stock') stock: number,
+ * ): Promise<void> { ... }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#param | CDS-TS-Dispatcher - @Param}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Param
  */
 function Param<T = Record<string, any>>(field: Extract<keyof T, string>): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -470,19 +630,20 @@ function Param<T = Record<string, any>>(field: Extract<keyof T, string>): Parame
 }
 
 /**
- * Annotates a parameter of a method to inject `req.user` - the authenticated user of the current request.
+ * Annotates a parameter of a method with `req.user` — the authenticated user of the current request.
+ *
+ * @remarks
+ * A convenience projection of `@Req`; equivalent to `@GetRequest('user')` typed as `User`. Combine with
+ * `user.is(role)` for ownership/authorization checks, or use `@IsRole` for a ready-made `boolean`.
  *
  * @example
- * ```typescript
- * public async someMethod(
- *   /@UserInfo() user: User
- * ) {
- *   if (user.is('Manager')) {
- *     // custom logic
- *   }
+ * @OnUpdate()
+ * public async onUpdate(@UserInfo() user: User): Promise<void> {
+ *   if (user.is('Manager')) { ... }
  * }
- * ```
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#userinfo | CDS-TS-Dispatcher - @UserInfo}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § UserInfo
  */
 function UserInfo(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -496,17 +657,18 @@ function UserInfo(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method to inject `req.tenant` - the tenant of the current request.
+ * Annotates a parameter of a method with `req.tenant` — the tenant of the current request.
+ *
+ * @remarks
+ * A convenience projection of `@Req`; equivalent to `@GetRequest('tenant')`. `undefined` in
+ * single-tenant setups and for requests without a resolved tenant.
  *
  * @example
- * ```typescript
- * public async someMethod(
- *   /@Tenant() tenant: string | undefined
- * ) {
- *   // custom logic based on tenant
- * }
- * ```
+ * @OnRead()
+ * public async onRead(@Tenant() tenant: string | undefined): Promise<void> { ... }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#tenant | CDS-TS-Dispatcher - @Tenant}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Tenant
  */
 function Tenant(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -520,20 +682,23 @@ function Tenant(): ParameterDecorator {
 }
 
 /**
- * Annotates a parameter of a method to inject `await req.diff()` - the before/after change-set of the current request.
+ * Annotates a parameter of a method with `await req.diff()` — CAP's deep before/after change-set of the
+ * request against the current database state (compositions expanded, draft-aware).
  *
- * `NOTE:` `@Diff` is the only `asynchronous` parameter decorator, therefore it is `unsupported` on `@OnError`
- * (CAP invokes error handlers synchronously).
+ * @remarks
+ * The only `async` parameter decorator: it costs one extra database read and resolves a microtask later
+ * than sibling handlers on the same event — do not rely on synchronous ordering against them. Not
+ * supported on `@OnError` (which runs synchronously). `req.diff()` is a semi-stable, undocumented
+ * `@sap/cds` API; on `@sap/cds` 10 an `UPDATE` diff carries the NEW values at the top level, the OLD
+ * values nested under `_old`, plus an `_op` marker — unchanged fields are omitted, key fields are always
+ * present. Do not assume `diff.<field>` is the old value.
  *
  * @example
- * ```typescript
- * public async someMethod(
- *   /@Diff() diff: MyEntity
- * ) {
- *   // custom logic based on diff
- * }
- * ```
+ * @BeforeUpdate()
+ * public async beforeUpdate(@Req() req: Request<Book>, @Diff() diff: Book): Promise<void> { ... }
+ *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#diff | CDS-TS-Dispatcher - @Diff}
+ * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Diff
  */
 function Diff(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
