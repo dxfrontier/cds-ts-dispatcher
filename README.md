@@ -1480,6 +1480,9 @@ class BookHandler {
 > [!TIP]
 > Decorator [@IsPresent()](#ispresent) works well with [@GetQuery()](#getquery).
 
+> [!NOTE]
+> Protocol creates build `INSERT...entries(data)` without a `.columns` list — `@IsPresent('INSERT', 'columns')` is `true` only for queries that set columns explicitly (programmatic CQN).
+
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### @IsRole
@@ -1550,6 +1553,9 @@ The `@IsColumnSupplied<T>(field : keyof T)` decorator is utilized at the `parame
 `Return` :
 
 - `boolean`: This decorator returns `true` if `field / column` was found, `false` otherwise
+
+> [!NOTE]
+> For `INSERT` / `UPSERT` queries an explicit `.columns` list wins when present; otherwise the field is looked up in the `entries` keys (the shape protocol `POST` requests produce); `false` when neither is present.
 
 `Example`
 

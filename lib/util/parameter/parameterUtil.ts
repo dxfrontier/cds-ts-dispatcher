@@ -48,15 +48,29 @@ const parameterUtil = {
    * @param metadata The metadata fields array.
    */
   applyIsColumnSupplied(req: Request, args: any[], metadata: MetadataFields[]): void {
+    // Protocol CREATE/UPSERT requests build `INSERT/UPSERT.entries(data)` and never carry `.columns` -
+    // explicit columns win when present, otherwise fall back to checking the entries for the field.
+    const isSupplied = (query: { columns?: string[]; entries?: Record<string, unknown>[] }, field: string): boolean => {
+      if (query.columns) {
+        return query.columns.includes(field);
+      }
+
+      if (query.entries) {
+        return query.entries.some((entry) => field in entry);
+      }
+
+      return false;
+    };
+
     metadata.forEach((parameter) => {
       if (parameter.type === 'CHECK_COLUMN_VALUE') {
         if (req.query.INSERT) {
-          args[parameter.parameterIndex] = req.query.INSERT.columns.includes(parameter.property);
+          args[parameter.parameterIndex] = isSupplied(req.query.INSERT, parameter.property);
           return;
         }
 
         if (req.query.UPSERT) {
-          args[parameter.parameterIndex] = req.query.UPSERT.columns.includes(parameter.property);
+          args[parameter.parameterIndex] = isSupplied(req.query.UPSERT, parameter.property);
           return;
         }
 
@@ -202,7 +216,7 @@ const parameterUtil = {
         case 'columns': {
           if (parameter.key === 'SELECT' || parameter.key === 'INSERT' || parameter.key === 'UPSERT') {
             args[parameter.parameterIndex] =
-              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query.SELECT?.[queryOption];
+              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query[parameter.key]?.[queryOption];
           }
 
           break;

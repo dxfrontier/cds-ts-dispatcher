@@ -322,8 +322,10 @@ function GetRequest(property: CustomRequest): ParameterDecorator {
  * request's `INSERT`, `UPSERT` or `SELECT` query.
  *
  * @remarks
- * Only inspects `INSERT.columns`, `UPSERT.columns` and `SELECT.columns` — always `undefined` (never
- * set) on `UPDATE` / `DELETE` requests, which do not carry a `columns` list.
+ * For `INSERT` / `UPSERT`: an explicit `.columns` list wins when present; otherwise suppliedness is
+ * derived from the `entries` keys (the shape protocol creates produce; ANY entry supplying the field
+ * counts); `false` when neither is present. For `SELECT`: inspects the `SELECT.columns` refs. Always `undefined` (never set) on
+ * `UPDATE` / `DELETE` requests, which do not carry a `columns` list.
  *
  * @example
  * ```ts
@@ -384,7 +386,9 @@ function IsRole(...roles: string[]): ParameterDecorator {
  * @remarks
  * Same `key` / `property` pairing as `@GetQuery` (see `PickQueryPropsByKey` for the per-key property
  * union) but returns existence instead of the value — check with `@IsPresent` before reading with
- * `@GetQuery` when the property may legitimately be absent.
+ * `@GetQuery` when the property may legitimately be absent. Note protocol creates build
+ * `INSERT...entries(data)` WITHOUT a `.columns` list — `('INSERT', 'columns')` answers `true` only
+ * for queries that set columns explicitly (programmatic CQN).
  *
  * @example
  * ```ts

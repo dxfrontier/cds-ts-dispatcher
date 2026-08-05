@@ -3,11 +3,14 @@ import { BookOrder } from '#cds-models/CatalogService';
 import {
   AfterCreate,
   AfterRead,
+  BeforeCreate,
   BeforeRead,
   CDS_DISPATCHER,
   EntityHandler,
   Exclude,
   Inject,
+  IsColumnSupplied,
+  IsPresent,
   LogExecution,
   Mask,
   Req,
@@ -31,6 +34,18 @@ class BookOrdersHandler {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
   @Inject(BookService) private readonly bookService: BookService;
   @Inject(BookOrdersService) private readonly bookOrdersService: BookOrdersService;
+
+  @BeforeCreate()
+  private async beforeCreate(
+    @Req() req: Request,
+    @IsColumnSupplied<BookOrder>('totalAmount') totalAmountSupplied: boolean,
+    @IsColumnSupplied<BookOrder>('createdAt') createdAtSupplied: boolean,
+    @IsPresent('INSERT', 'columns') explicitColumns: boolean,
+  ): Promise<void> {
+    console.log(
+      `[BookOrdersBeforeCreate] totalAmount=${totalAmountSupplied} createdAt=${createdAtSupplied} explicitColumns=${explicitColumns}`,
+    );
+  }
 
   @AfterCreate()
   private async afterCreate(@Results() result: BookOrder, @Req() req: Request): Promise<void> {

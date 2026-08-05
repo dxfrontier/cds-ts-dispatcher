@@ -12,7 +12,7 @@
 
 **Status (2026-08-04, docs-only tranche):** ✅ **FIXED & shipped on this branch** — C1, C2, M1–M5, M7, M10–M17, N1–N9 (JSDoc prose in `lib/`, README mirrors for M1/M16, tests.yml escape-convention sentinel for N8). Gates at fix time: check clean · build + 3 d.ts sentinels PASS · unit 527/527.
 
-**Status (2026-08-04, code-fix tranche):** the code-fix fork was taken for all seven open defects. ✅ **M18** — gate hardened (`matchAll` + per-name expected declaration counts; red-proofed by stripping the wildcard `@EntityHandler` overload's JSDoc). ⏳ **IN PROGRESS** — C3, C4, C5, C6, M6, M8, M9 (red-first tests per the backlog below; status updated per commit).
+**Status (2026-08-04, code-fix tranche):** the code-fix fork was taken for all seven open defects. ✅ **M18** — gate hardened (`matchAll` + per-name expected declaration counts; red-proofed by stripping the wildcard `@EntityHandler` overload's JSDoc). ✅ **C3, C4** — code-fixed (option (a) both): `applyIsColumnSupplied` guards INSERT/UPSERT with the ladder explicit `.columns` wins → `entries` keys (any entry) → `false`; the `'columns'` IsPresent branch keys on `req.query[parameter.key]`. Red-first `PARAMETER-QUERY-GUARDS.test.ts` (unit 14, integration 2 — the previously-500ing OData POST now 201s; the C4 discriminator rides an entries-form INSERT with an explicit `.columns` list because cds 10 app services reject positional rows payloads at input validation). `parameter.ts` remarks + README notes aligned. ⏳ **IN PROGRESS** — C5, C6, M6, M8, M9 (red-first tests per the backlog below; status updated per commit).
 
 ---
 
