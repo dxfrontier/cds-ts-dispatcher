@@ -542,8 +542,12 @@ function Validate<T>(validator: Validators, ...fields: (keyof T)[]) {
  * Removes the given fields from the response, in place, after the decorated `@After*` handler resolves.
  *
  * @remarks
- * Runs on whatever `results` shape the wrapped handler exposes — the array from `@AfterRead` / `@AfterAll`,
- * or the single row from `@AfterCreate` / `@AfterUpdate`. Complements `@Include` (keep only) and `@Mask`
+ * Runs on `req.results` — the array from `@AfterRead` / `@AfterAll`, or the write result from
+ * `@AfterCreate` / `@AfterUpdate`. Write-event caveat (`@sap/cds` 10+, default flags): the generic write
+ * handlers expose only key columns (CREATE) or an empty affected-count array (UPDATE) there, and generic
+ * OData/REST write response BODIES are rebuilt AFTER this phase via read-after-write — attach the
+ * transformer to `@AfterRead` to shape write responses (a custom `@On*` handler returning full rows is
+ * the exception). Complements `@Include` (keep only) and `@Mask`
  * (partially hide instead of remove). Place it directly below the handler decorator; multiple response
  * transformers (`@Exclude`, `@Include`, `@Mask`) may be stacked on the same handler.
  *
@@ -582,8 +586,12 @@ function Exclude<T>(...fields: (keyof T)[]) {
  * every other field is removed.
  *
  * @remarks
- * Runs on whatever `results` shape the wrapped handler exposes — the array from `@AfterRead` / `@AfterAll`,
- * or the single row from `@AfterCreate` / `@AfterUpdate`. Complements `@Exclude` (remove specific fields
+ * Runs on `req.results` — the array from `@AfterRead` / `@AfterAll`, or the write result from
+ * `@AfterCreate` / `@AfterUpdate`. Write-event caveat (`@sap/cds` 10+, default flags): the generic write
+ * handlers expose only key columns (CREATE) or an empty affected-count array (UPDATE) there, and generic
+ * OData/REST write response BODIES are rebuilt AFTER this phase via read-after-write — attach the
+ * transformer to `@AfterRead` to shape write responses (a custom `@On*` handler returning full rows is
+ * the exception). Complements `@Exclude` (remove specific fields
  * instead of keeping only a set) and `@Mask` (partially hide instead of remove). Useful for minimal
  * list/summary responses.
  *
@@ -622,8 +630,12 @@ function Include<T>(...fields: (keyof T)[]) {
  * resolves — keeps a configurable number of characters visible and replaces the rest.
  *
  * @remarks
- * Runs on whatever `results` shape the wrapped handler exposes — the array from `@AfterRead` / `@AfterAll`,
- * or the single row from `@AfterCreate` / `@AfterUpdate`. `options.char` (default `'*'`),
+ * Runs on `req.results` — the array from `@AfterRead` / `@AfterAll`, or the write result from
+ * `@AfterCreate` / `@AfterUpdate`. Write-event caveat (`@sap/cds` 10+, default flags): the generic write
+ * handlers expose only key columns (CREATE) or an empty affected-count array (UPDATE) there, and generic
+ * OData/REST write response BODIES are rebuilt AFTER this phase via read-after-write — attach the
+ * transformer to `@AfterRead` to shape write responses (a custom `@On*` handler returning full rows is
+ * the exception). `options.char` (default `'*'`),
  * `options.visibleEnd` (default `4`) and `options.visibleStart` (default `0`) control the mask; e.g.
  * `'1234567890123456'` with defaults becomes `'************3456'`. Complements `@Exclude` / `@Include`
  * (remove instead of mask).

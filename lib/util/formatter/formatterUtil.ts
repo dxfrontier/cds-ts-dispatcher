@@ -23,12 +23,14 @@ const formatterUtil = {
       return undefined;
     }
 
+    // BEFORE / ON events never carry '.results' - the `@FieldsFormatter` request-data path (formatting
+    // `req.data` instead) depends on this staying `undefined` here; do not change this branch.
+    if (util.lodash.isUndefined(req.results)) {
+      return undefined;
+    }
+
     // The 'results / result' property
     for (const arg of args) {
-      if (util.lodash.isUndefined(req.results)) {
-        continue;
-      }
-
       if (Array.isArray(req.results)) {
         if (arg === req.results) {
           return arg;
@@ -45,7 +47,18 @@ const formatterUtil = {
       }
     }
 
-    return undefined;
+    // FALLBACK: `@sap/cds` >= 10 write events (CREATE/UPDATE/DELETE) have `CDSDispatcher.executeAfterCallback`
+    // swap the callback argument to `req.data` (or a boolean, for DELETE) to restore the pre-cds-10 `@After*`
+    // contract - so none of `args` is ever identity-equal to `req.results` there, and the loop above never
+    // matches. `req.results` itself still holds CAP's real result, so returning it lets `@Exclude` /
+    // `@Include` / `@Mask` / `@FieldsFormatter` operate on the real results instead of silently no-op'ing
+    // (never fall back to `req.data` - that's the request payload, not a result). NOTE: generic OData/REST
+    // write RESPONSE BODIES are rebuilt after this phase (read-after-write / `req.data`) - see the
+    // `@Exclude` / `@Include` / `@Mask` docs for what shaping `req.results` does and does not reach.
+    // Guard: only object-shaped results are transformable - a `null` reply from a custom `@On*` handler or
+    // a numeric delete count (`legacy_srv_results: true`) must keep the pre-fix no-op instead of throwing
+    // inside the transformers (`delete null[field]`, `'x' in 1`). Do NOT "simplify" this away.
+    return util.lodash.isObjectLike(req.results) ? (req.results as T | T[]) : undefined;
   },
 
   /**

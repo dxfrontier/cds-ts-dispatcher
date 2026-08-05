@@ -6266,6 +6266,9 @@ The `@Exclude` decorator can be used on the following decorators:
   - [@AfterUpdate()](#afterupdate)
   - [@AfterAll()](#afterall)
 
+> [!NOTE]
+> On write events (`@AfterCreate` / `@AfterUpdate`) with `@sap/cds` 10+ the generic handlers expose only key columns (CREATE) or an empty affected-count array (UPDATE) in `req.results`, and generic OData/REST write response bodies are rebuilt after this phase via read-after-write — attach the transformer to [@AfterRead()](#afterread) to shape write responses (a custom `@On*` handler returning full rows is the exception).
+
 `Parameters`
 
 - `...fields`: Specify the fields of your entity that should be excluded from the response.
@@ -6308,6 +6311,9 @@ The `@Include` decorator can be used on the following decorators:
   - [@AfterCreate()](#aftercreate)
   - [@AfterUpdate()](#afterupdate)
   - [@AfterAll()](#afterall)
+
+> [!NOTE]
+> On write events (`@AfterCreate` / `@AfterUpdate`) with `@sap/cds` 10+ the generic handlers expose only key columns (CREATE) or an empty affected-count array (UPDATE) in `req.results`, and generic OData/REST write response bodies are rebuilt after this phase via read-after-write — attach the transformer to [@AfterRead()](#afterread) to shape write responses (a custom `@On*` handler returning full rows is the exception).
 
 `Parameters`
 
@@ -6352,12 +6358,16 @@ The `@Mask` decorator can be used on the following decorators:
   - [@AfterUpdate()](#afterupdate)
   - [@AfterAll()](#afterall)
 
+> [!NOTE]
+> On write events (`@AfterCreate` / `@AfterUpdate`) with `@sap/cds` 10+ the generic handlers expose only key columns (CREATE) or an empty affected-count array (UPDATE) in `req.results`, and generic OData/REST write response bodies are rebuilt after this phase via read-after-write — attach the transformer to [@AfterRead()](#afterread) to shape write responses (a custom `@On*` handler returning full rows is the exception).
+
 `Parameters`
 
 - `fields`: An array of fields of your entity that should be masked.
 - `options?`: [Optional] Configuration options for the masking:
   - `char?: string` - The character to use for masking (default: `'*'`)
-  - `visibleChars?: number` - Number of characters to leave visible at the end (default: `4`)
+  - `visibleStart?: number` - Number of characters to leave visible at the start (default: `0`)
+  - `visibleEnd?: number` - Number of characters to leave visible at the end (default: `4`)
 
 `Example 1` - Default masking
 
@@ -6384,7 +6394,7 @@ export class MyHandler {
 
 ```typescript
 @AfterRead()
-@Mask<MyEntity>(['phoneNumber'], { char: '#', visibleChars: 2 })
+@Mask<MyEntity>(['phoneNumber'], { char: '#', visibleEnd: 2 })
 private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
   // 'phoneNumber': '+1234567890' => '#########90'
 }

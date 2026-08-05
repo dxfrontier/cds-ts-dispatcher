@@ -95,17 +95,17 @@ describe('FORMATTER-UTIL', () => {
   // ============================================================================================================
 
   describe('formatterUtil.findResults', () => {
-    test('It should RETURN : undefined, when no Request instance is present in args', () => {
+    test('It should RETURN : undefined, when no Request instance is present in args (rule 1)', () => {
       expect(formatterUtil.findResults([{}, 'not-a-request'])).toBeUndefined();
     });
 
-    test('It should RETURN : undefined, when the Request is found but `.results` was never set', () => {
+    test('It should RETURN : undefined, when the Request is found but `.results` was never set (rule 2 - the BEFORE/ON, request-data path `@FieldsFormatter` depends on)', () => {
       const req = new CdsRequest({ data: {} });
 
       expect(formatterUtil.findResults([req])).toBeUndefined();
     });
 
-    test('It should RETURN : the matching array, when req.results is an array and args contains that same array reference', () => {
+    test('It should RETURN : the matching array, when req.results is an array and args contains that same array reference (rule 3)', () => {
       const req = new CdsRequest({ data: {} });
       const rows = [{ ID: 1 }, { ID: 2 }];
       (req as unknown as { results: unknown }).results = rows;
@@ -113,17 +113,10 @@ describe('FORMATTER-UTIL', () => {
       expect(formatterUtil.findResults([rows, req])).toBe(rows);
     });
 
-    test('It should RETURN : undefined, when req.results is an array but no arg matches it by reference', () => {
-      const req = new CdsRequest({ data: {} });
-      (req as unknown as { results: unknown }).results = [{ ID: 1 }];
-
-      expect(formatterUtil.findResults([req])).toBeUndefined();
-    });
-
     // The non-array branch matches EITHER shape: the bare single result object directly (the common
     // AfterReadSingleInstance-style shape), or an array wrapping it (arg[0] === req.results), kept for
     // backward compatibility with any caller relying on the wrapped shape.
-    test('It should RETURN : the wrapping array, when req.results is a single object and one arg is an array whose [0] is that object', () => {
+    test('It should RETURN : the wrapping array, when req.results is a single object and one arg is an array whose [0] is that object (rule 3)', () => {
       const req = new CdsRequest({ data: {} });
       const row = { ID: 1 };
       (req as unknown as { results: unknown }).results = row;
@@ -132,7 +125,7 @@ describe('FORMATTER-UTIL', () => {
       expect(formatterUtil.findResults([wrapper, req])).toBe(wrapper);
     });
 
-    test('It should RETURN : the bare object itself, when req.results is a single object passed directly (not wrapped in an array)', () => {
+    test('It should RETURN : the bare object itself, when req.results is a single object passed directly (not wrapped in an array) (rule 3)', () => {
       const req = new CdsRequest({ data: {} });
       const row = { ID: 1 };
       (req as unknown as { results: unknown }).results = row;
@@ -140,11 +133,83 @@ describe('FORMATTER-UTIL', () => {
       expect(formatterUtil.findResults([row, req])).toBe(row);
     });
 
-    test('It should RETURN : undefined, when req.results is a single object but no arg matches it (neither bare nor wrapped)', () => {
-      const req = new CdsRequest({ data: {} });
-      (req as unknown as { results: unknown }).results = { ID: 1 };
+    // ----------------------------------------------------------------------------------------------------------
+    // Fallback contract (rule 4, C5 fix): once a Request is found AND `.results` is set, but no arg matches it
+    // by reference, `findResults` now returns `req.results` itself instead of `undefined` - this is what lets
+    // `@Exclude` / `@Include` / `@Mask` / `@FieldsFormatter` actually shape the response on write-AFTER events
+    // (`@AfterCreate` / `@AfterUpdate` / `@AfterDelete`), where `CDSDispatcher.executeAfterCallback` swaps the
+    // callback argument to `req.data` (or a boolean, for DELETE) and nothing is ever identity-equal to
+    // `req.results` any more. The two cases below (arrays with a non-matching arg present, and req.results a
+    // single object with no match) previously asserted `undefined` here and directly contradicted this new
+    // contract, so their expectations were updated in place rather than duplicated.
+    // ----------------------------------------------------------------------------------------------------------
 
-      expect(formatterUtil.findResults([{ ID: 999 }, req])).toBeUndefined();
+    test('It should RETURN : req.results itself (fallback), when req.results is an array but no arg matches it by reference', () => {
+      const req = new CdsRequest({ data: {} });
+      const rows = [{ ID: 1 }];
+      (req as unknown as { results: unknown }).results = rows;
+
+      expect(formatterUtil.findResults([req])).toBe(rows);
+    });
+
+    test('It should RETURN : req.results itself (fallback), when args contains an object that is not identical to req.results (array)', () => {
+      const req = new CdsRequest({ data: {} });
+      const rows = [{ ID: 1 }, { ID: 2 }];
+      (req as unknown as { results: unknown }).results = rows;
+
+      expect(formatterUtil.findResults([{ ID: 999 }, req])).toBe(rows);
+    });
+
+    test('It should RETURN : req.results itself (fallback), when req.results is a single object but no arg matches it (neither bare nor wrapped)', () => {
+      const req = new CdsRequest({ data: {} });
+      const row = { ID: 1 };
+      (req as unknown as { results: unknown }).results = row;
+
+      expect(formatterUtil.findResults([{ ID: 999 }, req])).toBe(row);
+    });
+
+    test('It should RETURN : req.results itself (fallback), when args contains the AfterDelete boolean swap instead of the real results (booleans never match by reference)', () => {
+      const req = new CdsRequest({ data: {} });
+      const rows = [{ ID: 1 }];
+      (req as unknown as { results: unknown }).results = rows;
+
+      expect(formatterUtil.findResults([true, req])).toBe(rows);
+    });
+
+    // These two mirror the REAL `req.results` shapes verified empirically against a live `@sap/cds` 10 /
+    // `@cap-js/db-service` boot for a plain CREATE/UPDATE (see TRANSFORMERS-WRITE-EVENTS.test.ts's file
+    // header): an `InsertResults`-style key-only row array for CREATE, and a permanently empty array for
+    // UPDATE - `args` mirrors `CDSDispatcher.executeAfterCallback`'s actual swap: `[req.data, req]`.
+    test('It should RETURN : req.results itself (fallback), for the real CREATE shape (key-only row array)', () => {
+      const req = new CdsRequest({ data: { ID: 1, quantity: 9 } });
+      const keyOnlyRow = [{ ID: 1 }];
+      (req as unknown as { results: unknown }).results = keyOnlyRow;
+
+      expect(formatterUtil.findResults([req.data, req])).toBe(keyOnlyRow);
+    });
+
+    test('It should RETURN : req.results itself (fallback), for the real UPDATE shape (permanently empty array)', () => {
+      const req = new CdsRequest({ data: { saleDate: '2024-07-02' } });
+      const emptyResults: unknown[] = [];
+      (req as unknown as { results: unknown }).results = emptyResults;
+
+      expect(formatterUtil.findResults([req.data, req])).toBe(emptyResults);
+    });
+
+    // Non-object results are NOT transformable: the fallback must preserve the pre-fix no-op for them
+    // instead of handing them to the transformers (`delete null[field]` / `'x' in 1` would throw -> 500).
+    test('It should RETURN : undefined (guarded fallback), when req.results is null (custom @On* handler replying null)', () => {
+      const req = new CdsRequest({ data: {} });
+      (req as unknown as { results: unknown }).results = null;
+
+      expect(formatterUtil.findResults([[], req])).toBeUndefined();
+    });
+
+    test('It should RETURN : undefined (guarded fallback), when req.results is a number (legacy_srv_results delete count)', () => {
+      const req = new CdsRequest({ data: {} });
+      (req as unknown as { results: unknown }).results = 1;
+
+      expect(formatterUtil.findResults([true, req])).toBeUndefined();
     });
   });
 
