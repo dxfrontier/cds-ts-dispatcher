@@ -151,7 +151,9 @@ function CatchAndSetErrorMessage(newMessage: string, newStatusCode?: keyof Statu
  * @remarks
  * `options.eventDecorator` names the target Draft-suffixed decorator (e.g. `'BeforeReadDraft'`,
  * `'AfterUpdateDraft'`, `'OnNewDraft'`, ...); `options.actionName` is required only when the target is
- * `'OnBoundActionDraft'` / `'OnBoundFunctionDraft'`. On an `ON`-phase target, `return next()` is mandatory
+ * `'OnBoundActionDraft'` / `'OnBoundFunctionDraft'`. The prepended registration mirrors the target
+ * decorator's own entity: EDIT/SAVE-family targets register against the ACTIVE entity (those events
+ * dispatch there), every other target against `<Entity>.drafts`. On an `ON`-phase target, `return next()` is mandatory
  * in the prepended callback to let the actual event still run. Active-entity counterpart: `@Prepend`.
  * README has no dedicated `@PrependDraft` section; the closest coverage is `@Prepend`.
  *
@@ -190,7 +192,7 @@ function PrependDraft(options: PrependBaseDraft) {
     // ********************************************************************************************************************************
 
     const metadataDispatcher = new MetadataDispatcher(target, constants.DECORATOR.METHOD_ACCUMULATOR_NAME);
-    const { event, eventKind, actionName } = decoratorsUtil.mapPrependDraftEvent(options);
+    const { event, eventKind, actionName, isDraft } = decoratorsUtil.mapPrependDraftEvent(options);
 
     metadataDispatcher.addMethodMetadata({
       type: 'PREPEND',
@@ -200,7 +202,9 @@ function PrependDraft(options: PrependBaseDraft) {
         actionName,
       },
       callback: descriptor.value,
-      isDraft: true,
+      // Mirrors the TARGET decorator's own isDraft (EDIT/SAVE dispatch on the ACTIVE entity); every other
+      // draft decorator has none mapped, so this defaults back to true ('<Entity>.drafts'), unchanged.
+      isDraft: isDraft ?? true,
     });
   };
 }
@@ -408,10 +412,14 @@ function Throttle(options: ThrottleOptions) {
  * `@On*` request data.
  *
  * @remarks
- * On `@AfterRead`, formats `results` (array or single row); on `@BeforeCreate` / `@BeforeUpdate` /
+ * On `@After*` events, formats `req.results` — EVERY listed field (the write-event caveat from
+ * `@Exclude` applies: generic CREATE/UPDATE results carry key columns only, or an empty array); on
+ * `@BeforeCreate` / `@BeforeUpdate` /
  * `@OnCreate` / `@OnUpdate` / `@OnAction` / `@OnBoundAction` / `@OnFunction` / `@OnBoundFunction`, formats
- * `req.data` instead. `formatter.action` picks a built-in (`'blacklist'`, `'trim'`, `'toUpper'`,
- * `'camelCase'`, `'truncate'`, ...) or `'customFormatter'` with your own `callback(req, results)`.
+ * `req.data` instead, each listed field. `formatter.action` picks a built-in (`'blacklist'`, `'trim'`,
+ * `'toUpper'`, `'camelCase'`, `'truncate'`, ...) or `'customFormatter'` with your own
+ * `callback(req, results)` — invoked exactly ONCE, with or without field arguments (`results` is
+ * `undefined` on the request-data path).
  * Sibling: `@Validate` runs the same `BEFORE`/`ON` pass but only rejects. Note this decorator can ALSO
  * reject: on the request-data path, a formatted field that is `null`/`undefined` in `req.data` is
  * rejected with 400 — attach it only where the field is guaranteed present. Like
@@ -443,27 +451,19 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
 
       const isAfterEventManyResults = util.lodash.isArray(results);
       const isAfterEventOneResult = !util.lodash.isUndefined(results) && !isAfterEventManyResults;
-      const isCustomFormatter = formatter.action === 'customFormatter';
 
-      for (const field of fields) {
-        // All 3 if's are applied on 'Results' (AFTER events)
-        if (isCustomFormatter) {
-          await formatterUtil.handleCustomFormatter(req, formatter, results);
-          break;
-        }
-
-        if (isAfterEventManyResults) {
-          formatterUtil.handleManyItems<T>(formatter, results, field);
-          break;
-        }
-
-        if (isAfterEventOneResult) {
-          formatterUtil.handleOneItem<T>(formatter, results, field);
-          break;
-        }
-
+      if (formatter.action === 'customFormatter') {
+        // Runs exactly once - with or without field arguments
+        await formatterUtil.handleCustomFormatter(req, formatter, results);
+      } else if (isAfterEventManyResults) {
+        // Applied on 'Results' (AFTER events)
+        for (const field of fields) formatterUtil.handleManyItems<T>(formatter, results, field);
+      } else if (isAfterEventOneResult) {
+        // Applied on 'Results' (AFTER events)
+        for (const field of fields) formatterUtil.handleOneItem<T>(formatter, results, field);
+      } else {
         // Applied only for 'Request' (ON, BEFORE events)
-        formatterUtil.handleOneItemOfRequest<T>(req, formatter, field);
+        for (const field of fields) formatterUtil.handleOneItemOfRequest<T>(req, formatter, field);
       }
 
       return await originalMethod.apply(this, args);
@@ -1774,7 +1774,9 @@ const AfterReadDraft = buildAfter({ event: 'READ', eventKind: 'AFTER', isDraft: 
  * bulk/whole-array logic and `@AfterReadSingleInstance` when a single entity is requested by key.
  * IMPORTANT: CAP invokes per-row callbacks via `Array.prototype.forEach` and does NOT await returned
  * promises — `await`ed work inside races the response; keep per-row logic synchronous, or use
- * `@AfterRead` and iterate with `await` yourself. Draft variant: `@AfterReadDraftEachInstance`.
+ * `@AfterRead` and iterate with `await` yourself. Response transformers (`@Exclude` / `@Include` /
+ * `@Mask`) and `@FieldsFormatter` attached here operate on the WHOLE `req.results` array once per row
+ * invocation — attach them to `@AfterRead` instead. Draft variant: `@AfterReadDraftEachInstance`.
  *
  * @example
  * ```ts

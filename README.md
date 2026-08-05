@@ -5891,6 +5891,7 @@ The `@FieldsFormatter` decorator can be used on the following decorators :
 
    - `AFTER`
      - [@AfterRead()](#afterread)
+     - [@AfterCreate()](#aftercreate) / [@AfterUpdate()](#afterupdate) / [@AfterAll()](#afterall) — the write-event note under [@Exclude](#exclude) applies: generic write results carry key columns only (CREATE) or nothing (UPDATE); shape write responses on `@AfterRead`
 
 2. When you want to `modify`/`enhance` the `Request`.`data` _(Request Body)_ of the `@sap/cds - Request` object.
 
@@ -5933,6 +5934,9 @@ Here are the available formatter methods:
 | kebabCase       | Kebab case, also known as "spinal case" or "hyphen case," involves writing compound words in lowercase letters and separating them with hyphens ("-"). For example, the phrase "user settings panel" would be represented as `"user-settings-panel"` in the kebab case.    |
 | camelCase       | The format indicates the first word starting with either case, then the following words having an initial uppercase letter. `CustomerName, LastName ...`                                                                                                                   |
 | customFormatter | Apply a custom formatter when standard ones do not satisfy your needs.                                                                                                                                                                                                     |
+
+> [!NOTE]
+> Every listed field is formatted. `customFormatter` invokes your `callback(req, results)` exactly once — with or without field arguments; on the `BEFORE`/`ON` path `results` is `undefined` (work on `req.data` via `req`).
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

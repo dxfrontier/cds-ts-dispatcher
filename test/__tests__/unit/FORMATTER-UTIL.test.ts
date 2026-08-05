@@ -308,6 +308,12 @@ describe('FORMATTER-UTIL', () => {
   // ============================================================================================================
 
   describe('@FieldsFormatter (public path)', () => {
+    // customFormatter callbacks for the "zero fields listed" cases (C6): declared here (not inline) so
+    // the tests below can assert on invocation count/args via the SAME jest.fn() reference the decorator
+    // captured at class-definition time.
+    const customFormatterZeroFieldsAfterSpy = jest.fn().mockResolvedValue(undefined);
+    const customFormatterZeroFieldsBeforeSpy = jest.fn().mockResolvedValue(undefined);
+
     class ProductHandler {
       @FieldsFormatter<{ title: string }>({ action: 'toUpper' }, 'title')
       public async beforeCreate(req: Request): Promise<void> {
@@ -336,6 +342,42 @@ describe('FORMATTER-UTIL', () => {
       )
       public async afterReadCustom(results: Array<{ title: string }>, req: Request): Promise<Array<{ title: string }>> {
         return results;
+      }
+
+      @FieldsFormatter<{ title: string; author: string }>({ action: 'toUpper' }, 'title', 'author')
+      public async beforeCreateMultiField(req: Request): Promise<void> {
+        // BEFORE/ON style: no separate results arg - formatter applies directly to req.data.
+      }
+
+      @FieldsFormatter<{ title: string; author: string }>({ action: 'toUpper' }, 'title', 'author')
+      public async afterReadManyMultiField(
+        results: Array<{ title: string; author: string }>,
+        req: Request,
+      ): Promise<Array<{ title: string; author: string }>> {
+        return results;
+      }
+
+      @FieldsFormatter<{ title: string; author: string }>({ action: 'toUpper' }, 'title', 'author')
+      public async afterReadSingleMultiField(
+        result: { title: string; author: string },
+        req: Request,
+      ): Promise<{ title: string; author: string }> {
+        return result;
+      }
+
+      // ZERO field arguments: only 'customFormatter' must still fire (exactly once) - the built-in
+      // formatter branches have nothing to iterate and stay no-ops, which is out of scope here.
+      @FieldsFormatter<{ title: string }>({ action: 'customFormatter', callback: customFormatterZeroFieldsAfterSpy })
+      public async afterReadCustomZeroFields(
+        results: Array<{ title: string }>,
+        req: Request,
+      ): Promise<Array<{ title: string }>> {
+        return results;
+      }
+
+      @FieldsFormatter<{ title: string }>({ action: 'customFormatter', callback: customFormatterZeroFieldsBeforeSpy })
+      public async beforeCreateCustomZeroFields(req: Request): Promise<void> {
+        // BEFORE-style: no results arg at all - customFormatter must still fire once with (req, undefined).
       }
     }
 
@@ -391,6 +433,65 @@ describe('FORMATTER-UTIL', () => {
       const result = await instance.afterReadCustom(rows, req as unknown as Request);
 
       expect(result[0].title).toBe('CUSTOM');
+    });
+
+    test('It should APPLY : the formatter to ALL listed fields (not just the first), for an AFTER-many-style call', async () => {
+      const instance = new ProductHandler();
+      const rows = [
+        { title: 'a', author: 'x' },
+        { title: 'b', author: 'y' },
+      ];
+      const req = new CdsRequest({ data: {} });
+      (req as unknown as { results: unknown }).results = rows;
+
+      const result = await instance.afterReadManyMultiField(rows, req as unknown as Request);
+
+      expect(result.map((row) => row.title)).toEqual(['A', 'B']);
+      expect(result.map((row) => row.author)).toEqual(['X', 'Y']);
+    });
+
+    test('It should APPLY : the formatter to ALL listed fields (not just the first), for an AFTER-single-style call', async () => {
+      const instance = new ProductHandler();
+      const row = { title: 'hello', author: 'world' };
+      const req = new CdsRequest({ data: {} });
+      (req as unknown as { results: unknown }).results = row;
+
+      const result = await instance.afterReadSingleMultiField(row, req as unknown as Request);
+
+      expect(result.title).toBe('HELLO');
+      expect(result.author).toBe('WORLD');
+    });
+
+    test('It should APPLY : the formatter to ALL listed fields (regression pin), for a BEFORE/ON-style call', async () => {
+      const instance = new ProductHandler();
+      const req = new CdsRequest({ data: { title: 'hello', author: 'world' } });
+
+      await instance.beforeCreateMultiField(req as unknown as Request);
+
+      expect((req.data as { title: string; author: string }).title).toBe('HELLO');
+      expect((req.data as { title: string; author: string }).author).toBe('WORLD');
+    });
+
+    test('It should CALL : the custom formatter callback exactly once with (req, results), when ZERO fields are listed (AFTER-many-style call)', async () => {
+      const instance = new ProductHandler();
+      const rows = [{ title: 'a' }];
+      const req = new CdsRequest({ data: {} });
+      (req as unknown as { results: unknown }).results = rows;
+
+      await instance.afterReadCustomZeroFields(rows, req as unknown as Request);
+
+      expect(customFormatterZeroFieldsAfterSpy).toHaveBeenCalledTimes(1);
+      expect(customFormatterZeroFieldsAfterSpy).toHaveBeenCalledWith(req, rows);
+    });
+
+    test('It should CALL : the custom formatter callback exactly once with (req, undefined), when ZERO fields are listed (BEFORE-style call, no req.results)', async () => {
+      const instance = new ProductHandler();
+      const req = new CdsRequest({ data: {} });
+
+      await instance.beforeCreateCustomZeroFields(req as unknown as Request);
+
+      expect(customFormatterZeroFieldsBeforeSpy).toHaveBeenCalledTimes(1);
+      expect(customFormatterZeroFieldsBeforeSpy).toHaveBeenCalledWith(req, undefined);
     });
   });
 });

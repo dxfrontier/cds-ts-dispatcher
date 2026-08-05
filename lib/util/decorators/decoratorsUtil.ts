@@ -80,8 +80,10 @@ const decoratorsUtil = {
       AfterCancelDraft: { event: 'CANCEL', eventKind: 'AFTER' },
       AfterPatchDraft: { event: 'PATCH', eventKind: 'AFTER' },
       AfterDiscardDraft: { event: 'DISCARD', eventKind: 'AFTER' },
-      AfterEditDraft: { event: 'EDIT', eventKind: 'AFTER' },
-      AfterSaveDraft: { event: 'SAVE', eventKind: 'AFTER' },
+      // EDIT/SAVE mirror their own decorator's isDraft: false - they dispatch on the ACTIVE entity, not
+      // '<Entity>.drafts', so a @PrependDraft targeting one of them must register there too.
+      AfterEditDraft: { event: 'EDIT', eventKind: 'AFTER', isDraft: false },
+      AfterSaveDraft: { event: 'SAVE', eventKind: 'AFTER', isDraft: false },
       //
       BeforeCreateDraft: { event: 'CREATE', eventKind: 'BEFORE' },
       BeforeReadDraft: { event: 'READ', eventKind: 'BEFORE' },
@@ -91,8 +93,8 @@ const decoratorsUtil = {
       BeforeCancelDraft: { event: 'CANCEL', eventKind: 'BEFORE' },
       BeforePatchDraft: { event: 'PATCH', eventKind: 'BEFORE' },
       BeforeDiscardDraft: { event: 'DISCARD', eventKind: 'BEFORE' },
-      BeforeEditDraft: { event: 'EDIT', eventKind: 'BEFORE' },
-      BeforeSaveDraft: { event: 'SAVE', eventKind: 'BEFORE' },
+      BeforeEditDraft: { event: 'EDIT', eventKind: 'BEFORE', isDraft: false },
+      BeforeSaveDraft: { event: 'SAVE', eventKind: 'BEFORE', isDraft: false },
       //
       OnCreateDraft: { event: 'CREATE', eventKind: 'ON' },
       OnReadDraft: { event: 'READ', eventKind: 'ON' },
@@ -102,8 +104,8 @@ const decoratorsUtil = {
       OnCancelDraft: { event: 'CANCEL', eventKind: 'ON' },
       OnPatchDraft: { event: 'PATCH', eventKind: 'ON' },
       OnDiscardDraft: { event: 'DISCARD', eventKind: 'ON' },
-      OnEditDraft: { event: 'EDIT', eventKind: 'ON' },
-      OnSaveDraft: { event: 'SAVE', eventKind: 'ON' },
+      OnEditDraft: { event: 'EDIT', eventKind: 'ON', isDraft: false },
+      OnSaveDraft: { event: 'SAVE', eventKind: 'ON', isDraft: false },
     };
 
     if (options.eventDecorator === 'OnBoundActionDraft' || options.eventDecorator === 'OnBoundFunctionDraft') {

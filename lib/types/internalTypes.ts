@@ -362,6 +362,7 @@ export type MapPrepend = {
   eventKind: EventKind;
   actionName?: CdsFunction | string;
   eventName?: CdsEvent;
+  isDraft?: boolean;
 };
 
 // **************************************************************************************************************************

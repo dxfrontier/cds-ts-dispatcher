@@ -113,48 +113,92 @@ describe('DECORATORS-UTIL', () => {
 
   describe('decoratorsUtil.mapPrependDraftEvent', () => {
     describe('Draft lifecycle decorators (no actionName)', () => {
-      const cases: Array<[PrependBaseDraft['eventDecorator'], string, string]> = [
-        ['AfterCreateDraft', 'CREATE', 'AFTER'],
-        ['AfterReadDraft', 'READ', 'AFTER'],
-        ['AfterReadDraftSingleInstance', 'READ', 'AFTER_SINGLE'],
-        ['AfterReadDraftEachInstance', 'each', 'AFTER'],
-        ['AfterUpdateDraft', 'UPDATE', 'AFTER'],
-        ['AfterDeleteDraft', 'DELETE', 'AFTER'],
-        ['AfterNewDraft', 'NEW', 'AFTER'],
-        ['AfterCancelDraft', 'CANCEL', 'AFTER'],
-        ['AfterPatchDraft', 'PATCH', 'AFTER'],
-        ['AfterDiscardDraft', 'DISCARD', 'AFTER'],
-        ['AfterEditDraft', 'EDIT', 'AFTER'],
-        ['AfterSaveDraft', 'SAVE', 'AFTER'],
+      // 4th tuple element (isDraft): only the EDIT/SAVE group carries `false` - they mirror their own
+      // decorator's ACTIVE-entity registration (M6 fix); every other entry keeps it explicit `undefined`,
+      // i.e. the mapped result carries no `isDraft` key at all, same as before the fix. Every row MUST
+      // supply all 4 elements (not just the EDIT/SAVE ones): `test.each` treats a row shorter than the
+      // callback's own arity as the legacy `(...args, done) => {}` async form and injects a `done`
+      // callback function in place of the missing element instead of `undefined`.
+      const cases: Array<[PrependBaseDraft['eventDecorator'], string, string, boolean | undefined]> = [
+        ['AfterCreateDraft', 'CREATE', 'AFTER', undefined],
+        ['AfterReadDraft', 'READ', 'AFTER', undefined],
+        ['AfterReadDraftSingleInstance', 'READ', 'AFTER_SINGLE', undefined],
+        ['AfterReadDraftEachInstance', 'each', 'AFTER', undefined],
+        ['AfterUpdateDraft', 'UPDATE', 'AFTER', undefined],
+        ['AfterDeleteDraft', 'DELETE', 'AFTER', undefined],
+        ['AfterNewDraft', 'NEW', 'AFTER', undefined],
+        ['AfterCancelDraft', 'CANCEL', 'AFTER', undefined],
+        ['AfterPatchDraft', 'PATCH', 'AFTER', undefined],
+        ['AfterDiscardDraft', 'DISCARD', 'AFTER', undefined],
+        ['AfterEditDraft', 'EDIT', 'AFTER', false],
+        ['AfterSaveDraft', 'SAVE', 'AFTER', false],
         //
-        ['BeforeCreateDraft', 'CREATE', 'BEFORE'],
-        ['BeforeReadDraft', 'READ', 'BEFORE'],
-        ['BeforeUpdateDraft', 'UPDATE', 'BEFORE'],
-        ['BeforeDeleteDraft', 'DELETE', 'BEFORE'],
-        ['BeforeNewDraft', 'NEW', 'BEFORE'],
-        ['BeforeCancelDraft', 'CANCEL', 'BEFORE'],
-        ['BeforePatchDraft', 'PATCH', 'BEFORE'],
-        ['BeforeDiscardDraft', 'DISCARD', 'BEFORE'],
-        ['BeforeEditDraft', 'EDIT', 'BEFORE'],
-        ['BeforeSaveDraft', 'SAVE', 'BEFORE'],
+        ['BeforeCreateDraft', 'CREATE', 'BEFORE', undefined],
+        ['BeforeReadDraft', 'READ', 'BEFORE', undefined],
+        ['BeforeUpdateDraft', 'UPDATE', 'BEFORE', undefined],
+        ['BeforeDeleteDraft', 'DELETE', 'BEFORE', undefined],
+        ['BeforeNewDraft', 'NEW', 'BEFORE', undefined],
+        ['BeforeCancelDraft', 'CANCEL', 'BEFORE', undefined],
+        ['BeforePatchDraft', 'PATCH', 'BEFORE', undefined],
+        ['BeforeDiscardDraft', 'DISCARD', 'BEFORE', undefined],
+        ['BeforeEditDraft', 'EDIT', 'BEFORE', false],
+        ['BeforeSaveDraft', 'SAVE', 'BEFORE', false],
         //
-        ['OnCreateDraft', 'CREATE', 'ON'],
-        ['OnReadDraft', 'READ', 'ON'],
-        ['OnUpdateDraft', 'UPDATE', 'ON'],
-        ['OnDeleteDraft', 'DELETE', 'ON'],
-        ['OnNewDraft', 'NEW', 'ON'],
-        ['OnCancelDraft', 'CANCEL', 'ON'],
-        ['OnPatchDraft', 'PATCH', 'ON'],
-        ['OnDiscardDraft', 'DISCARD', 'ON'],
-        ['OnEditDraft', 'EDIT', 'ON'],
-        ['OnSaveDraft', 'SAVE', 'ON'],
+        ['OnCreateDraft', 'CREATE', 'ON', undefined],
+        ['OnReadDraft', 'READ', 'ON', undefined],
+        ['OnUpdateDraft', 'UPDATE', 'ON', undefined],
+        ['OnDeleteDraft', 'DELETE', 'ON', undefined],
+        ['OnNewDraft', 'NEW', 'ON', undefined],
+        ['OnCancelDraft', 'CANCEL', 'ON', undefined],
+        ['OnPatchDraft', 'PATCH', 'ON', undefined],
+        ['OnDiscardDraft', 'DISCARD', 'ON', undefined],
+        ['OnEditDraft', 'EDIT', 'ON', false],
+        ['OnSaveDraft', 'SAVE', 'ON', false],
       ];
 
-      test.each(cases)('It should MAP : %s -> { event: %s, eventKind: %s }', (eventDecorator, event, eventKind) => {
-        const result = decoratorsUtil.mapPrependDraftEvent({ eventDecorator } as unknown as PrependBaseDraft);
+      test.each(cases)(
+        'It should MAP : %s -> { event: %s, eventKind: %s }',
+        (eventDecorator, event, eventKind, isDraft) => {
+          const result = decoratorsUtil.mapPrependDraftEvent({ eventDecorator } as unknown as PrependBaseDraft);
 
-        expect(result).toEqual({ event, eventKind });
-      });
+          expect(result).toEqual(isDraft === undefined ? { event, eventKind } : { event, eventKind, isDraft });
+        },
+      );
+    });
+
+    describe('isDraft mirrors the target decorator for the EDIT/SAVE group (M6 fix)', () => {
+      const editSaveNames: Array<PrependBaseDraft['eventDecorator']> = [
+        'AfterEditDraft',
+        'AfterSaveDraft',
+        'BeforeEditDraft',
+        'BeforeSaveDraft',
+        'OnEditDraft',
+        'OnSaveDraft',
+      ];
+
+      test.each(editSaveNames)(
+        'It should MAP : %s -> isDraft: false (mirrors the underlying decorator - registers on the ACTIVE entity)',
+        (eventDecorator) => {
+          const result = decoratorsUtil.mapPrependDraftEvent({ eventDecorator } as unknown as PrependBaseDraft);
+
+          expect(result.isDraft).toBe(false);
+        },
+      );
+
+      const nonEditSaveNames: Array<PrependBaseDraft['eventDecorator']> = [
+        'BeforeReadDraft',
+        'OnNewDraft',
+        'AfterPatchDraft',
+      ];
+
+      test.each(nonEditSaveNames)(
+        'It should NOT SET : isDraft, for %s (unaffected - still registers on <Entity>.drafts)',
+        (eventDecorator) => {
+          const result = decoratorsUtil.mapPrependDraftEvent({ eventDecorator } as unknown as PrependBaseDraft);
+
+          expect(result.isDraft).toBeUndefined();
+        },
+      );
     });
 
     describe('Bound action / function draft decorators (with actionName)', () => {
@@ -417,6 +461,40 @@ describe('DECORATORS-UTIL', () => {
     test('It should REGISTER : a PREPEND/ON/DISCARD draft handler via @PrependDraft (uses decoratorsUtil.mapPrependDraftEvent)', () => {
       const found = handlers.find(
         (item) => item.type === 'PREPEND' && item.event === 'DISCARD' && item.eventKind === 'ON',
+      );
+
+      expect(found).toBeDefined();
+      expect(found!.isDraft).toBe(true);
+    });
+  });
+
+  // ============================================================================================================
+  // Metadata level: @PrependDraft's isDraft now mirrors the target decorator (M6 fix)
+  // ============================================================================================================
+
+  describe('@PrependDraft (metadata level) - isDraft mirrors the target decorator (M6 fix)', () => {
+    class DraftPrependHandler {
+      @PrependDraft({ eventDecorator: 'BeforeEditDraft' })
+      public async prependBeforeEditDraft(req: Request): Promise<void> {}
+
+      @PrependDraft({ eventDecorator: 'BeforeReadDraft' })
+      public async prependBeforeReadDraft(req: Request): Promise<void> {}
+    }
+
+    const handlers = MetadataDispatcher.getMetadataHandlers(new DraftPrependHandler());
+
+    test("It should REGISTER : isDraft: false, for @PrependDraft({ eventDecorator: 'BeforeEditDraft' }) (EDIT dispatches on the ACTIVE entity)", () => {
+      const found = handlers.find(
+        (item) => item.type === 'PREPEND' && item.event === 'EDIT' && item.eventKind === 'BEFORE',
+      );
+
+      expect(found).toBeDefined();
+      expect(found!.isDraft).toBe(false);
+    });
+
+    test("It should REGISTER : isDraft: true, for @PrependDraft({ eventDecorator: 'BeforeReadDraft' }) (unaffected - registers on <Entity>.drafts)", () => {
+      const found = handlers.find(
+        (item) => item.type === 'PREPEND' && item.event === 'READ' && item.eventKind === 'BEFORE',
       );
 
       expect(found).toBeDefined();
