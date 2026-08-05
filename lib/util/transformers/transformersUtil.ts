@@ -4,7 +4,7 @@ import formatterUtil from '../formatter/formatterUtil';
 import type { MaskOptions } from '../../types/responseTransformers';
 
 /**
- * Utility functions for response transformation decorators (@Exclude, @Include, @Mask).
+ * Utility functions for response transformation decorators (`@Exclude`, `@Include`, `@Mask`).
  */
 const transformersUtil = {
   /**

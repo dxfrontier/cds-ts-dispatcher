@@ -15,12 +15,12 @@ import type { PickQueryPropsByKey, CustomRequest, CRUDQueryKeys, PropertyStringP
  *
  * @example
  * ```ts
- * /@OnSubscribe({ eventName: 'BookOrdered', type: 'SAME_NODE_PROCESS' })
+ * \@OnSubscribe({ eventName: 'BookOrdered', type: 'SAME_NODE_PROCESS' })
  * private async onBookOrdered(@Msg() msg: Request<{ ID: string; amount: number }>): Promise<void> { ... }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#msg | CDS-TS-Dispatcher - @Msg}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Msg
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Msg
  */
 function Msg(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -44,14 +44,14 @@ function Msg(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@AfterRead()
- * private async enrich(@Results() results: Book[], @Req() req: Request<Book>, @SingleInstanceSwitch() isSingleInstance: boolean): Promise<void> {
+ * \@AfterRead()
+ * private async enrich(@Results() results: Book[], \@Req() req: Request<Book>, \@SingleInstanceSwitch() isSingleInstance: boolean): Promise<void> {
  *   if (isSingleInstance) { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#singleinstanceswitch | CDS-TS-Dispatcher - @SingleInstanceSwitch}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § SingleInstanceSwitch
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § SingleInstanceSwitch
  */
 function SingleInstanceSwitch(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -76,15 +76,15 @@ function SingleInstanceSwitch(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ErrorHandler {
- *   /@OnError()
- *   private onError(@Error() err: Error, @Req() req: Request): void { ... }
+ *   \@OnError()
+ *   private onError(@Error() err: Error, \@Req() req: Request): void { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#error | CDS-TS-Dispatcher - @Error}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Error
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Error
  */
 function Error(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -112,14 +112,14 @@ function Error(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@OnCreate()
- * public async onCreate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
+ * \@OnCreate()
+ * public async onCreate(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<Function> {
  *   return next();
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#next | CDS-TS-Dispatcher - @Next}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Next
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Next
  */
 function Next(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -145,14 +145,14 @@ function Next(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@AfterRead()
- * private async enrich(@Results() results: Book[], @Req() req: Request): Promise<void> {
+ * \@AfterRead()
+ * private async enrich(@Results() results: Book[], \@Req() req: Request): Promise<void> {
  *   results.forEach((book) => (book.discount = '10%'));
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#results--result | CDS-TS-Dispatcher - @Results}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Results / Result
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Results / Result
  */
 function Results(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -177,14 +177,14 @@ function Results(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@AfterDelete()
- * private async logDeletion(@Result() deleted: boolean, @Req() req: Request): Promise<void> {
+ * \@AfterDelete()
+ * private async logDeletion(@Result() deleted: boolean, \@Req() req: Request): Promise<void> {
  *   if (deleted) { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#results--result | CDS-TS-Dispatcher - @Result}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Results / Result
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Results / Result
  */
 function Result(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -208,12 +208,12 @@ function Result(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@AfterRead()
- * private async enrich(@Req() req: Request<Book>, @Results() results: Book[]): Promise<void> { ... }
+ * \@AfterRead()
+ * private async enrich(@Req() req: Request<Book>, \@Results() results: Book[]): Promise<void> { ... }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#req | CDS-TS-Dispatcher - @Req}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Req
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Req
  */
 function Req(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -238,14 +238,14 @@ function Req(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@AfterRead()
- * private async addHeader(@Req() req: Request, @Res() res: RequestResponse | undefined): Promise<void> {
+ * \@AfterRead()
+ * private async addHeader(@Req() req: Request, \@Res() res: RequestResponse | undefined): Promise<void> {
  *   res?.setHeader('Accept-Language', 'de-DE');
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#res | CDS-TS-Dispatcher - @Res}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Res
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Res
  */
 function Res(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -269,12 +269,12 @@ function Res(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@BeforeCreate()
- * public async beforeCreate(@Req() req: Request<Book>, @GetQuery('INSERT', 'columns') columns: GetQueryType['columns']['forInsert']): Promise<void> { ... }
+ * \@BeforeCreate()
+ * public async beforeCreate(@Req() req: Request<Book>, \@GetQuery('INSERT', 'columns') columns: GetQueryType['columns']['forInsert']): Promise<void> { ... }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#getquery | CDS-TS-Dispatcher - @GetQuery}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § GetQuery
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § GetQuery
  */
 function GetQuery<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsByKey<Key>): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -299,12 +299,12 @@ function GetQuery<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsB
  *
  * @example
  * ```ts
- * /@AfterRead()
- * private async enrich(@Results() results: Book[], @GetRequest('locale') locale: Request['locale']): Promise<void> { ... }
+ * \@AfterRead()
+ * private async enrich(@Results() results: Book[], \@GetRequest('locale') locale: Request['locale']): Promise<void> { ... }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#getrequest | CDS-TS-Dispatcher - @GetRequest}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § GetRequest
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § GetRequest
  */
 function GetRequest(property: CustomRequest): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -329,14 +329,14 @@ function GetRequest(property: CustomRequest): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@BeforeCreate()
- * public async beforeCreate(@Req() req: Request<Book>, @IsColumnSupplied<Book>('price') priceSupplied: boolean): Promise<void> {
+ * \@BeforeCreate()
+ * public async beforeCreate(@Req() req: Request<Book>, \@IsColumnSupplied<Book>('price') priceSupplied: boolean): Promise<void> {
  *   if (priceSupplied) { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#iscolumnsupplied | CDS-TS-Dispatcher - @IsColumnSupplied}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsColumnSupplied
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsColumnSupplied
  */
 function IsColumnSupplied<Key>(field: keyof Key): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -359,14 +359,14 @@ function IsColumnSupplied<Key>(field: keyof Key): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@AfterRead()
- * private async enrich(@Results() results: Book[], @IsRole('Admin', 'Editor') isPrivileged: boolean): Promise<void> {
+ * \@AfterRead()
+ * private async enrich(@Results() results: Book[], \@IsRole('Admin', 'Editor') isPrivileged: boolean): Promise<void> {
  *   if (isPrivileged) { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#isrole | CDS-TS-Dispatcher - @IsRole}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsRole
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsRole
  */
 function IsRole(...roles: string[]): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -392,14 +392,14 @@ function IsRole(...roles: string[]): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@BeforeCreate()
- * public async beforeCreate(@Req() req: Request<Book>, @IsPresent('INSERT', 'columns') hasColumns: boolean): Promise<void> {
+ * \@BeforeCreate()
+ * public async beforeCreate(@Req() req: Request<Book>, \@IsPresent('INSERT', 'columns') hasColumns: boolean): Promise<void> {
  *   if (hasColumns) { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#ispresent | CDS-TS-Dispatcher - @IsPresent}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsPresent
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § IsPresent
  */
 function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryPropsByKey<Key>): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -425,12 +425,12 @@ function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryProps
  *
  * @example
  * ```ts
- * /@AfterRead()
- * private async enrich(@Results() results: Book[], @Jwt() token: string | undefined): Promise<void> { ... }
+ * \@AfterRead()
+ * private async enrich(@Results() results: Book[], \@Jwt() token: string | undefined): Promise<void> { ... }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#jwt | CDS-TS-Dispatcher - @Jwt}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Jwt
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Jwt
  */
 function Jwt(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -454,15 +454,15 @@ function Jwt(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@BeforeCreate()
- * /@Validate<Book>({ action: 'isLowercase', exposeValidatorResult: true }, 'title')
- * public async beforeCreate(@Req() req: Request<Book>, @ValidationResults() validator: ValidatorFlags<'isLowercase'> | undefined): Promise<void> {
+ * \@BeforeCreate()
+ * \@Validate<Book>({ action: 'isLowercase', exposeValidatorResult: true }, 'title')
+ * public async beforeCreate(@Req() req: Request<Book>, \@ValidationResults() validator: ValidatorFlags<'isLowercase'> | undefined): Promise<void> {
  *   if (validator?.isLowercase) { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#validationresults | CDS-TS-Dispatcher - @ValidationResults}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ValidationResults
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ValidationResults
  */
 function ValidationResults(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -483,14 +483,14 @@ function ValidationResults(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@BeforeCreate()
- * public async beforeCreate(@Req() req: Request<Book>, @Locale() locale: string): Promise<void> {
+ * \@BeforeCreate()
+ * public async beforeCreate(@Req() req: Request<Book>, \@Locale() locale: string): Promise<void> {
  *   if (locale === 'en-US') { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#locale | CDS-TS-Dispatcher - @Locale}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Locale
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Locale
  */
 function Locale(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -518,14 +518,14 @@ function Locale(): ParameterDecorator {
  * ```ts
  * import type { CDS_ENV } from '#dispatcher';
  *
- * /@BeforeCreate()
- * public async beforeCreate(@Req() req: Request<Book>, @Env<CDS_ENV>('requires.db.kind') dbKind: string): Promise<void> {
+ * \@BeforeCreate()
+ * public async beforeCreate(@Req() req: Request<Book>, \@Env<CDS_ENV>('requires.db.kind') dbKind: string): Promise<void> {
  *   if (dbKind === 'sqlite') { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#env | CDS-TS-Dispatcher - @Env}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Env
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Env
  */
 
 function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
@@ -552,8 +552,8 @@ function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@OnBoundFunction(Book.actions.someFunction)
- * public async someBoundFunction(@Req() req: Request, @Subject() subject: ref | undefined): Promise<void> {
+ * \@OnBoundFunction(Book.actions.someFunction)
+ * public async someBoundFunction(@Req() req: Request, \@Subject() subject: ref | undefined): Promise<void> {
  *   if (subject) {
  *     const instance = await SELECT.one.from(subject);
  *   }
@@ -561,7 +561,7 @@ function Env<T>(env: PropertyStringPath<T>): ParameterDecorator {
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#subject | CDS-TS-Dispatcher - @Subject}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Subject
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Subject
  */
 function Subject(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -585,14 +585,14 @@ function Subject(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@AfterDelete()
- * public async afterDelete(@Req() req: Request<Book>, @Affected() affected: number | undefined): Promise<void> {
+ * \@AfterDelete()
+ * public async afterDelete(@Req() req: Request<Book>, \@Affected() affected: number | undefined): Promise<void> {
  *   req.notify(`Deleted ${affected} row(s)`);
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#affected | CDS-TS-Dispatcher - @Affected}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Affected
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Affected
  */
 function Affected(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -614,14 +614,14 @@ function Affected(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@OnCreate()
+ * \@OnCreate()
  * public async onCreate(@Data() data: Book): Promise<Book> {
  *   return data;
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#data | CDS-TS-Dispatcher - @Data}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Data
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Data
  */
 function Data(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -644,12 +644,12 @@ function Data(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@OnCreate()
- * public async onCreate(@Param<Book>('title') title: string, @Param<Book>('stock') stock: number): Promise<void> { ... }
+ * \@OnCreate()
+ * public async onCreate(@Param<Book>('title') title: string, \@Param<Book>('stock') stock: number): Promise<void> { ... }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#param | CDS-TS-Dispatcher - @Param}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Param
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Param
  */
 function Param<T = Record<string, any>>(field: Extract<keyof T, string>): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -671,14 +671,14 @@ function Param<T = Record<string, any>>(field: Extract<keyof T, string>): Parame
  *
  * @example
  * ```ts
- * /@OnUpdate()
+ * \@OnUpdate()
  * public async onUpdate(@UserInfo() user: User): Promise<void> {
  *   if (user.is('Manager')) { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#userinfo | CDS-TS-Dispatcher - @UserInfo}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § UserInfo
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § UserInfo
  */
 function UserInfo(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -700,12 +700,12 @@ function UserInfo(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@OnRead()
+ * \@OnRead()
  * public async onRead(@Tenant() tenant: string | undefined): Promise<void> { ... }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#tenant | CDS-TS-Dispatcher - @Tenant}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Tenant
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Tenant
  */
 function Tenant(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {
@@ -733,12 +733,12 @@ function Tenant(): ParameterDecorator {
  *
  * @example
  * ```ts
- * /@BeforeUpdate()
- * public async beforeUpdate(@Req() req: Request<Book>, @Diff() diff: Book): Promise<void> { ... }
+ * \@BeforeUpdate()
+ * public async beforeUpdate(@Req() req: Request<Book>, \@Diff() diff: Book): Promise<void> { ... }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#diff | CDS-TS-Dispatcher - @Diff}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Diff
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Diff
  */
 function Diff(): ParameterDecorator {
   return function (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) {

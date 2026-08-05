@@ -71,14 +71,16 @@ type MessagingTypes = {
      * Use when both `emitter` and `receiver` run in the same `CAP server instance` & `same service`.
      *
      * @example
+     * ```ts
      * // Emitting event
      * this.emit('NameOfTheEvent', { ID: '123', amount: 99.99 }); // where this is the service
      *
      * // Subscribing to event
-     * /@OnSubscribe({
+     * \@OnSubscribe({
      *  eventName: 'NameOfTheEvent',
      *  type: 'SAME_NODE_PROCESS',
      * })
+     * ```
      *
      * */
     type: 'SAME_NODE_PROCESS';
@@ -88,17 +90,19 @@ type MessagingTypes = {
      * Use when `emitter` can be found in E.g. `Service A` and `receiver` can reside in E.g. `Service B`, having same `CAP server instance` & `different services`.
      *
      * @example
+     * ```ts
      * // Emitting event from `Service A`
      * const service = cds.connect.to('Service_A');
      *       service.emit('NameOfTheEvent', { ID: '123', amount: 99.99 });
      * // or use this.emit ... assuming `this` is the service `Service_A`
      *
      * // Subscribing to event from `Service B`
-     * /@OnSubscribe({
+     * \@OnSubscribe({
      *  eventName: 'NameOfTheEvent',
      *  type: 'SAME_NODE_PROCESS_DIFFERENT_SERVICE',
      *  externalService: 'Service_A'
      * })
+     * ```
      * */
     type: 'SAME_NODE_PROCESS_DIFFERENT_SERVICE';
   };
@@ -107,15 +111,17 @@ type MessagingTypes = {
      * Recommended for production with external message brokers
      *
      * @example
+     * ```ts
      * // Emitting event
      * const msg = await cds.connect.to('messaging');
      *       msg.emit('NameOfTheEvent', { foo: 11, bar: '22' });
      *
      * // Subscribing to event
-     * /@OnSubscribe({
+     * \@OnSubscribe({
      *  eventName: 'NameOfTheEvent',
      *  type: 'MESSAGE_BROKER',
      * })
+     * ```
      * */
     type: 'MESSAGE_BROKER';
   };
@@ -143,8 +149,11 @@ export type EventMessagingOptions = {
   /**
    * When enabled, displays inbound message payloads in the specified format.
    *
-   * @example // With showReceiverMessage: true
+   * @example
+   * ```
+   * // With showReceiverMessage: true
    * > received: EventName { ID: '123', amount: 99.99 }
+   * ```
    *
    * @default false
    */
@@ -157,12 +166,14 @@ export type EventMessagingOptions = {
    * - `'debug'`: Displays data using  `console.debug()`, ideal for nested or dynamic messages.
    *
    * @example
+   * ```
    * // With consoleStyle: 'table'
    * ┌─────────┬──────┬────────┐
    * │ (index) │  ID  │ amount │
    * ├─────────┼──────┼────────┤
    * │    0    │ '123'│ 99.99  │
    * └─────────┴──────┴────────┘
+   * ```
    *
    * @default 'debug'
    */

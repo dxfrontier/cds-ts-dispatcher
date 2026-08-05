@@ -61,18 +61,18 @@ import type { LogExecutionOptions, MaskOptions } from '../types/responseTransfor
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterRead()
- *   /@CatchAndSetErrorCode('BAD_REQUEST-400')
- *   private async afterRead(@Req() req: Request, @Results() results: Book[]): Promise<void> {
+ *   \@AfterRead()
+ *   \@CatchAndSetErrorCode('BAD_REQUEST-400')
+ *   private async afterRead(@Req() req: Request, \@Results() results: Book[]): Promise<void> {
  *     await axios.get('https://example.invalid'); // any thrown/rejected error becomes HTTP 400
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#catchandseterrorcode | CDS-TS-Dispatcher - @CatchAndSetErrorCode}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § CatchAndSetErrorCode
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § CatchAndSetErrorCode
  */
 function CatchAndSetErrorCode(newStatusCode: keyof StatusCodeMapping) {
   return function (_: object, __: string, descriptor: PropertyDescriptor) {
@@ -108,11 +108,11 @@ function CatchAndSetErrorCode(newStatusCode: keyof StatusCodeMapping) {
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnUpdate()
- *   /@CatchAndSetErrorMessage('User data could not be retrieved', 'NOT_FOUND-404')
- *   private async onUpdate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
+ *   \@OnUpdate()
+ *   \@CatchAndSetErrorMessage('User data could not be retrieved', 'NOT_FOUND-404')
+ *   private async onUpdate(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<Function> {
  *     await axios.get(`https://example.invalid/users/${req.data.ID}`); // any error becomes 404 with this message
  *     return next();
  *   }
@@ -120,7 +120,7 @@ function CatchAndSetErrorCode(newStatusCode: keyof StatusCodeMapping) {
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#catchandseterrormessage | CDS-TS-Dispatcher - @CatchAndSetErrorMessage}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § CatchAndSetErrorMessage
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § CatchAndSetErrorMessage
  */
 function CatchAndSetErrorMessage(newMessage: string, newStatusCode?: keyof StatusCodeMapping) {
   return function (_: object, __: string, descriptor: PropertyDescriptor) {
@@ -159,14 +159,14 @@ function CatchAndSetErrorMessage(newMessage: string, newStatusCode?: keyof Statu
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@PrependDraft({ eventDecorator: 'BeforeReadDraft' })
+ *   \@PrependDraft({ eventDecorator: 'BeforeReadDraft' })
  *   private async prepend(@Req() req: Request<Book>): Promise<void> {
- *     req.locale = 'de-DE'; // runs before every @BeforeReadDraft handler
+ *     req.locale = 'de-DE'; // runs before every \@BeforeReadDraft handler
  *   }
  *
- *   /@BeforeReadDraft()
+ *   \@BeforeReadDraft()
  *   private async beforeReadDraft(@Req() req: Request<Book>): Promise<void> {
  *     // ... req.locale is already 'de-DE' here
  *   }
@@ -174,7 +174,7 @@ function CatchAndSetErrorMessage(newMessage: string, newStatusCode?: keyof Statu
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#prepend | CDS-TS-Dispatcher - @PrependDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Prepend
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Prepend
  */
 function PrependDraft(options: PrependBaseDraft) {
   return function (target: object, propertyName: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -226,22 +226,22 @@ function PrependDraft(options: PrependBaseDraft) {
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@Prepend({ eventDecorator: 'AfterRead' })
+ *   \@Prepend({ eventDecorator: 'AfterRead' })
  *   private async prepend(@Req() req: Request<Book>): Promise<void> {
- *     req.locale = 'de-DE'; // runs before every @AfterRead handler
+ *     req.locale = 'de-DE'; // runs before every \@AfterRead handler
  *   }
  *
- *   /@AfterRead()
- *   private async afterRead(@Results() results: Book[], @Req() req: Request<Book>): Promise<void> {
+ *   \@AfterRead()
+ *   private async afterRead(@Results() results: Book[], \@Req() req: Request<Book>): Promise<void> {
  *     // ... req.locale is already 'de-DE' here
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#prepend | CDS-TS-Dispatcher - @Prepend}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Prepend
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Prepend
  */
 function Prepend(options: PrependBase) {
   return function (target: object, propertyName: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -289,18 +289,18 @@ function Prepend(options: PrependBase) {
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterRead()
- *   /@ExecutionAllowedForRole('Manager', 'CEO')
- *   private async afterRead(@Req() req: Request, @Results() results: Book[]): Promise<void> {
+ *   \@AfterRead()
+ *   \@ExecutionAllowedForRole('Manager', 'CEO')
+ *   private async afterRead(@Req() req: Request, \@Results() results: Book[]): Promise<void> {
  *     // ... only runs for a Manager or CEO
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#executionallowedforrole | CDS-TS-Dispatcher - @ExecutionAllowedForRole}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ExecutionAllowedForRole
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ExecutionAllowedForRole
  */
 
 function ExecutionAllowedForRole(...roles: string[]) {
@@ -337,10 +337,10 @@ function ExecutionAllowedForRole(...roles: string[]) {
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ReportHandler {
- *   /@OnAction(GenerateReport)
- *   /@Throttle({ limit: 10, window: 60_000 }) // 10 calls per minute, per user
+ *   \@OnAction(GenerateReport)
+ *   \@Throttle({ limit: 10, window: 60_000 }) // 10 calls per minute, per user
  *   public async generate(@Req() req: ActionRequest<typeof GenerateReport>): ActionReturn<typeof GenerateReport> {
  *     // ...
  *   }
@@ -348,7 +348,7 @@ function ExecutionAllowedForRole(...roles: string[]) {
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#throttle | CDS-TS-Dispatcher - @Throttle}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Throttle
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Throttle
  */
 function Throttle(options: ThrottleOptions) {
   if (!Number.isFinite(options.limit) || options.limit < 1) {
@@ -428,18 +428,18 @@ function Throttle(options: ThrottleOptions) {
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterRead()
- *   /@FieldsFormatter<Book>({ action: 'blacklist', charsToRemove: 'W' }, 'title')
- *   private async afterRead(@Results() results: Book[], @Req() req: Request<Book>): Promise<void> {
+ *   \@AfterRead()
+ *   \@FieldsFormatter<Book>({ action: 'blacklist', charsToRemove: 'W' }, 'title')
+ *   private async afterRead(@Results() results: Book[], \@Req() req: Request<Book>): Promise<void> {
  *     // ... 'title' has every 'W' removed
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#fieldsformatter | CDS-TS-Dispatcher - @FieldsFormatter}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § FieldsFormatter
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § FieldsFormatter
  */
 function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -491,10 +491,10 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeCreate()
- *   /@Validate<Book>({ action: 'isLowercase' }, 'comment')
+ *   \@BeforeCreate()
+ *   \@Validate<Book>({ action: 'isLowercase' }, 'comment')
  *   private async beforeCreate(@Req() req: Request<Book>): Promise<void> {
  *     // ... only reached if 'comment' is already lowercase
  *   }
@@ -502,7 +502,7 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#validate | CDS-TS-Dispatcher - @Validate}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Validate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Validate
  */
 
 function Validate<T>(validator: Validators, ...fields: (keyof T)[]) {
@@ -553,18 +553,18 @@ function Validate<T>(validator: Validators, ...fields: (keyof T)[]) {
  *
  * @example
  * ```ts
- * /@EntityHandler(User)
+ * \@EntityHandler(User)
  * class UserHandler {
- *   /@AfterRead()
- *   /@Exclude<User>('password', 'ssn')
- *   private async afterRead(@Results() results: User[], @Req() req: Request<User>): Promise<void> {
+ *   \@AfterRead()
+ *   \@Exclude<User>('password', 'ssn')
+ *   private async afterRead(@Results() results: User[], \@Req() req: Request<User>): Promise<void> {
  *     // ... the response omits 'password' and 'ssn'
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#exclude | CDS-TS-Dispatcher - @Exclude}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Exclude
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Exclude
  */
 function Exclude<T>(...fields: (keyof T)[]) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -597,18 +597,18 @@ function Exclude<T>(...fields: (keyof T)[]) {
  *
  * @example
  * ```ts
- * /@EntityHandler(User)
+ * \@EntityHandler(User)
  * class UserHandler {
- *   /@AfterRead()
- *   /@Include<User>('ID', 'name', 'email')
- *   private async afterRead(@Results() results: User[], @Req() req: Request<User>): Promise<void> {
+ *   \@AfterRead()
+ *   \@Include<User>('ID', 'name', 'email')
+ *   private async afterRead(@Results() results: User[], \@Req() req: Request<User>): Promise<void> {
  *     // ... the response contains only 'ID', 'name', 'email'
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#include | CDS-TS-Dispatcher - @Include}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Include
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Include
  */
 function Include<T>(...fields: (keyof T)[]) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -642,18 +642,18 @@ function Include<T>(...fields: (keyof T)[]) {
  *
  * @example
  * ```ts
- * /@EntityHandler(User)
+ * \@EntityHandler(User)
  * class UserHandler {
- *   /@AfterRead()
- *   /@Mask<User>(['creditCard'], { char: 'X', visibleStart: 2, visibleEnd: 4 })
- *   private async afterRead(@Results() results: User[], @Req() req: Request<User>): Promise<void> {
+ *   \@AfterRead()
+ *   \@Mask<User>(['creditCard'], { char: 'X', visibleStart: 2, visibleEnd: 4 })
+ *   private async afterRead(@Results() results: User[], \@Req() req: Request<User>): Promise<void> {
  *     // ... 'creditCard' keeps its first 2 and last 4 characters visible
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#mask | CDS-TS-Dispatcher - @Mask}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Mask
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Mask
  */
 function Mask<T>(fields: (keyof T)[], options?: MaskOptions) {
   return function <Target>(_: Target, __: string | symbol, descriptor: TypedPropertyDescriptor<RequestType>) {
@@ -686,18 +686,18 @@ function Mask<T>(fields: (keyof T)[], options?: MaskOptions) {
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterRead()
- *   /@LogExecution({ logDuration: true })
- *   private async afterRead(@Results() results: Book[], @Req() req: Request<Book>): Promise<void> {
+ *   \@AfterRead()
+ *   \@LogExecution({ logDuration: true })
+ *   private async afterRead(@Results() results: Book[], \@Req() req: Request<Book>): Promise<void> {
  *     // ... logs '[LOG] BookHandler.afterRead - Duration: <n>ms'
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#logexecution | CDS-TS-Dispatcher - @LogExecution}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § LogExecution
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § LogExecution
  */
 function LogExecution(options?: LogExecutionOptions) {
   return function <Target>(
@@ -754,11 +754,11 @@ function LogExecution(options?: LogExecutionOptions) {
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterRead()
- *   /@SingleInstanceCapable()
- *   private async afterRead(@Results() results: Book[], @Req() req: Request, isSingleInstance: boolean): Promise<void> {
+ *   \@AfterRead()
+ *   \@SingleInstanceCapable()
+ *   private async afterRead(@Results() results: Book[], \@Req() req: Request, isSingleInstance: boolean): Promise<void> {
  *     if (isSingleInstance) {
  *       // ...
  *     }
@@ -767,7 +767,7 @@ function LogExecution(options?: LogExecutionOptions) {
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#singleinstanceswitch | CDS-TS-Dispatcher - @SingleInstanceSwitch}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § SingleInstanceSwitch
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § SingleInstanceSwitch
  */
 
 function SingleInstanceCapable<Target extends object>() {
@@ -822,19 +822,19 @@ function SingleInstanceCapable<Target extends object>() {
  *   }
  * }
  *
- * /@EntityHandler(Book)
- * /@Use(LocaleMiddleware) // class-level: runs before every handler of BookHandler
+ * \@EntityHandler(Book)
+ * \@Use(LocaleMiddleware) // class-level: runs before every handler of BookHandler
  * class BookHandler {
- *   /@AfterRead()
- *   /@Use(LocaleMiddleware) // method-level: runs before only this handler
- *   private async afterRead(@Results() results: Book[], @Req() req: Request<Book>): Promise<void> {
+ *   \@AfterRead()
+ *   \@Use(LocaleMiddleware) // method-level: runs before only this handler
+ *   private async afterRead(@Results() results: Book[], \@Req() req: Request<Book>): Promise<void> {
  *     // ...
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#use | CDS-TS-Dispatcher - @Use}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Use (class-level and method-level sections)
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Use (class-level and method-level sections)
  */
 function Use<Middleware extends Constructable<MiddlewareImpl>>(...MiddlewareClasses: Middleware[]) {
   return function <Target extends object>(
@@ -1238,9 +1238,9 @@ function buildOnCRUD<Target extends object>(options: {
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeAll()
+ *   \@BeforeAll()
  *   private async beforeAny(@Req() req: Request<Book>): Promise<void> {
  *     // ... runs ahead of every CREATE/READ/UPDATE/DELETE on Book
  *   }
@@ -1248,7 +1248,7 @@ function buildOnCRUD<Target extends object>(options: {
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeall | CDS-TS-Dispatcher - @BeforeAll}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeAll
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeAll
  */
 const BeforeAll = buildBefore({ event: '*', eventKind: 'BEFORE', isDraft: false });
 
@@ -1269,9 +1269,9 @@ const BeforeAll = buildBefore({ event: '*', eventKind: 'BEFORE', isDraft: false 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeAllDraft()
+ *   \@BeforeAllDraft()
  *   private async beforeAnyDraft(@Req() req: Request<Book>): Promise<void> {
  *     // ... runs ahead of every NEW/CANCEL/PATCH/DISCARD on Book.drafts
  *   }
@@ -1279,7 +1279,7 @@ const BeforeAll = buildBefore({ event: '*', eventKind: 'BEFORE', isDraft: false 
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeall | CDS-TS-Dispatcher - @BeforeAllDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeAll
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeAll
  */
 const BeforeAllDraft = buildBefore({ event: '*', eventKind: 'BEFORE', isDraft: true });
 
@@ -1295,9 +1295,9 @@ const BeforeAllDraft = buildBefore({ event: '*', eventKind: 'BEFORE', isDraft: t
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeCreate()
+ *   \@BeforeCreate()
  *   private async beforeCreate(@Req() req: Request<Book>): Promise<void> {
  *     if (!req.data.title) req.reject(400, 'title is required');
  *   }
@@ -1305,7 +1305,7 @@ const BeforeAllDraft = buildBefore({ event: '*', eventKind: 'BEFORE', isDraft: t
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforecreate | CDS-TS-Dispatcher - @BeforeCreate}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeCreate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeCreate
  */
 const BeforeCreate = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', isDraft: false });
 
@@ -1326,9 +1326,9 @@ const BeforeCreate = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', isDraft
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeCreateDraft()
+ *   \@BeforeCreateDraft()
  *   private async beforeCreateDraft(@Req() req: Request<Book>): Promise<void> {
  *     // ... runs for programmatic INSERTs into Book.drafts AND the nested CREATE inside every Fiori "New"
  *   }
@@ -1336,7 +1336,7 @@ const BeforeCreate = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', isDraft
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeCreateDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
  */
 const BeforeCreateDraft = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', isDraft: true });
 
@@ -1351,9 +1351,9 @@ const BeforeCreateDraft = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', is
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeRead()
+ *   \@BeforeRead()
  *   private async beforeRead(@Req() req: Request<Book>): Promise<void> {
  *     // ... e.g. inspect/adjust req.query before it runs
  *   }
@@ -1361,7 +1361,7 @@ const BeforeCreateDraft = buildBefore({ event: 'CREATE', eventKind: 'BEFORE', is
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeread | CDS-TS-Dispatcher - @BeforeRead}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeRead
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeRead
  */
 const BeforeRead = buildBefore({ event: 'READ', eventKind: 'BEFORE', isDraft: false });
 
@@ -1375,15 +1375,15 @@ const BeforeRead = buildBefore({ event: 'READ', eventKind: 'BEFORE', isDraft: fa
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeReadDraft()
+ *   \@BeforeReadDraft()
  *   private async beforeReadDraft(@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeReadDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
  */
 const BeforeReadDraft = buildBefore({ event: 'READ', eventKind: 'BEFORE', isDraft: true });
 
@@ -1399,15 +1399,15 @@ const BeforeReadDraft = buildBefore({ event: 'READ', eventKind: 'BEFORE', isDraf
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeUpdate()
- *   private async beforeUpdate(@Req() req: Request<Book>, @Diff() diff: Book): Promise<void> { ... }
+ *   \@BeforeUpdate()
+ *   private async beforeUpdate(@Req() req: Request<Book>, \@Diff() diff: Book): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeupdate | CDS-TS-Dispatcher - @BeforeUpdate}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeUpdate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeUpdate
  */
 const BeforeUpdate = buildBefore({ event: 'UPDATE', eventKind: 'BEFORE', isDraft: false });
 
@@ -1425,15 +1425,15 @@ const BeforeUpdate = buildBefore({ event: 'UPDATE', eventKind: 'BEFORE', isDraft
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeUpdateDraft()
+ *   \@BeforeUpdateDraft()
  *   private async beforeUpdateDraft(@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeUpdateDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
  */
 const BeforeUpdateDraft = buildBefore({ event: 'UPDATE', eventKind: 'BEFORE', isDraft: true });
 
@@ -1448,15 +1448,15 @@ const BeforeUpdateDraft = buildBefore({ event: 'UPDATE', eventKind: 'BEFORE', is
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeDelete()
+ *   \@BeforeDelete()
  *   private async beforeDelete(@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforedelete | CDS-TS-Dispatcher - @BeforeDelete}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeDelete
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeDelete
  */
 const BeforeDelete = buildBefore({ event: 'DELETE', eventKind: 'BEFORE', isDraft: false });
 
@@ -1475,15 +1475,15 @@ const BeforeDelete = buildBefore({ event: 'DELETE', eventKind: 'BEFORE', isDraft
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeDeleteDraft()
+ *   \@BeforeDeleteDraft()
  *   private async beforeDeleteDraft(@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher?tab=readme-ov-file#before | CDS-TS-Dispatcher - @BeforeDeleteDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Before
  */
 const BeforeDeleteDraft = buildBefore({ event: 'DELETE', eventKind: 'BEFORE', isDraft: true });
 
@@ -1498,9 +1498,9 @@ const BeforeDeleteDraft = buildBefore({ event: 'DELETE', eventKind: 'BEFORE', is
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ActionsHandler {
- *   /@BeforeAction(SubmitOrder)
+ *   \@BeforeAction(SubmitOrder)
  *   private async beforeSubmitOrder(@Req() req: ActionRequest<typeof SubmitOrder>): Promise<void> {
  *     if (!req.data.orderId) req.reject(400, 'orderId is required');
  *   }
@@ -1508,7 +1508,7 @@ const BeforeDeleteDraft = buildBefore({ event: 'DELETE', eventKind: 'BEFORE', is
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeaction | CDS-TS-Dispatcher - @BeforeAction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeAction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeAction
  */
 const BeforeAction = buildAction({ event: 'ACTION', eventKind: 'BEFORE', isDraft: false });
 
@@ -1523,9 +1523,9 @@ const BeforeAction = buildAction({ event: 'ACTION', eventKind: 'BEFORE', isDraft
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeBoundAction(Book.actions.approve)
+ *   \@BeforeBoundAction(Book.actions.approve)
  *   private async beforeApprove(@Req() req: ActionRequest<typeof Book.actions.approve>): Promise<void> {
  *     // ... validate before the bound action runs
  *   }
@@ -1533,7 +1533,7 @@ const BeforeAction = buildAction({ event: 'ACTION', eventKind: 'BEFORE', isDraft
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeboundaction | CDS-TS-Dispatcher - @BeforeBoundAction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundAction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundAction
  */
 const BeforeBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'BEFORE', isDraft: false });
 
@@ -1547,15 +1547,15 @@ const BeforeBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'BEFOR
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ActionsHandler {
- *   /@BeforeFunction(GetTopSellers)
+ *   \@BeforeFunction(GetTopSellers)
  *   private async beforeGetTopSellers(@Req() req: ActionRequest<typeof GetTopSellers>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforefunction | CDS-TS-Dispatcher - @BeforeFunction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeFunction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeFunction
  */
 const BeforeFunction = buildAction({ event: 'FUNC', eventKind: 'BEFORE', isDraft: false });
 
@@ -1570,15 +1570,15 @@ const BeforeFunction = buildAction({ event: 'FUNC', eventKind: 'BEFORE', isDraft
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeBoundFunction(Book.actions.someFunction)
+ *   \@BeforeBoundFunction(Book.actions.someFunction)
  *   private async beforeSomeFunction(@Req() req: ActionRequest<typeof Book.actions.someFunction>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeboundfunction | CDS-TS-Dispatcher - @BeforeBoundFunction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundFunction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundFunction
  */
 const BeforeBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'BEFORE', isDraft: false });
 
@@ -1615,10 +1615,10 @@ const BeforeBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'BEFOR
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterAll()
- *   private async afterAny(@Result() result: Book | Book[] | boolean, @Req() req: Request<Book>): Promise<void> {
+ *   \@AfterAll()
+ *   private async afterAny(@Result() result: Book | Book[] | boolean, \@Req() req: Request<Book>): Promise<void> {
  *     if (Array.isArray(result)) {
  *       // READ — entity set AND single reads (CAP array-wraps single READ results)
  *     } else if (typeof result === 'boolean') {
@@ -1631,7 +1631,7 @@ const BeforeBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'BEFOR
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterall | CDS-TS-Dispatcher - @AfterAll}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterAll
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterAll
  */
 const AfterAll = buildAfter({ event: '*', eventKind: 'AFTER', isDraft: false });
 
@@ -1652,15 +1652,15 @@ const AfterAll = buildAfter({ event: '*', eventKind: 'AFTER', isDraft: false });
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterAllDraft()
- *   private async afterAnyDraft(@Result() result: unknown, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterAllDraft()
+ *   private async afterAnyDraft(@Result() result: unknown, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterall | CDS-TS-Dispatcher - @AfterAllDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterAll
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterAll
  */
 const AfterAllDraft = buildAfter({ event: '*', eventKind: 'AFTER', isDraft: true });
 
@@ -1676,15 +1676,15 @@ const AfterAllDraft = buildAfter({ event: '*', eventKind: 'AFTER', isDraft: true
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterCreate()
- *   private async afterCreate(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterCreate()
+ *   private async afterCreate(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreate | CDS-TS-Dispatcher - @AfterCreate}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCreate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCreate
  */
 const AfterCreate = buildAfter({ event: 'CREATE', eventKind: 'AFTER', isDraft: false });
 
@@ -1705,15 +1705,15 @@ const AfterCreate = buildAfter({ event: 'CREATE', eventKind: 'AFTER', isDraft: f
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterCreateDraft()
- *   private async afterCreateDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterCreateDraft()
+ *   private async afterCreateDraft(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercreate | CDS-TS-Dispatcher - @AfterCreateDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCreate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCreate
  */
 const AfterCreateDraft = buildAfter({ event: 'CREATE', eventKind: 'AFTER', isDraft: true });
 
@@ -1727,17 +1727,17 @@ const AfterCreateDraft = buildAfter({ event: 'CREATE', eventKind: 'AFTER', isDra
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterRead()
- *   private async enrich(@Results() results: Book[], @Req() req: Request): Promise<void> {
+ *   \@AfterRead()
+ *   private async enrich(@Results() results: Book[], \@Req() req: Request): Promise<void> {
  *     results.forEach((book) => (book.discount = '10%'));
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterread | CDS-TS-Dispatcher - @AfterRead}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRead
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRead
  */
 const AfterRead = buildAfter({ event: 'READ', eventKind: 'AFTER', isDraft: false });
 
@@ -1753,15 +1753,15 @@ const AfterRead = buildAfter({ event: 'READ', eventKind: 'AFTER', isDraft: false
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterReadDraft()
- *   private async afterReadDraft(@Results() results: Book[], @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterReadDraft()
+ *   private async afterReadDraft(@Results() results: Book[], \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterread | CDS-TS-Dispatcher - @AfterReadDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRead
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRead
  */
 const AfterReadDraft = buildAfter({ event: 'READ', eventKind: 'AFTER', isDraft: true });
 
@@ -1781,17 +1781,17 @@ const AfterReadDraft = buildAfter({ event: 'READ', eventKind: 'AFTER', isDraft: 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterReadEachInstance()
- *   private async afterEach(@Result() result: Book, @Req() req: Request<Book>): Promise<void> {
+ *   \@AfterReadEachInstance()
+ *   private async afterEach(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> {
  *     result.discount = '10%';
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadeachinstance | CDS-TS-Dispatcher - @AfterReadEachInstance}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadEachInstance
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadEachInstance
  */
 const AfterReadEachInstance = buildAfter({ event: 'each', eventKind: 'AFTER', isDraft: false });
 
@@ -1806,15 +1806,15 @@ const AfterReadEachInstance = buildAfter({ event: 'each', eventKind: 'AFTER', is
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterReadDraftEachInstance()
- *   private async afterEachDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterReadDraftEachInstance()
+ *   private async afterEachDraft(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadeachinstance | CDS-TS-Dispatcher - @AfterReadDraftEachInstance}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadEachInstance
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadEachInstance
  */
 const AfterReadDraftEachInstance = buildAfter({ event: 'each', eventKind: 'AFTER', isDraft: true });
 
@@ -1835,17 +1835,17 @@ const AfterReadDraftEachInstance = buildAfter({ event: 'each', eventKind: 'AFTER
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterReadSingleInstance()
- *   private async afterReadOne(@Result() result: Book, @Req() req: Request<Book>): Promise<void> {
+ *   \@AfterReadSingleInstance()
+ *   private async afterReadOne(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> {
  *     // ... only for GET .../Book(ID=...)
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadsingleinstance | CDS-TS-Dispatcher - @AfterReadSingleInstance}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadSingleInstance
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadSingleInstance
  */
 const AfterReadSingleInstance = buildAfter({
   event: 'READ',
@@ -1865,15 +1865,15 @@ const AfterReadSingleInstance = buildAfter({
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterReadDraftSingleInstance()
- *   private async afterReadOneDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterReadDraftSingleInstance()
+ *   private async afterReadOneDraft(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterreadsingleinstance | CDS-TS-Dispatcher - @AfterReadDraftSingleInstance}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadSingleInstance
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterReadSingleInstance
  */
 const AfterReadDraftSingleInstance = buildAfter({
   event: 'READ',
@@ -1896,15 +1896,15 @@ const AfterReadDraftSingleInstance = buildAfter({
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterUpdate()
- *   private async afterUpdate(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterUpdate()
+ *   private async afterUpdate(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterupdate | CDS-TS-Dispatcher - @AfterUpdate}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterUpdate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterUpdate
  */
 const AfterUpdate = buildAfter({ event: 'UPDATE', eventKind: 'AFTER', isDraft: false });
 
@@ -1922,15 +1922,15 @@ const AfterUpdate = buildAfter({ event: 'UPDATE', eventKind: 'AFTER', isDraft: f
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterUpdateDraft()
- *   private async afterUpdateDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterUpdateDraft()
+ *   private async afterUpdateDraft(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterupdate | CDS-TS-Dispatcher - @AfterUpdateDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterUpdate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterUpdate
  */
 const AfterUpdateDraft = buildAfter({ event: 'UPDATE', eventKind: 'AFTER', isDraft: true });
 
@@ -1947,15 +1947,15 @@ const AfterUpdateDraft = buildAfter({ event: 'UPDATE', eventKind: 'AFTER', isDra
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterDelete()
- *   private async afterDelete(@Result() deleted: boolean, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterDelete()
+ *   private async afterDelete(@Result() deleted: boolean, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterdelete | CDS-TS-Dispatcher - @AfterDelete}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterDelete
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterDelete
  */
 const AfterDelete = buildAfter({ event: 'DELETE', eventKind: 'AFTER', isDraft: false });
 
@@ -1974,15 +1974,15 @@ const AfterDelete = buildAfter({ event: 'DELETE', eventKind: 'AFTER', isDraft: f
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterDeleteDraft()
- *   private async afterDeleteDraft(@Result() deleted: boolean, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterDeleteDraft()
+ *   private async afterDeleteDraft(@Result() deleted: boolean, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterdelete | CDS-TS-Dispatcher - @AfterDeleteDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterDelete
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterDelete
  */
 const AfterDeleteDraft = buildAfter({ event: 'DELETE', eventKind: 'AFTER', isDraft: true });
 
@@ -2000,17 +2000,17 @@ const AfterDeleteDraft = buildAfter({ event: 'DELETE', eventKind: 'AFTER', isDra
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ActionsHandler {
- *   /@AfterAction(SubmitOrder)
- *   private async afterSubmitOrder(@Result() result: unknown, @Req() req: ActionRequest<typeof SubmitOrder>): Promise<void> {
+ *   \@AfterAction(SubmitOrder)
+ *   private async afterSubmitOrder(@Result() result: unknown, \@Req() req: ActionRequest<typeof SubmitOrder>): Promise<void> {
  *     // ... e.g. audit logging
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afteraction | CDS-TS-Dispatcher - @AfterAction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterAction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterAction
  */
 const AfterAction = buildAction({ event: 'ACTION', eventKind: 'AFTER', isDraft: false });
 
@@ -2029,15 +2029,15 @@ const AfterAction = buildAction({ event: 'ACTION', eventKind: 'AFTER', isDraft: 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterBoundAction(Book.actions.approve)
- *   private async afterApprove(@Result() result: unknown, @Req() req: ActionRequest<typeof Book.actions.approve>): Promise<void> { ... }
+ *   \@AfterBoundAction(Book.actions.approve)
+ *   private async afterApprove(@Result() result: unknown, \@Req() req: ActionRequest<typeof Book.actions.approve>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeboundaction | CDS-TS-Dispatcher - @AfterBoundAction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundAction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundAction
  */
 const AfterBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'AFTER', isDraft: false });
 
@@ -2055,15 +2055,15 @@ const AfterBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'AFTER'
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ActionsHandler {
- *   /@AfterFunction(GetTopSellers)
- *   private async afterGetTopSellers(@Result() result: unknown, @Req() req: ActionRequest<typeof GetTopSellers>): Promise<void> { ... }
+ *   \@AfterFunction(GetTopSellers)
+ *   private async afterGetTopSellers(@Result() result: unknown, \@Req() req: ActionRequest<typeof GetTopSellers>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforefunction | CDS-TS-Dispatcher - @AfterFunction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeFunction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeFunction
  */
 const AfterFunction = buildAction({ event: 'FUNC', eventKind: 'AFTER', isDraft: false });
 
@@ -2082,15 +2082,15 @@ const AfterFunction = buildAction({ event: 'FUNC', eventKind: 'AFTER', isDraft: 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterBoundFunction(Book.actions.someFunction)
- *   private async afterSomeFunction(@Result() result: unknown, @Req() req: ActionRequest<typeof Book.actions.someFunction>): Promise<void> { ... }
+ *   \@AfterBoundFunction(Book.actions.someFunction)
+ *   private async afterSomeFunction(@Result() result: unknown, \@Req() req: ActionRequest<typeof Book.actions.someFunction>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeboundfunction | CDS-TS-Dispatcher - @AfterBoundFunction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundFunction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeBoundFunction
  */
 const AfterBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'AFTER', isDraft: false });
 
@@ -2132,10 +2132,10 @@ const AfterBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'AFTER'
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnAll()
- *   private async onAny(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *   \@OnAll()
+ *   private async onAny(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<unknown> {
  *     // ... runs instead of CREATE/READ/UPDATE/DELETE on Book
  *     return next();
  *   }
@@ -2143,7 +2143,7 @@ const AfterBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'AFTER'
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onall | CDS-TS-Dispatcher - @OnAll}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnAll
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnAll
  */
 const OnAll = buildOnCRUD({ event: '*', eventKind: 'ON', isDraft: false });
 
@@ -2167,17 +2167,17 @@ const OnAll = buildOnCRUD({ event: '*', eventKind: 'ON', isDraft: false });
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnAllDraft()
- *   private async onAnyDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *   \@OnAllDraft()
+ *   private async onAnyDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<unknown> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onall | CDS-TS-Dispatcher - @OnAllDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnAll
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnAll
  */
 const OnAllDraft = buildOnCRUD({ event: '*', eventKind: 'ON', isDraft: true });
 
@@ -2197,10 +2197,10 @@ const OnAllDraft = buildOnCRUD({ event: '*', eventKind: 'ON', isDraft: true });
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnCreate()
- *   private async onCreate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
+ *   \@OnCreate()
+ *   private async onCreate(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<Function> {
  *     // ... custom persistence, or:
  *     return next();
  *   }
@@ -2208,7 +2208,7 @@ const OnAllDraft = buildOnCRUD({ event: '*', eventKind: 'ON', isDraft: true });
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oncreate | CDS-TS-Dispatcher - @OnCreate}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnCreate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnCreate
  */
 const OnCreate = buildOnCRUD({ event: 'CREATE', eventKind: 'ON', isDraft: false });
 
@@ -2227,17 +2227,17 @@ const OnCreate = buildOnCRUD({ event: 'CREATE', eventKind: 'ON', isDraft: false 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnCreateDraft()
- *   private async onCreateDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
+ *   \@OnCreateDraft()
+ *   private async onCreateDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<Function> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oncreate | CDS-TS-Dispatcher - @OnCreateDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnCreate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnCreate
  */
 const OnCreateDraft = buildOnCRUD({ event: 'CREATE', eventKind: 'ON', isDraft: true });
 
@@ -2254,10 +2254,10 @@ const OnCreateDraft = buildOnCRUD({ event: 'CREATE', eventKind: 'ON', isDraft: t
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnRead()
- *   private async onRead(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
+ *   \@OnRead()
+ *   private async onRead(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<Function> {
  *     // ... custom fetch, or:
  *     return next();
  *   }
@@ -2265,7 +2265,7 @@ const OnCreateDraft = buildOnCRUD({ event: 'CREATE', eventKind: 'ON', isDraft: t
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onread | CDS-TS-Dispatcher - @OnRead}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnRead
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnRead
  */
 const OnRead = buildOnCRUD({ event: 'READ', eventKind: 'ON', isDraft: false });
 
@@ -2281,17 +2281,17 @@ const OnRead = buildOnCRUD({ event: 'READ', eventKind: 'ON', isDraft: false });
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnReadDraft()
- *   private async onReadDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
+ *   \@OnReadDraft()
+ *   private async onReadDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<Function> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onread | CDS-TS-Dispatcher - @OnReadDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnRead
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnRead
  */
 const OnReadDraft = buildOnCRUD({ event: 'READ', eventKind: 'ON', isDraft: true });
 
@@ -2308,17 +2308,17 @@ const OnReadDraft = buildOnCRUD({ event: 'READ', eventKind: 'ON', isDraft: true 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnUpdate()
- *   private async onUpdate(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
+ *   \@OnUpdate()
+ *   private async onUpdate(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<Function> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onupdate | CDS-TS-Dispatcher - @OnUpdate}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnUpdate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnUpdate
  */
 const OnUpdate = buildOnCRUD({ event: 'UPDATE', eventKind: 'ON', isDraft: false });
 
@@ -2337,17 +2337,17 @@ const OnUpdate = buildOnCRUD({ event: 'UPDATE', eventKind: 'ON', isDraft: false 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnUpdateDraft()
- *   private async onUpdateDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<Function> {
+ *   \@OnUpdateDraft()
+ *   private async onUpdateDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<Function> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onupdate | CDS-TS-Dispatcher - @OnUpdateDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnUpdate
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnUpdate
  */
 const OnUpdateDraft = buildOnCRUD({ event: 'UPDATE', eventKind: 'ON', isDraft: true });
 
@@ -2364,17 +2364,17 @@ const OnUpdateDraft = buildOnCRUD({ event: 'UPDATE', eventKind: 'ON', isDraft: t
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnDelete()
- *   private async onDelete(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *   \@OnDelete()
+ *   private async onDelete(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<unknown> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#ondelete | CDS-TS-Dispatcher - @OnDelete}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnDelete
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnDelete
  */
 const OnDelete = buildOnCRUD({ event: 'DELETE', eventKind: 'ON', isDraft: false });
 
@@ -2390,17 +2390,17 @@ const OnDelete = buildOnCRUD({ event: 'DELETE', eventKind: 'ON', isDraft: false 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnDeleteDraft()
- *   private async onDeleteDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *   \@OnDeleteDraft()
+ *   private async onDeleteDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<unknown> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#ondelete | CDS-TS-Dispatcher - @OnDeleteDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnDelete
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnDelete
  */
 const OnDeleteDraft = buildOnCRUD({ event: 'DELETE', eventKind: 'ON', isDraft: true });
 
@@ -2416,17 +2416,17 @@ const OnDeleteDraft = buildOnCRUD({ event: 'DELETE', eventKind: 'ON', isDraft: t
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ActionsHandler {
- *   /@OnAction(SubmitOrder)
- *   private async onSubmitOrder(@Req() req: ActionRequest<typeof SubmitOrder>, @Next() next: NextEvent): ActionReturn<typeof SubmitOrder> {
+ *   \@OnAction(SubmitOrder)
+ *   private async onSubmitOrder(@Req() req: ActionRequest<typeof SubmitOrder>, \@Next() next: NextEvent): ActionReturn<typeof SubmitOrder> {
  *     // ...
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onaction | CDS-TS-Dispatcher - @OnAction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnAction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnAction
  */
 const OnAction = buildAction({ event: 'ACTION', eventKind: 'ON', isDraft: false });
 
@@ -2442,17 +2442,17 @@ const OnAction = buildAction({ event: 'ACTION', eventKind: 'ON', isDraft: false 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnBoundAction(Book.actions.approve)
- *   private async onApprove(@Req() req: ActionRequest<typeof Book.actions.approve>, @Next() next: NextEvent): ActionReturn<typeof Book.actions.approve> {
+ *   \@OnBoundAction(Book.actions.approve)
+ *   private async onApprove(@Req() req: ActionRequest<typeof Book.actions.approve>, \@Next() next: NextEvent): ActionReturn<typeof Book.actions.approve> {
  *     // ...
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction | CDS-TS-Dispatcher - @OnBoundAction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundAction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundAction
  */
 const OnBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'ON', isDraft: false });
 
@@ -2468,17 +2468,17 @@ const OnBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'ON', isDr
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnBoundActionDraft(Book.actions.approve)
- *   private async onApproveDraft(@Req() req: ActionRequest<typeof Book.actions.approve>, @Next() next: NextEvent): ActionReturn<typeof Book.actions.approve> {
+ *   \@OnBoundActionDraft(Book.actions.approve)
+ *   private async onApproveDraft(@Req() req: ActionRequest<typeof Book.actions.approve>, \@Next() next: NextEvent): ActionReturn<typeof Book.actions.approve> {
  *     // ...
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundaction | CDS-TS-Dispatcher - @OnBoundActionDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundAction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundAction
  */
 const OnBoundActionDraft = buildAction({ event: 'BOUND_ACTION', eventKind: 'ON', isDraft: true });
 
@@ -2494,17 +2494,17 @@ const OnBoundActionDraft = buildAction({ event: 'BOUND_ACTION', eventKind: 'ON',
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnBoundFunction(Book.actions.someFunction)
- *   private async onSomeFunction(@Req() req: ActionRequest<typeof Book.actions.someFunction>, @Next() next: NextEvent): ActionReturn<typeof Book.actions.someFunction> {
+ *   \@OnBoundFunction(Book.actions.someFunction)
+ *   private async onSomeFunction(@Req() req: ActionRequest<typeof Book.actions.someFunction>, \@Next() next: NextEvent): ActionReturn<typeof Book.actions.someFunction> {
  *     // ...
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction | CDS-TS-Dispatcher - @OnBoundFunction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundFunction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundFunction
  */
 const OnBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'ON', isDraft: false });
 
@@ -2520,17 +2520,17 @@ const OnBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'ON', isDr
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnBoundFunctionDraft(Book.actions.someFunction)
- *   private async onSomeFunctionDraft(@Req() req: ActionRequest<typeof Book.actions.someFunction>, @Next() next: NextEvent): ActionReturn<typeof Book.actions.someFunction> {
+ *   \@OnBoundFunctionDraft(Book.actions.someFunction)
+ *   private async onSomeFunctionDraft(@Req() req: ActionRequest<typeof Book.actions.someFunction>, \@Next() next: NextEvent): ActionReturn<typeof Book.actions.someFunction> {
  *     // ...
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onboundfunction | CDS-TS-Dispatcher - @OnBoundFunctionDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundFunction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnBoundFunction
  */
 const OnBoundFunctionDraft = buildAction({ event: 'BOUND_FUNC', eventKind: 'ON', isDraft: true });
 
@@ -2545,17 +2545,17 @@ const OnBoundFunctionDraft = buildAction({ event: 'BOUND_FUNC', eventKind: 'ON',
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ActionsHandler {
- *   /@OnFunction(GetTopSellers)
- *   private async onGetTopSellers(@Req() req: ActionRequest<typeof GetTopSellers>, @Next() next: NextEvent): ActionReturn<typeof GetTopSellers> {
+ *   \@OnFunction(GetTopSellers)
+ *   private async onGetTopSellers(@Req() req: ActionRequest<typeof GetTopSellers>, \@Next() next: NextEvent): ActionReturn<typeof GetTopSellers> {
  *     // ...
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onfunction | CDS-TS-Dispatcher - @OnFunction}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnFunction
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnFunction
  */
 const OnFunction = buildAction({ event: 'FUNC', eventKind: 'ON', isDraft: false });
 
@@ -2575,9 +2575,9 @@ const OnFunction = buildAction({ event: 'FUNC', eventKind: 'ON', isDraft: false 
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class CatalogEventsHandler {
- *   /@OnEvent(SendData)
+ *   \@OnEvent(SendData)
  *   private async onSendData(@Req() req: Request<SendData>): Promise<void> {
  *     // req.data.foo, req.data.bar, req.headers, ...
  *   }
@@ -2585,7 +2585,7 @@ const OnFunction = buildAction({ event: 'FUNC', eventKind: 'ON', isDraft: false 
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onevent | CDS-TS-Dispatcher - @OnEvent}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnEvent
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnEvent
  */
 const OnEvent = buildOnEvent({ event: 'EVENT', eventKind: 'ON', isDraft: false });
 
@@ -2606,9 +2606,9 @@ const OnEvent = buildOnEvent({ event: 'EVENT', eventKind: 'ON', isDraft: false }
  *
  * @example
  * ```ts
- * /@UnboundActions() // bound as ChatService's impl via CDSDispatcher
+ * \@UnboundActions() // bound as ChatService's impl via CDSDispatcher
  * class ChatHandler {
- *   /@OnWebSocketMessage('sendMessage')
+ *   \@OnWebSocketMessage('sendMessage')
  *   private async onMessage(@Req() req: Request<{ text: string }>): Promise<string> {
  *     return req.data.text;
  *   }
@@ -2616,7 +2616,7 @@ const OnEvent = buildOnEvent({ event: 'EVENT', eventKind: 'ON', isDraft: false }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketmessage | CDS-TS-Dispatcher - @OnWebSocketMessage}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnWebSocketMessage
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnWebSocketMessage
  */
 const OnWebSocketMessage = (name: string) => OnEvent(name);
 
@@ -2632,9 +2632,9 @@ const OnWebSocketMessage = (name: string) => OnEvent(name);
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ChatHandler {
- *   /@OnWebSocketConnect()
+ *   \@OnWebSocketConnect()
  *   private async onConnect(@Req() req: Request): Promise<void> {
  *     console.log('[Chat] connect');
  *   }
@@ -2642,7 +2642,7 @@ const OnWebSocketMessage = (name: string) => OnEvent(name);
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketconnect | CDS-TS-Dispatcher - @OnWebSocketConnect}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnWebSocketConnect
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnWebSocketConnect
  */
 const OnWebSocketConnect = () => OnEvent('wsConnect');
 
@@ -2659,9 +2659,9 @@ const OnWebSocketConnect = () => OnEvent('wsConnect');
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ChatHandler {
- *   /@OnWebSocketDisconnect()
+ *   \@OnWebSocketDisconnect()
  *   private async onDisconnect(@Req() req: Request<{ reason?: string }>): Promise<void> {
  *     console.log(`[Chat] disconnect ${req.data?.reason ?? ''}`);
  *   }
@@ -2669,7 +2669,7 @@ const OnWebSocketConnect = () => OnEvent('wsConnect');
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onwebsocketdisconnect | CDS-TS-Dispatcher - @OnWebSocketDisconnect}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnWebSocketDisconnect
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnWebSocketDisconnect
  */
 const OnWebSocketDisconnect = () => OnEvent('wsDisconnect');
 
@@ -2689,9 +2689,9 @@ const OnWebSocketDisconnect = () => OnEvent('wsDisconnect');
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class CatalogEventsHandler {
- *   /@OnSubscribe({ eventName: SendData, type: 'SAME_NODE_PROCESS' })
+ *   \@OnSubscribe({ eventName: SendData, type: 'SAME_NODE_PROCESS' })
  *   private async onSendData(@Req() req: Request<SendData>): Promise<void> {
  *     // req.data.foo, req.data.bar, req.headers, ...
  *   }
@@ -2699,7 +2699,7 @@ const OnWebSocketDisconnect = () => OnEvent('wsDisconnect');
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onsubscribe | CDS-TS-Dispatcher - @OnSubscribe}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnSubscribe
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnSubscribe
  */
 const OnSubscribe = buildOnMessagingEvent({ event: 'MESSAGING_EVENT', eventKind: 'ON', isDraft: false });
 
@@ -2719,17 +2719,17 @@ const OnSubscribe = buildOnMessagingEvent({ event: 'MESSAGING_EVENT', eventKind:
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ErrorHandler {
- *   /@OnError()
- *   private onError(@Error() err: Error, @Req() req: Request): void {
+ *   \@OnError()
+ *   private onError(@Error() err: Error, \@Req() req: Request): void {
  *     err.message = 'New message';
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onerror | CDS-TS-Dispatcher - @OnError}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnError
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnError
  */
 const OnError = buildOnError({ eventKind: 'ON', isDraft: false });
 
@@ -2745,17 +2745,17 @@ const OnError = buildOnError({ eventKind: 'ON', isDraft: false });
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnEditDraft()
- *   private async onEditDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *   \@OnEditDraft()
+ *   private async onEditDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<unknown> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oneditdraft | CDS-TS-Dispatcher - @OnEditDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnEditDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnEditDraft
  */
 const OnEditDraft = buildOnCRUD({ event: 'EDIT', eventKind: 'ON', isDraft: false });
 
@@ -2773,17 +2773,17 @@ const OnEditDraft = buildOnCRUD({ event: 'EDIT', eventKind: 'ON', isDraft: false
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnSaveDraft()
- *   private async onSaveDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *   \@OnSaveDraft()
+ *   private async onSaveDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<unknown> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onsavedraft | CDS-TS-Dispatcher - @OnSaveDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnSaveDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnSaveDraft
  */
 const OnSaveDraft = buildOnCRUD({ event: 'SAVE', eventKind: 'ON', isDraft: false });
 
@@ -2812,17 +2812,17 @@ const OnSaveDraft = buildOnCRUD({ event: 'SAVE', eventKind: 'ON', isDraft: false
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnNewDraft()
- *   private async onNewDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *   \@OnNewDraft()
+ *   private async onNewDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<unknown> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onnewdraft | CDS-TS-Dispatcher - @OnNewDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnNewDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnNewDraft
  */
 const OnNewDraft = buildOnCRUD({ event: 'NEW', eventKind: 'ON', isDraft: true });
 
@@ -2839,17 +2839,17 @@ const OnNewDraft = buildOnCRUD({ event: 'NEW', eventKind: 'ON', isDraft: true })
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnCancelDraft()
- *   private async onCancelDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *   \@OnCancelDraft()
+ *   private async onCancelDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<unknown> {
  *     return next();
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#oncanceldraft | CDS-TS-Dispatcher - @OnCancelDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnCancelDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnCancelDraft
  */
 const OnCancelDraft = buildOnCRUD({ event: 'CANCEL', eventKind: 'ON', isDraft: true });
 
@@ -2866,9 +2866,9 @@ const OnCancelDraft = buildOnCRUD({ event: 'CANCEL', eventKind: 'ON', isDraft: t
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeNewDraft()
+ *   \@BeforeNewDraft()
  *   private async beforeNewDraft(@Req() req: Request<Book>): Promise<void> {
  *     // ... e.g. pre-fill or validate defaults for the new draft
  *   }
@@ -2876,7 +2876,7 @@ const OnCancelDraft = buildOnCRUD({ event: 'CANCEL', eventKind: 'ON', isDraft: t
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforenewdraft | CDS-TS-Dispatcher - @BeforeNewDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeNewDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeNewDraft
  */
 const BeforeNewDraft = buildBefore({ event: 'NEW', eventKind: 'BEFORE', isDraft: true });
 
@@ -2891,15 +2891,15 @@ const BeforeNewDraft = buildBefore({ event: 'NEW', eventKind: 'BEFORE', isDraft:
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeCancelDraft()
+ *   \@BeforeCancelDraft()
  *   private async beforeCancelDraft(@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforecanceldraft | CDS-TS-Dispatcher - @BeforeCancelDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeCancelDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeCancelDraft
  */
 const BeforeCancelDraft = buildBefore({ event: 'CANCEL', eventKind: 'BEFORE', isDraft: true });
 
@@ -2915,9 +2915,9 @@ const BeforeCancelDraft = buildBefore({ event: 'CANCEL', eventKind: 'BEFORE', is
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeEditDraft()
+ *   \@BeforeEditDraft()
  *   private async beforeEditDraft(@Req() req: Request<Book>): Promise<void> {
  *     // ... e.g. reject editing a locked Book
  *   }
@@ -2925,7 +2925,7 @@ const BeforeCancelDraft = buildBefore({ event: 'CANCEL', eventKind: 'BEFORE', is
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforeeditdraft | CDS-TS-Dispatcher - @BeforeEditDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeEditDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeEditDraft
  */
 const BeforeEditDraft = buildBefore({ event: 'EDIT', eventKind: 'BEFORE', isDraft: false });
 
@@ -2945,9 +2945,9 @@ const BeforeEditDraft = buildBefore({ event: 'EDIT', eventKind: 'BEFORE', isDraf
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeSaveDraft()
+ *   \@BeforeSaveDraft()
  *   private async beforeSaveDraft(@Req() req: Request<Book>): Promise<void> {
  *     if (!req.data.title) req.reject(400, 'title is required before saving');
  *   }
@@ -2955,7 +2955,7 @@ const BeforeEditDraft = buildBefore({ event: 'EDIT', eventKind: 'BEFORE', isDraf
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforesavedraft | CDS-TS-Dispatcher - @BeforeSaveDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeSaveDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeSaveDraft
  */
 const BeforeSaveDraft = buildBefore({ event: 'SAVE', eventKind: 'BEFORE', isDraft: false });
 
@@ -2971,15 +2971,15 @@ const BeforeSaveDraft = buildBefore({ event: 'SAVE', eventKind: 'BEFORE', isDraf
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterNewDraft()
- *   private async afterNewDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterNewDraft()
+ *   private async afterNewDraft(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afternewdraft | CDS-TS-Dispatcher - @AfterNewDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterNewDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterNewDraft
  */
 const AfterNewDraft = buildAfter({ event: 'NEW', eventKind: 'AFTER', isDraft: true });
 
@@ -2994,15 +2994,15 @@ const AfterNewDraft = buildAfter({ event: 'NEW', eventKind: 'AFTER', isDraft: tr
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterCancelDraft()
- *   private async afterCancelDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterCancelDraft()
+ *   private async afterCancelDraft(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercanceldraft | CDS-TS-Dispatcher - @AfterCancelDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCancelDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCancelDraft
  */
 const AfterCancelDraft = buildAfter({ event: 'CANCEL', eventKind: 'AFTER', isDraft: true });
 
@@ -3017,15 +3017,15 @@ const AfterCancelDraft = buildAfter({ event: 'CANCEL', eventKind: 'AFTER', isDra
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterEditDraft()
- *   private async afterEditDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterEditDraft()
+ *   private async afterEditDraft(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftereditdraft | CDS-TS-Dispatcher - @AfterEditDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterEditDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterEditDraft
  */
 const AfterEditDraft = buildAfter({ event: 'EDIT', eventKind: 'AFTER', isDraft: false });
 
@@ -3045,15 +3045,15 @@ const AfterEditDraft = buildAfter({ event: 'EDIT', eventKind: 'AFTER', isDraft: 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterSaveDraft()
- *   private async afterSaveDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterSaveDraft()
+ *   private async afterSaveDraft(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftersavedraft | CDS-TS-Dispatcher - @AfterSaveDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterSaveDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterSaveDraft
  */
 const AfterSaveDraft = buildAfter({ event: 'SAVE', eventKind: 'AFTER', isDraft: false });
 
@@ -3069,15 +3069,15 @@ const AfterSaveDraft = buildAfter({ event: 'SAVE', eventKind: 'AFTER', isDraft: 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforePatchDraft()
+ *   \@BeforePatchDraft()
  *   private async beforePatchDraft(@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforepatchdraft | CDS-TS-Dispatcher - @BeforePatchDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforePatchDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforePatchDraft
  */
 const BeforePatchDraft = buildBefore({ event: 'PATCH', eventKind: 'BEFORE', isDraft: true });
 
@@ -3091,15 +3091,15 @@ const BeforePatchDraft = buildBefore({ event: 'PATCH', eventKind: 'BEFORE', isDr
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeDiscardDraft()
+ *   \@BeforeDiscardDraft()
  *   private async beforeDiscardDraft(@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforediscarddraft | CDS-TS-Dispatcher - @BeforeDiscardDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeDiscardDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeDiscardDraft
  */
 const BeforeDiscardDraft = buildBefore({ event: 'DISCARD', eventKind: 'BEFORE', isDraft: true });
 
@@ -3114,15 +3114,15 @@ const BeforeDiscardDraft = buildBefore({ event: 'DISCARD', eventKind: 'BEFORE', 
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterPatchDraft()
- *   private async afterPatchDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterPatchDraft()
+ *   private async afterPatchDraft(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterpatchdraft | CDS-TS-Dispatcher - @AfterPatchDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterPatchDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterPatchDraft
  */
 const AfterPatchDraft = buildAfter({ event: 'PATCH', eventKind: 'AFTER', isDraft: true });
 
@@ -3136,15 +3136,15 @@ const AfterPatchDraft = buildAfter({ event: 'PATCH', eventKind: 'AFTER', isDraft
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterDiscardDraft()
- *   private async afterDiscardDraft(@Result() result: Book, @Req() req: Request<Book>): Promise<void> { ... }
+ *   \@AfterDiscardDraft()
+ *   private async afterDiscardDraft(@Result() result: Book, \@Req() req: Request<Book>): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterdiscarddraft | CDS-TS-Dispatcher - @AfterDiscardDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterDiscardDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterDiscardDraft
  */
 const AfterDiscardDraft = buildAfter({ event: 'DISCARD', eventKind: 'AFTER', isDraft: true });
 
@@ -3162,17 +3162,17 @@ const AfterDiscardDraft = buildAfter({ event: 'DISCARD', eventKind: 'AFTER', isD
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnPatchDraft()
- *   private async onPatchDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *   \@OnPatchDraft()
+ *   private async onPatchDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<unknown> {
  *     return next(); // preserve the default draft PATCH behavior
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onpatchdraft | CDS-TS-Dispatcher - @OnPatchDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnPatchDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnPatchDraft
  */
 const OnPatchDraft = buildOnCRUD({ event: 'PATCH', eventKind: 'ON', isDraft: true });
 
@@ -3188,17 +3188,17 @@ const OnPatchDraft = buildOnCRUD({ event: 'PATCH', eventKind: 'ON', isDraft: tru
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnDiscardDraft()
- *   private async onDiscardDraft(@Req() req: Request<Book>, @Next() next: NextEvent): Promise<unknown> {
+ *   \@OnDiscardDraft()
+ *   private async onDiscardDraft(@Req() req: Request<Book>, \@Next() next: NextEvent): Promise<unknown> {
  *     return next(); // preserve the default draft DISCARD behavior
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#ondiscarddraft | CDS-TS-Dispatcher - @OnDiscardDraft}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnDiscardDraft
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnDiscardDraft
  */
 const OnDiscardDraft = buildOnCRUD({ event: 'DISCARD', eventKind: 'ON', isDraft: true });
 
@@ -3231,9 +3231,9 @@ const OnDiscardDraft = buildOnCRUD({ event: 'DISCARD', eventKind: 'ON', isDraft:
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@BeforeCommit()
+ *   \@BeforeCommit()
  *   private async beforeCommit(@Req() req: Request<Book>): Promise<void> {
  *     const invariantViolated = false; // ... e.g. a cross-entity stock check
  *     if (invariantViolated) {
@@ -3244,7 +3244,7 @@ const OnDiscardDraft = buildOnCRUD({ event: 'DISCARD', eventKind: 'ON', isDraft:
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#beforecommit | CDS-TS-Dispatcher - @BeforeCommit}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeCommit
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § BeforeCommit
  */
 const BeforeCommit = buildRequestLifecycle({ event: 'BEFORE_COMMIT' });
 
@@ -3268,9 +3268,9 @@ const BeforeCommit = buildRequestLifecycle({ event: 'BEFORE_COMMIT' });
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterCommit()
+ *   \@AfterCommit()
  *   private async afterCommit(@Req() req: Request<Book>): Promise<void> {
  *     await cds.tx(async () => {
  *       // ... e.g. send a confirmation e-mail, invalidate a cache
@@ -3280,7 +3280,7 @@ const BeforeCommit = buildRequestLifecycle({ event: 'BEFORE_COMMIT' });
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#aftercommit | CDS-TS-Dispatcher - @AfterCommit}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCommit
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterCommit
  */
 const AfterCommit = buildRequestLifecycle({ event: 'AFTER_COMMIT' });
 
@@ -3304,9 +3304,9 @@ const AfterCommit = buildRequestLifecycle({ event: 'AFTER_COMMIT' });
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterRollback()
+ *   \@AfterRollback()
  *   private async afterRollback(@Req() req: Request<Book>): Promise<void> {
  *     await cds.tx(async () => {
  *       // ... e.g. release a reservation in a remote system, alert on the failure
@@ -3316,7 +3316,7 @@ const AfterCommit = buildRequestLifecycle({ event: 'AFTER_COMMIT' });
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#afterrollback | CDS-TS-Dispatcher - @AfterRollback}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRollback
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § AfterRollback
  */
 const AfterRollback = buildRequestLifecycle({ event: 'AFTER_ROLLBACK' });
 
@@ -3341,9 +3341,9 @@ const AfterRollback = buildRequestLifecycle({ event: 'AFTER_ROLLBACK' });
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@OnRequestDone()
+ *   \@OnRequestDone()
  *   private async requestDone(@Req() req: Request<Book>): Promise<void> {
  *     await cds.tx(async () => {
  *       // ... e.g. release a lock, stop a timer, emit duration metrics
@@ -3353,7 +3353,7 @@ const AfterRollback = buildRequestLifecycle({ event: 'AFTER_ROLLBACK' });
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onrequestdone | CDS-TS-Dispatcher - @OnRequestDone}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnRequestDone
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnRequestDone
  */
 const OnRequestDone = buildRequestLifecycle({ event: 'REQUEST_DONE' });
 
@@ -3385,9 +3385,9 @@ const OnRequestDone = buildRequestLifecycle({ event: 'REQUEST_DONE' });
  *
  * @example
  * ```ts
- * /@ServerLifecycle()
+ * \@ServerLifecycle()
  * export class Bootstrap {
- *   /@OnServed()
+ *   \@OnServed()
  *   public async seed(services: object): Promise<void> {
  *     // ... one-time startup work, may throw to abort the boot
  *   }
@@ -3395,7 +3395,7 @@ const OnRequestDone = buildRequestLifecycle({ event: 'REQUEST_DONE' });
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onserved | CDS-TS-Dispatcher - @OnServed}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnServed
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnServed
  */
 const OnServed = buildServerLifecycle({ event: 'SERVED' });
 
@@ -3412,9 +3412,9 @@ const OnServed = buildServerLifecycle({ event: 'SERVED' });
  *
  * @example
  * ```ts
- * /@ServerLifecycle()
+ * \@ServerLifecycle()
  * export class Bootstrap {
- *   /@OnListening()
+ *   \@OnListening()
  *   public logUrl(payload: { server: unknown; url: string }): void {
  *     console.log(`Listening on ${payload.url}`);
  *   }
@@ -3422,7 +3422,7 @@ const OnServed = buildServerLifecycle({ event: 'SERVED' });
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onlistening | CDS-TS-Dispatcher - @OnListening}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnListening
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnListening
  */
 const OnListening = buildServerLifecycle({ event: 'LISTENING' });
 
@@ -3442,9 +3442,9 @@ const OnListening = buildServerLifecycle({ event: 'LISTENING' });
  *
  * @example
  * ```ts
- * /@ServerLifecycle()
+ * \@ServerLifecycle()
  * export class Bootstrap {
- *   /@OnShutdown()
+ *   \@OnShutdown()
  *   public async cleanup(error: Error | null): Promise<void> {
  *     // ... release resources, may run more than once
  *   }
@@ -3452,7 +3452,7 @@ const OnListening = buildServerLifecycle({ event: 'LISTENING' });
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onshutdown | CDS-TS-Dispatcher - @OnShutdown}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnShutdown
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnShutdown
  */
 const OnShutdown = buildServerLifecycle({ event: 'SHUTDOWN' });
 
@@ -3551,9 +3551,9 @@ function registerScheduledOutcomeHandler(
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ScheduledTasksHandler {
- *   /@OnScheduled('my.namespace.reindexCatalog')
+ *   \@OnScheduled('my.namespace.reindexCatalog')
  *   public async reindex(@Req() req: Request): Promise<void> {
  *     // req.data holds the task payload
  *   }
@@ -3561,7 +3561,7 @@ function registerScheduledOutcomeHandler(
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onscheduled | CDS-TS-Dispatcher - @OnScheduled}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnScheduled
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnScheduled
  */
 function OnScheduled(name: string) {
   return function <Target extends object>(
@@ -3589,9 +3589,9 @@ function OnScheduled(name: string) {
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ScheduledTasksHandler {
- *   /@Schedule({ name: 'cleanupExpiredCarts', every: '2m' })
+ *   \@Schedule({ name: 'cleanupExpiredCarts', every: '2m' })
  *   public async cleanup(@Req() req: Request): Promise<void> {
  *     // ... runs on the bootstrap-scheduled recurrence
  *   }
@@ -3599,7 +3599,7 @@ function OnScheduled(name: string) {
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#schedule | CDS-TS-Dispatcher - @Schedule}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Schedule
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Schedule
  */
 function Schedule(options: ScheduleOptions) {
   return function <Target extends object>(
@@ -3624,17 +3624,17 @@ function Schedule(options: ScheduleOptions) {
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ScheduledTasksHandler {
- *   /@OnScheduledSuccess('cleanupExpiredCarts')
- *   public async succeeded(@Result() result: unknown, @Req() req: Request): Promise<void> {
+ *   \@OnScheduledSuccess('cleanupExpiredCarts')
+ *   public async succeeded(@Result() result: unknown, \@Req() req: Request): Promise<void> {
  *     // ... e.g. kick off follow-up work now that the task ran through
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onscheduledsuccess | CDS-TS-Dispatcher - @OnScheduledSuccess}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnScheduledSuccess
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnScheduledSuccess
  */
 function OnScheduledSuccess(name: string) {
   return function <Target extends object>(
@@ -3661,17 +3661,17 @@ function OnScheduledSuccess(name: string) {
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ScheduledTasksHandler {
- *   /@OnScheduledFailure('cleanupExpiredCarts')
- *   public async failed(@Result() failure: { message?: string }, @Req() req: Request): Promise<void> {
+ *   \@OnScheduledFailure('cleanupExpiredCarts')
+ *   public async failed(@Result() failure: { message?: string }, \@Req() req: Request): Promise<void> {
  *     // ... e.g. alert ops
  *   }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#onscheduledfailure | CDS-TS-Dispatcher - @OnScheduledFailure}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnScheduledFailure
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § OnScheduledFailure
  */
 function OnScheduledFailure(name: string) {
   return function <Target extends object>(
@@ -3706,10 +3706,10 @@ function OnScheduledFailure(name: string) {
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class BookHandler {
- *   /@OnFunction('streamBooks')
- *   /@Stream('application/json')
+ *   \@OnFunction('streamBooks')
+ *   \@Stream('application/json')
  *   public async streamBooks(@Req() req: Request): Promise<Readable> {
  *     const books = await SELECT.from('CatalogService.Books').columns('ID', 'title');
  *     return Readable.from([books.map((b) => JSON.stringify(b)).join('\n')]); // NDJSON
@@ -3718,7 +3718,7 @@ function OnScheduledFailure(name: string) {
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#stream | CDS-TS-Dispatcher - @Stream}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Stream
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Stream
  */
 function Stream(contentType: StreamContentType = 'application/octet-stream') {
   return function <Target extends object>(

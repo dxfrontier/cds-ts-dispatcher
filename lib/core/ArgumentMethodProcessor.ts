@@ -228,7 +228,7 @@ export class ArgumentMethodProcessor {
       .forEach((metadataKey) => {
         switch (metadataKey) {
           /**
-           * @Req(), @Res(), @Error(), @Next(), @Results(), @Result(), @Jwt, '@SingleInstanceSwitch' can be present only once per callback
+           * `@Req()`, `@Res()`, `@Error()`, `@Next()`, `@Results()`, `@Result()`, `@Jwt`, `@SingleInstanceSwitch` can be present only once per callback
            */
           case 'MSG':
           case 'ERROR':
@@ -332,7 +332,7 @@ export class ArgumentMethodProcessor {
           }
 
           /**
-           * @IsColumnSupplied, @IsRole, @GetRequest, @GetQuery, @IsPresent, can be present multiple times per callback.
+           * `@IsColumnSupplied`, `@IsRole`, `@GetRequest`, `@GetQuery`, `@IsPresent`, can be present multiple times per callback.
            */
           case 'GET_QUERY':
           case 'IS_PRESENT':

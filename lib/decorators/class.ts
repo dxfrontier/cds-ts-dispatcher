@@ -17,15 +17,15 @@ import type CDS_DISPATCHER from '../constants/constants';
  *
  * @example
  * ```ts
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@AfterRead()
- *   private async enrich(@Results() results: Book[], @Req() req: Request): Promise<void> { ... }
+ *   \@AfterRead()
+ *   private async enrich(@Results() results: Book[], \@Req() req: Request): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#entityhandler | CDS-TS-Dispatcher - @EntityHandler}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § EntityHandler
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § EntityHandler
  */
 function EntityHandler<T>(entity: CDSTyperEntity<T>): (target: new (...args: never) => unknown) => void;
 
@@ -41,15 +41,15 @@ function EntityHandler<T>(entity: CDSTyperEntity<T>): (target: new (...args: nev
  *
  * @example
  * ```ts
- * /@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES) // or '*'
+ * \@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES) // or '*'
  * class AllEntitiesHandler {
- *   /@AfterRead()
- *   private async logRead(@Results() results: unknown[], @Req() req: Request): Promise<void> { ... }
+ *   \@AfterRead()
+ *   private async logRead(@Results() results: unknown[], \@Req() req: Request): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#entityhandler | CDS-TS-Dispatcher - @EntityHandler}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § EntityHandler
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § EntityHandler
  */
 function EntityHandler(entity: typeof CDS_DISPATCHER.ALL_ENTITIES): (target: new (...args: never) => unknown) => void;
 
@@ -74,21 +74,21 @@ function EntityHandler<T>(entity: CDSTyperEntity<T> | typeof CDS_DISPATCHER.ALL_
  *
  * @example
  * ```ts
- * /@Repository()
+ * \@Repository()
  * class BookRepository extends BaseRepository<Book> {
  *   constructor() {
  *     super(Book);
  *   }
  * }
  *
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@Inject(BookRepository) private repository: BookRepository;
+ *   \@Inject(BookRepository) private repository: BookRepository;
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#repository | CDS-TS-Dispatcher - @Repository}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Repository
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Repository
  */
 function Repository<Target extends new (...args: never) => unknown>() {
   return function (target: Target) {
@@ -110,19 +110,19 @@ function Repository<Target extends new (...args: never) => unknown>() {
  *
  * @example
  * ```ts
- * /@ServiceLogic('Singleton')
+ * \@ServiceLogic('Singleton')
  * class BookService {
  *   private cache = new Map<string, Book>();
  * }
  *
- * /@EntityHandler(Book)
+ * \@EntityHandler(Book)
  * class BookHandler {
- *   /@Inject(BookService) private service: BookService;
+ *   \@Inject(BookService) private service: BookService;
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#servicelogic | CDS-TS-Dispatcher - @ServiceLogic}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ServiceLogic
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ServiceLogic
  */
 function ServiceLogic<Target extends new (...args: never) => unknown>(scope?: 'Singleton' | 'Transient') {
   return function (target: Target) {
@@ -142,15 +142,15 @@ function ServiceLogic<Target extends new (...args: never) => unknown>(scope?: 'S
  *
  * @example
  * ```ts
- * /@UnboundActions()
+ * \@UnboundActions()
  * class ActionsHandler {
- *   /@OnAction(SubmitOrder)
- *   private async onSubmitOrder(@Req() req: ActionRequest<typeof SubmitOrder>, @Next() next: NextEvent): ActionReturn<typeof SubmitOrder> { ... }
+ *   \@OnAction(SubmitOrder)
+ *   private async onSubmitOrder(@Req() req: ActionRequest<typeof SubmitOrder>, \@Next() next: NextEvent): ActionReturn<typeof SubmitOrder> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#unboundactions | CDS-TS-Dispatcher - @UnboundActions}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § UnboundActions
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § UnboundActions
  */
 function UnboundActions<Target extends new (...args: never) => unknown>() {
   return function (target: Target) {
@@ -174,21 +174,21 @@ function UnboundActions<Target extends new (...args: never) => unknown>() {
  *
  * @example
  * ```ts
- * /@ServerLifecycle()
+ * \@ServerLifecycle()
  * class Bootstrap {
- *   /@OnServed()
+ *   \@OnServed()
  *   public async seed(services: object): Promise<void> { ... }
  *
- *   /@OnListening()
+ *   \@OnListening()
  *   public logUrl(payload: { server: unknown; url: string }): void { ... }
  *
- *   /@OnShutdown()
+ *   \@OnShutdown()
  *   public async cleanup(error: Error | null): Promise<void> { ... }
  * }
  * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#serverlifecycle | CDS-TS-Dispatcher - @ServerLifecycle}
- * Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ServerLifecycle
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ServerLifecycle
  */
 function ServerLifecycle<Target extends new (...args: never) => unknown>() {
   return function (target: Target) {

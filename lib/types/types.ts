@@ -41,17 +41,23 @@ type RequestResponse = ServerResponse;
  * Use `NextMiddleware` type to annotate the `next` parameter of the implementation of the middleware.
  *
  * @example
+ * ```ts
  * export class Middleware implements MiddlewareImpl {
  *    public async use(req: Request<MyEntity>, next: NextMiddleware) {
  *      await next();
  *    }
  * }
+ * ```
  */
 export type NextMiddleware = () => Promise<unknown>;
 
 /**
  * Use `NextEvent` type to annotate the `next` parameter of the implementation of the `ON` events.
- * @example "@Next() next: NextEvent"
+ *
+ * @example
+ * ```ts
+ * \@Next() next: NextEvent
+ * ```
  */
 export type NextEvent = (req?: Request) => Function;
 

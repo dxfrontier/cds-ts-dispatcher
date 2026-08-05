@@ -5,7 +5,7 @@ import type { Request } from './types';
 // **************************************************************************************************************************
 
 /**
- * Options for the @Mask decorator.
+ * Options for the `@Mask` decorator.
  */
 export type MaskOptions = {
   /**
@@ -32,7 +32,7 @@ export type MaskOptions = {
 // **************************************************************************************************************************
 
 /**
- * Options for the @LogExecution decorator.
+ * Options for the `@LogExecution` decorator.
  */
 export type LogExecutionOptions = {
   /**
