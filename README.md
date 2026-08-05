@@ -5360,6 +5360,7 @@ export class CustomerHandler {
 >
 > 1. Middlewares when applied with `@Use` are executed before the normal events.
 > 2. If you need to apply middleware to `class` you can have a look over class specific [@Use](#use) decorator .
+> 3. The wrapped handler's return value passes through the middleware wrapper — an `@On*` handler with method-level `@Use` still replies its payload.
 
 > 
 > [!WARNING]

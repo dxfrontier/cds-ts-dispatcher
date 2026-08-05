@@ -801,7 +801,8 @@ function SingleInstanceCapable<Target extends object>() {
  * requests, NOT before plain active-entity ones) and `<Entity>` otherwise; for an `@UnboundActions`
  * class it instead registers one `srv.before` per action / function / event / error handler of the
  * class — the two modes are exclusive. At method level: wraps the method directly and runs the chain
- * before it.
+ * before it; the wrapped handler's return value passes through — an `@On*` handler with method-level
+ * `@Use` still replies its payload.
  *
  * @remarks
  * A middleware class implements `MiddlewareImpl` (`use(req, next): Promise<void>`); call `next()` to

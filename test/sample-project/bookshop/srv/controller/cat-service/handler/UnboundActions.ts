@@ -41,6 +41,7 @@ import {
 } from '../../../../@cds-models/CatalogService';
 import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
+import { MiddlewareMethodAction } from '../../../middleware/MiddlewareMethodAction';
 
 import type { ExposeFields } from '../../../../../../../lib/types/validator';
 import { Result, Results } from '@dxfrontier/cds-ts-dispatcher';
@@ -51,6 +52,7 @@ class UnboundActionsHandler {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
   @OnAction('changeBookProperties')
+  @Use(MiddlewareMethodAction)
   @FieldsFormatter<ExposeFields<typeof changeBookProperties>>({ action: 'toLower' }, 'language')
   @FieldsFormatter<ExposeFields<typeof changeBookProperties>>({ action: 'ltrim' }, 'language')
   @Validate<ExposeFields<typeof changeBookProperties>>({ action: 'isIn', values: ['PDF', 'E-Kindle'] }, 'format')
