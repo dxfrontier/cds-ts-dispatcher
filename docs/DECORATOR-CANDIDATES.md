@@ -16,24 +16,24 @@ Status values: `candidate` → `planned (#issue)` → `implemented (branch/PR)` 
 
 | # | Decorator | Tier | Wraps | Lives in | Extra dependency | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `@BeforeCommit` | 1 — runtime hooks | `req.before('commit')` | EntityHandler · UnboundActions (verified) | none | implemented (feature-tier1-decorators) |
-| 2 | `@AfterCommit` | 1 — runtime hooks | `req.on('succeeded')` | EntityHandler · UnboundActions (verified) | none | implemented (feature-tier1-decorators) |
-| 3 | `@AfterRollback` | 1 — runtime hooks | `req.on('failed')` | EntityHandler · UnboundActions (verified) | none | implemented (feature-tier1-decorators) |
-| 4 | `@OnRequestDone` | 1 — runtime hooks | `req.on('done')` | EntityHandler · UnboundActions (verified) | none | implemented (feature-tier1-decorators) |
-| 5 | `@OnScheduledSuccess` / `@OnScheduledFailure` | 1 — runtime hooks | `srv.after('<event>/#succeeded'\|'/#failed')` | UnboundActions (verified) | none | implemented (feature-tier1-decorators) |
+| 1 | `@BeforeCommit` | 1 — runtime hooks | `req.before('commit')` | EntityHandler · UnboundActions (verified) | none | shipped (6.1.0) |
+| 2 | `@AfterCommit` | 1 — runtime hooks | `req.on('succeeded')` | EntityHandler · UnboundActions (verified) | none | shipped (6.1.0) |
+| 3 | `@AfterRollback` | 1 — runtime hooks | `req.on('failed')` | EntityHandler · UnboundActions (verified) | none | shipped (6.1.0) |
+| 4 | `@OnRequestDone` | 1 — runtime hooks | `req.on('done')` | EntityHandler · UnboundActions (verified) | none | shipped (6.1.0) |
+| 5 | `@OnScheduledSuccess` / `@OnScheduledFailure` | 1 — runtime hooks | `srv.after('<event>/#succeeded'\|'/#failed')` | UnboundActions (verified) | none | shipped (6.1.0) |
 | 6 | `@Spawn` | 1 — runtime hooks | `cds.spawn` | any dispatcher class | none | deferred (2026-07) |
-| 7 | `@Data`, `@Param`, `@UserInfo`, `@Tenant`, `@Diff` | 1 — parameter injection | `req.data` / `req.user` / `req.tenant` / `req.diff()` | handler methods (EntityHandler · UnboundActions); `@Diff` EntityHandler-only (verified) | none | implemented (feature-tier1-decorators) |
+| 7 | `@Data`, `@Param`, `@UserInfo`, `@Tenant`, `@Diff` | 1 — parameter injection | `req.data` / `req.user` / `req.tenant` / `req.diff()` | handler methods (EntityHandler · UnboundActions); `@Diff` EntityHandler-only (verified) | none | shipped (6.1.0) |
 | 8 | `@Retry` | 2 — cross-cutting | own implementation | any dispatcher class | none | deferred (2026-07) |
 | 9 | `@Guard` | 2 — cross-cutting | own implementation over `req` | EntityHandler · UnboundActions | none | deferred (2026-07) |
 | 10 | `@Cached` / `@CacheEvict` | 2 — cross-cutting | own implementation | EntityHandler · UnboundActions | none | deferred (2026-07) |
-| 11 | `@Throttle` | 2 — cross-cutting | own implementation (no CAP-native hook — verified) | EntityHandler · UnboundActions | none | implemented (feature-batch2-decorators) |
+| 11 | `@Throttle` | 2 — cross-cutting | own implementation (no CAP-native hook — verified) | EntityHandler · UnboundActions | none | shipped (6.1.0) |
 | 12 | `@Transactional` | 2 — cross-cutting | `cds.tx` | ServiceLogic · Repository | none | deferred (2026-07) |
 | 13 | `@Validate` v2 (negation, if/else) | 2 — cross-cutting | extends existing `@Validate` DSL (own code — verified: `cds.validate()` has no public API) | EntityHandler · UnboundActions | none | candidate (issues [#96](https://github.com/dxfrontier/cds-ts-dispatcher/issues/96), [#97](https://github.com/dxfrontier/cds-ts-dispatcher/issues/97)) (skipped from batch-2 by decision 2026-07-29) |
 | 14 | `@AuditLog` | 3 — plugin integration | `@cap-js/audit-logging` | EntityHandler · UnboundActions (verified) | optional peer | candidate |
 | 15 | `@Notify` | 3 — plugin integration | `@cap-js/notifications` | EntityHandler · UnboundActions (verified) | optional peer | candidate |
 | 16 | `@FeatureGated` | 3 — plugin integration | `@cap-js-community/feature-toggle-library` | EntityHandler · UnboundActions | optional peer | deferred (2026-07) |
-| 17 | `@OnWebSocketMessage` / `@OnWebSocketConnect` / `@OnWebSocketDisconnect` | 3 — plugin integration | `@cap-js-community/websocket` | UnboundActions (verified — ws services are regular CAP services); no `@WebSocketHandler` alias shipped | optional peer | implemented (feature-batch2-decorators) |
-| 18 | `@OnServed` / `@OnListening` / `@OnShutdown` | 3 — lifecycle | `cds.on(...)` | `@ServerLifecycle` class (decided, shipped) | none | implemented (feature-batch2-decorators) |
+| 17 | `@OnWebSocketMessage` / `@OnWebSocketConnect` / `@OnWebSocketDisconnect` | 3 — plugin integration | `@cap-js-community/websocket` | UnboundActions (verified — ws services are regular CAP services); no `@WebSocketHandler` alias shipped | optional peer | shipped (6.1.0) |
+| 18 | `@OnServed` / `@OnListening` / `@OnShutdown` | 3 — lifecycle | `cds.on(...)` | `@ServerLifecycle` class (decided, shipped) | none | shipped (6.1.0) |
 
 Tier meaning: **1** — wraps a native CAP runtime capability we do not cover yet; no new dependencies; highest value-to-effort. **2** — cross-cutting utility decorators proven in other frameworks (Spring/NestJS); self-contained implementations. **3** — thin wrappers over the official CAP plugin ecosystem; each adds an optional peer dependency to test and maintain.
 
