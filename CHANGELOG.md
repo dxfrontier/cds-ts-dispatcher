@@ -2,6 +2,86 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.1.0] - 2026-08-06
+
+### 🚀 Features
+
+- *(params)* Add @Data, @Param, @UserInfo, @Tenant and @Diff parameter decorators
+- *(lifecycle)* Add request-lifecycle and scheduled-outcome decorators
+- *(throttle)* Add @Throttle fixed-window rate limiting decorator
+- *(server-lifecycle)* Add @ServerLifecycle host with @OnServed/@OnListening/@OnShutdown metadata
+- *(server-lifecycle)* Register cds.on hooks with per-process class dedup and host guards
+- *(server-lifecycle)* Fail fast on @Use middleware and pin ordering semantics after review
+- *(websocket)* Add OnWebSocketConnect/Disconnect/Message sugar decorators
+- *(stream)* Suggest common content types via StreamContentType union
+
+### 🐛 Bug Fixes
+
+- *(lifecycle)* Guard request-lifecycle attach against event-queue internal dispatches
+- *(sample)* Guard fixture setHeader calls; pin two-group $batch lifecycle semantics
+- *(server-lifecycle)* Keep literal event names for cds.on overloads in the dts build
+- *(parameter)* Guard @IsColumnSupplied INSERT/UPSERT, key @IsPresent columns (C3, C4)
+- *(transformers)* FindResults falls back to req.results on write AFTER events (C5)
+- *(decorators)* Format every FieldsFormatter field, mirror PrependDraft isDraft (C6, M6)
+- *(middleware)* Return the wrapped handler result, run class chain tail once (M8, M9)
+
+### 📚 Documentation
+
+- *(backlog)* Add decorator research backlog (Tier-1 batch source of truth)
+- *(readme)* Document Tier-1 request-lifecycle, scheduled-outcome and parameter decorators
+- *(readme)* Pin observed req.diff() payload shape in the @Diff section
+- *(backlog)* Record as-built notes for the implemented Tier-1 batch
+- *(specs)* Add decorator batch 2 design (throttle, server lifecycle, websocket)
+- *(specs)* Drop the WebSocketHandler alias; host ws handlers in UnboundActions
+- *(plans)* Add decorator batch 2 implementation plan
+- *(readme)* Document @Throttle, @ServerLifecycle family and websocket decorators
+- *(readme)* Restructure table of contents and decorator taxonomy
+- *(spec)* Add agentic-dx design spec for AI-assistant guidance
+- *(spec)* Relocate shipped agent guide to docs/ per ecosystem research
+- *(plan)* Add agentic-dx implementation plan (three-PR rollout)
+- *(agentic-dx)* Rev 2 - reduce scope to JSDoc-only, rewrite spec and plan
+- *(plan)* Use --no-verify for red-phase commits (pre-commit runs unit suite)
+- *(plan)* Fix drift-gate regex to forbid crossing comment boundaries
+- *(jsdoc)* Add @packageDocumentation header and CDSDispatcher bootstrap contract
+- *(jsdoc)* Canonical agent-oriented JSDoc for class and parameter decorators
+- *(plan)* Fence @example bodies and escape line-start decorators; fix @Env reference
+- *(jsdoc)* Fix EachInstance payload docs, fence examples, per-overload EntityHandler docs
+- *(jsdoc)* Canonical agent-oriented JSDoc for BEFORE/AFTER method decorators
+- *(jsdoc)* Correct wildcard-host ALL registration and draft CREATE illustration
+- *(jsdoc)* Complete decorator JSDoc pass; drift gate fully green
+- *(jsdoc)* Fix exposeValidatorResult nesting, Next return types, on-phase dispatch claims
+- *(jsdoc)* Fix contradictory OnAll first-match clause
+- *(jsdoc)* Carry module docs on CDSDispatcher per dts contingency; ci grep for d.ts survival
+- *(jsdoc)* Final-review fixes - subject semantics, escape-convention note, gate sentinels
+- *(jsdoc)* Fix verified review findings, docs-only tranche (C1-C2, M1-M5, M7, M10-M17, N1-N9)
+- *(jsdoc)* Switch @ guard to \@, guard mid-line decorators, split @see trailers
+- *(backlog)* Flip tier-1 and batch-2 statuses to shipped (6.1.0)
+
+### 🧪 Testing
+
+- *(integration)* Pin request-lifecycle, scheduled-outcome and req.diff runtime behavior
+- *(e2e)* Cover the @BeforeCommit veto in the postman collection
+- *(throttle)* Fixture throttledPing action and integration coverage
+- *(e2e)* Cover the @Throttle 429 flow in the postman collection
+- *(throttle)* Harden by-tenant keying and 429 message assertions after review
+- *(server-lifecycle)* Fixture handler, integration markers and e2e seed visibility
+- *(websocket)* Add ChatService fixture over @cap-js-community/websocket with integration coverage
+- *(e2e)* Websocket smoke script chained after the newman collection
+- *(websocket)* Pin close-code delivery and harden socket hygiene after review
+- *(agent-docs)* Add JSDoc drift gate (@example per export, package docs)
+- *(agent-docs)* Enforce comment-boundary adjacency in drift gate regex
+- *(agent-docs)* Enforce @example on every documented declaration (M18)
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version, CHANGELOG.md generated
+- *(workflows)* Publish with org-level NPM_ORG_TOKEN secret
+- *(mcp)* Register the official CAP MCP server and document usage rules
+- *(models)* Commit regenerated bookshop @cds-models for throttledPing
+- *(typedoc)* Remove generated docs and typedoc tooling
+- *(bookshop)* Refresh generated @dispatcher env types
+- *(tests)* Align JSDoc drift-gate sentinel with backslash escape wording
+
 ## [6.0.0] - 2026-07-21
 
 ### 🚀 Features
