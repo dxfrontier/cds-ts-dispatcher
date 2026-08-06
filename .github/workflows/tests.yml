@@ -101,8 +101,15 @@ jobs:
       matrix:
         version: [24, 22]
         platform: [ubuntu-latest]
+        include:
+          # Node 26 is Current (Active LTS on 2026-10-28) and not yet in the runner toolcache
+          # (setup-node downloads it). Early-signal leg — flip to blocking once 26 reaches LTS.
+          - version: 26
+            platform: ubuntu-latest
 
     runs-on: ${{ matrix.platform }}
+    # the Node 26 leg must not fail the workflow while 26 is pre-LTS
+    continue-on-error: ${{ matrix.version == 26 }}
 
     steps:
       - name: Get code
