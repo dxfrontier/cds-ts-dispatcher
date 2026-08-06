@@ -12,6 +12,7 @@ import {
   OnError,
   OnEvent,
   OnFunction,
+  OnRequestDone,
   Prepend,
   Req,
   RequestResponse,
@@ -40,6 +41,7 @@ import {
 } from '../../../../@cds-models/CatalogService';
 import { MiddlewareEntity1 } from '../../../middleware/MiddlewareEntity1';
 import { MiddlewareEntity2 } from '../../../middleware/MiddlewareEntity2';
+import { MiddlewareMethodAction } from '../../../middleware/MiddlewareMethodAction';
 
 import type { ExposeFields } from '../../../../../../../lib/types/validator';
 import { Result, Results } from '@dxfrontier/cds-ts-dispatcher';
@@ -50,6 +52,7 @@ class UnboundActionsHandler {
   @Inject(CDS_DISPATCHER.SRV) private readonly srv: Service;
 
   @OnAction('changeBookProperties')
+  @Use(MiddlewareMethodAction)
   @FieldsFormatter<ExposeFields<typeof changeBookProperties>>({ action: 'toLower' }, 'language')
   @FieldsFormatter<ExposeFields<typeof changeBookProperties>>({ action: 'ltrim' }, 'language')
   @Validate<ExposeFields<typeof changeBookProperties>>({ action: 'isIn', values: ['PDF', 'E-Kindle'] }, 'format')
@@ -175,7 +178,11 @@ class UnboundActionsHandler {
 
   @OnEvent(OrderedBook)
   public async orderedBook(@Req() req: Request<OrderedBook>, @Res() res: RequestResponse): Promise<void> {
-    res.setHeader('Content-Language', 'DE_de');
+    // Guarded: this event is also emitted from Books after-read - inside a multi-group OData $batch the
+    // shared HTTP response is already streaming there (ERR_HTTP_HEADERS_SENT otherwise).
+    if (!res.headersSent) {
+      res.setHeader('Content-Language', 'DE_de');
+    }
     if (req.event !== 'OrderedBook') {
       req.reject(400, 'Not OrderedBook: check @OnEvent decorator');
     }
@@ -225,6 +232,13 @@ class UnboundActionsHandler {
   @OnEvent('event_1')
   private async bla(@Req() req: Request<{ foo: number; bar: string }>): Promise<void> {
     const bla = req.data;
+  }
+
+  // Service-wide request lifecycle: hosted on '@UnboundActions', so it fires once per ROOT request of
+  // the whole 'CatalogService', not only for requests targeting one entity.
+  @OnRequestDone()
+  public async requestDone(@Req() req: Request): Promise<void> {
+    console.log('[UnboundLifecycle] RequestDone');
   }
 }
 

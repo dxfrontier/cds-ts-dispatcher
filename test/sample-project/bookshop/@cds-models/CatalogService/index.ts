@@ -9,6 +9,7 @@ export default class {
   declare static readonly submitOrder: typeof submitOrder;
   declare static readonly submitStock: typeof submitStock;
   declare static readonly submitQuantity: typeof submitQuantity;
+  declare static readonly throttledPing: typeof throttledPing;
   declare static readonly submitOrderFunction: typeof submitOrderFunction;
   declare static readonly streamBooks: typeof streamBooks;
   declare static readonly adminOnlyAction: typeof adminOnlyAction;
@@ -561,6 +562,16 @@ export declare const submitQuantity:  {
 } | null> |  {
   stock?: number | null,
 } | null
+  kind: 'action'
+}
+
+export declare const throttledPing:  {
+  // positional
+  (): globalThis.Promise<string | null> | string | null
+  // named
+  ({}: globalThis.Record<never, never>): globalThis.Promise<string | null> | string | null
+  // metadata (do not use)
+  __parameters: globalThis.Record<never, never>, __returns: globalThis.Promise<string | null> | string | null
   kind: 'action'
 }
 

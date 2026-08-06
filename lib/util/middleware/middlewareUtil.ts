@@ -15,7 +15,9 @@ const middlewareUtil = {
    * @param req The request object.
    * @param index The current index in the middleware chain. Defaults to 0.
    * @param middlewares An array of middleware classes to execute.
-   * @param entityInstance An optional entity instance.
+   * @param entityInstance Inert pass-through - nothing in the chain consumes it. Kept for call-site
+   * signature stability (the class-level `@Use` path passes it); its former conditional role is what
+   * caused the doubled-tail defect this function was fixed for.
    * @returns A promise that resolves when the middleware chain is complete.
    */
   async executeMiddlewareChain<Middleware extends Constructable<MiddlewareImpl>>(
@@ -34,11 +36,7 @@ const middlewareUtil = {
       const currentMiddlewareInstance = new CurrentMiddleware();
 
       const next = async (): Promise<void> => {
-        if (!util.lodash.isUndefined(entityInstance)) {
-          await this.executeMiddlewareChain(req, index + 1, middlewares, entityInstance);
-        }
-
-        await this.executeMiddlewareChain(req, index + 1, middlewares);
+        await this.executeMiddlewareChain(req, index + 1, middlewares, entityInstance);
       };
 
       await currentMiddlewareInstance.use(req, next);
@@ -64,7 +62,7 @@ const middlewareUtil = {
         await middlewareUtil.executeMiddlewareChain(req, 0, middlewares);
       }
 
-      await originalMethod?.apply(this, args);
+      return await originalMethod?.apply(this, args);
     };
   },
 

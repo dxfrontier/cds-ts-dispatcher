@@ -46,6 +46,9 @@ service CatalogService {
     stock : Integer
   };
 
+  // Unbound action - F7: rate-limited by the lib's @Throttle({ limit: 3, window: 10_000 }).
+  action throttledPing() returns String;
+
   // Unbound function
   function submitOrderFunction(book: Books:ID, quantity: Integer)                           returns {
     stock : Integer

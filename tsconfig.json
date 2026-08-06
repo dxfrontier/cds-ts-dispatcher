@@ -25,9 +25,5 @@
       "@sap/cds": ["./node_modules/@cap-js/cds-types"]
     }
   },
-  "typedocOptions": {
-    "entryPoints": ["./lib/**"],
-    "out": "./lib/docs"
-  },
   "exclude": ["./node_modules", "./test", "./dist"]
 }

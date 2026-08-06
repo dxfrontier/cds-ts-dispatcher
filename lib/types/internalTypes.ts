@@ -56,7 +56,14 @@ export type ParameterDecorators = keyof typeof constants.DECORATOR.PARAMETER;
 // @AfterRead, @AfterCreate, @BeforeCreate, @BeforeUpdate, @OnRead, etc decorator types
 // **************************************************************************************************************************
 
-export type EventKind = 'BEFORE' | 'AFTER' | 'AFTER_SINGLE' | 'ON' | 'PREPEND';
+export type EventKind =
+  | 'BEFORE'
+  | 'AFTER'
+  | 'AFTER_SINGLE'
+  | 'ON'
+  | 'PREPEND'
+  | 'REQUEST_LIFECYCLE'
+  | 'SERVER_LIFECYCLE';
 
 type MessagingTypes = {
   SAME_NODE_PROCESS: {
@@ -64,14 +71,16 @@ type MessagingTypes = {
      * Use when both `emitter` and `receiver` run in the same `CAP server instance` & `same service`.
      *
      * @example
+     * ```ts
      * // Emitting event
      * this.emit('NameOfTheEvent', { ID: '123', amount: 99.99 }); // where this is the service
      *
      * // Subscribing to event
-     * /@OnSubscribe({
+     * \@OnSubscribe({
      *  eventName: 'NameOfTheEvent',
      *  type: 'SAME_NODE_PROCESS',
      * })
+     * ```
      *
      * */
     type: 'SAME_NODE_PROCESS';
@@ -81,17 +90,19 @@ type MessagingTypes = {
      * Use when `emitter` can be found in E.g. `Service A` and `receiver` can reside in E.g. `Service B`, having same `CAP server instance` & `different services`.
      *
      * @example
+     * ```ts
      * // Emitting event from `Service A`
      * const service = cds.connect.to('Service_A');
      *       service.emit('NameOfTheEvent', { ID: '123', amount: 99.99 });
      * // or use this.emit ... assuming `this` is the service `Service_A`
      *
      * // Subscribing to event from `Service B`
-     * /@OnSubscribe({
+     * \@OnSubscribe({
      *  eventName: 'NameOfTheEvent',
      *  type: 'SAME_NODE_PROCESS_DIFFERENT_SERVICE',
      *  externalService: 'Service_A'
      * })
+     * ```
      * */
     type: 'SAME_NODE_PROCESS_DIFFERENT_SERVICE';
   };
@@ -100,15 +111,17 @@ type MessagingTypes = {
      * Recommended for production with external message brokers
      *
      * @example
+     * ```ts
      * // Emitting event
      * const msg = await cds.connect.to('messaging');
      *       msg.emit('NameOfTheEvent', { foo: 11, bar: '22' });
      *
      * // Subscribing to event
-     * /@OnSubscribe({
+     * \@OnSubscribe({
      *  eventName: 'NameOfTheEvent',
      *  type: 'MESSAGE_BROKER',
      * })
+     * ```
      * */
     type: 'MESSAGE_BROKER';
   };
@@ -136,8 +149,11 @@ export type EventMessagingOptions = {
   /**
    * When enabled, displays inbound message payloads in the specified format.
    *
-   * @example // With showReceiverMessage: true
+   * @example
+   * ```
+   * // With showReceiverMessage: true
    * > received: EventName { ID: '123', amount: 99.99 }
+   * ```
    *
    * @default false
    */
@@ -150,12 +166,14 @@ export type EventMessagingOptions = {
    * - `'debug'`: Displays data using  `console.debug()`, ideal for nested or dynamic messages.
    *
    * @example
+   * ```
    * // With consoleStyle: 'table'
    * ┌─────────┬──────┬────────┐
    * │ (index) │  ID  │ amount │
    * ├─────────┼──────┼────────┤
    * │    0    │ '123'│ 99.99  │
    * └─────────┴──────┴────────┘
+   * ```
    *
    * @default 'debug'
    */
@@ -201,6 +219,26 @@ export type ScheduledHandler = {
   scheduleOptions?: ScheduleOptions;
 };
 
+export type ScheduledOutcomeHandler = {
+  type: 'SCHEDULED_OUTCOME';
+  event: 'SCHEDULED_SUCCESS' | 'SCHEDULED_FAILURE';
+  taskName: string;
+};
+
+export type REQUEST_LIFECYCLE_EVENTS = 'BEFORE_COMMIT' | 'AFTER_COMMIT' | 'AFTER_ROLLBACK' | 'REQUEST_DONE';
+
+export type RequestLifecycleHandler = {
+  type: 'REQUEST_LIFECYCLE';
+  event: REQUEST_LIFECYCLE_EVENTS;
+};
+
+export type SERVER_LIFECYCLE_EVENTS = 'SERVED' | 'LISTENING' | 'SHUTDOWN';
+
+export type ServerLifecycleHandler = {
+  type: 'SERVER_LIFECYCLE';
+  event: SERVER_LIFECYCLE_EVENTS;
+};
+
 /**
  * Minimal shape of the `srv.schedule(...).every(...)` fluent builder that exposes `.as(name)`.
  *
@@ -216,7 +254,17 @@ export type BaseHandler = {
   callback: RequestType;
   eventKind: EventKind;
   isDraft: boolean;
-} & (DefaultHandlers | OnHandler | EventHandler | EventMessagingHandler | PrependHandler | ScheduledHandler);
+} & (
+  | DefaultHandlers
+  | OnHandler
+  | EventHandler
+  | EventMessagingHandler
+  | PrependHandler
+  | ScheduledHandler
+  | ScheduledOutcomeHandler
+  | RequestLifecycleHandler
+  | ServerLifecycleHandler
+);
 
 // **************************************************************************************************************************
 // **************************************************************************************************************************
@@ -325,6 +373,7 @@ export type MapPrepend = {
   eventKind: EventKind;
   actionName?: CdsFunction | string;
   eventName?: CdsEvent;
+  isDraft?: boolean;
 };
 
 // **************************************************************************************************************************
@@ -384,6 +433,11 @@ type EnvProperty = {
   property: string;
 };
 
+type DataParamProperty = {
+  type: 'DATA_PARAM';
+  property: string;
+};
+
 type OnlyParameterIndexDecorator = {
   type: 'INDEX_DECORATOR';
 };
@@ -418,6 +472,7 @@ export type MetadataFields = {
   | IsColumnValueSupplied
   | IsRoleProperties
   | EnvProperty
+  | DataParamProperty
 );
 
 export type MetadataInputs = {

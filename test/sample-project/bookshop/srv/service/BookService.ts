@@ -16,9 +16,13 @@ class BookService {
     jwt: string | undefined;
     env: string;
   }) {
-    args.res.setHeader('token', args.jwt ?? '');
-    args.res.setHeader('res', 'res');
-    args.res.setHeader('env', args.env);
+    // Guarded: inside a multi-group OData $batch the shared HTTP response is already streaming when a
+    // later atomicity group's follow-up READ runs - an unguarded setHeader throws ERR_HTTP_HEADERS_SENT.
+    if (!args.res.headersSent) {
+      args.res.setHeader('token', args.jwt ?? '');
+      args.res.setHeader('res', 'res');
+      args.res.setHeader('env', args.env);
+    }
 
     await this.emitOrderedBookData(args.req);
 

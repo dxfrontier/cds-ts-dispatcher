@@ -6,7 +6,7 @@ import constants from '../../constants/internalConstants';
 
 import type { MetadataFields, TemporaryArgs } from '../../types/internalTypes';
 import type { IncomingMessage, ServerResponse } from 'http';
-import type { ref } from '@sap/cds';
+import type { ref, User } from '@sap/cds';
 import type { Request } from '../../types/types';
 
 /**
@@ -48,15 +48,29 @@ const parameterUtil = {
    * @param metadata The metadata fields array.
    */
   applyIsColumnSupplied(req: Request, args: any[], metadata: MetadataFields[]): void {
+    // Protocol CREATE/UPSERT requests build `INSERT/UPSERT.entries(data)` and never carry `.columns` -
+    // explicit columns win when present, otherwise fall back to checking the entries for the field.
+    const isSupplied = (query: { columns?: string[]; entries?: Record<string, unknown>[] }, field: string): boolean => {
+      if (query.columns) {
+        return query.columns.includes(field);
+      }
+
+      if (query.entries) {
+        return query.entries.some((entry) => field in entry);
+      }
+
+      return false;
+    };
+
     metadata.forEach((parameter) => {
       if (parameter.type === 'CHECK_COLUMN_VALUE') {
         if (req.query.INSERT) {
-          args[parameter.parameterIndex] = req.query.INSERT.columns.includes(parameter.property);
+          args[parameter.parameterIndex] = isSupplied(req.query.INSERT, parameter.property);
           return;
         }
 
         if (req.query.UPSERT) {
-          args[parameter.parameterIndex] = req.query.UPSERT.columns.includes(parameter.property);
+          args[parameter.parameterIndex] = isSupplied(req.query.UPSERT, parameter.property);
           return;
         }
 
@@ -202,7 +216,7 @@ const parameterUtil = {
         case 'columns': {
           if (parameter.key === 'SELECT' || parameter.key === 'INSERT' || parameter.key === 'UPSERT') {
             args[parameter.parameterIndex] =
-              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query.SELECT?.[queryOption];
+              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query[parameter.key]?.[queryOption];
           }
 
           break;
@@ -252,6 +266,47 @@ const parameterUtil = {
   },
 
   /**
+   * Retrieves the `req.data` payload of the current request.
+   * @param req The request object.
+   * @returns The request data.
+   */
+  retrieveData(req: Request) {
+    return req.data;
+  },
+
+  /**
+   * Retrieves the authenticated user (`req.user`) of the current request.
+   * @param req The request object.
+   * @returns The `User` object.
+   */
+  retrieveUser(req: Request): User {
+    return req.user;
+  },
+
+  /**
+   * Retrieves the tenant (`req.tenant`) of the current request.
+   * @param req The request object.
+   * @returns The tenant identifier, if present.
+   */
+  retrieveTenant(req: Request): string | undefined {
+    return req.tenant;
+  },
+
+  /**
+   * Retrieves the awaited `req.diff()` result - the before/after change-set of the current request.
+   *
+   * `NOTE:` `req.diff` is a runtime-only capability (not declared by the `@sap/cds` type declarations), so its
+   * presence is checked defensively before invoking it.
+   * @param req The request object.
+   * @returns A promise resolving to the diff result if `req.diff` is a function, otherwise `undefined`.
+   */
+  async retrieveDiff(req: Request): Promise<unknown> {
+    const requestWithDiff = req as unknown as { diff?: () => Promise<unknown> };
+
+    return typeof requestWithDiff?.diff === 'function' ? await requestWithDiff.diff() : undefined;
+  },
+
+  /**
    * Finds the results from the argument.
    * @param arg The argument.
    * @returns The results array, boolean, object, or undefined.
@@ -297,6 +352,10 @@ const parameterUtil = {
           temporaryArgs.results = arg;
           break;
 
+        case util.lodash.isNumber(arg):
+          temporaryArgs.results = arg;
+          break;
+
         default: {
           const allOthersExceptString = typeof arg !== 'string';
           if (allOthersExceptString) {
@@ -329,6 +388,20 @@ const parameterUtil = {
         const envValue = getNestedProperty(cds.env, path);
 
         args[parameter.parameterIndex] = envValue;
+      }
+    });
+  },
+
+  /**
+   * Applies the `@Param` parameter(s) to the request arguments, injecting `req.data[field]` values.
+   * @param req The request object.
+   * @param args The arguments array.
+   * @param metadata The metadata fields array.
+   */
+  applyParam(req: Request, args: any[], metadata: MetadataFields[]): void {
+    metadata.forEach((parameter) => {
+      if (parameter.type === 'DATA_PARAM') {
+        args[parameter.parameterIndex] = req.data?.[parameter.property];
       }
     });
   },

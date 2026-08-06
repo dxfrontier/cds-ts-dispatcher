@@ -21,6 +21,7 @@ import {
   OnPatchDraft,
   OnSaveDraft,
   OnUpdate,
+  PrependDraft,
   Req,
   Request,
   Results,
@@ -78,6 +79,16 @@ class BookEventsHandler {
   public async save(@Req() req: Request, @Next() next: NextEvent) {
     this.bookEventsService.showSaveDraftMessage(req);
     return next();
+  }
+
+  // ============================================================================================================
+  // M6 regression probe: @PrependDraft({ eventDecorator: 'BeforeEditDraft' }) must register on the ACTIVE
+  // entity (isDraft: false), mirroring @BeforeEditDraft itself - see PREPEND-DRAFT-EDIT.test.ts.
+  // ============================================================================================================
+
+  @PrependDraft({ eventDecorator: 'BeforeEditDraft' })
+  private async prependBeforeEditDraft(@Req() req: Request): Promise<void> {
+    console.log('[PrependBeforeEditDraft] fired');
   }
 
   // ============================================================================================================

@@ -41,17 +41,23 @@ type RequestResponse = ServerResponse;
  * Use `NextMiddleware` type to annotate the `next` parameter of the implementation of the middleware.
  *
  * @example
+ * ```ts
  * export class Middleware implements MiddlewareImpl {
  *    public async use(req: Request<MyEntity>, next: NextMiddleware) {
  *      await next();
  *    }
  * }
+ * ```
  */
 export type NextMiddleware = () => Promise<unknown>;
 
 /**
  * Use `NextEvent` type to annotate the `next` parameter of the implementation of the `ON` events.
- * @example "@Next() next: NextEvent"
+ *
+ * @example
+ * ```ts
+ * \@Next() next: NextEvent
+ * ```
  */
 export type NextEvent = (req?: Request) => Function;
 
@@ -102,6 +108,60 @@ export type ScheduleOptions = {
    */
   data?: Record<string, unknown>;
 };
+
+/**
+ * Options for the `@Throttle` decorator.
+ */
+export type ThrottleOptions = {
+  /** Maximum number of invocations allowed per window. Must be >= 1. */
+  limit: number;
+  /** Fixed window length in milliseconds. Must be >= 1. */
+  window: number;
+  /**
+   * Counter key source: `'user'` keys by `req.user.id` (fallback `'anonymous'`),
+   * `'tenant'` keys by `req.tenant` (fallback `'no-tenant'`).
+   * @default 'user'
+   */
+  by?: 'user' | 'tenant';
+};
+
+// **************************************************************************************************************************
+// **************************************************************************************************************************
+
+// **************************************************************************************************************************
+// @Stream decorator types
+// **************************************************************************************************************************
+
+/**
+ * Common `Content-Type` values for the `@Stream` decorator.
+ * Any other valid MIME type string is also accepted.
+ */
+export type StreamContentType =
+  // Generic binary (the default)
+  | 'application/octet-stream'
+  // Streamed query results (SELECT.pipeline / for-await)
+  | 'application/json'
+  | 'application/x-ndjson'
+  // Tabular exports
+  | 'text/csv'
+  | 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // .xlsx
+  | 'application/vnd.ms-excel' // legacy .xls
+  // Documents & archives
+  | 'application/pdf'
+  | 'application/zip'
+  // Media entities
+  | 'image/png'
+  | 'image/jpeg'
+  | 'image/svg+xml'
+  | 'image/webp'
+  | 'video/mp4'
+  | 'audio/mpeg'
+  // Text
+  | 'text/plain'
+  | 'text/html'
+  | 'application/xml'
+  // Escape hatch: keeps the suggestions above while accepting any MIME string
+  | (string & {});
 
 // **************************************************************************************************************************
 // **************************************************************************************************************************

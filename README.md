@@ -22,32 +22,32 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-  - [`Option 1 :` Install CDS-TS-Dispatcher - `New project`](#option-1--install-cds-ts-dispatcher---new-project)
-  - [`Option 2 :` Install CDS-TS-Dispatcher - `Existing TypeScript project`](#option-2--install-cds-ts-dispatcher---existing-typescript-project)
-  - [`Generate CDS Typed entities`](#generate-cds-typed-entities)
-    - [`Important`](#important)
-  - [`Migration:` from @sap/cds `v7` to `v8`](#migration-from-sapcds-v7-to-v8)
-  - [`Migration:` from @sap/cds `v8` to `v9`](#migration-from-sapcds-v8-to-v9)
-  - [`Migration:` from @sap/cds `v9` to `v10`](#migration-from-sapcds-v9-to-v10)
+  - [Option 1 : Install CDS-TS-Dispatcher - New project](#option-1--install-cds-ts-dispatcher---new-project)
+  - [Option 2 : Install CDS-TS-Dispatcher - Existing TypeScript project](#option-2--install-cds-ts-dispatcher---existing-typescript-project)
+  - [Generate CDS Typed entities](#generate-cds-typed-entities)
+- [Migration guides](#migration-guides)
+  - [From @sap/cds v7 to v8](#migration-from-sapcds-v7-to-v8)
+  - [From @sap/cds v8 to v9](#migration-from-sapcds-v8-to-v9)
+  - [From @sap/cds v9 to v10](#migration-from-sapcds-v9-to-v10)
 - [Usage](#usage)
-  - [`Architecture`](#architecture)
-  - [`CDSDispatcher`](#cdsdispatcher)
-  - [`Decorators`](#decorators)
-    - [`Class`](#class)
+  - [Architecture](#architecture)
+  - [CDSDispatcher](#cdsdispatcher)
+  - [Decorators](#decorators)
+    - [Class](#class)
       - [@EntityHandler](#entityhandler)
       - [@ServiceLogic](#servicelogic)
       - [@Repository](#repository)
         - [`[Optional]` - CDS-TS-Repository - BaseRepository](#optional---cds-ts-repository---baserepository)
       - [@UnboundActions](#unboundactions)
+      - [@ServerLifecycle](#serverlifecycle)
       - [@Use](#use)
-    - [`Field`](#field)
+    - [Field](#field)
       - [@Inject](#inject)
-      - [@Inject(`CDS_DISPATCHER.SRV`)](#injectcds_dispatchersrv)
-      - [@Inject(CDS\_DISPATCHER.OUTBOXED\_SRV)](#injectcds_dispatcheroutboxed_srv)
-    - [`Parameter`](#parameter)
+      - [@Inject(CDS_DISPATCHER.SRV)](#injectcds_dispatchersrv)
+      - [@Inject(CDS_DISPATCHER.OUTBOXED_SRV)](#injectcds_dispatcheroutboxed_srv)
+    - [Parameter](#parameter)
       - [@Req](#req)
       - [@Res](#res)
       - [@Results / @Result](#results--result)
@@ -65,83 +65,63 @@ The goal of **CDS-TS-Dispatcher** is to significantly reduce the boilerplate cod
       - [@Env](#env)
       - [@Subject](#subject)
       - [@Affected](#affected)
+      - [@Data](#data)
+      - [@Param](#param)
+      - [@UserInfo](#userinfo)
+      - [@Tenant](#tenant)
+      - [@Diff](#diff)
       - [~~@Msg~~](#msg)
-    - [`Method`-`active entity`](#method-active-entity)
-      - [`Before`](#before)
-        - [@BeforeCreate](#beforecreate)
-        - [@BeforeRead](#beforeread)
-        - [@BeforeUpdate](#beforeupdate)
-        - [@BeforeDelete](#beforedelete)
-        - [@BeforeAction](#beforeaction)
-        - [@BeforeBoundAction](#beforeboundaction)
-        - [@BeforeFunction](#beforefunction)
-        - [@BeforeBoundFunction](#beforeboundfunction)
-        - [@BeforeAll](#beforeall)
-      - [`After`](#after)
-        - [@AfterCreate](#aftercreate)
-        - [@AfterRead](#afterread)
-        - [@AfterReadEachInstance](#afterreadeachinstance)
-        - [@AfterUpdate](#afterupdate)
-        - [@AfterDelete](#afterdelete)
-        - [@AfterAction](#afteraction)
-        - [@AfterAll](#afterall)
-      - [`On`](#on)
-        - [@OnCreate](#oncreate)
-        - [@OnRead](#onread)
-        - [@OnUpdate](#onupdate)
-        - [@OnDelete](#ondelete)
-        - [@OnAction](#onaction)
-        - [@OnFunction](#onfunction)
-        - [@OnEvent](#onevent)
-        - [@OnSubscribe](#onsubscribe)
-        - [@OnError](#onerror)
-        - [@OnBoundAction](#onboundaction)
-        - [@OnBoundFunction](#onboundfunction)
-        - [@OnAll](#onall)
-    - [`Method`-`draft entity`](#method-draft-entity)
-      - [`Before`](#before-1)
-        - [@BeforeNewDraft](#beforenewdraft)
-        - [@BeforeCancelDraft](#beforecanceldraft)
-        - [@BeforePatchDraft](#beforepatchdraft)
-        - [@BeforeDiscardDraft](#beforediscarddraft)
-        - [@BeforeEditDraft](#beforeeditdraft)
-        - [@BeforeSaveDraft](#beforesavedraft)
-      - [`After`](#after-1)
-        - [@AfterNewDraft](#afternewdraft)
-        - [@AfterCancelDraft](#aftercanceldraft)
-        - [@AfterPatchDraft](#afterpatchdraft)
-        - [@AfterDiscardDraft](#afterdiscarddraft)
-        - [@AfterEditDraft](#aftereditdraft)
-        - [@AfterSaveDraft](#aftersavedraft)
-      - [`On`](#on-1)
-        - [@OnNewDraft](#onnewdraft)
-        - [@OnCancelDraft](#oncanceldraft)
-        - [@OnPatchDraft](#onpatchdraft)
-        - [@OnDiscardDraft](#ondiscarddraft)
-        - [@OnEditDraft](#oneditdraft)
-        - [@OnSaveDraft](#onsavedraft)
-      - [`Other draft decorators`](#other-draft-decorators)
-    - [`Scheduling`](#scheduling)
+    - [Method — CRUD, active entity](#method--crud-active-entity)
+      - Before: [@BeforeCreate](#beforecreate), [@BeforeRead](#beforeread), [@BeforeUpdate](#beforeupdate), [@BeforeDelete](#beforedelete), [@BeforeAction](#beforeaction), [@BeforeBoundAction](#beforeboundaction), [@BeforeFunction](#beforefunction), [@BeforeBoundFunction](#beforeboundfunction), [@BeforeAll](#beforeall)
+      - After: [@AfterCreate](#aftercreate), [@AfterRead](#afterread), [@AfterReadEachInstance](#afterreadeachinstance), [@AfterUpdate](#afterupdate), [@AfterDelete](#afterdelete), [@AfterAction](#afteraction), [@AfterAll](#afterall)
+      - On: [@OnCreate](#oncreate), [@OnRead](#onread), [@OnUpdate](#onupdate), [@OnDelete](#ondelete), [@OnAction](#onaction), [@OnFunction](#onfunction), [@OnBoundAction](#onboundaction), [@OnBoundFunction](#onboundfunction), [@OnAll](#onall)
+    - [Method — CRUD, draft entity](#method--crud-draft-entity)
+      - Before: [@BeforeNewDraft](#beforenewdraft), [@BeforeCancelDraft](#beforecanceldraft), [@BeforePatchDraft](#beforepatchdraft), [@BeforeDiscardDraft](#beforediscarddraft), [@BeforeEditDraft](#beforeeditdraft), [@BeforeSaveDraft](#beforesavedraft)
+      - After: [@AfterNewDraft](#afternewdraft), [@AfterCancelDraft](#aftercanceldraft), [@AfterPatchDraft](#afterpatchdraft), [@AfterDiscardDraft](#afterdiscarddraft), [@AfterEditDraft](#aftereditdraft), [@AfterSaveDraft](#aftersavedraft)
+      - On: [@OnNewDraft](#onnewdraft), [@OnCancelDraft](#oncanceldraft), [@OnPatchDraft](#onpatchdraft), [@OnDiscardDraft](#ondiscarddraft), [@OnEditDraft](#oneditdraft), [@OnSaveDraft](#onsavedraft)
+      - [Other draft decorators](#other-draft-decorators)
+    - [Method — Events & messaging](#method--events--messaging)
+      - [@OnEvent](#onevent)
+      - [@OnSubscribe](#onsubscribe)
+      - [@OnError](#onerror)
+    - [Method — Request lifecycle](#method--request-lifecycle)
+      - [@BeforeCommit](#beforecommit)
+      - [@AfterCommit](#aftercommit)
+      - [@AfterRollback](#afterrollback)
+      - [@OnRequestDone](#onrequestdone)
+    - [Method — Server lifecycle](#method--server-lifecycle)
+      - [@OnServed](#onserved)
+      - [@OnListening](#onlistening)
+      - [@OnShutdown](#onshutdown)
+    - [Method — Scheduling](#method--scheduling)
       - [@OnScheduled](#onscheduled)
       - [@Schedule](#schedule)
-    - [`Streaming`](#streaming)
+      - [@OnScheduledSuccess](#onscheduledsuccess)
+      - [@OnScheduledFailure](#onscheduledfailure)
+    - [Method — Streaming](#method--streaming)
       - [@Stream](#stream)
-    - [`Method`-`helpers`](#method-helpers)
+    - [Method — WebSocket](#method--websocket)
+      - [@OnWebSocketConnect](#onwebsocketconnect)
+      - [@OnWebSocketDisconnect](#onwebsocketdisconnect)
+      - [@OnWebSocketMessage](#onwebsocketmessage)
+    - [Method — Middleware & guards](#method--middleware--guards)
+      - [@Use](#use-1)
+      - [@ExecutionAllowedForRole](#executionallowedforrole)
+      - [@Throttle](#throttle)
+    - [Method — Utilities](#method--utilities)
       - [@AfterReadSingleInstance](#afterreadsingleinstance)
       - [@Prepend](#prepend)
       - [@Validate](#validate)
       - [@FieldsFormatter](#fieldsformatter)
-      - [@ExecutionAllowedForRole](#executionallowedforrole)
-      - [@Use](#use-1)
       - [@CatchAndSetErrorCode](#catchandseterrorcode)
       - [@CatchAndSetErrorMessage](#catchandseterrormessage)
       - [@Exclude](#exclude)
       - [@Include](#include)
       - [@Mask](#mask)
       - [@LogExecution](#logexecution)
-- [`Deployment` to BTP using MTA](#deployment-to-btp-using-mta)
-- [`Best practices` \& `tips`](#best-practices--tips)
-- [`Samples`](#samples)
+- [Deployment to BTP using MTA](#deployment-to-btp-using-mta)
+- [Best practices & tips](#best-practices--tips)
+- [Samples](#samples)
 - [Contributing](#contributing)
 - [License](#license)
 - [Authors](#authors)
@@ -348,6 +328,8 @@ npx @cap-js/cds-typer "*" --outputDirectory ./srv/util/types/entities
 > - **`import { Book } from '#cds-models/CatalogService';`**
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+## Migration guides
 
 ### `Migration:` from @sap/cds `v7` to `v8`
 
@@ -645,7 +627,7 @@ export = new CDSDispatcher([
 
 ### `Decorators`
 
-#### `Class`
+#### Class
 
 ##### @EntityHandler
 
@@ -735,7 +717,7 @@ This decorator configures the dependency injection scope for the service class, 
 `Parameters`
 
 - `scope` `[Optional]` - The dependency injection scope for the service class:
-  - `'Singleton'` - Single instance shared across the entire application
+  - `'Singleton'` - Single instance shared per `CDSDispatcher` container (one per CAP service implementation)
   - `'Transient'` - New instance created for each injection (default)
   
   If not provided, defaults to `'Transient'` scope behavior.
@@ -784,15 +766,15 @@ export class AnyService {
 ```
 
 > [!IMPORTANT]
-> When using `@ServiceLogic('Singleton')`, the same instance is shared across the entire application. Any values set in the class properties (like `message` in the example above) will be **carried everywhere** and **persist** throughout the application lifecycle. 
+> When using `@ServiceLogic('Singleton')`, the same instance is shared across the owning `CDSDispatcher` container — i.e. one CAP service implementation. Any values set in the class properties (like `message` in the example above) **persist** across requests within that dispatcher; a class injected by SEPARATE dispatchers gets a separate instance per dispatcher. 
 > 
 > This means:
 > 
-> - State modifications in one part of your application will be visible in all other parts
+> - State modifications made by one handler class are visible in all other classes of the same dispatcher
 > - Data stored in singleton services persists across multiple requests
 > - All classes that `@Inject` this singleton service will receive the exact same instance with the same state
 >
-> Use `'Singleton'` scope carefully and only when you need shared state across your application.
+> Use `'Singleton'` scope carefully and only when you need shared state across a service implementation.
 
 > [!TIP]
 > When applying `@ServiceLogic()` decorator, the class becomes eligible to be used with [Inject](#inject) decorator for `Dependency injection`.
@@ -947,6 +929,64 @@ export = new CDSDispatcher([ UnboundActionsHandler, ...])
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+##### @ServerLifecycle
+
+**@ServerLifecycle()**
+
+The `@ServerLifecycle` decorator is utilized at the `class-level` to annotate a class as the host for the `server lifecycle` method decorators. Unlike every other host class, it does not register against `srv` - the three decorators it hosts register against CAP's `process-global` `cds.on('served' | 'listening' | 'shutdown', ...)` events instead, because server lifecycle has nothing to do with "the unbound actions of this service".
+
+The following decorators can be used inside of `@ServerLifecycle()`:
+
+- [@OnServed()](#onserved)
+- [@OnListening()](#onlistening)
+- [@OnShutdown()](#onshutdown)
+
+`Example`
+
+```typescript
+import { ServerLifecycle, OnServed, OnListening, OnShutdown } from '@dxfrontier/cds-ts-dispatcher';
+
+@ServerLifecycle()
+export class Bootstrap {
+  @OnServed()
+  public async seed(services: object) {
+    // ... one-time startup work, may throw to abort the boot
+  }
+
+  @OnListening()
+  public logUrl(payload: { server: unknown; url: string }) {
+    console.log(`Listening on ${payload.url}`);
+  }
+
+  @OnShutdown()
+  public async cleanup(error: Error | null) {
+    // ... release resources, may run more than once
+  }
+}
+```
+
+`Imported it` in the [CDSDispatcher](#cdsdispatcher)
+
+```typescript
+import { CDSDispatcher } from '@dxfrontier/cds-ts-dispatcher';
+
+export = new CDSDispatcher([Bootstrap, ...]).initialize();
+```
+
+> [!IMPORTANT]
+> A `@ServerLifecycle` class registers `once per process`, no matter how many `CDSDispatcher` instances (or bootstraps, e.g. in tests) list it - the `first` dispatcher to `initialize()` resolves the instance the callbacks stay bound to; later dispatchers do not re-register or re-bind.
+
+> [!NOTE]
+> That once-per-process guard lives in this package's own module scope, so it is `per loaded bundle` - a consumer that ends up loading **both** the `CJS` and `ESM` build of `@dxfrontier/cds-ts-dispatcher` in the same process (e.g. through a bundler that duplicates the dependency) would register a `@ServerLifecycle` class `twice`. Stick to a single resolved build of the package.
+
+> [!IMPORTANT]
+> [@Use](#use) middleware does `not` apply to `@ServerLifecycle` classes (lifecycle hooks are not request handlers) - stacking `@Use` on one `fails fast` at bootstrap.
+
+> [!NOTE]
+> A `@ServerLifecycle` class may only host [@OnServed()](#onserved), [@OnListening()](#onlistening), [@OnShutdown()](#onshutdown) - any other handler decorator on the class throws at bootstrap. Conversely, those three decorators throw at bootstrap if hosted outside a `@ServerLifecycle` class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ##### @Use
 
 **@Use**(`...Middleware[]`)
@@ -1020,7 +1060,7 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Field`
+#### Field
 
 ##### @Inject
 
@@ -1148,7 +1188,7 @@ export class CustomerHandler {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Parameter`
+#### Parameter
 
 ##### @Req
 
@@ -1440,6 +1480,9 @@ class BookHandler {
 > [!TIP]
 > Decorator [@IsPresent()](#ispresent) works well with [@GetQuery()](#getquery).
 
+> [!NOTE]
+> Protocol creates build `INSERT...entries(data)` without a `.columns` list — `@IsPresent('INSERT', 'columns')` is `true` only for queries that set columns explicitly (programmatic CQN).
+
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ##### @IsRole
@@ -1510,6 +1553,9 @@ The `@IsColumnSupplied<T>(field : keyof T)` decorator is utilized at the `parame
 `Return` :
 
 - `boolean`: This decorator returns `true` if `field / column` was found, `false` otherwise
+
+> [!NOTE]
+> For `INSERT` / `UPSERT` queries an explicit `.columns` list wins when present; otherwise the field is looked up in the `entries` keys (the shape protocol `POST` requests produce); `false` when neither is present.
 
 `Example`
 
@@ -2004,6 +2050,154 @@ public async afterDelete(@Req() req: Request<MyEntity>, @Affected() affected: nu
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
+##### @Data
+
+**@Data**()
+
+The `@Data` decorator is utilized at the `parameter level`. It injects `req.data` — the payload of the current request — directly into a method parameter, typed.
+
+`Return`
+
+- `T` : The payload of the current request (`req.data`).
+
+`Example`
+
+```typescript
+import { OnCreate, Data } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnCreate()
+public async onCreate(@Data() data: MyEntity) {
+  // ... custom logic based on data
+}
+```
+
+> [!TIP]
+> `@Data` keeps handler signatures and unit tests simple — pass a plain object instead of mocking the whole `Request`.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Param
+
+**@Param\<T\>(field: keyof T)**
+
+The `@Param` decorator is utilized at the `parameter level`. It injects `req.data[field]` — a single field of the current request's payload — directly into a method parameter.
+
+`Parameters`
+
+- `field (keyof T)` : The name of the field to get within `req.data`.
+
+`Type Parameters`
+
+- `T` : The entity type the `field` is checked against, allowing TypeScript to enforce type safety.
+
+`Return`
+
+- The value of `req.data[field]`.
+
+`Example`
+
+```typescript
+import { OnCreate, Param } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnCreate()
+public async onCreate(@Param<MyEntity>('title') title: string, @Param<MyEntity>('stock') stock: number) {
+  // ... custom logic based on title and stock
+}
+```
+
+> [!TIP]
+> `@Param` is repeatable — decorate as many parameters as the fields you need from `req.data`.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @UserInfo
+
+**@UserInfo**()
+
+The `@UserInfo` decorator is utilized at the `parameter level`. It injects `req.user` — the authenticated user of the current request — directly into a method parameter.
+
+`Return`
+
+- `User` : The authenticated user of the current request.
+
+`Example`
+
+```typescript
+import { OnUpdate, UserInfo } from '@dxfrontier/cds-ts-dispatcher';
+import type { User } from '@sap/cds';
+
+@OnUpdate()
+public async onUpdate(@UserInfo() user: User) {
+  if (user.is('Manager')) {
+    // ... custom ownership / authorization logic
+  }
+}
+```
+
+> [!TIP]
+> Import the `User` type from `@sap/cds` to type the injected `user`.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Tenant
+
+**@Tenant**()
+
+The `@Tenant` decorator is utilized at the `parameter level`. It injects `req.tenant` — the tenant of the current request — directly into a method parameter.
+
+`Return`
+
+- `string | undefined` : The tenant of the current request.
+
+`Example`
+
+```typescript
+import { OnRead, Tenant } from '@dxfrontier/cds-ts-dispatcher';
+
+@OnRead()
+public async onRead(@Tenant() tenant: string | undefined) {
+  // ... custom logic based on tenant
+}
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Diff
+
+**@Diff**()
+
+The `@Diff` decorator is utilized at the `parameter level`. It injects `await req.diff()` — CAP's deep old-vs-new change-set of the current request against the current database state (`compositions` expanded, `draft`-aware) — directly into a method parameter.
+
+`Return`
+
+- `T` : The before/after delta of the request's target entity.
+
+`Example`
+
+```typescript
+import { BeforeUpdate, Diff } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeUpdate()
+public async beforeUpdate(@Req() req: Request<MyEntity>, @Diff() diff: MyEntity) {
+  // ... custom logic based on diff
+}
+```
+
+> [!IMPORTANT]
+> `@Diff` costs `one extra database read` (it re-reads the current state to compute the delta) and resolves `asynchronously` - the handler body starts a `microtask` later than sibling handlers on the same event. Do not rely on synchronous side-effect ordering against sibling handlers. `@Diff` is only supported on [@EntityHandler](#entityhandler) write events and is **not** supported on [@OnError](#onerror) (a decoration-time error).
+
+> [!NOTE]
+> `req.diff()` is a `semi-stable` `@sap/cds` API not documented in the current capire docs. Observed payload shape on `@sap/cds` 10 (pinned by the dispatcher's integration tests): for an `UPDATE` the top-level fields hold the `NEW` (incoming) values, the `OLD` (pre-update) values sit nested under `_old`, plus an `_op: 'update'` marker — unchanged fields are omitted entirely, key fields are always present. Do **not** assume `diff.<field>` is the old value.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
 ##### ~~@Msg~~
 
 **@Msg()**
@@ -2012,7 +2206,7 @@ public async afterDelete(@Req() req: Request<MyEntity>, @Affected() affected: nu
 > **DEPRECATED:** The `@Msg` decorator is deprecated and will be removed in a future version. Please use `@Req` decorator instead for handling message data in event subscribers.
 
 
-The `@Msg` decorator is a parameter decorator used to inject response [Emitter](#https://cap.cloud.sap/docs/guides/messaging/#typical-emitter-and-receiver-roles) directly into a method parameter.
+The `@Msg` decorator is a parameter decorator used to inject response [Emitter](https://cap.cloud.sap/docs/guides/messaging/#typical-emitter-and-receiver-roles) directly into a method parameter.
 
 `Parameters`
 
@@ -2052,7 +2246,7 @@ public async onSubscribe(@Req() req: Request<{ foo: number; bar: string }>): Pro
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Method`-`active entity`
+#### Method — CRUD, active entity
 
 ##### `Before`
 
@@ -3152,7 +3346,901 @@ this.on(AFunction, async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @OnEvent
+###### @OnBoundAction
+
+**@OnBoundAction**(`name` : CdsAction)
+
+`Parameters`
+
+- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`.
+
+`Example`
+
+```typescript
+import { OnBoundAction, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { ActionRequest, ActionReturn, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnBoundAction(MyEntity.actions.AnAction)
+private async onActionMethod(@Req() req: ActionRequest<typeof MyEntity.actions.AnAction>, @Next() next: NextEvent): ActionReturn<typeof MyEntity.actions.AnAction> {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on(MyEntity.actions.AnAction, MyEntity, async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@OnBoundAction()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @OnBoundFunction
+
+**@OnBoundFunction**(`name` : CdsFunction)
+
+`Parameters`
+
+- `name (CdsFunction)` : Representing the `CDS action` defined in the `CDS file`.
+
+`Example`
+
+```typescript
+import { OnBoundFunction, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { ActionRequest, ActionReturn, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnBoundFunction(MyEntity.actions.AFunction)
+private async onFunctionMethod(@Req() req: ActionRequest<typeof MyEntity.actions.AFunction>, @Next() next: NextEvent): ActionReturn<typeof MyEntity.actions.AFunction> {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@OnBoundFunction()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @OnAll
+
+**@OnAll**()
+
+The `@OnAll` decorator is triggered whenever **_any CRUD (Create, Read, Update, Delete)_** event occurs, whether the entity is `active` or in `draft` mode.
+
+`ACTIVE ENTITY`
+
+For active entities, the `@OnAll` decorator will be triggered when at least __one__ of the following events occurs:
+
+- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
+- `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
+- `UPDATE` [@BeforeUpdate()](#beforeupdate), [@AfterUpdate()](#afterupdate), [@OnUpdate()](#onupdate)
+- `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
+- `BOUND ACTIONS` [@OnBoundAction()](#onboundaction)
+- `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
+  
+`DRAFT`
+
+For draft entities, the `@OnAll` decorator will be triggered when at least __one__ of the following events occurs:
+
+- `CREATE` [@BeforeNewDraft()](#beforenewdraft), [@AfterNewDraft()](#afternewdraft), [@OnNewDraft()](#onnewdraft)
+- `CANCEL` [@BeforeCancelDraft()](#beforecanceldraft), [@AfterCancelDraft()](#aftercanceldraft), [@OnCancelDraft()](#oncanceldraft)
+- `PATCH` [@BeforePatchDraft()](#beforepatchdraft), [@AfterPatchDraft()](#afterpatchdraft), [@OnPatchDraft()](#onpatchdraft)
+- `DISCARD` [@BeforeDiscardDraft()](#beforediscarddraft), [@AfterDiscardDraft()](#afterdiscarddraft), [@OnDiscardDraft()](#ondiscarddraft)
+- `EDIT` [@BeforeEditDraft()](#beforeeditdraft), [@AfterEditDraft()](#aftereditdraft), [@OnEditDraft()](#oneditdraft)
+- `SAVE` [@BeforeSaveDraft()](#beforesavedraft), [@AfterSaveDraft()](#aftersavedraft), [@OnSaveDraft()](#onsavedraft)
+- :heavy_plus_sign: All active entity [Before](#before), [After](#after), [On](#on) events which have a `Draft` variant.
+
+> [!NOTE]
+> Exception will be the following decorators [@OnEvent()](#onevent), [@OnError()](#onerror) and `UNBOUND ACTIONS` [@OnAction()](#onaction), `UNBOUND FUNCTIONS` [@OnFunction()](#onfunction) as these are bound to the service itself and not to an entity.
+
+`Example 1`
+
+In this example, the `@OnAll()` decorator of the `onAll` method is executed after any CRUD operation `(CREATE, READ, UPDATE, DELETE, BOUND ACTIONS, BOUND FUNCTIONS)` on the `MyEntity` entity. 
+
+Since the class is annotated with `@EntityHandler(MyEntity)`, the decorator is scoped to this specific `entity`, meaning it will only be triggered for operations related to `MyEntity`.
+
+```typescript
+import { OnAll, Next, EntityHandler } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class BookHandler {
+  // ...
+  constructor() {}
+  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
+
+  @OnAll()
+  private async onAll(@Req() req: Request, @Next() next: NextEvent) {
+    // ...
+    return next();
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('*', MyEntity, async (req, next) => {
+  // ...
+});
+```
+`Example 2`
+
+In this example, the `@OnAll()` decorator is used in a more generic way. Unlike `Example 1`, where it applies only to `MyEntity`, this setup ensures that `afterAll` is triggered for `all entities`. 
+
+This means the method will execute before any CRUD operation on `any` `entity` handled within the class.
+
+
+```typescript
+import { OnAll, Next, EntityHandler, CDS_DISPATCHER } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)
+export class BookHandler {
+  // ...
+  constructor() {}
+  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
+
+  @OnAll()
+  private async onAll(@Req() req: Request, @Next() next: NextEvent) {
+    // ...
+    return next();
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('*', '*', async (req, next) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@OnAll()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!TIP]
+> If the entity has drafts enabled `@odata.draft.enabled: true`, the `@OnAll` decorator will still be triggered for draft events.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Method — CRUD, draft entity
+
+##### `Before`
+
+Use `@BeforeNewDraft(), @BeforeCancelDraft(), @BeforePatchDraft(), @BeforeDiscardDraft(), @BeforeEditDraft(), @BeforeSaveDraft(), @BeforeCreateDraft(), @BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()` to register handlers to run before`.on`handlers, frequently used for `validating user input.`
+
+The handlers receive one argument:
+
+- `req` of type `Request`
+
+###### @BeforeNewDraft
+
+**@BeforeNewDraft**()
+
+Use this decorator when you want to validate inputs before a new draft is created.
+
+`Example`
+
+```typescript
+import { BeforeNewDraft, Request } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeNewDraft()
+private async beforeCreateDraftMethod(@Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('NEW', MyEntity.drafts, async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@BeforeNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @BeforeCancelDraft
+
+**@BeforeCancelDraft**()
+
+Use this decorator when you want to validate inputs before a draft is discarded.
+
+`Example`
+
+```typescript
+import { BeforeCancelDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeCancelDraft()
+private async beforeCancelDraftMethod(@Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('CANCEL', MyEntity.drafts, async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@BeforeCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @BeforePatchDraft
+
+**@BeforePatchDraft**()
+
+Use this decorator when you want to validate inputs before a field of an in-progress draft is changed.
+
+`PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at registration time (`req.event` is `'UPDATE'` at runtime, never `'PATCH'`) and fires every time a field of an in-progress draft changes.
+
+`Example`
+
+```typescript
+import { BeforePatchDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforePatchDraft()
+private async beforePatchDraftMethod(@Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('PATCH', MyEntity.drafts, async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@BeforePatchDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @BeforeDiscardDraft
+
+**@BeforeDiscardDraft**()
+
+Use this decorator when you want to validate inputs before an in-progress draft is discarded.
+
+`DISCARD` is an alias CAP normalizes to `CANCEL` at registration time (`req.event` is `'CANCEL'` at runtime) and fires when an in-progress draft is discarded.
+
+`Example`
+
+```typescript
+import { BeforeDiscardDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeDiscardDraft()
+private async beforeDiscardDraftMethod(@Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('DISCARD', MyEntity.drafts, async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@BeforeDiscardDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @BeforeEditDraft
+
+**@BeforeEditDraft**()
+
+Use this decorator when you want to validate inputs when a new draft is created from an active instance.
+
+`Example`
+
+```typescript
+import { BeforeEditDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeEditDraft()
+private async beforeEditDraftMethod(@Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('EDIT', MyEntity, async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@BeforeEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @BeforeSaveDraft
+
+**@BeforeSaveDraft**()
+
+Use this decorator when you want to validate inputs when active entity is changed.
+
+`Example`
+
+```typescript
+import { BeforeSaveDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@BeforeSaveDraft()
+private async beforeSaveDraftMethod(@Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.before('SAVE', MyEntity, async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@BeforeSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### `After`
+
+Use `@AfterNewDraft(), @AfterCancelDraft(), @AfterPatchDraft(), @AfterDiscardDraft(), @AfterEditDraft(), @AfterSaveDraft(), @AfterCreateDraft(), @AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.` The handlers receive two arguments:
+
+The results from the preceding `.on` handler, with the following types:
+
+| Parameters     | Decorator                         | Description                                                                |
+| -------------- | --------------------------------- | -------------------------------------------------------------------------- |
+| `results, req` | `@AfterRead`                      | An array of type `MyEntity[]` and the `Request`.                           |
+|                |                                   |                                                                            |
+| `result, req`  | `@AfterUpdate`<br> `@AfterCreate` | An object of type `MyEntity` and the `Request`.                            |
+|                |                                   |                                                                            |
+| `deleted, req` | `@AfterDelete`                    | A `boolean` indicating whether the instance was deleted and the `Request`. |
+
+###### @AfterNewDraft
+
+**@AfterNewDraft**()
+
+Use this decorator when you want to enhance outbound data when a new draft is created.
+
+`Example`
+
+```typescript
+import { AfterNewDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterNewDraft()
+private async afterNewDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('NEW', MyEntity.drafts, async (results, req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@AfterNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @AfterCancelDraft
+
+**@AfterCancelDraft**()
+
+Use this decorator when you want to enhance outbound data when a draft is discarded.
+
+`Example`
+
+```typescript
+import { AfterCancelDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterCancelDraft()
+private async afterCancelDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('CANCEL', MyEntity.drafts, async (results, req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@AfterCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @AfterPatchDraft
+
+**@AfterPatchDraft**()
+
+Use this decorator when you want to enhance outbound data when a field of an in-progress draft is changed.
+
+`PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at registration time (`req.event` is `'UPDATE'` at runtime, never `'PATCH'`) and fires every time a field of an in-progress draft changes.
+
+`Example`
+
+```typescript
+import { AfterPatchDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterPatchDraft()
+private async afterPatchDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('PATCH', MyEntity.drafts, async (results, req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@AfterPatchDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @AfterDiscardDraft
+
+**@AfterDiscardDraft**()
+
+Use this decorator when you want to enhance outbound data when an in-progress draft is discarded.
+
+`DISCARD` is an alias CAP normalizes to `CANCEL` at registration time (`req.event` is `'CANCEL'` at runtime) and fires when an in-progress draft is discarded.
+
+`Example`
+
+```typescript
+import { AfterDiscardDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterDiscardDraft()
+private async afterDiscardDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('DISCARD', MyEntity.drafts, async (results, req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@AfterDiscardDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @AfterEditDraft
+
+**@AfterEditDraft**()
+
+Use this decorator when you want to enhance outbound data when a new draft is created from an active instance.
+
+`Example`
+
+```typescript
+import { AfterEditDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterEditDraft()
+private async afterEditDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('EDIT', MyEntity, async (results, req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@AfterEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @AfterSaveDraft
+
+**@AfterSaveDraft**()
+
+Use this decorator when you want to enhance outbound data when the active entity is changed.
+
+`Example`
+
+```typescript
+import { AfterSaveDraft } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@AfterSaveDraft()
+private async afterSaveDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('SAVE', MyEntity, async (results, req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@AfterSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### `On`
+
+Use [@OnNewDraft()](#onnewdraft), [@OnCancelDraft()](#oncanceldraft), [@OnPatchDraft()](#onpatchdraft), [@OnDiscardDraft()](#ondiscarddraft), [@OnSaveDraft()](#onsavedraft), [@OnEditDraft()](#oneditdraft), @OnReadDraft(), @OnUpdateDraft(), @OnCreateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft() handlers to support for both, active and draft entities.
+
+The handlers receive two arguments:
+
+- `req` of type `Request`
+- `next` of type `NextEvent`
+
+See Official SAP **[Fiori-draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)**
+
+###### @OnNewDraft
+
+**@OnNewDraft()**
+
+This decorator will be triggered when `a new draft is created`.
+
+`Example`
+
+```typescript
+import { OnNewDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnNewDraft()
+private async onNewDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('NEW', MyEntity.drafts, async (req, next) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@OnNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @OnCancelDraft
+
+**@OnCancelDraft()**
+
+This decorator will be triggered when `a draft is cancelled`.
+
+`Example`
+
+```typescript
+import { OnCancelDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnCancelDraft()
+private async onCancelDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('CANCEL', MyEntity.drafts, async (req, next) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@OnCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @OnPatchDraft
+
+**@OnPatchDraft()**
+
+This decorator will be triggered when `a field of an in-progress draft is changed`.
+
+`PATCH` is an HTTP-method alias CAP normalizes to `UPDATE` at registration time (`req.event` is `'UPDATE'` at runtime, never `'PATCH'`) and fires every time a field of an in-progress draft changes.
+
+`Example`
+
+```typescript
+import { OnPatchDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnPatchDraft()
+private async onPatchDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
+  return next(); // preserve the default draft PATCH behavior
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('PATCH', MyEntity.drafts, async (req, next) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@OnPatchDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @OnDiscardDraft
+
+**@OnDiscardDraft()**
+
+This decorator will be triggered when `an in-progress draft is discarded`.
+
+`DISCARD` is an alias CAP normalizes to `CANCEL` at registration time (`req.event` is `'CANCEL'` at runtime) and fires when an in-progress draft is discarded.
+
+`Example`
+
+```typescript
+import { OnDiscardDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnDiscardDraft()
+private async onDiscardDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
+  return next(); // preserve the default draft DISCARD behavior
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('DISCARD', MyEntity.drafts, async (req, next) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@OnDiscardDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @OnEditDraft
+
+**@OnEditDraft()**
+
+This decorator will be triggered when `a new draft is created from an active instance`
+
+`Example`
+
+```typescript
+import { OnEditDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnEditDraft()
+private async onEditDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('EDIT', MyEntity, async (req, next) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@OnEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+###### @OnSaveDraft
+
+**@OnSaveDraft()**
+
+This decorator will be triggered when `the active entity is changed`
+
+`Example`
+
+```typescript
+
+import { OnSaveDraft, Req, Next  } from "@dxfrontier/cds-ts-dispatcher";
+import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@OnSaveDraft()
+private async onSaveDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('SAVE', MyEntity, async (req, next) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> Decorator `@OnSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### `Other draft decorators`
+
+All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
+
+> [!NOTE]
+> Except the [@OnAction()](#onaction), [@OnFunction()](#onfunction), [@OnEvent()](#onevent), [@OnError()](#onerror) as these actions are bound to the service and not to an entity.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Method — Events & messaging
+
+##### @OnEvent
 
 **@OnEvent**(`name` : CdsEvent)
 
@@ -3207,7 +4295,7 @@ this.on('AEvent', async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @OnSubscribe
+##### @OnSubscribe
 
 ```ts
 @OnSubscribe(options : {
@@ -3489,7 +4577,7 @@ const Service_1 = cds.connect.to('Service_1');
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @OnError
+##### @OnError
 
 **@OnError**()
 
@@ -3530,899 +4618,305 @@ this.on('error', (err, req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @OnBoundAction
+#### Method — Request lifecycle
 
-**@OnBoundAction**(`name` : CdsAction)
-
-`Parameters`
-
-- `name (CdsAction)` : Representing the `CDS action` defined in the `CDS file`.
-
-`Example`
-
-```typescript
-import { OnBoundAction, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
-import type { ActionRequest, ActionReturn, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@OnBoundAction(MyEntity.actions.AnAction)
-private async onActionMethod(@Req() req: ActionRequest<typeof MyEntity.actions.AnAction>, @Next() next: NextEvent): ActionReturn<typeof MyEntity.actions.AnAction> {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on(MyEntity.actions.AnAction, MyEntity, async (req) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@OnBoundAction()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @OnBoundFunction
-
-**@OnBoundFunction**(`name` : CdsFunction)
-
-`Parameters`
-
-- `name (CdsFunction)` : Representing the `CDS action` defined in the `CDS file`.
-
-`Example`
-
-```typescript
-import { OnBoundFunction, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
-import type { ActionRequest, ActionReturn, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@OnBoundFunction(MyEntity.actions.AFunction)
-private async onFunctionMethod(@Req() req: ActionRequest<typeof MyEntity.actions.AFunction>, @Next() next: NextEvent): ActionReturn<typeof MyEntity.actions.AFunction> {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on(MyEntity.actions.AFunction, MyEntity, async (req) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@OnBoundFunction()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @OnAll
-
-**@OnAll**()
-
-The `@OnAll` decorator is triggered whenever **_any CRUD (Create, Read, Update, Delete)_** event occurs, whether the entity is `active` or in `draft` mode.
-
-`ACTIVE ENTITY`
-
-For active entities, the `@OnAll` decorator will be triggered when at least __one__ of the following events occurs:
-
-- `CREATE` [@BeforeCreate()](#beforecreate), [@AfterCreate()](#aftercreate), [@OnCreate()](#oncreate)
-- `READ` [@BeforeRead()](#beforeread), [@AfterRead()](#afterread), [@OnRead()](#onread)
-- `UPDATE` [@BeforeUpdate()](#beforeupdate), [@AfterUpdate()](#afterupdate), [@OnUpdate()](#onupdate)
-- `DELETE` [@BeforeDelete()](#beforedelete), [@AfterDelete()](#afterdelete), [@OnDelete()](#ondelete)
-- `BOUND ACTIONS` [@OnBoundAction()](#onboundaction)
-- `BOUND FUNCTIONS` [@OnBoundFunction()](#onboundfunction)
-  
-`DRAFT`
-
-For draft entities, the `@OnAll` decorator will be triggered when at least __one__ of the following events occurs:
-
-- `CREATE` [@BeforeNewDraft()](#beforenewdraft), [@AfterNewDraft()](#afternewdraft), [@OnNewDraft()](#onnewdraft)
-- `CANCEL` [@BeforeCancelDraft()](#beforecanceldraft), [@AfterCancelDraft()](#aftercanceldraft), [@OnCancelDraft()](#oncanceldraft)
-- `PATCH` [@BeforePatchDraft()](#beforepatchdraft), [@AfterPatchDraft()](#afterpatchdraft), [@OnPatchDraft()](#onpatchdraft)
-- `DISCARD` [@BeforeDiscardDraft()](#beforediscarddraft), [@AfterDiscardDraft()](#afterdiscarddraft), [@OnDiscardDraft()](#ondiscarddraft)
-- `EDIT` [@BeforeEditDraft()](#beforeeditdraft), [@AfterEditDraft()](#aftereditdraft), [@OnEditDraft()](#oneditdraft)
-- `SAVE` [@BeforeSaveDraft()](#beforesavedraft), [@AfterSaveDraft()](#aftersavedraft), [@OnSaveDraft()](#onsavedraft)
-- :heavy_plus_sign: All active entity [Before](#before), [After](#after), [On](#on) events which have a `Draft` variant.
-
-> [!NOTE]
-> Exception will be the following decorators [@OnEvent()](#onevent), [@OnError()](#onerror) and `UNBOUND ACTIONS` [@OnAction()](#onaction), `UNBOUND FUNCTIONS` [@OnFunction()](#onfunction) as these are bound to the service itself and not to an entity.
-
-`Example 1`
-
-In this example, the `@OnAll()` decorator of the `onAll` method is executed after any CRUD operation `(CREATE, READ, UPDATE, DELETE, BOUND ACTIONS, BOUND FUNCTIONS)` on the `MyEntity` entity. 
-
-Since the class is annotated with `@EntityHandler(MyEntity)`, the decorator is scoped to this specific `entity`, meaning it will only be triggered for operations related to `MyEntity`.
-
-```typescript
-import { OnAll, Next, EntityHandler } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@EntityHandler(MyEntity)
-export class BookHandler {
-  // ...
-  constructor() {}
-  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
-
-  @OnAll()
-  private async onAll(@Req() req: Request, @Next() next: NextEvent) {
-    // ...
-    return next();
-  }
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('*', MyEntity, async (req, next) => {
-  // ...
-});
-```
-`Example 2`
-
-In this example, the `@OnAll()` decorator is used in a more generic way. Unlike `Example 1`, where it applies only to `MyEntity`, this setup ensures that `afterAll` is triggered for `all entities`. 
-
-This means the method will execute before any CRUD operation on `any` `entity` handled within the class.
-
-
-```typescript
-import { OnAll, Next, EntityHandler, CDS_DISPATCHER } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)
-export class BookHandler {
-  // ...
-  constructor() {}
-  // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
-
-  @OnAll()
-  private async onAll(@Req() req: Request, @Next() next: NextEvent) {
-    // ...
-    return next();
-  }
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('*', '*', async (req, next) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@OnAll()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!TIP]
-> If the entity has drafts enabled `@odata.draft.enabled: true`, the `@OnAll` decorator will still be triggered for draft events.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-#### `Method`-`draft entity`
-
-##### `Before`
-
-Use `@BeforeNewDraft(), @BeforeCancelDraft(), @BeforePatchDraft(), @BeforeDiscardDraft(), @BeforeEditDraft(), @BeforeSaveDraft(), @BeforeCreateDraft(), @BeforeReadDraft(), @BeforeUpdateDraft(), @BeforeDeleteDraft()` to register handlers to run before`.on`handlers, frequently used for `validating user input.`
+Use [@BeforeCommit()](#beforecommit), [@AfterCommit()](#aftercommit), [@AfterRollback()](#afterrollback), [@OnRequestDone()](#onrequestdone) to hook into the `commit` / `succeeded` / `failed` / `done` phases of the current `ROOT` request's transaction.
 
 The handlers receive one argument:
 
 - `req` of type `Request`
 
-###### @BeforeNewDraft
+> [!NOTE]
+> Ordering across `multiple handler classes`: `@BeforeCommit` callbacks run in `CDSDispatcher([...])` array order, while `@AfterCommit` / `@AfterRollback` / `@OnRequestDone` callbacks run in `reverse` array order (within one class, declaration order always holds). With more than ~10 handler classes hooking the `same` lifecycle event, Node's default `MaxListenersExceededWarning` may appear for the shared root-context emitter — harmless log noise, not a leak.
 
-**@BeforeNewDraft**()
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-Use this decorator when you want to validate inputs before a new draft is created.
+##### @BeforeCommit
+
+**@BeforeCommit**()
+
+The `@BeforeCommit` decorator runs custom logic `inside` the transaction, `immediately before commit`, after `all` other handlers of the request (including handlers of other services touched by the same request) have run. Throwing an error here `vetoes` the commit — the transaction is rolled back and the error is returned to the client.
+
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
 
 `Example`
 
 ```typescript
-import { BeforeNewDraft, Request } from "@dxfrontier/cds-ts-dispatcher";
+import { BeforeCommit } from "@dxfrontier/cds-ts-dispatcher";
 import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-@BeforeNewDraft()
-private async beforeCreateDraftMethod(@Req() req: Request<MyEntity>) {
-  // ...
+@BeforeCommit()
+private async beforeCommit(@Req() req: Request<MyEntity>) {
+  if (/* cross-entity invariant violated */ false) {
+    throw new Error('Total stock must stay non-negative'); // vetoes the commit
+  }
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('NEW', MyEntity.drafts, async (req) => {
-  // ...
+this.before('*', MyEntity, (req) => {
+  req.before('commit', async () => {
+    // ...
+  });
 });
 ```
 
 > [!IMPORTANT]
-> Decorator `@BeforeNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+> The injected `req` is the `first sub-request` of the root request that reached the hook. Use `@BeforeCommit` for `cross-request` / `final-state` invariants that need to read the current database state, keep `per-operation` validation in your [Before](#before) / [On](#on) handlers.
 
 > [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @BeforeCancelDraft
+##### @AfterCommit
 
-**@BeforeCancelDraft**()
+**@AfterCommit**()
 
-Use this decorator when you want to validate inputs before a draft is discarded.
+The `@AfterCommit` decorator runs custom logic only `after` the transaction of the current request was durably `committed`, `outside` any transaction. Errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
+
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
 
 `Example`
 
 ```typescript
-import { BeforeCancelDraft } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterCommit } from "@dxfrontier/cds-ts-dispatcher";
 import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-@BeforeCancelDraft()
-private async beforeCancelDraftMethod(@Req() req: Request<MyEntity>) {
-  // ...
+@AfterCommit()
+private async afterCommit(@Req() req: Request<MyEntity>) {
+  await cds.tx(async () => {
+    // ... e.g. send a confirmation e-mail, invalidate a cache
+  });
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('CANCEL', MyEntity.drafts, async (req) => {
-  // ...
+this.before('*', MyEntity, (req) => {
+  req.on('succeeded', async () => {
+    // ...
+  });
 });
 ```
 
 > [!IMPORTANT]
-> Decorator `@BeforeCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+> The request's transaction is already `closed` by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
 
 > [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @BeforePatchDraft
+##### @AfterRollback
 
-**@BeforePatchDraft**()
+**@AfterRollback**()
 
-Use this decorator when you want to validate inputs before a field of an in-progress draft is changed.
+The `@AfterRollback` decorator runs custom logic `after` the transaction of the current request was `rolled back`, `outside` any transaction. Errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
 
-`PATCH` is CAP's canonical `field-level` draft-edit event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) and fires every time a field of an in-progress draft changes.
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
 
 `Example`
 
 ```typescript
-import { BeforePatchDraft } from "@dxfrontier/cds-ts-dispatcher";
+import { AfterRollback } from "@dxfrontier/cds-ts-dispatcher";
 import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-@BeforePatchDraft()
-private async beforePatchDraftMethod(@Req() req: Request<MyEntity>) {
-  // ...
+@AfterRollback()
+private async afterRollback(@Req() req: Request<MyEntity>) {
+  await cds.tx(async () => {
+    // ... e.g. release a reservation in a remote system, alert on the failure
+  });
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('PATCH', MyEntity.drafts, async (req) => {
-  // ...
+this.before('*', MyEntity, (req) => {
+  req.on('failed', async () => {
+    // ...
+  });
 });
 ```
 
 > [!IMPORTANT]
-> Decorator `@BeforePatchDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+> The request's transaction is already `closed` (rolled back) by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
 
 > [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @BeforeDiscardDraft
+##### @OnRequestDone
 
-**@BeforeDiscardDraft**()
+**@OnRequestDone**()
 
-Use this decorator when you want to validate inputs before an in-progress draft is discarded.
+The `@OnRequestDone` decorator runs custom logic when the current request is `done`, no matter if it `succeeded` or `failed` — `finally` semantics. It runs `outside` any transaction and errors `cannot veto` anything anymore — they are caught and logged by the dispatcher.
 
-`DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 and fires when an in-progress draft is discarded.
+Hosted in an [@EntityHandler](#entityhandler) class it is scoped to requests targeting that entity, hosted in an [@UnboundActions](#unboundactions) class it applies to every request of the service.
 
 `Example`
 
 ```typescript
-import { BeforeDiscardDraft } from "@dxfrontier/cds-ts-dispatcher";
+import { OnRequestDone } from "@dxfrontier/cds-ts-dispatcher";
 import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import cds from '@sap/cds';
 
 import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
 
-@BeforeDiscardDraft()
-private async beforeDiscardDraftMethod(@Req() req: Request<MyEntity>) {
-  // ...
+@OnRequestDone()
+private async requestDone(@Req() req: Request<MyEntity>) {
+  await cds.tx(async () => {
+    // ... e.g. release a lock, stop a timer, emit duration metrics
+  });
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('DISCARD', MyEntity.drafts, async (req) => {
-  // ...
+this.before('*', MyEntity, (req) => {
+  req.on('done', async () => {
+    // ...
+  });
 });
 ```
 
 > [!IMPORTANT]
-> Decorator `@BeforeDiscardDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+> The request's transaction is already `closed` by the time this handler runs - a plain query would fail. Always open a `new` transaction with `await cds.tx(async () => { ... })` for any database work.
 
 > [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> It runs `once` per `ROOT` request (once per OData `$batch` changeset). For `draft`-enabled entities the hook fires on draft `ACTIVATION`, not during the draft-editing roundtrip.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @BeforeEditDraft
+#### Method — Server lifecycle
 
-**@BeforeEditDraft**()
+Use [@OnServed()](#onserved), [@OnListening()](#onlistening), [@OnShutdown()](#onshutdown) - hosted in a [@ServerLifecycle](#serverlifecycle) class - to hook into the CAP server's `served` / `listening` / `shutdown` process lifecycle.
 
-Use this decorator when you want to validate inputs when a new draft is created from an active instance.
+> [!NOTE]
+> Unlike every other method decorator in this library, these three receive CAP's arguments `verbatim` - no [@Req()](#req)-style parameter decorator applies.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnServed
+
+**@OnServed()**
+
+The `@OnServed` decorator executes custom logic once, `right before` the CAP server starts `listening` for requests. The handler receives `cds.services` (the bootstrapped services) as its only argument. CAP `awaits` every `@OnServed` handler `sequentially` - in `declaration order` inside a class, and in `CDSDispatcher` array order across classes - before `app.listen` runs. A `thrown` error `fails` server startup.
 
 `Example`
 
 ```typescript
-import { BeforeEditDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import { ServerLifecycle, OnServed } from '@dxfrontier/cds-ts-dispatcher';
 
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@BeforeEditDraft()
-private async beforeEditDraftMethod(@Req() req: Request<MyEntity>) {
-  // ...
+@ServerLifecycle()
+export class Bootstrap {
+  @OnServed()
+  public async seed(services: object) {
+    // ... one-time startup work, may throw to abort the boot
+  }
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('EDIT', MyEntity, async (req) => {
+cds.on('served', async (services) => {
   // ...
 });
 ```
 
 > [!IMPORTANT]
-> Decorator `@BeforeEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> Must be hosted in a [@ServerLifecycle](#serverlifecycle) class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @BeforeSaveDraft
+##### @OnListening
 
-**@BeforeSaveDraft**()
+**@OnListening()**
 
-Use this decorator when you want to validate inputs when active entity is changed.
+The `@OnListening` decorator executes custom logic once the CAP server is `listening` for requests. The handler receives `{ server, url }`. CAP dispatches `@OnListening` `synchronously` - any return value (including a `Promise`) is `discarded`, so treat the handler as `fire-and-forget`.
 
 `Example`
 
 ```typescript
-import { BeforeSaveDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import { ServerLifecycle, OnListening } from '@dxfrontier/cds-ts-dispatcher';
 
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@BeforeSaveDraft()
-private async beforeSaveDraftMethod(@Req() req: Request<MyEntity>) {
-  // ...
+@ServerLifecycle()
+export class Bootstrap {
+  @OnListening()
+  public logUrl(payload: { server: unknown; url: string }) {
+    console.log(`Listening on ${payload.url}`);
+  }
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.before('SAVE', MyEntity, async (req) => {
+cds.on('listening', ({ server, url }) => {
   // ...
 });
 ```
 
 > [!IMPORTANT]
-> Decorator `@BeforeSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> Must be hosted in a [@ServerLifecycle](#serverlifecycle) class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-##### `After`
+##### @OnShutdown
 
-Use `@AfterNewDraft(), @AfterCancelDraft(), @AfterPatchDraft(), @AfterDiscardDraft(), @AfterEditDraft(), @AfterSaveDraft(), @AfterCreateDraft(), @AfterReadDraft(), @AfterUpdateDraft(), @AfterDeleteDraft()` register handlers to run after the `.on` handlers, frequently used to `enrich outbound data.` The handlers receive two arguments:
+**@OnShutdown()**
 
-The results from the preceding `.on` handler, with the following types:
-
-| Parameters     | Decorator                         | Description                                                                |
-| -------------- | --------------------------------- | -------------------------------------------------------------------------- |
-| `results, req` | `@AfterRead`                      | An array of type `MyEntity[]` and the `Request`.                           |
-|                |                                   |                                                                            |
-| `result, req`  | `@AfterUpdate`<br> `@AfterCreate` | An object of type `MyEntity` and the `Request`.                            |
-|                |                                   |                                                                            |
-| `deleted, req` | `@AfterDelete`                    | A `boolean` indicating whether the instance was deleted and the `Request`. |
-
-###### @AfterNewDraft
-
-**@AfterNewDraft**()
-
-Use this decorator when you want to enhance outbound data when a new draft is created.
+The `@OnShutdown` decorator executes custom logic while the CAP server is shutting down. The handler receives `err: Error | null`. CAP runs `all` `@OnShutdown` handlers (of every class) `in parallel` and `awaits` them `before` the server closes.
 
 `Example`
 
 ```typescript
-import { AfterNewDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+import { ServerLifecycle, OnShutdown } from '@dxfrontier/cds-ts-dispatcher';
 
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterNewDraft()
-private async afterNewDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
-  // ...
+@ServerLifecycle()
+export class Bootstrap {
+  @OnShutdown()
+  public async cleanup(error: Error | null) {
+    // ... release resources, may run more than once
+  }
 }
 ```
 
 `Equivalent to 'JS'`
 
 ```typescript
-this.after('NEW', MyEntity.drafts, async (results, req) => {
+cds.on('shutdown', async (error) => {
   // ...
 });
 ```
 
 > [!IMPORTANT]
-> Decorator `@AfterNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
+> Must be hosted in a [@ServerLifecycle](#serverlifecycle) class.
 
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> [!WARNING]
+> CAP has `NO once-guard` on `shutdown` - unlike `served` / `listening`, this callback `may fire more than once` per process. Make the handler `idempotent`.
 
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @AfterCancelDraft
-
-**@AfterCancelDraft**()
-
-Use this decorator when you want to enhance outbound data when a draft is discarded.
-
-`Example`
-
-```typescript
-import { AfterCancelDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterCancelDraft()
-private async afterCancelDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.after('CANCEL', MyEntity.drafts, async (results, req) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@AfterCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+> [!WARNING]
+> Catch your own errors: a `rejected` `@OnShutdown` handler propagates out of CAP's shutdown dispatch, so `server.close` (and the force-exit fallback timer) never run - the process stays alive with an `unhandled rejection` instead of shutting down.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-###### @AfterPatchDraft
-
-**@AfterPatchDraft**()
-
-Use this decorator when you want to enhance outbound data when a field of an in-progress draft is changed.
-
-`PATCH` is CAP's canonical `field-level` draft-edit event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) and fires every time a field of an in-progress draft changes.
-
-`Example`
-
-```typescript
-import { AfterPatchDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterPatchDraft()
-private async afterPatchDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.after('PATCH', MyEntity.drafts, async (results, req) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@AfterPatchDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @AfterDiscardDraft
-
-**@AfterDiscardDraft**()
-
-Use this decorator when you want to enhance outbound data when an in-progress draft is discarded.
-
-`DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 and fires when an in-progress draft is discarded.
-
-`Example`
-
-```typescript
-import { AfterDiscardDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterDiscardDraft()
-private async afterDiscardDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.after('DISCARD', MyEntity.drafts, async (results, req) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@AfterDiscardDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @AfterEditDraft
-
-**@AfterEditDraft**()
-
-Use this decorator when you want to enhance outbound data when a new draft is created from an active instance.
-
-`Example`
-
-```typescript
-import { AfterEditDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterEditDraft()
-private async afterEditDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.after('EDIT', MyEntity, async (results, req) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@AfterEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @AfterSaveDraft
-
-**@AfterSaveDraft**()
-
-Use this decorator when you want to enhance outbound data when the active entity is changed.
-
-`Example`
-
-```typescript
-import { AfterSaveDraft } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@AfterSaveDraft()
-private async afterSaveDraftMethod(@Result() result: MyEntity, @Req() req: Request<MyEntity>) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.after('SAVE', MyEntity, async (results, req) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@AfterSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-##### `On`
-
-Use [@OnNewDraft()](#onnewdraft), [@OnCancelDraft()](#oncanceldraft), [@OnPatchDraft()](#onpatchdraft), [@OnDiscardDraft()](#ondiscarddraft), [@OnSaveDraft()](#onsavedraft), [@OnEditDraft()](#oneditdraft), @OnReadDraft(), @OnUpdateDraft(), @OnCreateDraft(), @OnDeleteDraft(), @OnBoundActionDraft(), @OnBoundFunctionDraft() handlers to support for both, active and draft entities.
-
-The handlers receive two arguments:
-
-- `req` of type `Request`
-- `next` of type `NextEvent`
-
-See Official SAP **[Fiori-draft](https://cap.cloud.sap/docs/node.js/fiori#draft-support)**
-
-###### @OnNewDraft
-
-**@OnNewDraft()**
-
-This decorator will be triggered when `a new draft is created`.
-
-`Example`
-
-```typescript
-import { OnNewDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@OnNewDraft()
-private async onNewDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('NEW', MyEntity.drafts, async (req, next) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@OnNewDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @OnCancelDraft
-
-**@OnCancelDraft()**
-
-This decorator will be triggered when `a draft is cancelled`.
-
-`Example`
-
-```typescript
-import { OnCancelDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@OnCancelDraft()
-private async onCancelDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('CANCEL', MyEntity.drafts, async (req, next) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@OnCancelDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @OnPatchDraft
-
-**@OnPatchDraft()**
-
-This decorator will be triggered when `a field of an in-progress draft is changed`.
-
-`PATCH` is CAP's canonical `field-level` draft-edit event (an alias of `UPDATE` on `.drafts` since `@sap/cds` 10) and fires every time a field of an in-progress draft changes.
-
-`Example`
-
-```typescript
-import { OnPatchDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@OnPatchDraft()
-private async onPatchDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
-  return next(); // preserve the default draft PATCH behavior
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('PATCH', MyEntity.drafts, async (req, next) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@OnPatchDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @OnDiscardDraft
-
-**@OnDiscardDraft()**
-
-This decorator will be triggered when `an in-progress draft is discarded`.
-
-`DISCARD` is CAP's canonical alias of `CANCEL` since `@sap/cds` 10 and fires when an in-progress draft is discarded.
-
-`Example`
-
-```typescript
-import { OnDiscardDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@OnDiscardDraft()
-private async onDiscardDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
-  return next(); // preserve the default draft DISCARD behavior
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('DISCARD', MyEntity.drafts, async (req, next) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@OnDiscardDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @OnEditDraft
-
-**@OnEditDraft()**
-
-This decorator will be triggered when `a new draft is created from an active instance`
-
-`Example`
-
-```typescript
-import { OnEditDraft, Req, Next } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@OnEditDraft()
-private async onEditDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('EDIT', MyEntity, async (req, next) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@OnEditDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-###### @OnSaveDraft
-
-**@OnSaveDraft()**
-
-This decorator will be triggered when `the active entity is changed`
-
-`Example`
-
-```typescript
-
-import { OnSaveDraft, Req, Next  } from "@dxfrontier/cds-ts-dispatcher";
-import type { Request, NextEvent } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@OnSaveDraft()
-private async onSaveDraft(@Req() req: Request<MyEntity>, @Next() next: NextEvent) {
-  // ...
-}
-```
-
-`Equivalent to 'JS'`
-
-```typescript
-this.on('SAVE', MyEntity, async (req, next) => {
-  // ...
-});
-```
-
-> [!IMPORTANT]
-> Decorator `@OnSaveDraft()` will be triggered based on the [EntityHandler](#entityhandler) `argument` => `MyEntity`.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-##### `Other draft decorators`
-
-All active entity [On](#on), [Before](#before), [After](#after) events have also a `Draft` variant.
-
-> [!NOTE]
-> Except the [@OnAction()](#onaction), [@OnFunction()](#onfunction), [@OnEvent()](#onevent), [@OnError()](#onerror) as these actions are bound to the service and not to an entity.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-#### `Scheduling`
+#### Method — Scheduling
 
 Use [@OnScheduled()](#onscheduled) and [@Schedule()](#schedule) to handle and register recurring background tasks on top of the `@sap/cds` 10 `event-queue`.
 
@@ -4531,13 +5025,89 @@ this.on('cleanupExpiredCarts', async (req) => {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Streaming`
+##### @OnScheduledSuccess
+
+**@OnScheduledSuccess(name: string)**
+
+The `@OnScheduledSuccess` decorator is a `method-level` decorator that handles the `successful` outcome of a scheduled task. It registers `srv.after('<name>/#succeeded', cb)` — the handler receives the `result` returned by the task handler ([@OnScheduled](#onscheduled) / [@Schedule](#schedule)) via [@Result()](#results--result) and the `req`.
+
+`Parameters`
+
+- `name (string)` : The scheduled task name whose success to handle. The name is registered **verbatim** (dots are **not** stripped), so fully-qualified names like `'my.namespace.Task'` match exactly.
+
+`Example`
+
+```typescript
+import { OnScheduledSuccess, Result, Req, UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@UnboundActions()
+class ScheduledTasksHandler {
+  @OnScheduledSuccess('cleanupExpiredCarts')
+  public async succeeded(@Result() result: unknown, @Req() req: Request) {
+    // ... e.g. kick off follow-up work now that the task ran through
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('cleanupExpiredCarts/#succeeded', (result, req) => {
+  // ...
+});
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnScheduledFailure
+
+**@OnScheduledFailure(name: string)**
+
+The `@OnScheduledFailure` decorator is a `method-level` decorator that handles the `failed` outcome of a scheduled task, once its retries are exhausted. It registers `srv.after('<name>/#failed', cb)` — the handler receives the failure payload via [@Result()](#results--result) and the `req`.
+
+`Parameters`
+
+- `name (string)` : The scheduled task name whose failure to handle. The name is registered **verbatim** (dots are **not** stripped), so fully-qualified names like `'my.namespace.Task'` match exactly.
+
+`Example`
+
+```typescript
+import { OnScheduledFailure, Result, Req, UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@UnboundActions()
+class ScheduledTasksHandler {
+  @OnScheduledFailure('cleanupExpiredCarts')
+  public async failed(@Result() error: { name: string; message: string; stack: string; code: string }, @Req() req: Request) {
+    // ... e.g. alert ops
+  }
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.after('cleanupExpiredCarts/#failed', (error, req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> `@OnScheduledFailure` only fires once the task's `retries` are `exhausted` (event-queue `maxAttempts`, `10` by default) — not on every failed attempt.
+
+> [!IMPORTANT]
+> The failure payload is a `serialized plain object` (`{ name, message, stack, code }`), `NOT` an `Error` instance. Inject it with [@Result()](#results--result) — [@Error()](#error) will **not** populate here, as it only matches arguments that are `instanceof Error`.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Method — Streaming
 
 Use [@Stream()](#stream) to pipe a handler's `Readable` return value straight to the HTTP response.
 
 ##### @Stream
 
-**@Stream(contentType?: string)**
+**@Stream(contentType?: StreamContentType)**
 
 The `@Stream` decorator is a `method-level` decorator for `ON` read handlers ([@OnRead()](#onread), [@OnFunction()](#onfunction), [@OnBoundFunction()](#onboundfunction)). Place it **directly on the method, below the `ON` decorator**, so it wraps the returned value.
 
@@ -4545,7 +5115,7 @@ If the decorated method returns a `Readable` (an object exposing a `.pipe` funct
 
 `Parameters`
 
-- `contentType (string)` `optional` : The response `Content-Type`. Defaults to `'application/octet-stream'`.
+- `contentType (StreamContentType)` `optional` : The response `Content-Type`. Defaults to `'application/octet-stream'`. `StreamContentType` is a union of common MIME types (`'application/json'`, `'application/x-ndjson'`, `'text/csv'`, `'application/pdf'`, `'image/png'`, ...) so the editor suggests them - any other valid MIME type string is accepted as well.
 
 `Example`
 
@@ -4570,7 +5140,320 @@ public async streamBooks(@Req() req: Request): Promise<Readable> {
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
-#### `Method`-`helpers`
+#### Method — WebSocket
+
+Use [@OnWebSocketConnect()](#onwebsocketconnect), [@OnWebSocketDisconnect()](#onwebsocketdisconnect), [@OnWebSocketMessage()](#onwebsocketmessage) to handle realtime operations of a CDS service exposed over the [`@cap-js-community/websocket`](https://github.com/cap-js-community/websocket) plugin - an `optional peer` the consumer app installs separately. They are pure `sugar` for [@OnEvent()](#onevent) - `@OnWebSocketConnect()` ≈ `@OnEvent('wsConnect')`, `@OnWebSocketDisconnect()` ≈ `@OnEvent('wsDisconnect')` - and register through the exact same [@UnboundActions](#unboundactions) host; there is no dedicated websocket host class, since a websocket service impl is just a regular CAP service impl (`module.exports = (srv) => ...`).
+
+The service is annotated `@protocol: 'websocket'` (or `@ws`):
+
+```cds
+@protocol: 'websocket'
+@path    : 'chat'
+service ChatService {
+  action wsConnect();
+  action wsDisconnect(reason : String);
+  action sendMessage(text : String) returns String;
+}
+```
+
+`Example`
+
+```typescript
+import { OnWebSocketConnect, OnWebSocketDisconnect, OnWebSocketMessage, Req, UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
+import type { Request } from '@dxfrontier/cds-ts-dispatcher';
+
+@UnboundActions() // bound as ChatService's impl via CDSDispatcher
+export class ChatHandler {
+  @OnWebSocketConnect()
+  public async onConnect(@Req() req: Request) {
+    console.log('[Chat] connect');
+  }
+
+  @OnWebSocketMessage('sendMessage')
+  public async onMessage(@Req() req: Request<{ text: string }>) {
+    console.log(`[Chat] message ${req.data.text}`);
+    return req.data.text;
+  }
+
+  @OnWebSocketDisconnect()
+  public async onDisconnect(@Req() req: Request<{ reason?: string }>) {
+    // Under kind 'ws' the plugin delivers the socket close CODE as a string (e.g. '1000'), not a phrase.
+    console.log(`[Chat] disconnect ${req.data?.reason ?? ''}`);
+  }
+}
+```
+
+`Wire format` - clients send plain JSON frames to `ws://host:port/ws/<path>` (`/ws/chat` for the example above):
+
+```json
+{ "event": "sendMessage", "data": { "text": "hello" } }
+```
+
+`event` is matched against the plain string passed to [@OnWebSocketMessage()](#onwebsocketmessage) (or the fixed `'wsConnect'` / `'wsDisconnect'` names); `data` becomes `req.data`.
+
+> [!IMPORTANT]
+> [@OnWebSocketConnect()](#onwebsocketconnect) / [@OnWebSocketDisconnect()](#onwebsocketdisconnect) only fire when `wsConnect()` / `wsDisconnect(reason)` are `modeled as actions` on the service, exactly as above - the plugin's adapter only calls modeled operations, it does not synthesize connect/disconnect events for services that omit them.
+
+> [!WARNING]
+> Observed on kind `'ws'` (plugin `1.11.x`): action `return` values are `not` echoed back as a reply frame - raw `ws` has no ack-callback channel (unlike `socket.io`), so whatever [@OnWebSocketMessage()](#onwebsocketmessage) returns is discarded on the wire. Use `srv.emit(...)` / `srv.broadcast(...)` from inside the handler if the client needs a message back.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnWebSocketConnect
+
+**@OnWebSocketConnect()**
+
+Fires when a websocket client connects. Sugar for [@OnEvent('wsConnect')](#onevent).
+
+`Example`
+
+```typescript
+@OnWebSocketConnect()
+public async onConnect(@Req() req: Request) {
+  // ...
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('wsConnect', async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> The service must model `action wsConnect();` - see the [WebSocket](#method--websocket) prerequisites above.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnWebSocketDisconnect
+
+**@OnWebSocketDisconnect()**
+
+Fires when a websocket client disconnects. Sugar for [@OnEvent('wsDisconnect')](#onevent).
+
+`Example`
+
+```typescript
+@OnWebSocketDisconnect()
+public async onDisconnect(@Req() req: Request<{ reason?: string }>) {
+  // Under kind 'ws' the plugin delivers the socket close CODE as a string (e.g. '1000'), not a phrase.
+  console.log(`[Chat] disconnect ${req.data?.reason ?? ''}`);
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('wsDisconnect', async (req) => {
+  // ...
+});
+```
+
+> [!IMPORTANT]
+> The service must model `action wsDisconnect(reason: String);` to receive a disconnect detail in `req.data.reason` - see the [WebSocket](#method--websocket) prerequisites above.
+
+> [!WARNING]
+> Under the plugin's default `kind: 'ws'`, the delivered value is the socket `close code` as a `string` (e.g. `'1000'`, `'1005'`), **not** a reason phrase - raw `ws` passes `(code, reason)` and the plugin forwards only the first argument.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @OnWebSocketMessage
+
+**@OnWebSocketMessage(name: string)**
+
+Handles an incoming websocket operation/event by `name`. Sugar for [@OnEvent(name)](#onevent).
+
+`Parameters`
+
+- `name (string)` : the websocket operation name, matched against the `event` field of the wire payload (`{"event":"<name>","data":{...}}`) - a `plain string`, not a `@cds-model` action reference.
+
+> [!NOTE]
+> Like [@OnEvent()](#onevent), everything before the `last dot` is stripped at registration time - `'ChatService.sendMessage'` registers as `'sendMessage'`. Pass the `plain operation name`.
+
+`Example`
+
+```typescript
+@OnWebSocketMessage('sendMessage')
+public async onMessage(@Req() req: Request<{ text: string }>) {
+  // req.data.text
+}
+```
+
+`Equivalent to 'JS'`
+
+```typescript
+this.on('sendMessage', async (req) => {
+  // ...
+});
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Method — Middleware & guards
+
+##### @Use
+
+**@Use**(`...Middleware[]`)
+
+The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your method.
+
+Middleware decorators can perform the following tasks:
+
+- Execute any code.
+- Make changes to the request object.
+- End the request-response cycle.
+- Call the next middleware function in the stack.
+- If the current middleware function does not end the request-response cycle, it must call `next()` to pass control to the next middleware function. Otherwise, the request will be left hanging.
+
+`Parameters`
+
+- `...Middleware[])`: Middleware classes to be injected.
+
+`Example:` middleware implementation:
+
+```typescript
+import type { MiddlewareImpl, NextMiddleware, Request } from '@dxfrontier/cds-ts-dispatcher';
+
+export class MiddlewareClass implements MiddlewareImpl {
+  public async use(req: Request, next: NextMiddleware) {
+    console.log('Middleware use method called.');
+
+    await next();
+  }
+}
+```
+
+> [!TIP]
+>
+> Inside of the `use` method you can use [@CatchAndSetErrorCode](#catchandseterrorcode) and [@CatchAndSetErrorMessage](#catchandseterrormessage) decorators if you want to catch errors.
+
+
+`Example` usage:
+
+```typescript
+import { EntityHandler, Use, Inject, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
+import type { Service, Request } from '@dxfrontier/cds-ts-dispatcher';
+
+import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
+import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@EntityHandler(MyEntity)
+export class CustomerHandler {
+  // ...
+  @Inject(CDS_DISPATCHER.SRV) private srv: Service;
+  // ...
+  constructor() {}
+
+  @AfterRead()
+  @Use(MiddlewareClass)
+  private async aMethod(@Results() results: MyEntity[], @Req() req: Request) {
+    // ...
+  }
+
+  // ...
+}
+```
+
+> [!TIP]
+>
+> 1. Middlewares when applied with `@Use` are executed before the normal events.
+> 2. If you need to apply middleware to `class` you can have a look over class specific [@Use](#use) decorator .
+> 3. The wrapped handler's return value passes through the middleware wrapper — an `@On*` handler with method-level `@Use` still replies its payload.
+
+> 
+> [!WARNING]
+> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
+
+> [!NOTE]
+> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @ExecutionAllowedForRole
+
+**@ExecutionAllowedForRole(...roles: string[])**
+
+The `@ExecutionAllowedForRole` is used as a `method` decorator and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
+
+It applies an logical `OR` on the specified **_roles_**, meaning it checks if at `least one` of the specified roles is assigned to the current request, then the execution will be allowed.
+
+`Parameters`
+
+- `...roles: string[]`: Specifies the roles that are permitted to execute the event logic.
+
+`Example`
+
+```typescript
+@AfterRead()
+@ExecutionAllowedForRole('Manager', 'User', 'CEO')
+private async afterRead(
+  @Req() req: Request,
+  @Results() results: BookSale[],
+) {
+  // Method implementation
+  // Code will be executed only in case of User ( Manager, User and CEO )
+}
+```
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+##### @Throttle
+
+**@Throttle(options: { limit: number; window: number; by?: 'user' | 'tenant' })**
+
+The `@Throttle` decorator is a `method` decorator that rate-limits a handler with a `fixed window`, counted per `user` (default) or per `tenant`. Once the limit is exhausted inside the current window, the request is rejected with `HTTP 429` through `req.reject(...)` - the decorated method body never runs.
+
+It works on any handler decorator that receives a real `cds.Request` - CRUD ([@OnCreate()](#oncreate), [@BeforeUpdate()](#beforeupdate), ...), actions and functions ([@OnAction()](#onaction), [@OnBoundFunction()](#onboundfunction), ...) - hosted in either [@EntityHandler](#entityhandler) or [@UnboundActions](#unboundactions).
+
+`Parameters`
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `limit` | `number` | _(required)_ | Maximum number of invocations allowed per window. Must be `>= 1`. |
+| `window` | `number` (ms) | _(required)_ | Fixed window length in milliseconds. Must be `>= 1`. |
+| `by` | `'user' \| 'tenant'` | `'user'` | Counter key source: `'user'` keys by `req.user.id` (fallback `'anonymous'`), `'tenant'` keys by `req.tenant` (fallback `'no-tenant'`). |
+
+`Example`
+
+```typescript
+import { OnAction, Req, Throttle, UnboundActions } from '@dxfrontier/cds-ts-dispatcher';
+import type { ActionRequest, ActionReturn } from '@dxfrontier/cds-ts-dispatcher';
+
+import { GenerateReport } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
+
+@UnboundActions()
+export class ReportHandler {
+  @OnAction(GenerateReport)
+  @Throttle({ limit: 10, window: 60_000 }) // 10 calls per minute, per user
+  public async generate(@Req() req: ActionRequest<typeof GenerateReport>): ActionReturn<typeof GenerateReport> {
+    // ...
+  }
+}
+```
+
+> [!IMPORTANT]
+> Stack `@Throttle` **directly below** the handler decorator (`@OnAction`, `@OnCreate`, ...), closer to the method - the same rule as [@ExecutionAllowedForRole](#executionallowedforrole). Decorators wrap `descriptor.value` bottom-up, so a wrapper placed **above** the handler decorator never becomes part of the registered callback - it silently does nothing. Keep a [@Req()](#req) parameter: the wrapper reads the current `cds.Request` off the handler arguments to resolve the counter key and to call `req.reject(...)`.
+
+> [!IMPORTANT]
+> `@Throttle` targets `request` handlers only. On messaging-event handlers ([@OnEvent()](#onevent) / [@OnSubscribe()](#onsubscribe)) there is no `cds.Request` among the arguments - every delivery fails loudly with a descriptive error instead of silently letting messages through unthrottled.
+
+> [!NOTE]
+> Counters are `fixed-window`, kept `in-memory`, `per app instance` **and** `per decorated method` - in a multi-instance deployment the limit is effectively `per pod`, not global. Each OData `$batch` sub-request invokes the handler (and therefore the counter) individually - there is no batch-level dedup like [@BeforeCommit](#beforecommit) has.
+
+> [!NOTE]
+> Over the limit, the rejection message has the shape: `Rate limit exceeded: max ${limit} requests per ${window} ms for this ${by}. Retry in ${retryAfter} ms.`
+
+> [!WARNING]
+> `@Throttle` cannot be combined with [@OnError()](#onerror) - stacking it under `@OnError` throws at `decoration time` (error handlers run synchronously while the transaction unwinds, which a throttling wrapper cannot honor).
+
+> [!TIP]
+> For a `service-global` (not per-handler) limit, use CAP's own extension point instead: `cds.middlewares.add(rateLimit(), { after: 'auth' })` in a custom `server.js`. `@Throttle` stays the per-handler tool.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+#### Method — Utilities
 
 ##### @AfterReadSingleInstance
 
@@ -5009,6 +5892,7 @@ The `@FieldsFormatter` decorator can be used on the following decorators :
 
    - `AFTER`
      - [@AfterRead()](#afterread)
+     - [@AfterCreate()](#aftercreate) / [@AfterUpdate()](#afterupdate) / [@AfterAll()](#afterall) — the write-event note under [@Exclude](#exclude) applies: generic write results carry key columns only (CREATE) or nothing (UPDATE); shape write responses on `@AfterRead`
 
 2. When you want to `modify`/`enhance` the `Request`.`data` _(Request Body)_ of the `@sap/cds - Request` object.
 
@@ -5051,6 +5935,9 @@ Here are the available formatter methods:
 | kebabCase       | Kebab case, also known as "spinal case" or "hyphen case," involves writing compound words in lowercase letters and separating them with hyphens ("-"). For example, the phrase "user settings panel" would be represented as `"user-settings-panel"` in the kebab case.    |
 | camelCase       | The format indicates the first word starting with either case, then the following words having an initial uppercase letter. `CustomerName, LastName ...`                                                                                                                   |
 | customFormatter | Apply a custom formatter when standard ones do not satisfy your needs.                                                                                                                                                                                                     |
+
+> [!NOTE]
+> Every listed field is formatted. `customFormatter` invokes your `callback(req, results)` exactly once — with or without field arguments; on the `BEFORE`/`ON` path `results` is `undefined` (work on `req.data` via `req`).
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -5130,7 +6017,7 @@ export class CustomerHandler {
 ```
 
 > [!TIP]
-> See best practice for [customFormatter](#best-practices-tips)
+> See best practice for [customFormatter](#best-practices--tips)
 
 `Example 2` : using `@FieldsFormatter` decorator inside the [@UnboundActions](#unboundactions)
 
@@ -5187,111 +6074,6 @@ class UnboundActionsHandler {
 > - [@OnBoundFunction()](#onboundfunction)
 >
 > you must use the `ExposeFields type` inside of the `@FieldsFormatter` decorator.
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-##### @ExecutionAllowedForRole
-
-**@ExecutionAllowedForRole(...roles: string[])**
-
-The `@ExecutionAllowedForRole` is used as a `method` decorator and was designed to enforce `role-based access control`, ensuring that only users with `specific roles` are authorized to execute the event.
-
-It applies an logical `OR` on the specified **_roles_**, meaning it checks if at `least one` of the specified roles is assigned to the current request, then the execution will be allowed.
-
-`Parameters`
-
-- `...roles: string[]`: Specifies the roles that are permitted to execute the event logic.
-
-`Example`
-
-```typescript
-@AfterRead()
-@ExecutionAllowedForRole('Manager', 'User', 'CEO')
-private async afterRead(
-  @Req() req: Request,
-  @Results() results: BookSale[],
-) {
-  // Method implementation
-  // Code will be executed only in case of User ( Manager, User and CEO )
-}
-```
-
-<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
-
-##### @Use
-
-**@Use**(`...Middleware[]`)
-
-The `@Use` decorator is utilized as a `method-level` decorator and allows you to inject middlewares into your method.
-
-Middleware decorators can perform the following tasks:
-
-- Execute any code.
-- Make changes to the request object.
-- End the request-response cycle.
-- Call the next middleware function in the stack.
-- If the current middleware function does not end the request-response cycle, it must call `next()` to pass control to the next middleware function. Otherwise, the request will be left hanging.
-
-`Parameters`
-
-- `...Middleware[])`: Middleware classes to be injected.
-
-`Example:` middleware implementation:
-
-```typescript
-import type { MiddlewareImpl, NextMiddleware, Request } from '@dxfrontier/cds-ts-dispatcher';
-
-export class MiddlewareClass implements MiddlewareImpl {
-  public async use(req: Request, next: NextMiddleware) {
-    console.log('Middleware use method called.');
-
-    await next();
-  }
-}
-```
-
-> [!TIP]
->
-> Inside of the `use` method you can use [@CatchAndSetErrorCode](#catchandseterrorcode) and [@CatchAndSetErrorMessage](#catchandseterrormessage) decorators if you want to catch errors.
-
-
-`Example` usage:
-
-```typescript
-import { EntityHandler, Use, Inject, CDS_DISPATCHER } from '@dxfrontier/cds-ts-dispatcher';
-import type { Service, Request } from '@dxfrontier/cds-ts-dispatcher';
-
-import { MiddlewareClass } from 'YOUR_MIDDLEWARE_LOCATION';
-import { MyEntity } from 'YOUR_CDS_TYPER_ENTITIES_LOCATION';
-
-@EntityHandler(MyEntity)
-export class CustomerHandler {
-  // ...
-  @Inject(CDS_DISPATCHER.SRV) private srv: Service;
-  // ...
-  constructor() {}
-
-  @AfterRead()
-  @Use(MiddlewareClass)
-  private async aMethod(@Results() results: MyEntity[], @Req() req: Request) {
-    // ...
-  }
-
-  // ...
-}
-```
-
-> [!TIP]
->
-> 1. Middlewares when applied with `@Use` are executed before the normal events.
-> 2. If you need to apply middleware to `class` you can have a look over class specific [@Use](#use) decorator .
-
-> 
-> [!WARNING]
-> If `req.reject()` is being used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
-
-> [!NOTE]
-> MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the class.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
@@ -5489,6 +6271,9 @@ The `@Exclude` decorator can be used on the following decorators:
   - [@AfterUpdate()](#afterupdate)
   - [@AfterAll()](#afterall)
 
+> [!NOTE]
+> On write events (`@AfterCreate` / `@AfterUpdate`) with `@sap/cds` 10+ the generic handlers expose only key columns (CREATE) or an empty affected-count array (UPDATE) in `req.results`, and generic OData/REST write response bodies are rebuilt after this phase via read-after-write — attach the transformer to [@AfterRead()](#afterread) to shape write responses (a custom `@On*` handler returning full rows is the exception).
+
 `Parameters`
 
 - `...fields`: Specify the fields of your entity that should be excluded from the response.
@@ -5531,6 +6316,9 @@ The `@Include` decorator can be used on the following decorators:
   - [@AfterCreate()](#aftercreate)
   - [@AfterUpdate()](#afterupdate)
   - [@AfterAll()](#afterall)
+
+> [!NOTE]
+> On write events (`@AfterCreate` / `@AfterUpdate`) with `@sap/cds` 10+ the generic handlers expose only key columns (CREATE) or an empty affected-count array (UPDATE) in `req.results`, and generic OData/REST write response bodies are rebuilt after this phase via read-after-write — attach the transformer to [@AfterRead()](#afterread) to shape write responses (a custom `@On*` handler returning full rows is the exception).
 
 `Parameters`
 
@@ -5575,12 +6363,16 @@ The `@Mask` decorator can be used on the following decorators:
   - [@AfterUpdate()](#afterupdate)
   - [@AfterAll()](#afterall)
 
+> [!NOTE]
+> On write events (`@AfterCreate` / `@AfterUpdate`) with `@sap/cds` 10+ the generic handlers expose only key columns (CREATE) or an empty affected-count array (UPDATE) in `req.results`, and generic OData/REST write response bodies are rebuilt after this phase via read-after-write — attach the transformer to [@AfterRead()](#afterread) to shape write responses (a custom `@On*` handler returning full rows is the exception).
+
 `Parameters`
 
 - `fields`: An array of fields of your entity that should be masked.
 - `options?`: [Optional] Configuration options for the masking:
   - `char?: string` - The character to use for masking (default: `'*'`)
-  - `visibleChars?: number` - Number of characters to leave visible at the end (default: `4`)
+  - `visibleStart?: number` - Number of characters to leave visible at the start (default: `0`)
+  - `visibleEnd?: number` - Number of characters to leave visible at the end (default: `4`)
 
 `Example 1` - Default masking
 
@@ -5607,7 +6399,7 @@ export class MyHandler {
 
 ```typescript
 @AfterRead()
-@Mask<MyEntity>(['phoneNumber'], { char: '#', visibleChars: 2 })
+@Mask<MyEntity>(['phoneNumber'], { char: '#', visibleEnd: 2 })
 private async afterRead(@Results() results: MyEntity[], @Req() req: Request) {
   // 'phoneNumber': '+1234567890' => '#########90'
 }

@@ -133,9 +133,26 @@ export class ArgumentMethodProcessor {
         break;
       }
 
+      case 'PARAM': {
+        parameterUtil.applyParam(this.temporaryArgs.req, this.args, metadata);
+        break;
+      }
+
       default:
         util.throwErrorMessage('Unsupported decorator key');
     }
+  }
+
+  /**
+   * Applies the `@Diff` decorator by assigning the awaited `req.diff()` result to the decorated parameter.
+   *
+   * Kept out of the synchronous switch in `applyDecorators` because `@Diff` is the only parameter decorator
+   * that needs to await the request before the value is known.
+   */
+  private async applyDiffDecorator(): Promise<void> {
+    const metadata = this.getMetadata('DIFF')!;
+
+    this.args[metadata[0].parameterIndex] = await parameterUtil.retrieveDiff(this.temporaryArgs.req);
   }
 
   // STATIC ROUTINES
@@ -194,108 +211,148 @@ export class ArgumentMethodProcessor {
 
   /**
    * Registration of decorators
+   *
+   * `@Diff` is the only asynchronous parameter decorator: it is skipped by the synchronous switch below (while
+   * still counting as "attached" for the `cleanArgs` gate) and applied last via `applyDiffDecorator()`. When no
+   * `@Diff` is attached, this method returns `undefined` synchronously, exactly as before `@Diff` existed.
    */
-  public applyDecorators(): void {
+  public applyDecorators(): void | Promise<void> {
     if (this.hasDecoratorsAttached()) {
       util.cleanArgs(this.args);
     }
 
-    this.getAttachedDecorators().forEach((metadataKey) => {
-      switch (metadataKey) {
-        /**
-         * @Req(), @Res(), @Error(), @Next(), @Results(), @Result(), @Jwt, '@SingleInstanceSwitch' can be present only once per callback
-         */
-        case 'MSG':
-        case 'ERROR':
-        case 'NEXT':
-        case 'RESULTS':
-        case 'REQ': {
-          // FIXME:
-          // TEMPORARLY until we fix this better
-          // so we need to remove the MSG as in the new version of CAP this doesn't reflect anymore and this can be req and the decorator @MSG can be deleted.
-          if (metadataKey === 'MSG') {
-            let key = 'req' as 'req' | 'results' | 'next' | 'error';
+    const attachedDecorators = this.getAttachedDecorators();
+
+    attachedDecorators
+      .filter((metadataKey) => metadataKey !== 'DIFF')
+      .forEach((metadataKey) => {
+        switch (metadataKey) {
+          /**
+           * `@Req()`, `@Res()`, `@Error()`, `@Next()`, `@Results()`, `@Result()`, `@Jwt`, `@SingleInstanceSwitch` can be present only once per callback
+           */
+          case 'MSG':
+          case 'ERROR':
+          case 'NEXT':
+          case 'RESULTS':
+          case 'REQ': {
+            // FIXME:
+            // TEMPORARLY until we fix this better
+            // so we need to remove the MSG as in the new version of CAP this doesn't reflect anymore and this can be req and the decorator @MSG can be deleted.
+            if (metadataKey === 'MSG') {
+              let key = 'req' as 'req' | 'results' | 'next' | 'error';
+              this.applySingleDecoratorByKey({ metadataKey, data: this.temporaryArgs[key] });
+              break;
+            }
+
+            let key = util.lodash.lowerCase(metadataKey) as 'req' | 'results' | 'next' | 'error';
             this.applySingleDecoratorByKey({ metadataKey, data: this.temporaryArgs[key] });
+
             break;
           }
 
-          let key = util.lodash.lowerCase(metadataKey) as 'req' | 'results' | 'next' | 'error';
-          this.applySingleDecoratorByKey({ metadataKey, data: this.temporaryArgs[key] });
+          case 'RES': {
+            this.applySingleDecoratorByKey({
+              metadataKey,
+              data: parameterUtil.retrieveResponse(this.temporaryArgs.req),
+            });
 
-          break;
+            break;
+          }
+
+          case 'JWT': {
+            this.applySingleDecoratorByKey({
+              metadataKey,
+              data: parameterUtil.retrieveJwt(this.temporaryArgs.req),
+            });
+
+            break;
+          }
+
+          case 'SINGLE_INSTANCE_SWITCH': {
+            this.applySingleDecoratorByKey({
+              metadataKey,
+              data: parameterUtil.isSingleInstance(this.temporaryArgs.req),
+            });
+
+            break;
+          }
+
+          case 'LOCALE': {
+            this.applySingleDecoratorByKey({
+              metadataKey,
+              data: parameterUtil.retrieveLocale(this.temporaryArgs.req),
+            });
+
+            break;
+          }
+
+          case 'SUBJECT': {
+            this.applySingleDecoratorByKey({
+              metadataKey,
+              data: parameterUtil.retrieveSubject(this.temporaryArgs.req),
+            });
+
+            break;
+          }
+
+          case 'AFFECTED': {
+            this.applySingleDecoratorByKey({
+              metadataKey,
+              data: parameterUtil.retrieveAffected(this.temporaryArgs.req),
+            });
+
+            break;
+          }
+
+          case 'DATA': {
+            this.applySingleDecoratorByKey({
+              metadataKey,
+              data: parameterUtil.retrieveData(this.temporaryArgs.req),
+            });
+
+            break;
+          }
+
+          case 'USER_INFO': {
+            this.applySingleDecoratorByKey({
+              metadataKey,
+              data: parameterUtil.retrieveUser(this.temporaryArgs.req),
+            });
+
+            break;
+          }
+
+          case 'TENANT': {
+            this.applySingleDecoratorByKey({
+              metadataKey,
+              data: parameterUtil.retrieveTenant(this.temporaryArgs.req),
+            });
+
+            break;
+          }
+
+          /**
+           * `@IsColumnSupplied`, `@IsRole`, `@GetRequest`, `@GetQuery`, `@IsPresent`, can be present multiple times per callback.
+           */
+          case 'GET_QUERY':
+          case 'IS_PRESENT':
+          case 'IS_ROLE':
+          case 'GET_REQUEST':
+          case 'IS_COLUMN_SUPPLIED':
+          case 'ENV':
+          case 'PARAM': {
+            this.applyMultipleDecoratorsByKey(metadataKey);
+            break;
+          }
+
+          default:
+            util.throwErrorMessage(`Parameter decorator ${metadataKey} option not handled !`);
+            break;
         }
+      });
 
-        case 'RES': {
-          this.applySingleDecoratorByKey({
-            metadataKey,
-            data: parameterUtil.retrieveResponse(this.temporaryArgs.req),
-          });
-
-          break;
-        }
-
-        case 'JWT': {
-          this.applySingleDecoratorByKey({
-            metadataKey,
-            data: parameterUtil.retrieveJwt(this.temporaryArgs.req),
-          });
-
-          break;
-        }
-
-        case 'SINGLE_INSTANCE_SWITCH': {
-          this.applySingleDecoratorByKey({
-            metadataKey,
-            data: parameterUtil.isSingleInstance(this.temporaryArgs.req),
-          });
-
-          break;
-        }
-
-        case 'LOCALE': {
-          this.applySingleDecoratorByKey({
-            metadataKey,
-            data: parameterUtil.retrieveLocale(this.temporaryArgs.req),
-          });
-
-          break;
-        }
-
-        case 'SUBJECT': {
-          this.applySingleDecoratorByKey({
-            metadataKey,
-            data: parameterUtil.retrieveSubject(this.temporaryArgs.req),
-          });
-
-          break;
-        }
-
-        case 'AFFECTED': {
-          this.applySingleDecoratorByKey({
-            metadataKey,
-            data: parameterUtil.retrieveAffected(this.temporaryArgs.req),
-          });
-
-          break;
-        }
-
-        /**
-         * @IsColumnSupplied, @IsRole, @GetRequest, @GetQuery, @IsPresent, can be present multiple times per callback.
-         */
-        case 'GET_QUERY':
-        case 'IS_PRESENT':
-        case 'IS_ROLE':
-        case 'GET_REQUEST':
-        case 'IS_COLUMN_SUPPLIED':
-        case 'ENV': {
-          this.applyMultipleDecoratorsByKey(metadataKey);
-          break;
-        }
-
-        default:
-          util.throwErrorMessage(`Parameter decorator ${metadataKey} option not handled !`);
-          break;
-      }
-    });
+    if (attachedDecorators.includes('DIFF')) {
+      return this.applyDiffDecorator();
+    }
   }
 }

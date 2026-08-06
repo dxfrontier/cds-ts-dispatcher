@@ -69,4 +69,28 @@ describe('Scheduling (@Schedule / @OnScheduled)', () => {
     const books = await srv.read('Authors');
     expect(Array.isArray(books)).toBe(true);
   });
+
+  test("It should FIRE the @OnScheduledSuccess outcome end-to-end (`srv.after('<task>/#succeeded')`) through the real queue", async () => {
+    const srv = (await cds.connect.to('CatalogService')) as any;
+    const spy = jest.spyOn(console, 'log');
+
+    const succeededCount = () =>
+      spy.mock.calls.filter((c) => String(c[0]).includes('[ScheduledOutcome] succeeded')).length;
+    const before = succeededCount();
+
+    await srv.schedule(REINDEX_TASK, { probe: 'succeeded-outcome-pin' }).after(1, 'ms');
+
+    // A DELTA (not a presence) check: `[ScheduledOutcome] succeeded` carries no probe of its own (it
+    // logs the handler's raw, always-undefined return value - see SCHEDULED-OUTCOME.test.ts), so a
+    // stray occurrence from an earlier test's still-settling dispatch would otherwise be indistinguishable.
+    const fired = await waitFor(() => succeededCount() > before);
+    spy.mockRestore();
+    expect(fired).toBe(true);
+  }, 15000);
+
+  // The failure counterpart (`@OnScheduledFailure`) only fires once the event-queue's retries
+  // (`maxAttempts`, default 10) are exhausted - not practical to simulate end-to-end here without a
+  // dedicated fast-failing task (this suite's fixtures don't have one, and adding one is out of scope
+  // for this file). Registration + payload-shape (serialized failure object, not an Error) are already
+  // pinned at the unit level in SCHEDULED-OUTCOME.test.ts.
 });

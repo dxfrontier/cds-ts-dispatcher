@@ -4,6 +4,8 @@ export const constants = {
     MIDDLEWARE_NAME: 'MIDDLEWARE',
     ENTITY_HANDLER_NAME: 'ENTITY_NAME',
     METHOD_ACCUMULATOR_NAME: 'METHOD_ACCUMULATOR',
+    THROTTLE_KEY: Symbol('THROTTLE'),
+    SERVER_LIFECYCLE_NAME: 'SERVER_LIFECYCLE',
 
     PARAMETER: {
       IS_ROLE: Symbol('IS_ROLE'),
@@ -24,6 +26,11 @@ export const constants = {
       MSG: Symbol('MSG'),
       SUBJECT: Symbol('SUBJECT'),
       AFFECTED: Symbol('AFFECTED'),
+      DATA: Symbol('DATA'),
+      PARAM: Symbol('PARAM'),
+      USER_INFO: Symbol('USER_INFO'),
+      TENANT: Symbol('TENANT'),
+      DIFF: Symbol('DIFF'),
     },
   },
 
@@ -43,6 +50,17 @@ export const constants = {
       "The Request object must contain the '.data' property and must not be empty when '${validator}' validator is used !",
     VALIDATOR_NOT_VALID: "{ ${field} : ${input} } does not meet the constraints of validator '${validator}' !",
     UNSUPPORTED_DECORATOR_ACTIONS: "@IsPresent() / @GetQuery does not support 'INSERT', 'DELETE', 'DROP', 'CREATE'",
+    THROTTLE_LIMIT_EXCEEDED:
+      'Rate limit exceeded: max ${limit} requests per ${window} ms for this ${by}. Retry in ${retryAfter} ms.',
+    THROTTLE_NO_REQUEST:
+      "@Throttle() could not find a 'Request' among the handler arguments of '${className}.${methodName}'. Place @Throttle() directly below the handler decorator and keep a @Req() parameter.",
+    THROTTLE_ON_ERROR: '@Throttle() cannot be used on @OnError handlers (error handlers are invoked synchronously).',
+    SERVER_LIFECYCLE_FOREIGN_HANDLERS:
+      "@ServerLifecycle class '${className}' contains non-lifecycle handler decorators. Only @OnServed / @OnListening / @OnShutdown are allowed here.",
+    SERVER_LIFECYCLE_WRONG_HOST:
+      "@OnServed / @OnListening / @OnShutdown found in '${className}', which is not decorated with @ServerLifecycle. Move them into a @ServerLifecycle class.",
+    SERVER_LIFECYCLE_MIDDLEWARE:
+      "@Use middleware found on @ServerLifecycle class '${className}'. Server lifecycle hooks are not request handlers - middleware does not apply here.",
   },
 
   ALL_EVENTS: '*' as const,

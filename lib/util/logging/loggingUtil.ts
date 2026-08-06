@@ -10,7 +10,7 @@ type ResolvedLogExecutionOptions = Required<Omit<LogExecutionOptions, 'condition
   Pick<LogExecutionOptions, 'condition'>;
 
 /**
- * Utility functions for the @LogExecution decorator.
+ * Utility functions for the `@LogExecution` decorator.
  */
 const loggingUtil = {
   /**

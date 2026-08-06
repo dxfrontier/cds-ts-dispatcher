@@ -7,32 +7,49 @@ import type { CDSTyperEntity } from '../types/types';
 import type CDS_DISPATCHER from '../constants/constants';
 
 /**
- * Associates a handler class with a specific entity and makes it injectable for dependency injection.
+ * Binds the handler class to a CDS-Typer entity (or to every entity via `CDS_DISPATCHER.ALL_ENTITIES`)
+ * and marks it inversify-injectable. Required host for entity event handlers.
  *
- * This decorator ensures that all handlers within the class operate with the specified entity context.
- * It enables type-safe entity operations and automatic dependency injection within the handler class.
+ * @remarks
+ * The class only takes effect when passed to `new CDSDispatcher([...])` — otherwise it is silently
+ * inert. Draft-variant method decorators inside this class target `<Entity>.drafts` automatically.
+ * Unbound actions belong in an `@UnboundActions` class; server lifecycle hooks in `@ServerLifecycle`.
  *
- * @param entity - The entity to associate with the handler class. Must be a `CDS-Typer` generated entity class.
- * @returns A decorator function that applies the entity association and injectable configuration to the target class.
+ * @example
+ * ```ts
+ * \@EntityHandler(Book)
+ * class BookHandler {
+ *   \@AfterRead()
+ *   private async enrich(@Results() results: Book[], \@Req() req: Request): Promise<void> { ... }
+ * }
+ * ```
  *
- * @example "@EntityHandler(Customer)"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#entityhandler | CDS-TS-Dispatcher - @EntityHandler}
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § EntityHandler
  */
 function EntityHandler<T>(entity: CDSTyperEntity<T>): (target: new (...args: never) => unknown) => void;
 
 /**
- * Associates a handler class with all entities and makes it injectable for dependency injection.
+ * Binds the handler class to every entity (the `CDS_DISPATCHER.ALL_ENTITIES` wildcard, i.e. the `'*'`
+ * literal) and marks it inversify-injectable.
  *
- * This decorator ensures that all handlers within the class operate with a generic context applicable
- * to all entities. Use this when you need to create handlers that work across multiple entity types.
+ * @remarks
+ * Same contract as the entity-specific overload — silently inert unless passed to
+ * `new CDSDispatcher([...])` — but every handler decorator inside the class fires for ALL entities
+ * instead of one. `@OnAction`, `@OnFunction`, `@OnEvent`, `@OnError` are excluded from that firing (they
+ * belong to the service itself, not to any entity); host them in an `@UnboundActions` class instead.
  *
- * @param entity - A wildcard constant indicating all entities. Use `CDS_DISPATCHER.ALL_ENTITIES`.
- * @returns A decorator function that applies the entity association and injectable configuration to the target class.
+ * @example
+ * ```ts
+ * \@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES) // or '*'
+ * class AllEntitiesHandler {
+ *   \@AfterRead()
+ *   private async logRead(@Results() results: unknown[], \@Req() req: Request): Promise<void> { ... }
+ * }
+ * ```
  *
- * @example "@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)"
- * or
- * "@EntityHandler('*')"
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#entityhandler | CDS-TS-Dispatcher - @EntityHandler}
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § EntityHandler
  */
 function EntityHandler(entity: typeof CDS_DISPATCHER.ALL_ENTITIES): (target: new (...args: never) => unknown) => void;
 
@@ -45,14 +62,33 @@ function EntityHandler<T>(entity: CDSTyperEntity<T> | typeof CDS_DISPATCHER.ALL_
 }
 
 /**
- * Marks a class as containing repository logic and makes it injectable for dependency injection.
+ * Marks a class as a repository — CDS-QL-only data access code — and makes it inversify-injectable.
  *
- * Repository classes typically handle data access operations, database interactions, and entity
- * management.
+ * @remarks
+ * Not passed to `new CDSDispatcher([...])` directly: it only takes effect once `@Inject`ed — directly
+ * or transitively — into a class that itself is in that array (an `@EntityHandler`, `@UnboundActions`
+ * or `@ServerLifecycle` class); an `@Repository` class nobody injects is never instantiated. Pairs
+ * optionally with the companion `@dxfrontier/cds-ts-repository` package's `BaseRepository<Entity>` for
+ * ready-made CRUD. In the suggested Controller-Service-Repository layering, `@ServiceLogic` classes call
+ * into repositories, not the other way around.
  *
- * @returns A decorator function that applies the injectable configuration to the target class.
+ * @example
+ * ```ts
+ * \@Repository()
+ * class BookRepository extends BaseRepository<Book> {
+ *   constructor() {
+ *     super(Book);
+ *   }
+ * }
+ *
+ * \@EntityHandler(Book)
+ * class BookHandler {
+ *   \@Inject(BookRepository) private repository: BookRepository;
+ * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#repository | CDS-TS-Dispatcher - @Repository}
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § Repository
  */
 function Repository<Target extends new (...args: never) => unknown>() {
   return function (target: Target) {
@@ -61,19 +97,32 @@ function Repository<Target extends new (...args: never) => unknown>() {
 }
 
 /**
- * Marks a class as containing service logic and makes it injectable for dependency injection.
+ * Marks a class as service logic (business rules) and makes it inversify-injectable, with an optional
+ * dependency-injection `scope`.
  *
- * This decorator configures the dependency injection scope for the service class, allowing
- * control over instance lifecycle and sharing across the application.
+ * @remarks
+ * `scope` defaults to `'Transient'` (a new instance per injection); `'Singleton'` shares ONE instance
+ * per `CDSDispatcher` container (i.e. per CAP service implementation) — its property values persist
+ * across requests and are visible to every injector within that dispatcher, but SEPARATE dispatchers
+ * each construct their own instance. Use it only for genuinely shared state. Like `@Repository`, it is not passed to `new CDSDispatcher([...])`
+ * directly: it takes effect once `@Inject`ed — directly or transitively — into a class that itself is in
+ * that array; otherwise it is never instantiated.
  *
- * @param scope - (Optional) The dependency injection scope for the service class:
- *   - `'Singleton'` - Single instance shared across the entire application
- *   - `'Transient'` - New instance created for each injection
- *   If not provided, defaults to `'Transient'` scope behavior.
+ * @example
+ * ```ts
+ * \@ServiceLogic('Singleton')
+ * class BookService {
+ *   private cache = new Map<string, Book>();
+ * }
  *
- * @returns A decorator function that applies the injectable configuration to the target class.
+ * \@EntityHandler(Book)
+ * class BookHandler {
+ *   \@Inject(BookService) private service: BookService;
+ * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#servicelogic | CDS-TS-Dispatcher - @ServiceLogic}
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ServiceLogic
  */
 function ServiceLogic<Target extends new (...args: never) => unknown>(scope?: 'Singleton' | 'Transient') {
   return function (target: Target) {
@@ -82,14 +131,26 @@ function ServiceLogic<Target extends new (...args: never) => unknown>(scope?: 'S
 }
 
 /**
- * Marks a class as containing unbound actions and makes it injectable for dependency injection.
+ * Marks a class as the host for a service's unbound actions/functions/events/errors and makes it
+ * inversify-injectable.
  *
- * Unbound actions are operations that are not tied to a specific entity and can be called
- * independently without requiring entity context.
+ * @remarks
+ * Hosts `@OnAction`, `@OnFunction`, `@OnEvent`, `@OnError`, `@OnSubscribe` — decorators that belong to
+ * the service itself, not to any single entity. Entity-scoped handlers belong in an `@EntityHandler`
+ * class instead; server lifecycle hooks in `@ServerLifecycle`. Like `@EntityHandler`, the class only
+ * takes effect when passed to `new CDSDispatcher([...])` — otherwise it is silently inert.
  *
- * @returns A decorator function that applies the injectable configuration to the target class.
+ * @example
+ * ```ts
+ * \@UnboundActions()
+ * class ActionsHandler {
+ *   \@OnAction(SubmitOrder)
+ *   private async onSubmitOrder(@Req() req: ActionRequest<typeof SubmitOrder>, \@Next() next: NextEvent): ActionReturn<typeof SubmitOrder> { ... }
+ * }
+ * ```
  *
  * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#unboundactions | CDS-TS-Dispatcher - @UnboundActions}
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § UnboundActions
  */
 function UnboundActions<Target extends new (...args: never) => unknown>() {
   return function (target: Target) {
@@ -97,4 +158,44 @@ function UnboundActions<Target extends new (...args: never) => unknown>() {
   };
 }
 
-export { EntityHandler, Repository, ServiceLogic, UnboundActions };
+/**
+ * Marks a class as the host for the three `server lifecycle` method decorators and makes it
+ * inversify-injectable. Registers their callbacks against CAP's `process-global`
+ * `cds.on('served' | 'listening' | 'shutdown', ...)` events (NOT `srv.*`).
+ *
+ * @remarks
+ * May host ONLY `@OnServed`, `@OnListening`, `@OnShutdown` — any other handler decorator throws at
+ * bootstrap, and those three throw at bootstrap if hosted outside a `@ServerLifecycle` class. `@Use`
+ * does not apply here either (lifecycle hooks are not request handlers) and fails fast at bootstrap.
+ * Registers `once per process`: no matter how many `CDSDispatcher` instances (or bootstraps, e.g. in
+ * tests) list the class, the `first` dispatcher to `initialize()` resolves the instance the callbacks
+ * stay bound to; later ones do not re-register or re-bind. Like every handler class, it only takes
+ * effect when passed to `new CDSDispatcher([...])` — otherwise it is silently inert.
+ *
+ * @example
+ * ```ts
+ * \@ServerLifecycle()
+ * class Bootstrap {
+ *   \@OnServed()
+ *   public async seed(services: object): Promise<void> { ... }
+ *
+ *   \@OnListening()
+ *   public logUrl(payload: { server: unknown; url: string }): void { ... }
+ *
+ *   \@OnShutdown()
+ *   public async cleanup(error: Error | null): Promise<void> { ... }
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/dxfrontier/cds-ts-dispatcher#serverlifecycle | CDS-TS-Dispatcher - @ServerLifecycle}
+ * @see Full docs ship with this package: node_modules/@dxfrontier/cds-ts-dispatcher/README.md § ServerLifecycle
+ */
+function ServerLifecycle<Target extends new (...args: never) => unknown>() {
+  return function (target: Target) {
+    Reflect.defineMetadata(constants.DECORATOR.SERVER_LIFECYCLE_NAME, true, target);
+
+    injectable()(target);
+  };
+}
+
+export { EntityHandler, Repository, ServerLifecycle, ServiceLogic, UnboundActions };
