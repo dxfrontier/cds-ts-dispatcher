@@ -41,6 +41,16 @@ Tests and workspaces: the npm workspaces (`test/sample-project/bookshop`, `test/
 - `README.md` is the user-facing documentation: every public decorator and a migration guide per `@sap/cds` major live there. Public API changes must be mirrored in it.
 - Each `@sap/cds` major bump is a dispatcher major release with the peerDependency narrowed to the new major (e.g. dispatcher 5.0.0 ↔ `@sap/cds ^9`).
 
+## Releases
+
+Two-stage, label-gated PR flow — merging to `main` does not publish by itself:
+
+1. A feature PR to `main` carries exactly one of `version: patch|minor|major` or `norelease` (enforce-labels.yml blocks otherwise); never add `deploy` to it. Merge with a merge commit, not squash (`gh pr merge --merge --admin` as solo maintainer).
+2. On merge (release.yml gates on `merged == true`), `dxfrontier/gh-action-release` + git-cliff opens a `feature-version-bump` PR (version bump + CHANGELOG) already labeled `deploy`. It does not auto-merge — merge it the same way.
+3. That merge runs deployment.yaml → `npm publish --access public --provenance` via the org secret `NPM_ORG_TOKEN`. Leave the `feature-version-bump` branch in place, it's reused.
+
+A trusted-publishing (OIDC) migration is pending.
+
 ## MCP servers
 
 - `.mcp.json` registers `cds-mcp` (`@cap-js/mcp-server` — the official SAP CAP MCP server, pre-release 0.0.x).
