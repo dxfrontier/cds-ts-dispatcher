@@ -1612,14 +1612,23 @@ const BeforeBoundFunction = buildAction({ event: 'BOUND_FUNC', eventKind: 'BEFOR
  * `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)`. On that host the `Draft` variant has no additional
  * effect — both register the identical `srv.after('*', '*', callback)`, so stacking `@AfterAllDraft` there
  * duplicates every event — draft and active alike.
+ * A bound action or function on the host entity also reaches this handler; there `@Result` is the RAW
+ * value the action/function returns, passed straight through — it can be any shape, including an array
+ * or a `boolean`, so it can coincidentally match the `Array.isArray` / `typeof result === 'boolean'`
+ * narrowing below even though no `READ`/`DELETE` event occurred. Check `req.event` (the CRUD event name
+ * vs the action/function name) before branching on the result's shape — the same holds for unbound
+ * actions/functions when the host is `CDS_DISPATCHER.ALL_ENTITIES` or `@UnboundActions`.
  *
  * @example
  * ```ts
  * \@EntityHandler(Book)
  * class BookHandler {
  *   \@AfterAll()
- *   private async afterAny(@Result() result: Book | Book[] | boolean, \@Req() req: Request<Book>): Promise<void> {
- *     if (Array.isArray(result)) {
+ *   private async afterAny(@Result() result: Book | Book[] | boolean | unknown, \@Req() req: Request<Book>): Promise<void> {
+ *     if (req.event !== 'CREATE' && req.event !== 'READ' && req.event !== 'UPDATE' && req.event !== 'DELETE') {
+ *       // bound action/function (raw result, any shape) or, on a draft-enabled entity, a draft event
+ *       // such as NEW / EDIT / CANCEL (normalized as usual) — branch on req.event
+ *     } else if (Array.isArray(result)) {
  *       // READ — entity set AND single reads (CAP array-wraps single READ results)
  *     } else if (typeof result === 'boolean') {
  *       // DELETE
@@ -1649,6 +1658,10 @@ const AfterAll = buildAfter({ event: '*', eventKind: 'AFTER', isDraft: false });
  * `srv.after('*', '*', callback)` — CAP drops the path filter entirely for `'*'`, so drafts of every
  * entity are included there too, and adding this decorator duplicates every event — draft and active
  * alike.
+ * Bound actions/functions on `.drafts` reach `@Result` the same way `@AfterAll` does — the RAW return
+ * value, passed straight through, which can coincidentally match the array/boolean shapes described
+ * there; check `req.event` before branching on it. On an `ALL_ENTITIES` / `@UnboundActions` host, unbound
+ * ones arrive the same way too.
  *
  * @example
  * ```ts
@@ -1994,9 +2007,8 @@ const AfterDeleteDraft = buildAfter({ event: 'DELETE', eventKind: 'AFTER', isDra
  * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
  * unbound functions: `@AfterFunction`; bound counterpart: `@AfterBoundAction`. Typical use: audit
  * logging, notifications, cleanup after the action's own implementation (`@OnAction`) has run.
- * Caveat: results flow through the dispatcher's write-result normalization — a bare NUMERIC return is
- * coerced to the boolean `value === 1` before reaching `@Result`; return an object / structured payload
- * to receive it unchanged.
+ * `@Result` receives the raw result returned by the action / function implementation, unchanged (`null`,
+ * string, number, boolean included).
  *
  * @example
  * ```ts
@@ -2023,9 +2035,8 @@ const AfterAction = buildAction({ event: 'ACTION', eventKind: 'AFTER', isDraft: 
  * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound functions:
  * `@AfterBoundFunction`; unbound counterpart: `@AfterAction`. README has no dedicated `@AfterBoundAction`
  * section; the closest coverage is `@BeforeBoundAction`.
- * Caveat: results flow through the dispatcher's write-result normalization — a bare NUMERIC return is
- * coerced to the boolean `value === 1` before reaching `@Result`; return an object / structured payload
- * to receive it unchanged.
+ * `@Result` receives the raw result returned by the action / function implementation, unchanged (`null`,
+ * string, number, boolean included).
  *
  * @example
  * ```ts
@@ -2049,9 +2060,8 @@ const AfterBoundAction = buildAction({ event: 'BOUND_ACTION', eventKind: 'AFTER'
  * Conventionally hosted in an `@UnboundActions` class (service-wide, not entity-scoped). Sibling for
  * unbound actions: `@AfterAction`; bound counterpart: `@AfterBoundFunction`. README has no dedicated
  * `@AfterFunction` section; the closest coverage is `@BeforeFunction`.
- * Caveat: results flow through the dispatcher's write-result normalization — a bare NUMERIC return is
- * coerced to the boolean `value === 1` before reaching `@Result`; return an object / structured payload
- * to receive it unchanged.
+ * `@Result` receives the raw result returned by the action / function implementation, unchanged (`null`,
+ * string, number, boolean included).
  *
  * @example
  * ```ts
@@ -2076,9 +2086,8 @@ const AfterFunction = buildAction({ event: 'FUNC', eventKind: 'AFTER', isDraft: 
  * hosting it elsewhere leaves the entity argument `undefined`. Sibling for bound actions:
  * `@AfterBoundAction`; unbound counterpart: `@AfterFunction`. README has no dedicated
  * `@AfterBoundFunction` section; the closest coverage is `@BeforeBoundFunction`.
- * Caveat: results flow through the dispatcher's write-result normalization — a bare NUMERIC return is
- * coerced to the boolean `value === 1` before reaching `@Result`; return an object / structured payload
- * to receive it unchanged.
+ * `@Result` receives the raw result returned by the action / function implementation, unchanged (`null`,
+ * string, number, boolean included).
  *
  * @example
  * ```ts

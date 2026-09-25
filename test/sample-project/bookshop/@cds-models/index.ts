@@ -138,3 +138,18 @@ Object.defineProperty(ProductsEntity, 'name', { value: 'ProductsEntity' })
 Object.defineProperty(ProductsEntity, 'is_singular', { value: true })
 export class ProductsEntity_ extends Array<ProductsEntity> {$count?: number}
 Object.defineProperty(ProductsEntity_, 'name', { value: 'ProductsEntity' })
+
+export function _RobustnessItemsEntityAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class RobustnessItemsEntity extends _cuidAspect(Base) {
+    declare name?: string | null
+    static override readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<RobustnessItemsEntity> & typeof cuid.keys;
+    declare static readonly elements: __.ElementsOf<RobustnessItemsEntity>;
+    declare static readonly actions: typeof cuid.actions & globalThis.Record<never, never>;
+  };
+}
+export class RobustnessItemsEntity extends _RobustnessItemsEntityAspect(__.Entity) {}
+Object.defineProperty(RobustnessItemsEntity, 'name', { value: 'RobustnessItemsEntity' })
+Object.defineProperty(RobustnessItemsEntity, 'is_singular', { value: true })
+export class RobustnessItemsEntity_ extends Array<RobustnessItemsEntity> {$count?: number}
+Object.defineProperty(RobustnessItemsEntity_, 'name', { value: 'RobustnessItemsEntity' })

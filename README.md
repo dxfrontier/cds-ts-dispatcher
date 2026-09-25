@@ -1269,6 +1269,8 @@ The `@Results` decorator is utilized at the `parameter level` to annotate a para
 `Return`
 
 - `Array / object`: Contains the OData Request `Body`.
+- For [@AfterAction](#afteraction), `@AfterFunction`, `@AfterBoundAction` and `@AfterBoundFunction`: the raw result returned by the action / function implementation, unchanged - including `null`, `string`, `number` and `boolean` results.
+- For [@AfterAll](#afterall) / `@AfterAllDraft`, when the triggering event is a bound (or, on an `ALL_ENTITIES` / `@UnboundActions` host, unbound) action or function: the same raw result, unaffected by the CRUD `Array / object` shape above.
 
 `Example`
 
@@ -1401,11 +1403,14 @@ export class UnboundActionsHandler {
 
 The `@Jwt` decorator is utilized at the `parameter level`. It will retrieve the to retrieve `JWT` from the `Request` that is based on the node `req.http.req - IncomingMessage`.
 
-Fails if no authorization header is given or has the wrong format.
+Resolves to `undefined` (with a logged warning) when no Bearer authorization header is present.
 
 `Return`
 
 - `string` | `undefined` : The retrieved `JWT token` or undefined if no token was found.
+
+> [!NOTE]
+> Resolves to `undefined` when the request has no HTTP part (`req.http.req`) - e.g. an action sent with `srv.send` outside an HTTP request (e.g. `cds.spawn`, tests), queued, scheduled or messaging dispatches.
 
 `Example`
 
@@ -1447,6 +1452,9 @@ The `@IsPresent` decorator is utilized at the `parameter level`. It allows you t
 `Return`
 
 - `boolean`: This decorator returns `true` if `property` `value` is filled, `false` otherwise
+
+> [!NOTE]
+> Applies to `CRUD` requests. A request without a query - unbound actions / functions, an action or function sent with `srv.send`, queued, scheduled or messaging dispatches - resolves to `false`. For bound actions / functions `req.query` is deprecated in `@sap/cds` 10 (removed in 11): use [@Subject](#subject) to identify the target instance.
 
 `Example`
 
@@ -1557,6 +1565,9 @@ The `@IsColumnSupplied<T>(field : keyof T)` decorator is utilized at the `parame
 > [!NOTE]
 > For `INSERT` / `UPSERT` queries an explicit `.columns` list wins when present; otherwise the field is looked up in the `entries` keys (the shape protocol `POST` requests produce); `false` when neither is present.
 
+> [!NOTE]
+> Applies to `CRUD` requests. A request without a query - unbound actions / functions, an action or function sent with `srv.send`, queued, scheduled or messaging dispatches - resolves to `false`. For bound actions / functions `req.query` is deprecated in `@sap/cds` 10 (removed in 11): use [@Subject](#subject) to identify the target instance.
+
 `Example`
 
 ```typescript
@@ -1663,6 +1674,9 @@ The `@GetQuery` decorator is utilized at the `parameter level`. It allows you to
   - @GetQuery(`'DELETE'`, `'where'`) columns: `GetQueryType['where']`
 
     </details>
+
+> [!NOTE]
+> Applies to `CRUD` requests. A request without a query - unbound actions / functions, an action or function sent with `srv.send`, queued, scheduled or messaging dispatches - resolves to `undefined`. For bound actions / functions `req.query` is deprecated in `@sap/cds` 10 (removed in 11): use [@Subject](#subject) to identify the target instance.
 
 `Example`
 
@@ -1885,13 +1899,17 @@ public async beforeCreate(
 
 Parameter decorator used to inject locale information into a method parameter.
 
+`Return`
+
+- `string` | `undefined` : The locale of the request (`req.locale`), or `undefined` when the request carries none.
+
 `Example`
 
 ```ts
 @BeforeCreate()
 public async beforeCreate(
   @Req() req: Request<MyEntity>,
-  @Locale() locale: string
+  @Locale() locale: string | undefined
 ) {
   if (locale === 'en-US') {
     // handle logic specific to the 'en-US' locale
@@ -2025,11 +2043,11 @@ public async someBoundFunction(@Req() req: Request, @Subject() subject: ref) {
 
 The `@Affected` decorator is utilized at the `parameter level`. It injects the database `affected` row count of the current request into a method parameter.
 
-It is defined for `CREATE` / `UPDATE` / `DELETE` `@After*` handlers under `@sap/cds` >= 10 (the row count reported by the database) and is `undefined` for `READ`.
+It is defined for `CREATE` / `UPDATE` / `DELETE` `@After*` handlers under `@sap/cds` >= 10 (the row count reported by the database) and is `undefined` for `READ` and for action / function results (`@AfterAction`, `@AfterFunction`, `@AfterBoundAction`, `@AfterBoundFunction`, and `@AfterAll` / `@AfterAllDraft` when they fire for an action or function), which are not database outcomes.
 
 `Return`
 
-- `number | undefined` : The number of rows affected by the current request, or `undefined` for `READ`.
+- `number | undefined` : The number of rows affected by the current request, or `undefined` for `READ` and for action / function results.
 
 `Example`
 
@@ -2730,6 +2748,9 @@ The handlers receive two arguments:
 | `result, req`  | `@AfterUpdate`<br> `@AfterCreate` | An object of type `MyEntity` and the `Request`.                            |
 | `deleted, req` | `@AfterDelete`                    | A `boolean` indicating whether the instance was deleted and the `Request`. |
 
+> [!NOTE]
+> [@AfterAction](#afteraction), `@AfterFunction`, `@AfterBoundAction` and `@AfterBoundFunction` receive the raw result returned by the action / function implementation, unchanged - including `null`, `string`, `number` and `boolean` results. The mapping above applies to the entity events only.
+
 > [!TIP]
 > If `@odata.draft.enabled: true` to manage event handlers for draft version you can use :
 >
@@ -2967,6 +2988,9 @@ this.after(MyAction, async (result, req) => {
 > [!IMPORTANT]  
 > Decorator `@AfterAction` should be used inside [@UnboundActions()](#unboundactions) class.
 
+> [!NOTE]
+> The `result` is the raw value returned by the action implementation, unchanged - `null`, `string`, `number` and `boolean` results included.
+
 > [!TIP]
 > Use `@AfterAction` to:
 > - Log action execution results
@@ -3025,8 +3049,13 @@ export class BookHandler {
   // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
 
   @AfterAll()
-  private async afterAll(@Result() result: MyEntity | MyEntity[] | boolean, @Req() req: Request) {
-    if(Array.isArray(result)) {
+  private async afterAll(@Result() result: MyEntity | MyEntity[] | boolean | unknown, @Req() req: Request) {
+    if (req.event !== 'CREATE' && req.event !== 'READ' && req.event !== 'UPDATE' && req.event !== 'DELETE') {
+      // any other event: a bound action/function (`result` is its raw return value, passed through
+      // unchanged, any shape - including an array or a boolean) or, on a draft-enabled entity, a draft
+      // event such as NEW / EDIT / CANCEL (normalized as usual) - branch on `req.event` here
+    }
+    else if(Array.isArray(result)) {
       // when after `READ` event was triggered
     }
     else if(typeof result === 'boolean' ) {
@@ -3068,8 +3097,13 @@ export class BookHandler {
   // All events like @AfterRead, @BeforeRead, ... will be triggered based on 'MyEntity'
 
   @AfterAll()
-  private async afterAll(@Result() result: MyEntity | MyEntity[] | boolean, @Req() req: Request) {
-    if(Array.isArray(result)) {
+  private async afterAll(@Result() result: MyEntity | MyEntity[] | boolean | unknown, @Req() req: Request) {
+    if (req.event !== 'CREATE' && req.event !== 'READ' && req.event !== 'UPDATE' && req.event !== 'DELETE') {
+      // any other event: a bound or unbound action/function (`result` is its raw return value, passed
+      // through unchanged, any shape - including an array or a boolean) or, on a draft-enabled entity,
+      // a draft event such as NEW / EDIT / CANCEL (normalized as usual) - branch on `req.event` here
+    }
+    else if(Array.isArray(result)) {
       // when after `READ` event was triggered
     }
     else if(typeof result === 'boolean' ) {
@@ -3100,6 +3134,9 @@ this.after('*', '*', async (result, req) => {
 
 > [!NOTE]
 > MyEntity was generated using [CDS-Typer](#generate-cds-typed-entities) and imported in the the class.
+
+> [!NOTE]
+> For a bound action or function, `result` is the raw value returned by the action/function implementation, passed through unchanged - it can be any shape, including an array or a `boolean`, so it can coincidentally match the `Array.isArray` / `typeof result === 'boolean'` narrowing shown above even though no `READ` or `DELETE` event occurred. Check `req.event` (the CRUD event name vs the action/function name) before branching on the result's shape; on a draft-enabled entity the remaining events also include draft events such as `NEW`, `EDIT` or `CANCEL`, whose results the dispatcher normalizes as usual. The same applies to `@AfterAllDraft`, plus unbound actions/functions when the class is `@EntityHandler(CDS_DISPATCHER.ALL_ENTITIES)` or `@UnboundActions()`.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

@@ -169,6 +169,20 @@ class CDSDispatcher {
   ): Promise<unknown> {
     const [handler, entity] = handlerAndEntity;
 
+    // Action / function results (bound and unbound) are the `@On*` handler's own return value, not a database
+    // outcome: pass them through untouched (no `affected` capture, no CRUD normalization below). A directly
+    // typed action/function decorator (`handler.event`) always qualifies. A wildcard `@AfterAll` /
+    // `@AfterAllDraft` (`handler.event === '*'`) ALSO reaches bound actions/functions on its host entity and,
+    // on an `ALL_ENTITIES` / `@UnboundActions` host, unbound ones too - detect those from the DISPATCHED
+    // request instead: `req.event` naming a bound operation of `req.target`, or an unbound operation of the
+    // service itself.
+    const boundOperation = (req.target as { actions?: Record<string, unknown> } | undefined)?.actions?.[req.event];
+    const isDispatchedOperation = Boolean(boundOperation ?? this.srv?.actions?.[req.event]);
+
+    if (['ACTION', 'FUNC', 'BOUND_ACTION', 'BOUND_FUNC'].includes(handler.event) || isDispatchedOperation) {
+      return await handler.callback.call(entity, results, req);
+    }
+
     // Capture the raw database `affected` row count and stash it on the request under a `Symbol`
     // (see `@Affected` parameter decorator). Done BEFORE the normalization below, which discards it.
     if (Array.isArray(results) && 'affected' in results) {

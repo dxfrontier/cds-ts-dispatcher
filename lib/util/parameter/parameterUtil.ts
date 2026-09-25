@@ -64,6 +64,12 @@ const parameterUtil = {
 
     metadata.forEach((parameter) => {
       if (parameter.type === 'CHECK_COLUMN_VALUE') {
+        // Unbound actions / functions, `srv.send` and queued, scheduled or messaging dispatches carry no query.
+        if (!req?.query) {
+          args[parameter.parameterIndex] = false;
+          return;
+        }
+
         if (req.query.INSERT) {
           args[parameter.parameterIndex] = isSupplied(req.query.INSERT, parameter.property);
           return;
@@ -129,6 +135,10 @@ const parameterUtil = {
     req: Request,
     args: unknown[],
   ): void {
+    // Unbound actions / functions, `srv.send` and queued, scheduled or messaging dispatches carry no query:
+    // every option then reads as absent (`undefined` for `@GetQuery`, `false` for `@IsPresent`).
+    const query = (req?.query ?? {}) as Request['query'];
+
     for (const parameter of metadataParameters) {
       if (parameter.type !== 'QUERY') {
         break;
@@ -147,7 +157,7 @@ const parameterUtil = {
         case 'one': {
           if (parameter.key === 'SELECT') {
             args[parameter.parameterIndex] =
-              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query[parameter.key]?.[queryOption];
+              type === 'Get' ? query[parameter.key]?.[queryOption] : !!query[parameter.key]?.[queryOption];
           }
 
           break;
@@ -159,7 +169,7 @@ const parameterUtil = {
           const props = words[words.length - 1] as 'rows' | 'offset';
 
           args[parameter.parameterIndex] =
-            type === 'Get' ? req.query.SELECT?.limit?.[props] : !!req.query.SELECT?.limit?.[props];
+            type === 'Get' ? query.SELECT?.limit?.[props] : !!query.SELECT?.limit?.[props];
 
           break;
         }
@@ -168,7 +178,7 @@ const parameterUtil = {
         case 'entity': {
           if (parameter.key === 'UPDATE') {
             args[parameter.parameterIndex] =
-              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query[parameter.key]?.[queryOption];
+              type === 'Get' ? query[parameter.key]?.[queryOption] : !!query[parameter.key]?.[queryOption];
           }
 
           break;
@@ -189,7 +199,7 @@ const parameterUtil = {
         case 'into': {
           if (parameter.key === 'INSERT' || parameter.key === 'UPSERT') {
             args[parameter.parameterIndex] =
-              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query[parameter.key]?.[queryOption];
+              type === 'Get' ? query[parameter.key]?.[queryOption] : !!query[parameter.key]?.[queryOption];
           }
 
           break;
@@ -198,7 +208,7 @@ const parameterUtil = {
         case 'from': {
           if (parameter.key === 'SELECT' || parameter.key === 'DELETE') {
             args[parameter.parameterIndex] =
-              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query[parameter.key]?.[queryOption];
+              type === 'Get' ? query[parameter.key]?.[queryOption] : !!query[parameter.key]?.[queryOption];
           }
 
           break;
@@ -207,7 +217,7 @@ const parameterUtil = {
         case 'where': {
           if (parameter.key === 'SELECT' || parameter.key === 'UPDATE' || parameter.key === 'DELETE') {
             args[parameter.parameterIndex] =
-              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query[parameter.key]?.[queryOption];
+              type === 'Get' ? query[parameter.key]?.[queryOption] : !!query[parameter.key]?.[queryOption];
           }
 
           break;
@@ -216,7 +226,7 @@ const parameterUtil = {
         case 'columns': {
           if (parameter.key === 'SELECT' || parameter.key === 'INSERT' || parameter.key === 'UPSERT') {
             args[parameter.parameterIndex] =
-              type === 'Get' ? req.query[parameter.key]?.[queryOption] : !!req.query[parameter.key]?.[queryOption];
+              type === 'Get' ? query[parameter.key]?.[queryOption] : !!query[parameter.key]?.[queryOption];
           }
 
           break;
@@ -235,7 +245,10 @@ const parameterUtil = {
    * @returns The JWT string if present, otherwise undefined.
    */
   retrieveJwt(req: Request): string | undefined {
-    return retrieveJwt(req.http?.req as IncomingMessage);
+    const incomingMessage = req?.http?.req as IncomingMessage | undefined;
+
+    // `srv.send`, queued, scheduled and messaging dispatches have no HTTP request to read the JWT from.
+    return incomingMessage ? retrieveJwt(incomingMessage) : undefined;
   },
 
   /**
@@ -328,7 +341,7 @@ const parameterUtil = {
   extractArguments(args: any[]): TemporaryArgs {
     const temporaryArgs: TemporaryArgs = Object.create({});
 
-    args.forEach((arg) => {
+    args.forEach((arg, index) => {
       if (arg === undefined) return;
 
       switch (true) {
@@ -356,10 +369,11 @@ const parameterUtil = {
           temporaryArgs.results = arg;
           break;
 
+        // The after-callbacks (`@After*`, `@OnScheduledSuccess`, `@OnScheduledFailure`) pass the handler result as
+        // the FIRST argument: a `null` or `string` result lands in results as-is. Any other value is ignored.
         default: {
-          const allOthersExceptString = typeof arg !== 'string';
-          if (allOthersExceptString) {
-            util.throwErrorMessage(`Option ${arg} is not handled for extractArgument method!`);
+          if (index === 0) {
+            temporaryArgs.results = arg;
           }
         }
       }
@@ -371,9 +385,9 @@ const parameterUtil = {
   /**
    * Retrieves the locale language of the current req
    * @param req The request object.
-   * @returns The locale language.
+   * @returns The locale language, or `undefined` when the request carries none.
    */
-  retrieveLocale(req: Request): string {
+  retrieveLocale(req: Request): string | undefined {
     return req.locale;
   },
 

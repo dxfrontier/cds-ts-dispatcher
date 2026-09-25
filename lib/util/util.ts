@@ -61,7 +61,11 @@ const util = {
    * @returns True if the argument is a Msg function, otherwise false.
    */
   isMsgEvent(arg: any): arg is Request {
-    return typeof arg === 'object' && ['inbound', 'event', 'data', 'headers'].every((key: string) => key in arg);
+    return (
+      typeof arg === 'object' &&
+      arg !== null &&
+      ['inbound', 'event', 'data', 'headers'].every((key: string) => key in arg)
+    );
   },
 
   /**

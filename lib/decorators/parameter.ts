@@ -418,10 +418,9 @@ function IsPresent<Key extends CRUDQueryKeys>(key: Key, property: PickQueryProps
  *
  * @remarks
  * Expects the `Bearer <token>` format. Resolves to `undefined` (with a warning logged) when the header
- * is missing or malformed — no throw for HTTP-borne requests, so narrow the `string | undefined` type
- * before use. NON-HTTP dispatches are the exception: without `req.http` (queued/scheduled tasks,
- * messaging events, programmatic `srv.run` outside an HTTP context) the underlying SDK helper throws —
- * only use `@Jwt` on handlers reached via HTTP.
+ * is missing or malformed, and resolves to `undefined` when the request has no HTTP part (queued/scheduled
+ * tasks, messaging events, `srv.send` outside an HTTP request) — narrow the `string | undefined` type
+ * before use.
  *
  * @example
  * ```ts
@@ -479,12 +478,13 @@ function ValidationResults(): ParameterDecorator {
  * Annotates a parameter of a method with `req.locale` — the negotiated locale of the current request.
  *
  * @remarks
- * A convenience projection of `@Req`; equivalent to `@GetRequest('locale')` typed as `string`.
+ * A convenience projection of `@Req`; equivalent to `@GetRequest('locale')` typed as `string | undefined`
+ * (`undefined` when the request carries no locale).
  *
  * @example
  * ```ts
  * \@BeforeCreate()
- * public async beforeCreate(@Req() req: Request<Book>, \@Locale() locale: string): Promise<void> {
+ * public async beforeCreate(@Req() req: Request<Book>, \@Locale() locale: string | undefined): Promise<void> {
  *   if (locale === 'en-US') { ... }
  * }
  * ```
@@ -580,7 +580,8 @@ function Subject(): ParameterDecorator {
  *
  * @remarks
  * Populated for `CREATE` / `UPDATE` / `DELETE` under `@sap/cds` >= 10 (the row count reported by the
- * database); `undefined` for `READ`. Independent of `@Results` / `@Result` — it does not change what
+ * database); `undefined` for `READ` and for action / function results (they are not database outcomes).
+ * Independent of `@Results` / `@Result` — it does not change what
  * they receive, it only exposes the raw count.
  *
  * @example
