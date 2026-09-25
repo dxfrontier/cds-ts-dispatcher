@@ -451,17 +451,26 @@ function FieldsFormatter<T>(formatter: Formatters<T>, ...fields: (keyof T)[]) {
 
       const isAfterEventManyResults = util.lodash.isArray(results);
       const isAfterEventOneResult = !util.lodash.isUndefined(results) && !isAfterEventManyResults;
+      // An AFTER event whose result is not object-shaped (raw action / function result, `null` reply):
+      // nothing to format, the result passes through untouched.
+      const isAfterEventRawResult =
+        util.lodash.isUndefined(results) &&
+        !util.lodash.isUndefined((req as { results?: unknown } | undefined)?.results);
 
       if (formatter.action === 'customFormatter') {
         // Runs exactly once - with or without field arguments
-        await formatterUtil.handleCustomFormatter(req, formatter, results);
+        // A raw (non-object) AFTER result that the handler itself received reaches the custom callback as-is;
+        // only the built-in formatters need object-shaped results.
+        const rawResult = (req as { results?: unknown } | undefined)?.results;
+        const customResults = isAfterEventRawResult && args.some((arg) => arg === rawResult) ? rawResult : results;
+        await formatterUtil.handleCustomFormatter(req, formatter, customResults as T | T[] | undefined);
       } else if (isAfterEventManyResults) {
         // Applied on 'Results' (AFTER events)
         for (const field of fields) formatterUtil.handleManyItems<T>(formatter, results, field);
       } else if (isAfterEventOneResult) {
         // Applied on 'Results' (AFTER events)
         for (const field of fields) formatterUtil.handleOneItem<T>(formatter, results, field);
-      } else {
+      } else if (!isAfterEventRawResult) {
         // Applied only for 'Request' (ON, BEFORE events)
         for (const field of fields) formatterUtil.handleOneItemOfRequest<T>(req, formatter, field);
       }

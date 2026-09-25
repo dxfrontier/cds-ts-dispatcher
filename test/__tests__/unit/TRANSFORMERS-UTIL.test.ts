@@ -319,4 +319,61 @@ describe('TRANSFORMERS-UTIL', () => {
       expect(row.creditCard).toBe('************1111');
     });
   });
+
+  // ============================================================================================================
+  // Public path with a non-object result (raw action / function results reaching an `@After*` handler): the
+  // result passes through untouched and the decorated handler still runs.
+  // ============================================================================================================
+
+  describe('@Exclude / @Include / @Mask (public path) - non-object results', () => {
+    class RawResultHandler {
+      @Exclude<{ creditCard: string }>('creditCard')
+      public async afterExclude(result: unknown, req: Request): Promise<string> {
+        return 'exclude-done';
+      }
+
+      @Include<{ creditCard: string }>('creditCard')
+      public async afterInclude(result: unknown, req: Request): Promise<string> {
+        return 'include-done';
+      }
+
+      @Mask<{ creditCard: string }>(['creditCard'])
+      public async afterMask(result: unknown, req: Request): Promise<string> {
+        return 'mask-done';
+      }
+    }
+
+    const withRawResult = (value: unknown) => {
+      const req = new CdsRequest({ data: {} });
+      (req as unknown as { results: unknown }).results = value;
+      return req as unknown as Request;
+    };
+
+    const RAW_RESULTS: Array<[string, () => unknown, unknown]> = [
+      ['a number', () => 5, 5],
+      ['a string', () => 'hi', 'hi'],
+      ['a boolean', () => true, true],
+      ['null', () => null, null],
+      ['an array of numbers', () => [1, 2, 3], [1, 2, 3]],
+      ['an array holding null and a string', () => [null, 'x'], [null, 'x']],
+    ];
+
+    test.each(RAW_RESULTS)(
+      'It should PASS THROUGH : %s untouched with @Exclude, @Include and @Mask, and run the handler',
+      async (_label, make, expected) => {
+        const instance = new RawResultHandler();
+
+        for (const [method, done] of [
+          ['afterExclude', 'exclude-done'],
+          ['afterInclude', 'include-done'],
+          ['afterMask', 'mask-done'],
+        ] as const) {
+          const value = make();
+
+          await expect(instance[method](value, withRawResult(value))).resolves.toBe(done);
+          expect(value).toEqual(expected);
+        }
+      },
+    );
+  });
 });

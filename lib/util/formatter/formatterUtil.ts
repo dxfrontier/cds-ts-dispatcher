@@ -50,6 +50,13 @@ const formatterUtil = {
       return undefined;
     }
 
+    // Only object-shaped results are transformable: a raw action / function result (number, string,
+    // boolean) or a `null` reply passes through `@Exclude` / `@Include` / `@Mask` / `@FieldsFormatter`
+    // untouched - also when an argument is that very same value.
+    if (!util.lodash.isObjectLike(req.results)) {
+      return undefined;
+    }
+
     // The 'results / result' property
     for (const arg of args) {
       if (Array.isArray(req.results)) {
@@ -76,10 +83,8 @@ const formatterUtil = {
     // (never fall back to `req.data` - that's the request payload, not a result). NOTE: generic OData/REST
     // write RESPONSE BODIES are rebuilt after this phase (read-after-write / `req.data`) - see the
     // `@Exclude` / `@Include` / `@Mask` docs for what shaping `req.results` does and does not reach.
-    // Guard: only object-shaped results are transformable - a `null` reply from a custom `@On*` handler or
-    // a numeric delete count (`legacy_srv_results: true`) must keep the pre-fix no-op instead of throwing
-    // inside the transformers (`delete null[field]`, `'x' in 1`). Do NOT "simplify" this away.
-    return util.lodash.isObjectLike(req.results) ? (req.results as T | T[]) : undefined;
+    // `req.results` is object-shaped here (guarded above).
+    return req.results as T | T[];
   },
 
   /**
@@ -143,7 +148,7 @@ const formatterUtil = {
   },
 
   /**
-   * Applies the specified formatter to a single field of a single item.
+   * Applies the specified formatter to a single field of a single item; a non-object item is left untouched.
    * @param formatter - The formatter to apply.
    * @param result - The item to format.
    * @param field - The field of the item to format.
@@ -153,11 +158,15 @@ const formatterUtil = {
     result: Result,
     field: Field,
   ): void {
+    if (!util.lodash.isObjectLike(result)) {
+      return;
+    }
+
     (result[field] as string) = this.applyFormatter(formatter, result[field]);
   },
 
   /**
-   * Applies the specified formatter to a single field of multiple items.
+   * Applies the specified formatter to a single field of multiple items; non-object items are left untouched.
    * @param formatter - The formatter to apply.
    * @param results - The items to format.
    * @param field - The field of the items to format.
@@ -167,7 +176,7 @@ const formatterUtil = {
     results: Results,
     field: Field,
   ): void {
-    results.forEach((entry: any) => (entry[field] = this.applyFormatter(formatter, entry[field])));
+    results.forEach((entry: any) => this.handleOneItem<T, any, any>(formatter, entry, field));
   },
 
   /**

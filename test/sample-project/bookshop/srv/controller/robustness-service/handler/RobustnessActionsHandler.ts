@@ -22,7 +22,7 @@ const logReceived = (functionName: string, value: unknown): void => {
 
 @UnboundActions()
 class RobustnessActionsHandler {
-  // Functions returning a `null` / `String` / `Integer` / `Decimal` result
+  // Functions returning a `null` / `String` / `Integer` / `Decimal` / `array of Integer` result
 
   @OnFunction('returnNull')
   public async returnNull(@Req() req: Request): Promise<null> {
@@ -42,6 +42,11 @@ class RobustnessActionsHandler {
   @OnFunction('returnDecimal')
   public async returnDecimal(@Req() req: ActionRequest<{ value: number }>): Promise<number> {
     return req.data.value;
+  }
+
+  @OnFunction('returnIntegerList')
+  public async returnIntegerList(@Req() req: Request): Promise<number[]> {
+    return [1, 2, 3];
   }
 
   // `@AfterFunction` handlers recording the result they received

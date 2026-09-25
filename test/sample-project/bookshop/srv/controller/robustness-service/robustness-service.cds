@@ -11,5 +11,6 @@ service RobustnessService {
   function returnString(value : String)          returns String;
   function returnInteger(value : Integer)        returns Integer;
   function returnDecimal(value : Decimal(9, 2))  returns Decimal(9, 2);
+  function returnIntegerList()                   returns array of Integer;
   action   readQueryOptions()                    returns String;
 }

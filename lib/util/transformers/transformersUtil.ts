@@ -16,11 +16,15 @@ const transformersUtil = {
   },
 
   /**
-   * Excludes specified fields from a single item.
+   * Excludes specified fields from a single item; a non-object item is left untouched.
    * @param item - The item to process.
    * @param fields - The fields to exclude.
    */
   excludeFieldsFromItem<T>(item: T, fields: (keyof T)[]): void {
+    if (!util.lodash.isObjectLike(item)) {
+      return;
+    }
+
     for (const field of fields) {
       delete item[field];
     }
@@ -46,11 +50,15 @@ const transformersUtil = {
   },
 
   /**
-   * Includes only specified fields in a single item (removes all others).
+   * Includes only specified fields in a single item (removes all others); a non-object item is left untouched.
    * @param item - The item to process.
    * @param fields - The fields to include.
    */
   includeOnlyFieldsFromItem<T>(item: T, fields: (keyof T)[]): void {
+    if (!util.lodash.isObjectLike(item)) {
+      return;
+    }
+
     const allKeys = Object.keys(item as object) as (keyof T)[];
     const fieldsToRemove = allKeys.filter((key) => !fields.includes(key));
 
@@ -105,12 +113,16 @@ const transformersUtil = {
   },
 
   /**
-   * Masks specified fields in a single item.
+   * Masks specified fields in a single item; a non-object item is left untouched.
    * @param item - The item to process.
    * @param fields - The fields to mask.
    * @param options - The mask options.
    */
   maskFieldsInItem<T>(item: T, fields: (keyof T)[], options: Required<MaskOptions>): void {
+    if (!util.lodash.isObjectLike(item)) {
+      return;
+    }
+
     for (const field of fields) {
       if (field in (item as object)) {
         (item as any)[field] = this.maskValue(item[field], options);

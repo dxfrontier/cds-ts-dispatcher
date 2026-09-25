@@ -16,6 +16,9 @@
  * - A wildcard `@AfterAll`, registered on an `ALL_ENTITIES` host (`RobustnessAfterAllHandler`), also fires for
  *   these unbound functions and must receive the same raw result - it logs `[RobustnessAfterAll]
  *   received=<typeof>:<JSON>`.
+ * - A second wildcard `@AfterAll` on the same host (`RobustnessTransformersHandler`) stacks `@Mask`, `@Exclude`,
+ *   `@Include` and `@FieldsFormatter`: raw (non-object) results pass through them untouched and the handler still
+ *   runs - it logs `[RobustnessTransformers] received=<typeof>:<JSON>`.
  */
 import path from 'node:path';
 import cds from '@sap/cds';
@@ -29,6 +32,7 @@ const robustness = '/odata/v4/robustness';
 
 const MARKER = '[RobustnessAfter]';
 const MARKER_ALL = '[RobustnessAfterAll]';
+const MARKER_TRANSFORMERS = '[RobustnessTransformers]';
 
 /** Runs `fn` under a console spy and returns the logged markers starting with `prefix` (default `[RobustnessAfter]`). */
 const captureMarkers = async (
@@ -102,6 +106,61 @@ describe('Argument robustness - @After* results of functions', () => {
       `${MARKER} returnInteger received=number:42`,
       `${MARKER} returnString received=string:"hi"`,
     ]);
+  });
+});
+
+describe('Argument robustness - @AfterAll with @Mask / @Exclude / @Include / @FieldsFormatter on raw results', () => {
+  test('It should ANSWER 200 with the raw Integer 5 and run the transformer-stacked @AfterAll handler', async () => {
+    const { result, markers } = await captureMarkers(
+      () => client.GET(`${robustness}/returnInteger(value=5)`),
+      MARKER_TRANSFORMERS,
+    );
+
+    expect((result as { status: number }).status).toBe(200);
+    expect((result as { data: { value: unknown } }).data.value).toBe(5);
+    expect(markers).toEqual([`${MARKER_TRANSFORMERS} received=number:5`]);
+  });
+
+  test('It should ANSWER 200 with the raw Decimal 3.14 and run the transformer-stacked @AfterAll handler', async () => {
+    const { result, markers } = await captureMarkers(
+      () => client.GET(`${robustness}/returnDecimal(value=3.14)`),
+      MARKER_TRANSFORMERS,
+    );
+
+    expect((result as { status: number }).status).toBe(200);
+    expect(markers).toEqual([`${MARKER_TRANSFORMERS} received=number:3.14`]);
+  });
+
+  test("It should ANSWER 200 with the raw String 'hi' and run the transformer-stacked @AfterAll handler", async () => {
+    const { result, markers } = await captureMarkers(
+      () => client.GET(`${robustness}/returnString(value='hi')`),
+      MARKER_TRANSFORMERS,
+    );
+
+    expect((result as { status: number }).status).toBe(200);
+    expect((result as { data: { value: unknown } }).data.value).toBe('hi');
+    expect(markers).toEqual([`${MARKER_TRANSFORMERS} received=string:"hi"`]);
+  });
+
+  test('It should ANSWER 204 for a null result and run the transformer-stacked @AfterAll handler', async () => {
+    const { result, markers } = await captureMarkers(
+      () => client.GET(`${robustness}/returnNull()`),
+      MARKER_TRANSFORMERS,
+    );
+
+    expect((result as { status: number }).status).toBe(204);
+    expect(markers).toEqual([`${MARKER_TRANSFORMERS} received=object:null`]);
+  });
+
+  test('It should ANSWER 200 with the raw array [1, 2, 3] and run the transformer-stacked @AfterAll handler', async () => {
+    const { result, markers } = await captureMarkers(
+      () => client.GET(`${robustness}/returnIntegerList()`),
+      MARKER_TRANSFORMERS,
+    );
+
+    expect((result as { status: number }).status).toBe(200);
+    expect((result as { data: { value: unknown } }).data.value).toEqual([1, 2, 3]);
+    expect(markers).toEqual([`${MARKER_TRANSFORMERS} received=object:[1,2,3]`]);
   });
 });
 

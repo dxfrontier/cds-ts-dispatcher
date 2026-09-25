@@ -222,6 +222,23 @@ describe('FORMATTER-UTIL', () => {
 
       expect(formatterUtil.findResults([true, req])).toBeUndefined();
     });
+
+    // A raw action / function result reaches the `@After*` handler unchanged, so args may hold the very same
+    // primitive as req.results: only object-shaped values are returned, even on an identity match.
+    test.each<[string, unknown]>([
+      ['a number', 5],
+      ['a string', 'hi'],
+      ['a boolean', true],
+      ['null', null],
+    ])(
+      'It should RETURN : undefined, when req.results is %s and args contain that same value (identity match)',
+      (_label, value) => {
+        const req = new CdsRequest({ data: {} });
+        (req as unknown as { results: unknown }).results = value;
+
+        expect(formatterUtil.findResults([value, req])).toBeUndefined();
+      },
+    );
   });
 
   // ============================================================================================================
@@ -316,7 +333,7 @@ describe('FORMATTER-UTIL', () => {
       expect(data[1].title).toBeUndefined();
     });
 
-    test('It should REJECT : with the field-not-exists message identifying the entry index, treating a null entry the same as one missing the field (not a TypeError)', () => {
+    test('It should REJECT : with the field-not-exists message identifying the entry index, treating a null entry the same as one missing the field', () => {
       const req = buildBulkReq([{ title: 'hello' }, null as unknown as Record<string, unknown>]);
 
       formatterUtil.handleOneItemOfRequest(req, { action: 'toUpper' }, 'title');
@@ -371,6 +388,7 @@ describe('FORMATTER-UTIL', () => {
     // captured at class-definition time.
     const customFormatterZeroFieldsAfterSpy = jest.fn().mockResolvedValue(undefined);
     const customFormatterZeroFieldsBeforeSpy = jest.fn().mockResolvedValue(undefined);
+    const customFormatterRawResultSpy = jest.fn();
 
     class ProductHandler {
       @FieldsFormatter<{ title: string }>({ action: 'toUpper' }, 'title')
@@ -436,6 +454,16 @@ describe('FORMATTER-UTIL', () => {
       @FieldsFormatter<{ title: string }>({ action: 'customFormatter', callback: customFormatterZeroFieldsBeforeSpy })
       public async beforeCreateCustomZeroFields(req: Request): Promise<void> {
         // BEFORE-style: no results arg at all - customFormatter must still fire once with (req, undefined).
+      }
+
+      @FieldsFormatter<{ title: string }>({ action: 'toUpper' }, 'title')
+      public async afterRawResult(result: unknown, req: Request): Promise<string> {
+        return 'raw-done';
+      }
+
+      @FieldsFormatter<{ title: string }>({ action: 'customFormatter', callback: customFormatterRawResultSpy })
+      public async afterRawResultCustom(result: unknown, req: Request): Promise<string> {
+        return 'raw-custom-done';
       }
     }
 
@@ -568,6 +596,58 @@ describe('FORMATTER-UTIL', () => {
 
       expect(customFormatterZeroFieldsBeforeSpy).toHaveBeenCalledTimes(1);
       expect(customFormatterZeroFieldsBeforeSpy).toHaveBeenCalledWith(req, undefined);
+    });
+
+    // A raw action / function result (non-object) reaching an `@After*` handler passes through untouched:
+    // neither formatted nor treated as a missing field of req.data.
+    test.each<[string, () => unknown, unknown]>([
+      ['a number', () => 5, 5],
+      ['a string', () => 'hi', 'hi'],
+      ['a boolean', () => false, false],
+      ['null', () => null, null],
+      ['an array of numbers', () => [1, 2, 3], [1, 2, 3]],
+      ['an array holding null and a string', () => [null, 'x'], [null, 'x']],
+    ])(
+      'It should PASS THROUGH : %s untouched, for an AFTER-style call, and run the handler',
+      async (_label, make, expected) => {
+        const instance = new ProductHandler();
+        const value = make();
+        const req = new CdsRequest({ data: {} });
+        (req as unknown as { results: unknown }).results = value;
+
+        await expect(instance.afterRawResult(value, req as unknown as Request)).resolves.toBe('raw-done');
+        expect(value).toEqual(expected);
+        expect(req.data).toEqual({});
+      },
+    );
+
+    test.each<[string, unknown]>([
+      ['a number', 5],
+      ['a string', 'hi'],
+      ['a boolean', false],
+      ['null', null],
+    ])(
+      'It should HAND : %s to a customFormatter callback unchanged, for an AFTER-style call',
+      async (_label, value) => {
+        const instance = new ProductHandler();
+        const req = new CdsRequest({ data: {} });
+        (req as unknown as { results: unknown }).results = value;
+        customFormatterRawResultSpy.mockClear();
+
+        await expect(instance.afterRawResultCustom(value, req as unknown as Request)).resolves.toBe('raw-custom-done');
+        expect(customFormatterRawResultSpy).toHaveBeenCalledTimes(1);
+        expect(customFormatterRawResultSpy).toHaveBeenCalledWith(req, value);
+      },
+    );
+
+    test('It should HAND undefined to a customFormatter callback when the raw result is not among the handler arguments', async () => {
+      const instance = new ProductHandler();
+      const req = new CdsRequest({ data: {} });
+      (req as unknown as { results: unknown }).results = 1;
+      customFormatterRawResultSpy.mockClear();
+
+      await expect(instance.afterRawResultCustom(true, req as unknown as Request)).resolves.toBe('raw-custom-done');
+      expect(customFormatterRawResultSpy).toHaveBeenCalledWith(req, undefined);
     });
   });
 });
