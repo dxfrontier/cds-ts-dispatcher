@@ -7,3 +7,4 @@ using from './authorization/authorization';
 using from './controller/products-service/products-service';
 using from './controller/robustness-service/robustness-service';
 using from './controller/gated-draft-service/gated-draft-service';
+using from './controller/bulk-service/bulk-service';

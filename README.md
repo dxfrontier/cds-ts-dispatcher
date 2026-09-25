@@ -5740,6 +5740,14 @@ The `@Validate` decorator is useful when you need to `validate` the `Request`.`d
 
 The decorator will raise a `Request.reject` message if the validation requirements are not met.
 
+> [!NOTE]
+> When `Request.data` is a bulk (array) payload - e.g. a `@sap/cds` 10 bulk `INSERT` dispatched from a single REST POST of an array - `@Validate` checks every entry.
+>
+> - **`mandatoryFieldValidation: true`** runs per field, in the order the fields are listed on `@Validate`: for each field, this pass runs over ALL entries before that field's values are validated - the first entry missing the field rejects immediately, with the entry index appended (e.g. `... (bulk entry index: 1)`). Only once every entry has that field present does value validation for that field start, before the decorator moves on to the next listed field. Because fields are checked one at a time, a value-validation rejection on an earlier field is reported before the mandatory-field pass for a later field ever runs. If `customMessage` is also set, this first pass is skipped entirely (matching the single-object behavior) and the field is simply treated as not mandatory.
+> - **Value validation** then rejects the first entry whose value fails, with the same message as a single-object payload and the entry index appended; the remaining entries are left unchecked.
+> - **`customMessage`** is used as-is, with NO entry index appended - `Request.reject`'s message can be looked up by `@sap/cds` as an i18n key (e.g. from `_i18n/messages.properties`), and appending text to it would turn a valid key into an unresolvable string. Only the dispatcher's own templated message gets the index suffix.
+> - **`exposeValidatorResult: true`** returns a single flag per action, `true` only when every non-empty entry passes (the per-entry results are `AND`-ed together); it does not identify which entry failed.
+
 <span style="color:#32CD32"> **Validators** </span>
 
 Below is a list of available validators:
@@ -5986,6 +5994,8 @@ Here are the available formatter methods:
 
 > [!NOTE]
 > Every listed field is formatted. `customFormatter` invokes your `callback(req, results)` exactly once — with or without field arguments; on the `BEFORE`/`ON` path `results` is `undefined` (work on `req.data` via `req`).
+>
+> On the `BEFORE`/`ON` (`Request.data`) path, when `Request.data` is a bulk (array) payload - e.g. a `@sap/cds` 10 bulk `INSERT` dispatched from a single REST POST of an array - the formatter is applied to every entry, in place. The empty-field check (which rejects when a listed field is missing) applies per entry too: the first entry missing the field rejects with the same message as a single-object payload, with the entry index appended (e.g. `... (bulk entry index: 1)`), and the remaining entries are left unformatted.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

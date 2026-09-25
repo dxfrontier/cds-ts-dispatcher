@@ -1,10 +1,31 @@
 import validator from 'validator';
 
+import constants from '../../constants/internalConstants';
 import util from '../util';
 
 import type { ExtendedRequestWithResults } from '../../types/internalTypes';
 import type { Custom, Formatters } from '../../types/formatter';
 import type { Request } from '../../types/types';
+
+/**
+ * Appends the entry index to a rejection message, for a bulk (array) `req.data` payload; returns the
+ * message unchanged when `index` is `undefined` (single-object `req.data`).
+ * @param message The base rejection message.
+ * @param index The zero-based index of the entry within the bulk array, or `undefined`.
+ */
+function withEntryIndex(message: string, index?: number): string {
+  return index === undefined ? message : `${message} (bulk entry index: ${index})`;
+}
+
+/**
+ * Reads `field` off one entry of a bulk (array) `req.data`. A non-object entry (e.g. `null`) counts as an
+ * entry missing the field.
+ * @param entry One entry of a bulk `req.data` array.
+ * @param field The field to read.
+ */
+function getEntryFieldValue(entry: unknown, field: PropertyKey): any {
+  return util.lodash.isObjectLike(entry) ? (entry as Record<PropertyKey, unknown>)[field] : undefined;
+}
 
 /**
  * Utility functions for applying formatters to various data structures.
@@ -160,11 +181,37 @@ const formatterUtil = {
     formatter: Exclude<Formatters<T>, Custom<T>>,
     field: Field,
   ): void {
-    if (util.isFieldEmpty(req.data[field])) {
-      util.raiseBadRequestEmptyField(req, formatter, field as string);
+    if (!util.lodash.isArray(req.data)) {
+      if (util.isFieldEmpty(req.data[field])) {
+        util.raiseBadRequestEmptyField(req, formatter, field as string);
+      }
+
+      req.data[field] = this.applyFormatter(formatter, req.data[field]);
+      return;
     }
 
-    req.data[field] = this.applyFormatter(formatter, req.data[field]);
+    // Bulk (array) req.data - e.g. a cds 10 bulk INSERT dispatched as one REST POST: format the field
+    // on every entry, in place, in array order. The empty-field check applies per entry; the first
+    // entry missing the field rejects with the same 400 as the single-object case, its message
+    // identifying the entry index, and the remaining entries are left unformatted.
+    for (let index = 0; index < req.data.length; index += 1) {
+      const entry = req.data[index];
+      const value = getEntryFieldValue(entry, field);
+
+      if (util.isFieldEmpty(value)) {
+        util.raiseBadRequestMessage(
+          req,
+          withEntryIndex(
+            util.buildMessage(constants.MESSAGES.VALIDATOR_FIELD_NOT_EXISTS, { action: formatter.action, field }),
+            index,
+          ),
+        );
+
+        return;
+      }
+
+      entry[field] = this.applyFormatter(formatter, value);
+    }
   },
 
   /**

@@ -185,3 +185,20 @@ Object.defineProperty(GatedNotesEntity, 'name', { value: 'GatedNotesEntity' })
 Object.defineProperty(GatedNotesEntity, 'is_singular', { value: true })
 export class GatedNotesEntity_ extends Array<GatedNotesEntity> {$count?: number}
 Object.defineProperty(GatedNotesEntity_, 'name', { value: 'GatedNotesEntity' })
+
+export function _BulkEntityAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class BulkEntity extends Base {
+    declare ID?: __.Key<number>
+    declare email?: string | null
+    declare title?: string | null
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<BulkEntity>;
+    declare static readonly elements: __.ElementsOf<BulkEntity>;
+    declare static readonly actions: globalThis.Record<never, never>;
+  };
+}
+export class BulkEntity extends _BulkEntityAspect(__.Entity) {}
+Object.defineProperty(BulkEntity, 'name', { value: 'BulkEntity' })
+Object.defineProperty(BulkEntity, 'is_singular', { value: true })
+export class BulkEntity_ extends Array<BulkEntity> {$count?: number}
+Object.defineProperty(BulkEntity_, 'name', { value: 'BulkEntity' })

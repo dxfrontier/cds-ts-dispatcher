@@ -23,6 +23,17 @@ const buildReq = (data: Record<string, unknown> = {}): Request =>
     reject: jest.fn(),
   }) as unknown as Request;
 
+/**
+ * Same fabricated `Request` as `buildReq`, but with a bulk (array) `req.data` - the shape `@sap/cds` 10
+ * hands `@BeforeCreate` / `@OnCreate` for a REST bulk INSERT (one dispatch, `req.data` is the array of
+ * entries).
+ */
+const buildBulkReq = (data: Record<string, unknown>[]): Request =>
+  ({
+    data,
+    reject: jest.fn(),
+  }) as unknown as Request;
+
 describe('FORMATTER-UTIL', () => {
   // ============================================================================================================
   // formatterUtil.applyFormatter - one row per formatter action
@@ -274,6 +285,53 @@ describe('FORMATTER-UTIL', () => {
   });
 
   // ============================================================================================================
+  // formatterUtil.handleOneItemOfRequest - bulk (array) req.data
+  // ============================================================================================================
+
+  describe('formatterUtil.handleOneItemOfRequest - bulk (array) req.data', () => {
+    test('It should MUTATE : the field on EVERY entry, in place', () => {
+      const req = buildBulkReq([{ title: 'hello' }, { title: 'world' }]);
+
+      formatterUtil.handleOneItemOfRequest(req, { action: 'toUpper' }, 'title');
+
+      expect((req.data as unknown as { title: string }[]).map((entry) => entry.title)).toEqual(['HELLO', 'WORLD']);
+      expect(req.reject).not.toHaveBeenCalled();
+    });
+
+    test('It should REJECT : with the field-not-exists message identifying the entry index, for the first entry missing the field, and leave the remaining entries unformatted', () => {
+      const req = buildBulkReq([{ title: 'hello' }, {}]);
+
+      formatterUtil.handleOneItemOfRequest(req, { action: 'toUpper' }, 'title');
+
+      const data = req.data as unknown as { title?: string }[];
+      const expectedMessage = util.buildMessage(constants.MESSAGES.VALIDATOR_FIELD_NOT_EXISTS, {
+        action: 'toUpper',
+        field: 'title',
+      });
+
+      expect(req.reject).toHaveBeenCalledTimes(1);
+      expect(req.reject).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST, `${expectedMessage} (bulk entry index: 1)`);
+      // The entry BEFORE the missing one is already formatted (loop stops only once the problem is hit).
+      expect(data[0].title).toBe('HELLO');
+      expect(data[1].title).toBeUndefined();
+    });
+
+    test('It should REJECT : with the field-not-exists message identifying the entry index, treating a null entry the same as one missing the field (not a TypeError)', () => {
+      const req = buildBulkReq([{ title: 'hello' }, null as unknown as Record<string, unknown>]);
+
+      formatterUtil.handleOneItemOfRequest(req, { action: 'toUpper' }, 'title');
+
+      const expectedMessage = util.buildMessage(constants.MESSAGES.VALIDATOR_FIELD_NOT_EXISTS, {
+        action: 'toUpper',
+        field: 'title',
+      });
+
+      expect(req.reject).toHaveBeenCalledTimes(1);
+      expect(req.reject).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST, `${expectedMessage} (bulk entry index: 1)`);
+    });
+  });
+
+  // ============================================================================================================
   // formatterUtil.handleCustomFormatter
   // ============================================================================================================
 
@@ -396,6 +454,24 @@ describe('FORMATTER-UTIL', () => {
 
       await expect(instance.beforeCreate(req as unknown as Request)).rejects.toThrow(
         `Validator 'toUpper' is trying to validate the field 'title'. Field 'title' must be present in the Request body or not to be empty !`,
+      );
+    });
+
+    test('It should APPLY : the formatter to EVERY entry, for a bulk (array) req.data (BEFORE/ON-style, no results arg)', async () => {
+      const instance = new ProductHandler();
+      const req = new CdsRequest({ data: [{ title: 'hello' }, { title: 'world' }] });
+
+      await instance.beforeCreate(req as unknown as Request);
+
+      expect((req.data as unknown as { title: string }[]).map((entry) => entry.title)).toEqual(['HELLO', 'WORLD']);
+    });
+
+    test('It should THROW : identifying the entry index, when one entry of a bulk (array) req.data is missing the field (BEFORE/ON-style)', async () => {
+      const instance = new ProductHandler();
+      const req = new CdsRequest({ data: [{ title: 'hello' }, {}] });
+
+      await expect(instance.beforeCreate(req as unknown as Request)).rejects.toThrow(
+        `Validator 'toUpper' is trying to validate the field 'title'. Field 'title' must be present in the Request body or not to be empty ! (bulk entry index: 1)`,
       );
     });
 

@@ -22,6 +22,17 @@ const buildReq = (data: Record<string, unknown> = {}): Request =>
     reject: jest.fn(),
   }) as unknown as Request;
 
+/**
+ * Same fabricated `Request` as `buildReq`, but with a bulk (array) `req.data` - the shape `@sap/cds` 10
+ * hands `@BeforeCreate` / `@OnCreate` for a REST bulk INSERT (one dispatch, `req.data` is the array of
+ * entries).
+ */
+const buildBulkReq = (data: Record<string, unknown>[]): Request =>
+  ({
+    data,
+    reject: jest.fn(),
+  }) as unknown as Request;
+
 describe('VALIDATOR-UTIL', () => {
   // ============================================================================================================
   // validatorUtil.showNotValidMessage
@@ -71,6 +82,35 @@ describe('VALIDATOR-UTIL', () => {
         StatusCodes.BAD_REQUEST,
         `{ email : bad } does not meet the constraints of validator 'isEmail' !`,
       );
+    });
+
+    test("It should REJECT : with the customMessage left unchanged, WITHOUT an entry index appended, even for a bulk (array) req.data - CAP looks up req.reject's message as a possible i18n key, so appending text to it would break that lookup", () => {
+      const req = buildReq();
+
+      validatorUtil.showNotValidMessage({
+        field: 'email',
+        input: 'bad',
+        validator: 'isEmail',
+        message: 'EMAIL_INVALID',
+        req,
+        index: 1,
+      });
+
+      expect(req.reject).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST, 'EMAIL_INVALID');
+    });
+
+    test('It should REJECT : with the templated default message AND the entry index appended, for a bulk (array) req.data', () => {
+      const req = buildReq();
+
+      validatorUtil.showNotValidMessage({ field: 'email', input: 'bad', validator: 'isEmail', req, index: 1 });
+
+      const expectedMessage = util.buildMessage(constants.MESSAGES.VALIDATOR_NOT_VALID, {
+        field: 'email',
+        input: 'bad',
+        validator: 'isEmail',
+      });
+
+      expect(req.reject).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST, `${expectedMessage} (bulk entry index: 1)`);
     });
   });
 
@@ -144,6 +184,70 @@ describe('VALIDATOR-UTIL', () => {
 
       expect(validatorUtil.canValidate(req, validator, 'email')).toBe(false);
       expect(req.reject).not.toHaveBeenCalled();
+    });
+  });
+
+  // ============================================================================================================
+  // validatorUtil.canValidate - bulk (array) req.data
+  // ============================================================================================================
+
+  describe('validatorUtil.canValidate - bulk (array) req.data', () => {
+    test('It should RETURN : true and NOT reject, when at least one entry has the field present', () => {
+      const req = buildBulkReq([{ email: 'a@b.com' }, { email: 'not-an-email' }]);
+      const validator: Validators = { action: 'isEmail' };
+
+      expect(validatorUtil.canValidate(req, validator, 'email')).toBe(true);
+      expect(req.reject).not.toHaveBeenCalled();
+    });
+
+    test('It should RETURN : false and NOT reject, when every entry is missing the field and mandatoryFieldValidation is not set', () => {
+      const req = buildBulkReq([{}, { email: undefined }]);
+      const validator: Validators = { action: 'isEmail' };
+
+      expect(validatorUtil.canValidate(req, validator, 'email')).toBe(false);
+      expect(req.reject).not.toHaveBeenCalled();
+    });
+
+    test('It should REJECT : with the field-not-exists message identifying the entry index, for the first entry missing a mandatory field', () => {
+      const req = buildBulkReq([{ email: undefined }, { email: 'a@b.com' }]);
+      const validator: Validators = { action: 'isEmail', mandatoryFieldValidation: true };
+
+      expect(validatorUtil.canValidate(req, validator, 'email')).toBe(false);
+      expect(req.reject).toHaveBeenCalledTimes(1);
+      expect(req.reject).toHaveBeenCalledWith(
+        StatusCodes.BAD_REQUEST,
+        `Validator 'isEmail' is trying to validate the field 'email'. Field 'email' must be present in the Request body or not to be empty ! (bulk entry index: 0)`,
+      );
+    });
+
+    test('It should REJECT : identifying the SECOND entry, when only that entry is missing a mandatory field', () => {
+      const req = buildBulkReq([{ email: 'a@b.com' }, { email: null }]);
+      const validator: Validators = { action: 'isEmail', mandatoryFieldValidation: true };
+
+      expect(validatorUtil.canValidate(req, validator, 'email')).toBe(false);
+      expect(req.reject).toHaveBeenCalledWith(
+        StatusCodes.BAD_REQUEST,
+        `Validator 'isEmail' is trying to validate the field 'email'. Field 'email' must be present in the Request body or not to be empty ! (bulk entry index: 1)`,
+      );
+    });
+
+    test('It should RETURN : true and NOT throw, when a null entry is followed by an entry that has the field present', () => {
+      const req = buildBulkReq([null as unknown as Record<string, unknown>, { email: 'a@b.com' }]);
+      const validator: Validators = { action: 'isEmail' };
+
+      expect(validatorUtil.canValidate(req, validator, 'email')).toBe(true);
+      expect(req.reject).not.toHaveBeenCalled();
+    });
+
+    test('It should REJECT : with the field-not-exists message identifying the entry index, treating a null entry the same as one missing a mandatory field', () => {
+      const req = buildBulkReq([{ email: 'a@b.com' }, null as unknown as Record<string, unknown>]);
+      const validator: Validators = { action: 'isEmail', mandatoryFieldValidation: true };
+
+      expect(validatorUtil.canValidate(req, validator, 'email')).toBe(false);
+      expect(req.reject).toHaveBeenCalledWith(
+        StatusCodes.BAD_REQUEST,
+        `Validator 'isEmail' is trying to validate the field 'email'. Field 'email' must be present in the Request body or not to be empty ! (bulk entry index: 1)`,
+      );
     });
   });
 
@@ -359,6 +463,98 @@ describe('VALIDATOR-UTIL', () => {
   });
 
   // ============================================================================================================
+  // validatorUtil.applyValidator - bulk (array) req.data
+  // ============================================================================================================
+
+  describe('validatorUtil.applyValidator - bulk (array) req.data', () => {
+    test('It should NOT reject, when every entry passes validation', () => {
+      const req = buildBulkReq([{ field: 'a@b.com' }, { field: 'c@d.com' }]);
+      const validator: Validators = { action: 'isEmail' };
+
+      validatorUtil.applyValidator(req, validator, 'field');
+
+      expect(req.reject).not.toHaveBeenCalled();
+    });
+
+    test('It should REJECT : once, with the message of the FIRST invalid entry identifying its index, and stop checking the rest', () => {
+      const req = buildBulkReq([{ field: 'test@example.com' }, { field: 'not-an-email' }, { field: 'also-bad' }]);
+      const validator: Validators = { action: 'isEmail' };
+
+      validatorUtil.applyValidator(req, validator, 'field');
+
+      expect(req.reject).toHaveBeenCalledTimes(1);
+      expect(req.reject).toHaveBeenCalledWith(
+        StatusCodes.BAD_REQUEST,
+        `{ field : not-an-email } does not meet the constraints of validator 'isEmail' ! (bulk entry index: 1)`,
+      );
+    });
+
+    test('It should SKIP : entries whose field is empty, and reject on the first non-empty invalid entry', () => {
+      const req = buildBulkReq([{ field: undefined }, { field: 'not-an-email' }]);
+      const validator: Validators = { action: 'isEmail' };
+
+      validatorUtil.applyValidator(req, validator, 'field');
+
+      expect(req.reject).toHaveBeenCalledTimes(1);
+      expect(req.reject).toHaveBeenCalledWith(
+        StatusCodes.BAD_REQUEST,
+        `{ field : not-an-email } does not meet the constraints of validator 'isEmail' ! (bulk entry index: 1)`,
+      );
+    });
+
+    describe('exposeValidatorResult: true', () => {
+      test('It should RETURN : { [action]: true } and NOT reject, when every checked entry passes', () => {
+        const req = buildBulkReq([{ field: 'a@b.com' }, { field: 'c@d.com' }]);
+        const validator: Validators = { action: 'isEmail', exposeValidatorResult: true };
+
+        const result = validatorUtil.applyValidator(req, validator, 'field');
+
+        expect(result).toEqual({ isEmail: true });
+        expect(req.reject).not.toHaveBeenCalled();
+      });
+
+      test('It should RETURN : { [action]: false } and NOT reject, when at least one checked entry fails', () => {
+        const req = buildBulkReq([{ field: 'a@b.com' }, { field: 'not-an-email' }]);
+        const validator: Validators = { action: 'isEmail', exposeValidatorResult: true };
+
+        const result = validatorUtil.applyValidator(req, validator, 'field');
+
+        expect(result).toEqual({ isEmail: false });
+        expect(req.reject).not.toHaveBeenCalled();
+      });
+
+      test('It should SKIP : entries whose field is empty, and RETURN : { [action]: true } when every remaining entry passes', () => {
+        const req = buildBulkReq([{ field: undefined }, { field: 'a@b.com' }]);
+        const validator: Validators = { action: 'isEmail', exposeValidatorResult: true };
+
+        const result = validatorUtil.applyValidator(req, validator, 'field');
+
+        expect(result).toEqual({ isEmail: true });
+        expect(req.reject).not.toHaveBeenCalled();
+      });
+
+      test('It should SKIP : a null entry (treated as field-empty) and NOT throw, RETURN : { [action]: true } when the remaining entries pass', () => {
+        const req = buildBulkReq([null as unknown as Record<string, unknown>, { field: 'a@b.com' }]);
+        const validator: Validators = { action: 'isEmail', exposeValidatorResult: true };
+
+        const result = validatorUtil.applyValidator(req, validator, 'field');
+
+        expect(result).toEqual({ isEmail: true });
+        expect(req.reject).not.toHaveBeenCalled();
+      });
+    });
+
+    test('It should SKIP : a null entry (treated as field-empty) and NOT throw, when the remaining entries pass', () => {
+      const req = buildBulkReq([{ field: 'a@b.com' }, null as unknown as Record<string, unknown>]);
+      const validator: Validators = { action: 'isEmail' };
+
+      validatorUtil.applyValidator(req, validator, 'field');
+
+      expect(req.reject).not.toHaveBeenCalled();
+    });
+  });
+
+  // ============================================================================================================
   // Public path: @Validate decorator (covers the decorator glue calling into validatorUtil)
   // ============================================================================================================
 
@@ -434,6 +630,40 @@ describe('VALIDATOR-UTIL', () => {
 
       expect(result).toBe('handled');
       expect(instance.seenComment).toBeUndefined();
+    });
+
+    test('It should CALL : the original method, when every entry of a bulk (array) req.data passes validation', async () => {
+      const instance = new ComplaintHandler();
+      const req = new CdsRequest({ data: [{ comment: 'Comment: one' }, { comment: 'Comment: two' }] });
+
+      const result = await instance.recordComment(req as unknown as Request);
+
+      expect(result).toBe('handled');
+    });
+
+    test('It should THROW : the templated validation error identifying the entry index, for a bulk (array) req.data', async () => {
+      const instance = new ComplaintHandler();
+      const req = new CdsRequest({ data: [{ comment: 'Comment: ok' }, { comment: 'Nope' }] });
+
+      await expect(instance.recordComment(req as unknown as Request)).rejects.toThrow(
+        `{ comment : Nope } does not meet the constraints of validator 'startsWith' ! (bulk entry index: 1)`,
+      );
+    });
+
+    test('It should THROW : the customMessage EXACTLY, with NO entry index appended, for a bulk (array) req.data', async () => {
+      const instance = new ComplaintHandler();
+      const req = new CdsRequest({ data: [{ comment: 'Comment: ok' }, { comment: 'Nope' }] });
+
+      let caught: unknown;
+
+      try {
+        await instance.recordCustomMessageComment(req as unknown as Request);
+      } catch (error) {
+        caught = error;
+      }
+
+      expect(caught).toBeInstanceOf(Error);
+      expect((caught as Error).message).toBe('Comment must start with "Comment:"');
     });
   });
 });
