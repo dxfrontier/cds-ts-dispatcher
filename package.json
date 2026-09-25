@@ -44,6 +44,7 @@
     "build:clean:postinstall": "echo 'Clean postinstall folder ...' && npx rimraf ./postinstall/PostInstall.js",
     "build:ts": "tsup",
     "build": "run-s build:clean build:clean:postinstall build:message build:ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "typecheck:native": "tsgo --noEmit -p tsconfig.json --moduleResolution bundler"
   },
   "repository": {
