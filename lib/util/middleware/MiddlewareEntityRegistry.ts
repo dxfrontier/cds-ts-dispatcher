@@ -41,34 +41,59 @@ export class MiddlewareEntityRegistry {
   };
 
   /**
-   * Retrieves the active entity or its draft entity.
-   * @returns The active entity or its draft entity if available.
+   * Retrieves the names of the entity the class is bound to: the active entity and, for a draft-enabled
+   * entity, also its `.drafts` - requests on the active entity (direct CRUD on active instances, on by default
+   * since `@sap/cds` 10) and on its drafts must both pass the class-level middleware chain.
+   * @returns The entity names, or an empty array when the class is not bound to a named entity.
    */
-  private getActiveEntityOrDraftEntity(): string | undefined {
+  private getEntityNames(): string[] {
     const entity = MetadataDispatcher.getEntity(this.entityInstance);
 
-    if (!util.lodash.isUndefined(entity)) {
-      return entity.drafts ? entity.drafts.name : entity.name;
+    if (util.lodash.isUndefined(entity) || util.lodash.isEmpty(entity.name)) {
+      return [];
     }
+
+    return entity.drafts ? [entity.name, entity.drafts.name] : [entity.name];
   }
 
   /**
-   * Registers the `before` handlers for the entity.
+   * Checks if the request is the write which `draftActivate` dispatches on the active entity (`CREATE` for a
+   * new row, `UPDATE` for an edited one). `@sap/cds` marks it by the event of the outer request, the same test
+   * its own `SAVE` handlers use.
+   * @param req The request object.
+   * @returns True if the request is the internal write of a draft activation, otherwise false.
    */
-  private registerBeforeHandlers(): void {
-    const entity = this.getActiveEntityOrDraftEntity();
-    if (entity) {
-      this.srv.before(constants.ALL_EVENTS, entity, async (req: Request) => {
+  private isDraftActivationWrite(req: Request): boolean {
+    return (req as unknown as { _?: { event?: string } })._?.event === 'draftActivate';
+  }
+
+  /**
+   * Registers the `before` handlers for the active entity and, if draft-enabled, for its drafts.
+   * On the active entity of a draft-enabled entity the chain skips the internal write of `draftActivate`: the
+   * draft's content already passed the chain at `NEW` / `EDIT` / `PATCH`.
+   * @param entityNames The entity names to register the middleware chain on, the active entity first.
+   */
+  private registerBeforeHandlers(entityNames: string[]): void {
+    const isDraftEnabled = entityNames.length > 1;
+
+    entityNames.forEach((entityName, index) => {
+      const isActiveOfDraftEntity = isDraftEnabled && index === 0;
+
+      this.srv.before(constants.ALL_EVENTS, entityName, async (req: Request) => {
+        if (isActiveOfDraftEntity && this.isDraftActivationWrite(req)) {
+          return;
+        }
+
         await this.executeMiddlewareChain(req);
       });
-    }
+    });
   }
 
   /**
    * Registers the `on` actions for the entity.
    */
   private registerOnActions(): void {
-    const handlers = MetadataDispatcher.getMetadataHandlers(this.entityInstance);
+    const handlers = MetadataDispatcher.getMetadataHandlers(this.entityInstance) ?? [];
     handlers.forEach((handler) => {
       // '@BeforeCommit' & co, '@OnScheduled' / '@Schedule' and the scheduled outcomes are NO action events:
       // they hook the transaction of the current request, respectively a queued task, so there is no action
@@ -147,16 +172,16 @@ export class MiddlewareEntityRegistry {
    * Builds the middleware chain for the entity.
    */
   public buildMiddlewares(): void {
-    const entity = this.getActiveEntityOrDraftEntity();
+    const entityNames = this.getEntityNames();
 
     // All decorators except actions
-    const hasActiveHandlers = !util.lodash.isEmpty(entity);
+    const hasActiveHandlers = entityNames.length > 0;
     if (hasActiveHandlers) {
-      this.registerBeforeHandlers();
+      this.registerBeforeHandlers(entityNames);
     }
 
     // All actions
-    const hasUnboundActions = util.lodash.isUndefined(entity);
+    const hasUnboundActions = !hasActiveHandlers;
     if (hasUnboundActions) {
       this.registerOnActions();
     }

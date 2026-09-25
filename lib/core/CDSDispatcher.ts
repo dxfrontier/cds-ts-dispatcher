@@ -930,6 +930,18 @@ class CDSDispatcher {
       };
     }
 
+    // A class-level '@Use' without any handler method still guards the entity it is bound to.
+    if ((MetadataDispatcher.getMiddlewares(entityInstance) ?? []).length > 0) {
+      return {
+        buildHandlers: (): void => {
+          // no handler methods - only the class-level middleware chain is registered
+        },
+        buildMiddlewares: (): void => {
+          this.buildMiddlewareBy(entityInstance);
+        },
+      };
+    }
+
     return undefined;
   }
 

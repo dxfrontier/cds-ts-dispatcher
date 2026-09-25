@@ -796,9 +796,12 @@ function SingleInstanceCapable<Target extends object>() {
  * Wires one or more middleware classes into the request pipeline — as a CLASS decorator (all handlers of
  * the class) or a METHOD decorator (that one handler only), depending on how many arguments TypeScript
  * hands the decorator function.
- * At class level: for an `@EntityHandler` class, registers ONE `srv.before('*', <path>, callback)` where
- * `<path>` is `<Entity>.drafts` for draft-enabled entities (the chain then runs before draft-targeted
- * requests, NOT before plain active-entity ones) and `<Entity>` otherwise; for an `@UnboundActions`
+ * At class level: for an `@EntityHandler` class, registers `srv.before('*', <path>, callback)` on TWO
+ * paths for draft-enabled entities, `<Entity>` and `<Entity>.drafts` (the chain runs before active-entity
+ * requests AND draft-targeted ones, once per request CAP dispatches — a collection read runs it for both
+ * parts; only the internal write of `draftActivate` on `<Entity>` skips it, the draft's content already
+ * passed the chain at NEW / EDIT / PATCH), and on ONE path, `<Entity>`, otherwise — also for a class that
+ * has the class-level `@Use` but no handler method. For an `@UnboundActions`
  * class it instead registers one `srv.before` per action / function / event / error handler of the
  * class — the two modes are exclusive. At method level: wraps the method directly and runs the chain
  * before it; the wrapped handler's return value passes through — an `@On*` handler with method-level

@@ -1052,6 +1052,17 @@ export class CustomerHandler {
 > 2. Middlewares when applied with `@Use` are executed before the normal events.
 > 3. If you need to apply middleware to a `method` you should use the method specific [@Use](#use-1) decorator .
 
+> [!IMPORTANT]
+> On a `draft-enabled` entity (`@odata.draft.enabled`) the class-level `@Use` middlewares run for requests on the `active` entity **and** on its `drafts`. Since `@sap/cds` 10 accepts direct `POST` / `PATCH` / `DELETE` requests on active instances (`IsActiveEntity=true`) by default, these are a standard path, so a middleware which checks or rejects requests guards them as well as the draft flow.
+>
+> The middlewares run once per request the service dispatches for the entity. A single draft operation can dispatch several of them, so check `req.event` (and `req.target`) instead of assuming one run per HTTP call, e.g.:
+>
+> - a collection `READ` of a draft-enabled entity runs them for the active part and for the `drafts` part.
+> - `draftEdit` runs as `EDIT` on the active entity; a new draft as `NEW` then `CREATE` on `drafts`; a draft `PATCH` as `UPDATE` on `drafts`; discarding a draft as `CANCEL` then `DELETE` on `drafts`.
+> - `draftActivate` runs them for reading the draft (`READ` on `drafts`). The write it then dispatches on the active entity (`CREATE` for a new row, `UPDATE` for an edited one) does not run them again: the draft's content already passed the middlewares at `NEW` / `EDIT` / `PATCH`.
+>
+> A class carrying only a class-level `@Use`, without any handler method, still registers its middlewares on the entity.
+
 > [!WARNING]
 > If `req.reject()` is used inside of middleware this will stop the stack of middlewares, this means that next middleware will not be executed.
 

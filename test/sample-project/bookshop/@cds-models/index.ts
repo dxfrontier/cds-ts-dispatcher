@@ -153,3 +153,35 @@ Object.defineProperty(RobustnessItemsEntity, 'name', { value: 'RobustnessItemsEn
 Object.defineProperty(RobustnessItemsEntity, 'is_singular', { value: true })
 export class RobustnessItemsEntity_ extends Array<RobustnessItemsEntity> {$count?: number}
 Object.defineProperty(RobustnessItemsEntity_, 'name', { value: 'RobustnessItemsEntity' })
+
+export function _GatedDocumentsEntityAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class GatedDocumentsEntity extends Base {
+    declare ID?: __.Key<number>
+    declare title?: string | null
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<GatedDocumentsEntity>;
+    declare static readonly elements: __.ElementsOf<GatedDocumentsEntity>;
+    declare static readonly actions: globalThis.Record<never, never>;
+  };
+}
+export class GatedDocumentsEntity extends _GatedDocumentsEntityAspect(__.Entity) {}
+Object.defineProperty(GatedDocumentsEntity, 'name', { value: 'GatedDocumentsEntity' })
+Object.defineProperty(GatedDocumentsEntity, 'is_singular', { value: true })
+export class GatedDocumentsEntity_ extends Array<GatedDocumentsEntity> {$count?: number}
+Object.defineProperty(GatedDocumentsEntity_, 'name', { value: 'GatedDocumentsEntity' })
+
+export function _GatedNotesEntityAspect<TBase extends new (...args: any[]) => object>(Base: TBase) {
+  return class GatedNotesEntity extends Base {
+    declare ID?: __.Key<number>
+    declare text?: string | null
+    static readonly kind: 'entity' | 'type' | 'aspect' = 'entity';
+    declare static readonly keys: __.KeysOf<GatedNotesEntity>;
+    declare static readonly elements: __.ElementsOf<GatedNotesEntity>;
+    declare static readonly actions: globalThis.Record<never, never>;
+  };
+}
+export class GatedNotesEntity extends _GatedNotesEntityAspect(__.Entity) {}
+Object.defineProperty(GatedNotesEntity, 'name', { value: 'GatedNotesEntity' })
+Object.defineProperty(GatedNotesEntity, 'is_singular', { value: true })
+export class GatedNotesEntity_ extends Array<GatedNotesEntity> {$count?: number}
+Object.defineProperty(GatedNotesEntity_, 'name', { value: 'GatedNotesEntity' })

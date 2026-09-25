@@ -6,3 +6,4 @@ using from './controller/chat-service/chat-service';
 using from './authorization/authorization';
 using from './controller/products-service/products-service';
 using from './controller/robustness-service/robustness-service';
+using from './controller/gated-draft-service/gated-draft-service';
