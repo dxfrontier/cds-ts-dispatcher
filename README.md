@@ -4641,7 +4641,8 @@ import type { Request } from '@dxfrontier/cds-ts-dispatcher';
 
 @OnError()
 private onError(@Error() err: Error, @Req() req: Request) { // sync func
-  err.message = 'New message'
+  // `req` is the root context: `req.user`, `req.locale`, `req.http` are available.
+  err.message = `New message (user: ${req.user.id})`;
   // ...
 }
 ```
@@ -4650,7 +4651,7 @@ private onError(@Error() err: Error, @Req() req: Request) { // sync func
 
 ```typescript
 this.on('error', (err, req) => {
-  err.message = 'New message';
+  err.message = `New message (user: ${req.user.id})`;
   // ...
 });
 ```
@@ -4659,7 +4660,13 @@ this.on('error', (err, req) => {
 > Decorator `@OnError` should be used inside [@UnboundActions](#unboundactions) class.
 
 > [!CAUTION]
-> OnError callback are expected to be a **`sync`** function, i.e., **`not async`**, not returning `Promises`.
+> OnError callbacks are expected to be a **`sync`** function, i.e., **`not async`** - no `await` inside the body. CAP runs error handlers **synchronously** while the transaction unwinds and never awaits them; returning a `Promise` is fine (see below) but does not delay the response sent to the client.
+
+> [!NOTE]
+> The `@Req()` parameter of `@OnError` is the **root `EventContext`** of the failed request (`req.user`, `req.locale`, `req.http`), **not** the failed `cds.Request`: it has no `req.data`, `req.event`, `req.target` and no `req.reject()`. Change the outgoing error through `@Error()` instead.
+
+> [!NOTE]
+> An error thrown inside an `@OnError` method - synchronously, or by a returned `Promise` - is **logged** (`console.error`, prefixed `[CDS-TS-Dispatcher]`) and **not rethrown**: the client still receives the original error, and the server keeps running. A returned thenable is **adopted**: its rejection is caught and logged the same way; CAP does not wait for it, so the client response is not delayed. It still runs inside the failed request's (already rolled-back) transaction, so a **DB write through it is refused**. For error logs that must persist, explicitly `return` a fresh `cds.tx(...)` call so the dispatcher's own catch covers its failure too - an **un-returned** `cds.tx(...)` call is invisible to it and can surface as an unhandled rejection. `cds.spawn(...)` runs detached instead: its failures are handled by CAP, outside the dispatcher (returning it changes nothing).
 
 > [!TIP]
 > More info can be found at [SAP CAP Error](https://cap.cloud.sap/docs/node.js/core-services#srv-on-error)
@@ -5161,6 +5168,10 @@ The `@Stream` decorator is a `method-level` decorator for `ON` read handlers ([@
 
 If the decorated method returns a `Readable` (an object exposing a `.pipe` function), `@Stream` sets the response `Content-Type` and pipes the stream straight to the HTTP response, destroying the response on stream error. Any non-stream return value passes through unchanged.
 
+`@Stream` pipes **only for a root HTTP request** - the request that reached the server. When the handler is called by other code through `srv.send(...)`, the `Readable` is **returned** to the caller instead (the root response is left untouched), tagged with a `mimetype` property (as `req.reply(stream, { mimetype })` does, an existing `mimetype` is kept).
+
+`@Stream` is **not supported inside `$batch`**: when the handler runs as a part of an OData `$batch` request, it destroys the `Readable` and **rejects that part** with `400` `'@Stream is not supported inside $batch'`, like any other failing part. In a `multipart` `$batch` without `Prefer: odata.continue-on-error` (the default), processing **stops** at that part - parts queued after it never run; a JSON `$batch` part inside an `atomicity group` / `changeset` fails the whole group the same way. Call `@Stream` functions directly, not through `$batch`.
+
 `Parameters`
 
 - `contentType (StreamContentType)` `optional` : The response `Content-Type`. Defaults to `'application/octet-stream'`. `StreamContentType` is a union of common MIME types (`'application/json'`, `'application/x-ndjson'`, `'text/csv'`, `'application/pdf'`, `'image/png'`, ...) so the editor suggests them - any other valid MIME type string is accepted as well.
@@ -5182,6 +5193,9 @@ public async streamBooks(@Req() req: Request): Promise<Readable> {
 
 > [!IMPORTANT]
 > `@Stream` works end-to-end over the `OData` adapter for [@OnFunction()](#onfunction), [@OnBoundFunction()](#onboundfunction) and [@OnRead()](#onread) reads — it flushes headers synchronously so the adapter does not double-write.
+
+> [!NOTE]
+> Telling a nested `srv.send` call from a root request or a `$batch` part needs the handler's request among its arguments: declare `@Req()`, or no parameter decorators at all. Without it, a nested `srv.send` call from a root request is piped to that request's response, and any call inside a `$batch` request is rejected as a `$batch` part.
 
 > [!TIP]
 > Real streaming reads via `SELECT.pipeline()`, `SELECT.foreach()`, or `for-await` iteration are the intended producers.

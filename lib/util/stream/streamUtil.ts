@@ -2,6 +2,14 @@ import util from '../util';
 
 import type { Readable } from 'stream';
 import type { ServerResponse } from 'http';
+import type { Request } from '../../types/types';
+
+/**
+ * The event's OWN HTTP request (`req._.req`, set by the protocol adapter), if any.
+ * @param req The event's request.
+ * @returns The HTTP request the event was dispatched from, or `undefined` for a nested `srv.send`.
+ */
+const ownHttpRequestOf = (req: Request): unknown => (req as unknown as { _?: { req?: unknown } })._?.req;
 
 /**
  * Utility object for handling `@Stream` streaming operations (`@sap/cds` 10 streaming reads).
@@ -16,6 +24,59 @@ const streamUtil = {
     return (
       !util.lodash.isNil(value) && typeof value === 'object' && typeof (value as { pipe?: unknown }).pipe === 'function'
     );
+  },
+
+  /**
+   * Checks whether `req` was dispatched straight from the ROOT HTTP request (not a `$batch` part, not a nested
+   * `srv.send`).
+   *
+   * Every request inherits the root `req.http` from `cds.context`, but only the root event's OWN HTTP request
+   * (`req._.req`, set by the protocol adapter) is that same request: a `$batch` part owns its sub-request, and
+   * a nested `srv.send` owns none.
+   * @param req The event's request.
+   * @returns True if the request is the root HTTP request, otherwise false.
+   */
+  isRootHttpRequest(req: Request): boolean {
+    const ownHttpRequest = ownHttpRequestOf(req);
+
+    return !util.lodash.isNil(ownHttpRequest) && ownHttpRequest === req.http?.req;
+  },
+
+  /**
+   * Checks whether `req` was dispatched from an OData `$batch` part: it owns an HTTP (sub-)request that
+   * differs from the root HTTP request, AND that root HTTP request itself targets `$batch`.
+   *
+   * A nested `srv.send` inherits the root's `req.http` but owns no HTTP request of its own, so the first
+   * conjunct alone already excludes it. A programmatic dispatch with no root HTTP request at all (e.g.
+   * inside `cds.spawn`, or a test calling `srv.dispatch(...)` directly) is excluded the same way. Neither
+   * counts as a `$batch` part on its own, and an own request whose root targets something other than
+   * `$batch` is excluded by the last conjunct.
+   * @param req The event's request.
+   * @returns True if the request is a `$batch` part, otherwise false.
+   */
+  isBatchPart(req: Request): boolean {
+    const ownHttpRequest = ownHttpRequestOf(req);
+    const rootHttpRequest = req.http?.req;
+
+    return (
+      !util.lodash.isNil(ownHttpRequest) &&
+      !util.lodash.isNil(rootHttpRequest) &&
+      ownHttpRequest !== rootHttpRequest &&
+      streamUtil.isBatchRequest(rootHttpRequest as { originalUrl?: string; url?: string })
+    );
+  },
+
+  /**
+   * Checks whether an HTTP request is an OData `$batch` request - matched like express routes it (any case,
+   * optional trailing slash) against the PATHNAME only, ignoring the query string.
+   * @param httpReq The HTTP (express) request.
+   * @returns True if the request targets `$batch`, otherwise false.
+   */
+  isBatchRequest(httpReq: { originalUrl?: string; url?: string } | undefined): boolean {
+    const url = httpReq?.originalUrl ?? httpReq?.url ?? '';
+    const pathname = url.split('?')[0];
+
+    return /\/\$batch\/?$/i.test(pathname);
   },
 
   /**

@@ -1144,13 +1144,33 @@ function buildOnError(options: { eventKind: EventKind; isDraft: boolean }) {
       }
 
       const method = descriptor.value!;
+      const handlerName = `${(target as any).constructor?.name ?? 'Unknown'}.${String(propertyName)}`;
 
-      descriptor.value = async function (...args: any[]) {
-        // NOTE: `applyDecorators()` is intentionally NOT awaited here - CAP invokes error handlers synchronously,
-        // and awaiting it (even `await undefined`) would defer this method to a microtask. This is why `@Diff` -
-        // the only asynchronous parameter decorator - is unsupported on `@OnError`.
-        new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
-        return method.apply(this, args);
+      const logFailure = (error: unknown): void => {
+        console.error(
+          util.showRedConsole(`[CDS-TS-Dispatcher] @OnError handler '${handlerName}' failed; the error was logged.`),
+          error,
+        );
+      };
+
+      descriptor.value = function (...args: any[]) {
+        // NOTE: synchronous on purpose - CAP does not await `srv.on('error')` handlers, so `applyDecorators()`
+        // is NOT awaited (this is why `@Diff` - the only asynchronous parameter decorator - is unsupported on
+        // `@OnError`). Contract: an error thrown or rejected inside the handler is logged, never rethrown.
+        try {
+          new ArgumentMethodProcessor(target, propertyName, args).applyDecorators();
+          const result = method.apply(this, args);
+
+          // Adopt any thenable (a returned promise, or a lazy `cds.ql` query that only runs once its `then` is
+          // read) - CAP ignores the return value, so this is what runs it and logs its failure.
+          if (typeof (result as { then?: unknown } | undefined)?.then === 'function') {
+            return Promise.resolve(result).catch(logFailure);
+          }
+
+          return result;
+        } catch (error) {
+          logFailure(error);
+        }
       };
 
       // ********************************************************************************************************************************
@@ -2721,12 +2741,23 @@ const OnSubscribe = buildOnMessagingEvent({ event: 'MESSAGING_EVENT', eventKind:
  * Registers `srv.on('error', callback)`.
  *
  * @remarks
- * MUST be a `sync` function — no `await`, no returned `Promise`; CAP invokes error handlers
- * SYNCHRONOUSLY while the transaction unwinds. Consequently `@Diff` (the only asynchronous parameter
- * decorator) and `@Throttle` are both REJECTED here — the dispatcher throws at decoration time if either
- * is stacked on an `@OnError` handler. Mutate the injected `@Error` (or `@Req`) synchronously instead
- * (`err.message = '...'`); do any async work (logging, notifications) fire-and-forget, uncoupled from the
- * handler's own return. Conventionally hosted in an `@UnboundActions` class (service-wide, not
+ * MUST be a `sync` function — no `await` in the handler body; CAP invokes error handlers
+ * SYNCHRONOUSLY while the transaction unwinds and never awaits them. Consequently `@Diff` (the only
+ * asynchronous parameter decorator) and `@Throttle` are both REJECTED here — the dispatcher throws at
+ * decoration time if either is stacked on an `@OnError` handler. Mutate the injected `@Error` synchronously
+ * instead (`err.message = '...'`); async work (logging, notifications) may run uncoupled from the handler's
+ * own return, but only with a `.catch(...)` of its own if it is not returned. An error thrown inside the
+ * handler (or by a returned `Promise`) is logged by the dispatcher and NOT rethrown - it never replaces the
+ * original error nor stops the service. A returned thenable is ADOPTED: its rejection is caught and logged
+ * the same way; CAP does not wait for it, so the client response is not delayed. It still runs inside the
+ * failed request's (already rolled-back) transaction - a DB write through it is refused. For error logs
+ * that must persist, explicitly `return` a fresh `cds.tx(...)` call so the dispatcher's own catch covers
+ * its failure too - an un-returned `cds.tx(...)` call is invisible to it and can surface as an unhandled
+ * rejection. `cds.spawn(...)` runs detached instead: its failures are handled by CAP, outside the
+ * dispatcher (returning it changes nothing).
+ * The `@Req()` argument is the ROOT `EventContext` of the failed request (`req.user`, `req.locale`,
+ * `req.http`), not the failed `cds.Request` - it has no `req.data`, `req.event`, `req.target` or
+ * `req.reject()`. Conventionally hosted in an `@UnboundActions` class (service-wide, not
  * entity-scoped) — excluded from `@OnAll` / `@BeforeAll` / `@AfterAll` firing.
  *
  * @example
@@ -2735,7 +2766,8 @@ const OnSubscribe = buildOnMessagingEvent({ event: 'MESSAGING_EVENT', eventKind:
  * class ErrorHandler {
  *   \@OnError()
  *   private onError(@Error() err: Error, \@Req() req: Request): void {
- *     err.message = 'New message';
+ *     // `req` is the root context: `req.user`, `req.locale`, `req.http` are available.
+ *     err.message = `New message (user: ${req.user.id})`;
  *   }
  * }
  * ```
@@ -3710,7 +3742,17 @@ function OnScheduledFailure(name: string) {
  * `SELECT.pipeline()`, `SELECT.foreach()`, or `for-await` iteration over a `@sap/cds` 10 streaming read),
  * `@Stream` sets the response `Content-Type` (default `'application/octet-stream'`) and pipes it to the
  * express response, destroying the response if the stream errors; any NON-stream return value passes
- * through unchanged. `contentType` accepts the `StreamContentType` union (`'application/json'`,
+ * through unchanged. Only a ROOT HTTP request is piped. A nested `srv.send` call gets the `Readable` back,
+ * tagged with `mimetype` (as `req.reply(stream, { mimetype })` does). `@Stream` is NOT supported inside an
+ * OData `$batch` part: the stream is destroyed and the part is rejected with
+ * `400 '@Stream is not supported inside $batch'`, like any other failing part - in a `multipart` `$batch`
+ * without `Prefer: odata.continue-on-error` (the default), processing stops there and parts queued after it
+ * never run; a JSON `$batch` part inside an atomicity group / changeset fails the whole group the same way.
+ * Call `@Stream` functions directly, not through `$batch`. Telling a nested call from a root one or a
+ * `$batch` part needs the handler's request among its arguments - `@Req()`, or no parameter decorators at
+ * all; without it, a nested call
+ * from a root request is piped to that request's response, and any call inside a `$batch` request is
+ * rejected. `contentType` accepts the `StreamContentType` union (`'application/json'`,
  * `'text/csv'`, `'application/pdf'`, `'image/png'`, ...) for editor suggestions, or any other MIME type
  * string. Place `@Stream` DIRECTLY on the method, BELOW the `ON` decorator, so it wraps the returned value
  * — decorators wrap `descriptor.value` bottom-up, and a wrapper applied above the handler decorator never
@@ -3748,12 +3790,33 @@ function Stream(contentType: StreamContentType = 'application/octet-stream') {
         return result;
       }
 
-      // Resolve the HTTP response from the current request context (robust to argument re-indexing).
-      const req = (cds.context as Request | undefined) ?? util.findRequest(args);
-      const res = req ? parameterUtil.retrieveResponse(req) : undefined;
+      // Pipe only for a ROOT, non-batch HTTP request. The event's own request (kept in `args` by `@Req()` or an
+      // undecorated parameter list) tells a root call from a `$batch` part or a nested `srv.send`; without it,
+      // fall back to `cds.context`, where any call inside a `$batch` request counts as a `$batch` part.
+      const eventReq = util.findRequest(args);
+      const req = eventReq ?? (cds.context as Request | undefined);
+      const isBatch = eventReq ? streamUtil.isBatchPart(eventReq) : streamUtil.isBatchRequest(req?.http?.req);
 
-      // No HTTP response to pipe to (e.g. non-HTTP invocation) → passthrough.
+      // `@Stream` is not supported inside `$batch` - reject the part with 400, buffered or streamed. Like any
+      // other failing part: a multipart `$batch` without `Prefer: odata.continue-on-error` stops processing
+      // there (parts queued after it never run), and a JSON atomicity group / changeset that contains it fails
+      // as a whole.
+      if (isBatch) {
+        // Duck-typed streams may lack `destroy` - release the producer (e.g. a `SELECT.pipeline()` cursor) if it can.
+        if (typeof result.destroy === 'function') result.destroy();
+
+        throw Object.assign(new Error('@Stream is not supported inside $batch'), { status: StatusCodes.BAD_REQUEST });
+      }
+
+      const isRoot = eventReq ? streamUtil.isRootHttpRequest(eventReq) : true;
+      const res = req && isRoot ? parameterUtil.retrieveResponse(req) : undefined;
+
+      // Not a root HTTP request (nested `srv.send`, non-HTTP invocation) → return the `Readable`, tagged with its
+      // `mimetype` (as `req.reply(stream, { mimetype })` does). An existing `mimetype` is kept.
       if (!res) {
+        const tagged = result as unknown as { mimetype?: string };
+        tagged.mimetype ??= contentType;
+
         return result;
       }
 
